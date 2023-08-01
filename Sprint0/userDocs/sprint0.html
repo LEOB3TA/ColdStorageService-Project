@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<!--
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<link rel="stylesheet" type="text/css" href="resources/css/sprint0.css">
+
+<head>
+
+    <title>Sprint0</title></head>
+
+<body>
+<div id="top">
+    <h1><b>PROGETTO DI INGEGNERIA DEI SISTEMI SOFTWARE</b> - SPRINT 0 <font size="5"></font></h1>
+    <h3>Gruppo di lavoro: Focardi, Galeone, Porrazzo <font size="3"></font></h3>
+</div>
+
+<div class="body">
+    <h2>Introduction</h2>
+    <div class="remark"> Progetto finale di ISS, finalizzato allo sviluppo software di un magazzino refrigerato, nel
+        quale
+        vi è un robot che ha il compito di trasportare del cibo da un punto di partenza - chiamato INDOOR - alla cella
+        frigorifera.
+    </div>
+
+    <h2>Requirements</h2>
+    <div class="remark">
+        <a href="resources/html/TemaFinale23.html">Tema Finale </a>
+    </div>
+
+    <h2>Requirement analysis</h2>
+    <div class="remark">
+        <h3>Formalizzazione dei requisiti</h3>
+        <p>Per la formalizzazione dei requisiti verrà usato il linguaggio Kotlin.</p>
+        <p>D'altra parte, alcuni requisiti introducono un <i>abstraction gap</i>, per il quale non bastano i costrutti
+            dei
+            linguaggi di programmazione più diffusi. Per questo motivo, la nostra software house ha creato su misura il
+            <b class="ks">QActor meta-model</b> (QAK) per
+            soddisfare questi requisiti. La documentazione di questo meta-model si trova a questo indirizzo: <a
+                    href="resources/html/QAKActors23.html">QActor meta-model</a></p>
+
+        <!--------------SERVICE AREA-------------------------->
+        <h4>Service Area</h4>
+        Stanza rettangolare piana di dimensioni note, priva di ostacoli interni e delimitata da pareti solide.
+        All'interno della
+        stanza troviamo una
+        <bc>INDOOR port</bc>
+        , dalla quale viene prelevato il cibo, e una
+        <bc>ColdRoom</bc>
+        , nella quale viene depositato il cibo.
+        Possiamo formalizzare le dimensioni della stanza con due valori
+        <kc>serviceAreaLength</kc>
+        e
+        <kc>serviceAreaWidth</kc>
+        , che rappresentano rispettivamente la lunghezza e la larghezza della stanza.
+        <pre>
+        <key>val</key> serviceAreaLength :  Float
+        <key>val</key> serviceAreaWidth   :  Float</pre>
+
+        <!--------------COLD ROOM-------------------------->
+        <h4>ColdRoom</h4>
+        Stanza refrigerata che ha l'obiettivo di tenere al fresco il cibo che il robot deposita. La stanza può contenere
+        fino a <b>MAXW</b> kg di cibo.
+        Possiamo formalizzare la capacità della stanza con
+        <ul>
+            <li> una costante
+                <kc>MAXW</kc>
+                , che rappresenta il peso massimo che la stanza può contenere.
+            </li>
+            <li> una variabile
+                <kc>coldRoomCurrentWeight</kc>
+                , che rappresenta il peso attuale di cibo contenuto nella stanza.
+            </li>
+        </ul>
+
+        <pre>
+        <key>val</key> MAXW :  Double
+        <key>val</key> coldRoomCurrentWeight : Double</pre>
+
+
+    <!--------------DDR ROBOT-------------------------->
+    <h4>DDR Robot</h4>
+    Il Differential Drive Robot è un robot fisico che esegue le seguenti operazioni:
+    <ul>
+        <li>si muove avanti e indietro in linea retta</li>
+        <li>si ferma</li>
+        <li>ruota di 90° a destra o a sinistra</li>
+    </ul>
+    Queste azioni sono eseguite alla ricezione dei relativi comandi da parte del sistema.
+    Il client fornisce software capace di interfacciare il DDR robot con altri robot (reali o virtuali): <a href="">unibo.basicrobot23</a>.
+    L'attore QAK <a href="">basicrobot.QAK</a> di unibo.basicrobot23 è in grado di interfacciarsi con il DDR robot e di
+    eseguire i comandi di movimento e rotazione.
+
+
+        <p>Il componente <span class="blue">basicrobot</span> viene visto dall’esterno come un servizio che realizza un insieme di funzionalità:</p>
+        <ol class="arabic simple">
+            <li><p>Esecuzione di richieste di <span class="brown">ingaggio</span>:
+                <pre><span class="high">Request engage:engage(CALLER)</span></pre></p>
+            </li>
+            <li><p>Esecuzione di <span class="brown">comandi elementari</span> di movimento: messaggio <pre><span class="high">Dispatch cmd:cmd(MOVE)</span></pre></p>
+            </li>
+            <li><p>Esecuzione di <span class="brown">step</span> (movimento in avanti per un tempo dato): <pre><span class="high">Request step:step(TIME)</span></pre></p></li>
+            <li><p>Esecuzione di <span class="brown">sequenze di movimento</span> (piani): <pre><span class="high">Request doplan:doplan(PATH,STEPTIME)</span></pre></p></li>
+            <li><p>Esecuzione di <span class="brown">posizionamento</span>: <pre><span class="high">Request moverobot:moverobot(TARGETX, TARGETY)</span></pre></p></li>
+        </ol>
+
+
+        <!--------------TRANSPORT TROLLEY-------------------------->
+        <h4>Transport Trolley</h4>
+        Il carrello di trasporto è un'entità software che deve interagire con il robot DDR. A tal fine,
+        il carrello di trasporto deve interfacciarsi con il basicrobot.
+        Il carrello di trasporto deve essere in grado di eseguire le stesse azioni del robot DDR, tuttavia il software
+        fornito dal cliente in unibo.basicrobot22 è un attore, e come tale non prevede il concetto di ereditarietà,
+        quindi il carrello di trasporto non può essere formalizzato utilizzando l'ereditarietà.
+
+        Per verificare il corretto funzionamento del carrello di trasporto e capire meglio qual è il comportamento atteso,
+        abbiamo preparato alcuni semplici test (<a href=""> TestTransportTrolleyActor.kt </a>).
+
+
+    </div>
+
+    <h2>Problem analysis</h2>
+    <!-- Bisogna fare così analisi del progetto -->
+    <!--Naturalmente questo non è l’unico modo di procedere. Il lettore è invitato (come analista e/o come progettista) a individuare alternatve.-->
+    <div class="remark">
+
+        <!--        <h3>Archittettura Logica</h3>-->
+
+    </div>
+
+
+    <h2>Test plans</h2>
+    <!-- E' possibile che si debbano modificare le classi per effettuare un testing corretto, modificando
+    il meno possibile.
+     Se, tuttavia, devo modificare troppo faccio un casino.-->
+    <div class="remark">
+
+    </div>
+
+    <h2>Project</h2>
+    <!-- Farei così -> progetto -->
+    <!--Partendo dal più semplice modo di Interazione sincrona basato su HTTP, risolviamo il problema inviando al robot un comando di movimento in avanti per un tempo abbastanza lungo a garantire una collisione con la parete di fronte. Dopo la collisione inviamo un comando di rotazione a sinistra e ripetiamo il tutto 4 volte.-->
+    <div class="remark">
+
+        <!--        Codice -->
+
+    </div>
+</div>
+
+<h2>Testing</h2>
+<div class="remark">
+
+</div>
+
+
+<h2>Deployment</h2>
+<div class="remark">
+
+</div>
+
+
+<h2>Maintenance</h2>
+
+<!-- USEFUL
+<table style="width:100%" border="1">
+<tr>
+<td style="width:50%">
+</td>
+<td></td>
+</tr>
+</table>
+-->
+
+<br/><br/>
+</div>
+
+<div style="background-color:rgba(86, 56, 253, 0.9); width:73%;text-align:left;color:white">
+    By email:
+    <!--<img src="" alt="mbot" width="15%" height="15%">-->
+    GIT repo: https://github.com/LEOB3TA/issProject2023
+</div>
+</body>
+</html>
