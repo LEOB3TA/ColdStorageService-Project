@@ -31,13 +31,13 @@
     <h2>Requirement analysis</h2>
     <div class="remark">
         <h3>Formalizzazione dei requisiti</h3>
-        <p>Per la formalizzazione dei requisiti verrà usato il linguaggio Kotlin.</p>
-        <p>D'altra parte, alcuni requisiti introducono un <i>abstraction gap</i>, per il quale non bastano i costrutti
+        Per la formalizzazione dei requisiti verrà usato il linguaggio Kotlin.<br>
+        D'altra parte, alcuni requisiti introducono un <i>abstraction gap</i>, per il quale non bastano i costrutti
             dei
             linguaggi di programmazione più diffusi. Per questo motivo, la nostra software house ha creato su misura il
             <b class="ks">QActor meta-model</b> (QAK) per
             soddisfare questi requisiti. La documentazione di questo meta-model si trova a questo indirizzo: <a
-                    href="resources/html/QAKActors23.html">QActor meta-model</a></p>
+                    href="resources/html/QAKActors23.html">QActor meta-model</a>
 
         <!--------------SERVICE AREA-------------------------->
         <h4>Service Area</h4>
@@ -92,17 +92,28 @@
     eseguire i comandi di movimento e rotazione.
 
 
-        <p>Il componente <span class="blue">basicrobot</span> viene visto dall’esterno come un servizio che realizza un insieme di funzionalità:</p>
-        <ol class="arabic simple">
-            <li><p>Esecuzione di richieste di <span class="brown">ingaggio</span>:
-                <pre><span class="high">Request engage:engage(CALLER)</span></pre></p>
+        Il componente <span class="blue">basicrobot</span> viene visto dall’esterno come un servizio che realizza un insieme di funzionalità:
+        <ul class="arabic simple">
+            <br>
+            <li>Esecuzione di richieste di <span class="brown">ingaggio</span>:
+                <pre><span class="high">Request engage : engage(CALLER)
+Reply   engagedone    : engagedone(ARG)
+Reply   engagerefused : engagerefused(ARG)
+Dispatch disengage    : disengage(ARG)</span></pre>
             </li>
-            <li><p>Esecuzione di <span class="brown">comandi elementari</span> di movimento: messaggio <pre><span class="high">Dispatch cmd:cmd(MOVE)</span></pre></p>
+            <li>Esecuzione di <span class="brown">comandi elementari</span> di movimento: <pre><span class="high">Dispatch cmd : cmd(MOVE)
+Dispatch end : end(ARG)</span></pre></p>
             </li>
-            <li><p>Esecuzione di <span class="brown">step</span> (movimento in avanti per un tempo dato): <pre><span class="high">Request step:step(TIME)</span></pre></p></li>
-            <li><p>Esecuzione di <span class="brown">sequenze di movimento</span> (piani): <pre><span class="high">Request doplan:doplan(PATH,STEPTIME)</span></pre></p></li>
-            <li><p>Esecuzione di <span class="brown">posizionamento</span>: <pre><span class="high">Request moverobot:moverobot(TARGETX, TARGETY)</span></pre></p></li>
-        </ol>
+            <li>Esecuzione di <span class="brown">step</span> (movimento in avanti per un tempo dato): <pre><span class="high">Request step:step(TIME)
+Reply stepdone : stepdone(V)
+Reply stepfailed : stepfailed(DURATION, CAUSE)</span></pre></p></li>
+            <li>Esecuzione di <span class="brown">sequenze di movimento</span> (piani): <pre><span class="high">Request doplan:doplan(PATH,STEPTIME)
+Reply doplandone : doplandone(ARG)
+Reply doplanfailed : doplanfailed(ARG)</span></pre></p></li>
+            <li>Esecuzione di <span class="brown">posizionamento</span>: <pre><span class="high">Request moverobot:moverobot(TARGETX, TARGETY)
+Reply moverobotdone : moverobotok(ARG)
+Reply moverobotfailed : moverobotfailed(PLANDONE, PLANTODO)</span></pre></p></li>
+        </ul>
 
 
         <!--------------TRANSPORT TROLLEY-------------------------->
@@ -110,12 +121,65 @@
         Il carrello di trasporto è un'entità software che deve interagire con il robot DDR. A tal fine,
         il carrello di trasporto deve interfacciarsi con il basicrobot.
         Il carrello di trasporto deve essere in grado di eseguire le stesse azioni del robot DDR, tuttavia il software
-        fornito dal cliente in unibo.basicrobot22 è un attore, e come tale non prevede il concetto di ereditarietà,
+        fornito dal cliente in unibo.basicrobot23 è un attore, e come tale non prevede il concetto di ereditarietà,
         quindi il carrello di trasporto non può essere formalizzato utilizzando l'ereditarietà.
+        <br>
+        Il trasport trolley ha la forma di un quadrato con dimensione del lato prefissata <b>RD</b>
+        <br>
+        Il trasport trolley può essere modellato come modello Qak:
+        <pre>
+Dispatch pickingup : pickingup(_)
+Dispatch droppingout : droppingout(MATERIAL)
+Dispatch backhome : backhome(_)
 
+QActor transporttrolley context ctxtransporttrolley {
+
+    State s0 initial{
+        ...
+    }
+    Goto idle
+
+    State idle{
+        ...
+    }
+    Transition t0 whenMsg pickingup -> pickup
+
+    State pickup{
+        ...
+    }
+    Transition t0 whenMsg droppingout -> dropout
+
+    State dropout{
+        ...
+    }
+    Transition t0 whenMsg backhome -> backhome
+                        whenMsg pickingup -> pickup
+
+    State backhome{
+        ...
+    }
+    Goto idle
+        </pre>
+        <br>
         Per verificare il corretto funzionamento del carrello di trasporto e capire meglio qual è il comportamento atteso,
         abbiamo preparato alcuni semplici test (<a href=""> TestTransportTrolleyActor.kt </a>).
 
+        <!--------------SEQUENZA OPERATIVA-------------------------->
+        <h4>Sequenza operativa</h4>
+        Rappresenta le azioni che deve compiere il <bc>Trasport trolley</bc>, che inizialmente è situato in <bc>HOME</bc>:
+        <ol>
+            <br>
+            <li>Prendere un carico di cibo da un camion situato alla <bc>INDOOR</bc></li>
+            <li>Spostarsi dalla <bc>INDOOR</bc> alla <bc>PORT</bc> della <span class="blue" >ColdRoom</span class="blue"> </li>
+            <li>Depositare il carico di cibo nella <span class="blue" >ColdRoom</span class="blue"> </li>
+            <br>
+        </ol>
+        La fase di trasporto del carico di cibo può essere divisa in due fasi:
+        <ul>
+            <br>
+            <li>Fase di <kc>PickingUp</kc>, in cui il robot preleva il carico dal camion, quindi si muove verso la indoor</li>
+            <li>Fase di <kc>DroppingOut</kc>, in cui il robot si muove verso la Port della ColdRoom e deposita il carico al suo interno</li>
+        </ul>
 
     </div>
 
