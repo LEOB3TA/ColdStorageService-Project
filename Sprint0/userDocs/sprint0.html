@@ -10,11 +10,12 @@
     <title>Sprint0</title></head>
 
 <body>
+<!--
 <div id="top">
     <h1><b>PROGETTO DI INGEGNERIA DEI SISTEMI SOFTWARE</b> - SPRINT 0 <font size="5"></font></h1>
     <h3>Gruppo di lavoro: Focardi, Galeone, Porrazzo <font size="3"></font></h3>
 </div>
-
+-->
 <div class="body">
     <h2>Introduction</h2>
     <div class="remark"> Progetto finale di ISS, finalizzato allo sviluppo software di un magazzino refrigerato, nel
@@ -25,7 +26,7 @@
 
     <h2>Requirements</h2>
     <div class="remark">
-        <a href="resources/html/TemaFinale23.html">Tema Finale </a>
+        <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/TemaFinale23.html">Tema Finale </a>
     </div>
 
     <h2>Requirement analysis</h2>
@@ -36,8 +37,8 @@
             dei
             linguaggi di programmazione pi&ugrave; diffusi. Per questo motivo, la nostra software house ha creato su misura il
             <b class="ks">QActor meta-model</b> (QAK) per
-            soddisfare questi requisiti. La documentazione di questo meta-model si trova a questo indirizzo: <a
-                    href="resources/html/QAKActors23.html">QActor meta-model</a>
+            soddisfare questi requisiti. La documentazione di questo meta-model si trova a questo indirizzo:
+        <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/QakActors23.html">QActor meta-model</a>
 
         <!--------------SERVICE AREA-------------------------->
         <h4>Service Area</h4>
@@ -87,8 +88,8 @@
         <li>ruota di 90&deg; a destra o a sinistra</li>
     </ul>
     Queste azioni sono eseguite alla ricezione dei relativi comandi da parte del sistema.
-    Il cliente fornisce software capace di interfacciare il DDR robot con altri robot (reali o virtuali): <a href="">unibo.basicrobot23</a>.
-    L'attore QAK <a href="">basicrobot.qak</a> di unibo.basicrobot23 &egrave; in grado di interfacciarsi con il DDR robot e di
+    Il cliente fornisce software capace di interfacciare il DDR robot con altri robot (reali o virtuali): <a href="https://github.com/anatali/issLab23/tree/main/unibo.basicrobot23">unibo.basicrobot23</a>.
+    L'attore QAK <a href="https://github.com/anatali/issLab23/blob/main/unibo.basicrobot23/src/basicrobot.qak">basicrobot.qak</a> di unibo.basicrobot23 &egrave; in grado di interfacciarsi con il DDR robot e di
     eseguire i comandi di movimento e rotazione.
 
 
@@ -162,11 +163,11 @@ QActor transporttrolley context ctxtransporttrolley {
         </pre>
         <br>
         Per verificare il corretto funzionamento del carrello di trasporto e capire meglio qual &egrave; il comportamento atteso,
-        abbiamo preparato alcuni semplici test (<a href=""> TestTransportTrolleyActor.kt </a>).
+        abbiamo preparato alcuni semplici test ( <a href="">TestTransportTrolleyActor.kt</a> ).
 
         <!--------------SEQUENZA OPERATIVA-------------------------->
         <h4>Sequenza operativa</h4>
-        Rappresenta le azioni che deve compiere il <bc>Trasport trolley</bc>, che inizialmente &egrave; situato in <bc>HOME</bc>:
+        Rappresenta le azioni che deve compiere il <bc>Transport trolley</bc>, che inizialmente &egrave; situato in <bc>HOME</bc>:
         <ol>
             <br>
             <li>Prendere un carico di cibo da un camion situato alla <bc>INDOOR</bc></li>
@@ -183,7 +184,7 @@ QActor transporttrolley context ctxtransporttrolley {
 
         <!--------------SONAR------------------------->
         <h4>Sonar</h4>
-        Rappresenta l'astrazione del sensore fisico 'HC-SR04'. Il cliente ci ha gi&aacute; fornito in precedenza il software relativo al sonar, formalizzando il sonar come un attore <kc>Qak</kc> <a href="">unibo.sonarqak23</a>.<br>
+        Rappresenta l'astrazione del sensore fisico 'HC-SR04'. Il cliente ci ha gi&aacute; fornito in precedenza il software relativo al sonar, formalizzando il sonar come un attore <kc>Qak</kc> <a href="https://github.com/anatali/issLab23/tree/main/unibo.sonarqak23">unibo.sonarqak23</a>.<br>
         Il software emette evneti a seconda della distanza, inoltre &egrave; possibile usare i comandi <bc> Dispatch </bc>per attivare o disattivare il sonar.
         <pre>
 Dispatch sonaractivate     : info(ARG)
@@ -204,11 +205,11 @@ Event obstacle  :  obstacle(distance)
         <ul>
             <br>
             <li>Led Off: quando il Transport Trolley &egrave; in HOME</li>
-            <li>Led On: quando il Trasport Trolley &egrave; fermo </li>
-            <li>Led Blink: quando il Trasport Trolley si sta muovendo</li>
+            <li>Led On: quando il Transport Trolley &egrave; fermo </li>
+            <li>Led Blink: quando il Transport Trolley si sta muovendo</li>
             <br>
         </ul>
-        Il cliente ci ha fornito in precedenza il software per il Led: <a href="">unibo.qak</a> e <a href="">it.unibo.radarRystem23</a> <br>
+        Il cliente ci ha fornito in precedenza il software per il Led: <a href="">unibo.qak</a> e <a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarRystem23</a> <br>
         Il comportamento del Led pu&oacute; essere espresso tremite un attore Qak:
         <pre>
 Dispatch turnOn : turnOn(_)
@@ -263,22 +264,22 @@ QActor ledqakactor context ctxledqak {
 <key>val</key> TICKETTIME : Int
         </pre>
 
-        <!--------------Stato corrente del Trasport Trolley-------------------------->
-        <h4>Stato corrente del Trasport Trolley</h4>
-        Indica lo stato del Trasport Trolley, pu&oacute; essere formalizzato come un enumerativo <a href="">TrasportTrolleyState.kt</a>
+        <!--------------Stato corrente del Transport Trolley-------------------------->
+        <h4>Stato corrente del Transport Trolley</h4>
+        Indica lo stato del Transport Trolley, pu&oacute; essere formalizzato come un enumerativo <a href="">TransportTrolleyState.kt</a>
         <pre>
 enum class CurrStateTrolley { IDLE, STOPPED, MOVING, PICKINGUP, DROPPINGOUT }
         </pre>
 
-        <!--------------Posizione del Trasport Trolley-------------------------->
-        <h4>Posizione del Trasport Trolley</h4>
-        Indica le varie posizione possibili del Trasport Trolley, pu&oacute; essere formalizzato come un enumerativo <a href="">TrasportTrolleyPosition.kt</a>
+        <!--------------Posizione del Transport Trolley-------------------------->
+        <h4>Posizione del Transport Trolley</h4>
+        Indica le varie posizione possibili del Transport Trolley, pu&oacute; essere formalizzato come un enumerativo <a href="">TransportTrolleyPosition.kt</a>
         <pre>
 enum class TTPosition { HOME, INDOOR, PORT }
         </pre>
 
         <!--------------Stato del Led-------------------------->
-        <h4>Posizione del Trasport Trolley</h4>
+        <h4>Posizione del Transport Trolley</h4>
         Indica i vari stati che il Led pu&oacute; assumere, pu&oacute; essere formalizzato come un enumerativo <a href="">LedState.kt</a>
         <pre>
 enum class CurrStateLed { ON, OFF, BLINKING }
@@ -302,16 +303,16 @@ Reply storeAccepted : storeAccepted(Ticket)
         <!--------------Scarico non consentito-------------------------->
         <h4>Scarico non consentito</h4>
         Nel caso in cui <kc>ColdStorageService</kc>, a seguito di una <kc>Request storeFood</kc>, rispondesse in modo negativo, non &egrave; possibile scaricare il cibo nella <kc>ColdRoom</kc>.
-        La formalizzazione di questo concetto può essere espressa attraverso il linguaggio Qak.
+        La formalizzazione di questo concetto pu&ograve; essere espressa attraverso il linguaggio Qak.
         <pre>
 Reply storeRejected : storeRejected(_)
         </pre>
 
         <!--------------Cold Storage Service-------------------------->
         <h4>Cold Storage Service</h4>
-       &Egrave; il servizio che coordina il deposito del cibo, interfacciandosi con il <kc>Trasport Trolley</kc> per effettuare le azioni necessarie.<br>
-        Per questo &egrave; un entit&aacute; <b>attiva</b> che deve essere in grado di ricevere richiesta (<kc>storeFood</kc>) e mandare risposte (<kc>storeAccepted</kc>, <kc>storeRejected</kc>).<br>
-        Pu&oacute; essere formalizzato come un attore attraverso il linguaggio Qak (<a href="">ColdStorageService.qak</a>).
+       &Egrave; il servizio che coordina il deposito del cibo, interfacciandosi con il <kc>Transport Trolley</kc> per effettuare le azioni necessarie.<br>
+        Per questo &egrave; un entit&aacute; <b>attiva</b> che deve essere in grado di ricevere richiesta ( <kc>storeFood</kc>)  e mandare risposte (<kc>storeAccepted</kc>, <kc>storeRejected</kc>).<br>
+        Pu&oacute; essere formalizzato come un attore attraverso il linguaggio Qak ( <a href="">ColdStorageService.qak</a> ).
         <pre>
 QActor coldStorageServiceActor context ctxStorageService {
         State setup initial {
@@ -353,7 +354,8 @@ assertTrue(asw.contains("storeRejected"))
 
         <!--------------DLIMT-------------------------->
         <h4>DLIMT</h4>
-        Valore per cui il Trasport Trolley deve fermarsi se la distanza rilevata dal Sonar &egrave; minore di DLIMT
+        Valore per cui il Transport Trolley deve fermarsi se la distanza rilevata dal Sonar &egrave; minore di DLIMT. Il Transport Trolley verr&agrave; riattivato una
+        volta che il sonar rilevi una distanza maggiore di DLIMT.
         <pre>
 val DLIMT : Float
         </pre>
@@ -421,9 +423,15 @@ var FW :  Float
 <br/><br/>
 </div>
 
-<div style="background-color:rgba(86, 56, 253, 0.9); width:73%;text-align:left;color:white">
-    By email:
-    <!--<img src="" alt="mbot" width="15%" height="15%">-->
+<div class="stud">
+    By Students: <br>
+    Name: Leonardo Focardi, Christian Galeone, Gianmiriano Porrazzo<br>
+    Email: leonardo.focardi@studio.unibo.it, christian.galeone@studio.unibo.it, gianmiriano.porrazzo@studio.unibo.it <br>
+    <!--
+    <img src="./resources/boys/" alt="" width="8%" height="8%">
+    <img src="./resources/boys/" alt="" width="8%" height="8%">
+    -->
+    <img src="./resources/boys/gian.jpg" alt="" width="8%" height="8%">
     GIT repo: https://github.com/LEOB3TA/issProject2023
 </div>
 </body>
