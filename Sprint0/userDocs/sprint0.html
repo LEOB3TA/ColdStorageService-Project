@@ -75,7 +75,7 @@
 
         <pre>
         <key>val</key> MAXW :  Double
-        <key>val</key> coldRoomCurrentWeight : Double</pre>
+        <key>var</key> coldRoomCurrentWeight : Double</pre>
 
 
     <!--------------DDR ROBOT-------------------------->
@@ -87,7 +87,7 @@
         <li>ruota di 90&deg; a destra o a sinistra</li>
     </ul>
     Queste azioni sono eseguite alla ricezione dei relativi comandi da parte del sistema.
-    Il client fornisce software capace di interfacciare il DDR robot con altri robot (reali o virtuali): <a href="">unibo.basicrobot23</a>.
+    Il cliente fornisce software capace di interfacciare il DDR robot con altri robot (reali o virtuali): <a href="">unibo.basicrobot23</a>.
     L'attore QAK <a href="">basicrobot.qak</a> di unibo.basicrobot23 &egrave; in grado di interfacciarsi con il DDR robot e di
     eseguire i comandi di movimento e rotazione.
 
@@ -183,7 +183,7 @@ QActor transporttrolley context ctxtransporttrolley {
 
         <!--------------SONAR------------------------->
         <h4>Sonar</h4>
-        Rappresenta l'astrazione del sensore fisico 'HC-SR04'. La nostra software house ha sviluppato in precedenza il software relativo al sonar, formalizzando il sonar come un attore <kc>Qak</kc> <a href="">unibo.sonarqak23</a>.<br>
+        Rappresenta l'astrazione del sensore fisico 'HC-SR04'. Il cliente ci ha gi&aacute; fornito in precedenza il software relativo al sonar, formalizzando il sonar come un attore <kc>Qak</kc> <a href="">unibo.sonarqak23</a>.<br>
         Il software emette evneti a seconda della distanza, inoltre &egrave; possibile usare i comandi <bc> Dispatch </bc>per attivare o disattivare il sonar.
         <pre>
 Dispatch sonaractivate     : info(ARG)
@@ -200,13 +200,170 @@ Event obstacle  :  obstacle(distance)
 
         <!--------------LED-------------------------->
         <h4>Led</h4>
+        Il Led &egrave; un dispositivo di output presente nel RaspberryPi; le azioni che pu&oacute; compiere sono:
+        <ul>
+            <br>
+            <li>Led Off: quando il Transport Trolley &egrave; in HOME</li>
+            <li>Led On: quando il Trasport Trolley &egrave; fermo </li>
+            <li>Led Blink: quando il Trasport Trolley si sta muovendo</li>
+            <br>
+        </ul>
+        Il cliente ci ha fornito in precedenza il software per il Led: <a href="">unibo.qak</a> e <a href="">it.unibo.radarRystem23</a> <br>
+        Il comportamento del Led pu&oacute; essere espresso tremite un attore Qak:
+        <pre>
+Dispatch turnOn : turnOn(_)
+Dispatch turnOff : turnOff(_)
+Dispatch blink : blink(_)
+
+QActor ledqakactor context ctxledqak {
+
+    State setup initial {
+        println("$name | setup")
+    }Goto off
+
+    State on {
+        ...
+    }
+    Transition t0 whenMsg blink -> blink
+                    whenMsg turnOff -> off
+
+
+    State off{
+        ...
+    }
+    Transition t0 whenMsg turnOn -> on
+                    whenMsg blink -> blink
+
+
+    State blink{
+        ...
+    }
+    Transition t0 whenMsg turnOn -> on
+                    whenMsg turnOff -> off
+}
+        </pre>
         <!--------------ServiceAccessGUI-------------------------->
         <h4>ServiceAccessGUI</h4>
-        <!--------------ServiceStatusGUI-------------------------->
-        <h4>ServiceStatusGUI</h4>
+        La ServiceAccessGui &egrave; un' interfaccia grafica che consente a una persona di osservare il peso corrente del cibo immagazzinato all'interno
+        della <kc>ColdRoom</kc> e di inviare messaggi al <kc>ColdStorageService</kc> per immagazzinare un nuovo carico di <b>FW</b> kg di cibo.
+        <pre>
+<key>val</key> FW : Double
+        </pre>
+        Se la richiesta &egrave; accetta il servizio assegna un ticket che scade dopo un periodo prefissato <b>TICKETTIME</b> secs.
+        <pre>
+<key>val</key> TICKETTIME : Int
+        </pre>
+        e fornisce un campo per immettere il numero del ticket quando un furgone si trova presso l' <kc>INDOOR</kc>
+        <!--------------Ticket-------------------------->
+        <h4>Ticket</h4>
+        Il ticket &egrave; rappresenta l'oggetto restituito dalla <kc>ServiceAccessGUI</kc>, al momento di arrivo di un nuovo furgone.<br>
+        Possiede due campi:
+        <pre>
+<key>val</key> TICKETID : Int
+<key>val</key> TICKETTIME : Int
+        </pre>
 
+        <!--------------Stato corrente del Trasport Trolley-------------------------->
+        <h4>Stato corrente del Trasport Trolley</h4>
+        Indica lo stato del Trasport Trolley, pu&oacute; essere formalizzato come un enumerativo <a href="">TrasportTrolleyState.kt</a>
+        <pre>
+enum class CurrStateTrolley { IDLE, STOPPED, MOVING, PICKINGUP, DROPPINGOUT }
+        </pre>
 
+        <!--------------Posizione del Trasport Trolley-------------------------->
+        <h4>Posizione del Trasport Trolley</h4>
+        Indica le varie posizione possibili del Trasport Trolley, pu&oacute; essere formalizzato come un enumerativo <a href="">TrasportTrolleyPosition.kt</a>
+        <pre>
+enum class TTPosition { HOME, INDOOR, PORT }
+        </pre>
 
+        <!--------------Stato del Led-------------------------->
+        <h4>Posizione del Trasport Trolley</h4>
+        Indica i vari stati che il Led pu&oacute; assumere, pu&oacute; essere formalizzato come un enumerativo <a href="">LedState.kt</a>
+        <pre>
+enum class CurrStateLed { ON, OFF, BLINKING }
+        </pre>
+
+        <!--------------Richiesta di deposito-------------------------->
+        <h4>Richiesta di deposito</h4>
+        Rappresenta la richiesta che un driver pu&oacute; effettuare attraverso la <kc>ServiceAccessGUI</kc> che viene processata dallo <kc>ColdStorageService</kc>.
+        Per formalizzare la richiesta utilizziamo il linguaggio <kc>Qak</kc>:
+        <pre>
+Request storeFood : storeFood(FW)
+        </pre>
+        <!--------------Scarico consentito-------------------------->
+        <h4>Scarico consentito</h4>
+        Nel caso in cui <kc>ColdStorageService</kc>, a seguito di una <kc>Request storeFood</kc>, rispondesse in modo affermativo &egrave; possibile scaricare il cibo nella <kc>ColdRoom</kc>;in questo caso viene generato un <b>TICKET</b> che viene assegnato al driver.
+        La formalizzazione di questo concetto può essere espressa attraverso il linguaggio Qak.
+        <pre>
+Reply storeAccepted : storeAccepted(Ticket)
+        </pre>
+
+        <!--------------Scarico non consentito-------------------------->
+        <h4>Scarico non consentito</h4>
+        Nel caso in cui <kc>ColdStorageService</kc>, a seguito di una <kc>Request storeFood</kc>, rispondesse in modo negativo, non &egrave; possibile scaricare il cibo nella <kc>ColdRoom</kc>.
+        La formalizzazione di questo concetto può essere espressa attraverso il linguaggio Qak.
+        <pre>
+Reply storeRejected : storeRejected(_)
+        </pre>
+
+        <!--------------Cold Storage Service-------------------------->
+        <h4>Cold Storage Service</h4>
+       &Egrave; il servizio che coordina il deposito del cibo, interfacciandosi con il <kc>Trasport Trolley</kc> per effettuare le azioni necessarie.<br>
+        Per questo &egrave; un entit&aacute; <b>attiva</b> che deve essere in grado di ricevere richiesta (<kc>storeFood</kc>) e mandare risposte (<kc>storeAccepted</kc>, <kc>storeRejected</kc>).<br>
+        Pu&oacute; essere formalizzato come un attore attraverso il linguaggio Qak (<a href="">ColdStorageService.qak</a>).
+        <pre>
+QActor coldStorageServiceActor context ctxStorageService {
+        State setup initial {
+            ...
+        }
+        Goto idle
+        
+        State idle {
+            ...
+        }
+        Transition t0 whenRequest storeFood -> requestEvaluation
+        
+        State requestEvaluation {
+            onMsg(storeFood : storeFood(FW)){
+                
+                if[# coldRoom.canStore(requestWeightToStore) #]
+                {
+                    ...
+                    replyTo storeFood with storeAccepted : storeAccepted(Ticket)
+                }
+                else{
+                    replyTo storeFood with storeRejected : storeRejected(_)
+                } 
+            }
+        }
+        Goto idle
+    }
+        </pre>
+        Per verificare il corretto funzionamento del servizio, abbiamo implementato dei test (<a href="">TestColdStorageService.kt</a>).
+        <pre>
+var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(100),1)"
+var asw = conn.request(storeFood)
+assertTrue(asw.contains("storeAccepted"))
+
+var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(1000),1)"      <!--TODO capire che cazzo &egrave; quell'1-->
+var asw = conn.request(storeFood)
+assertTrue(asw.contains("storeRejected"))
+        </pre>
+
+        <!--------------DLIMT-------------------------->
+        <h4>DLIMT</h4>
+        Valore per cui il Trasport Trolley deve fermarsi se la distanza rilevata dal Sonar &egrave; minore di DLIMT
+        <pre>
+val DLIMT : Float
+        </pre>
+
+        <!--------------FW-------------------------->
+        <h4>FW</h4>
+        Rappresenta il peso in chilogrammi, che si intende depositare nella ColdRoom.
+        <pre>
+var FW :  Float 
+        </pre>
     </div>
 
     <h2>Problem analysis</h2>
