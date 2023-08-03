@@ -213,3 +213,12 @@ code {
     padding: 0 1px 0 1px;
     font-size: 0.95em;
 }
+
+div.stud {
+    background: #0e84b5;
+    width: 70%;
+    text-align: center;
+    color: white;
+    margin-left: 20%;
+    border-radius: 25px;
+}
