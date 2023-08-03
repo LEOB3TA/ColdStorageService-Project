@@ -184,7 +184,7 @@ QActor transporttrolley context ctxtransporttrolley {
         <!--------------SONAR------------------------->
         <h4>Sonar</h4>
         Rappresenta l'astrazione del sensore fisico 'HC-SR04'. La nostra software house ha sviluppato in precedenza il software relativo al sonar, formalizzando il sonar come un attore <kc>Qak</kc> <a href="">unibo.sonarqak23</a>.<br>
-        Il software emette evneti a seconda della distanza, inoltre è possibile usare i comandi <bc> Dispatch </bc>per attivare o disattivare il sonar.
+        Il software emette evneti a seconda della distanza, inoltre &egrave; possibile usare i comandi <bc> Dispatch </bc>per attivare o disattivare il sonar.
         <pre>
 Dispatch sonaractivate     : info(ARG)
 Dispatch sonardeactivate   : info(ARG)
@@ -193,7 +193,7 @@ Event sonar               : distance(V)
 
         Inserire qui l'architettura
         <br>
-         L'attore <bc>distanceFilter</bc> filtra e invia al prossimo attore eventi di tipo ostacolo: l'evento viene creato solo quando la distanza 'filtrata' rilevata è minore di una distanza fissa predefinita <kc>DLIMT</kc>.
+         L'attore <bc>distanceFilter</bc> filtra e invia al prossimo attore eventi di tipo ostacolo: l'evento viene creato solo quando la distanza 'filtrata' rilevata &egrave; minore di una distanza fissa predefinita <kc>DLIMT</kc>.
         <pre>
 Event obstacle  :  obstacle(distance)
         </pre>
