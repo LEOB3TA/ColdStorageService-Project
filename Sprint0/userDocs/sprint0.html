@@ -19,7 +19,7 @@
     <h2>Introduction</h2>
     <div class="remark"> Progetto finale di ISS, finalizzato allo sviluppo software di un magazzino refrigerato, nel
         quale
-        vi è un robot che ha il compito di trasportare del cibo da un punto di partenza - chiamato INDOOR - alla cella
+        vi &egrave; un robot che ha il compito di trasportare del cibo da un punto di partenza - chiamato INDOOR - alla cella
         frigorifera.
     </div>
 
@@ -31,10 +31,10 @@
     <h2>Requirement analysis</h2>
     <div class="remark">
         <h3>Formalizzazione dei requisiti</h3>
-        Per la formalizzazione dei requisiti verrà usato il linguaggio Kotlin.<br>
+        Per la formalizzazione dei requisiti verr&agrave; usato il linguaggio Kotlin.<br>
         D'altra parte, alcuni requisiti introducono un <i>abstraction gap</i>, per il quale non bastano i costrutti
             dei
-            linguaggi di programmazione più diffusi. Per questo motivo, la nostra software house ha creato su misura il
+            linguaggi di programmazione pi&ugrave; diffusi. Per questo motivo, la nostra software house ha creato su misura il
             <b class="ks">QActor meta-model</b> (QAK) per
             soddisfare questi requisiti. La documentazione di questo meta-model si trova a questo indirizzo: <a
                     href="resources/html/QAKActors23.html">QActor meta-model</a>
@@ -59,13 +59,13 @@
 
         <!--------------COLD ROOM-------------------------->
         <h4>ColdRoom</h4>
-        Stanza refrigerata che ha l'obiettivo di tenere al fresco il cibo che il robot deposita. La stanza può contenere
+        Stanza refrigerata che ha l'obiettivo di tenere al fresco il cibo che il robot deposita. La stanza pu&ograve; contenere
         fino a <b>MAXW</b> kg di cibo.
-        Possiamo formalizzare la capacità della stanza con
+        Possiamo formalizzare la capacit&agrave; della stanza con
         <ul>
             <li> una costante
                 <kc>MAXW</kc>
-                , che rappresenta il peso massimo che la stanza può contenere.
+                , che rappresenta il peso massimo che la stanza pu&ograve; contenere.
             </li>
             <li> una variabile
                 <kc>coldRoomCurrentWeight</kc>
@@ -80,19 +80,19 @@
 
     <!--------------DDR ROBOT-------------------------->
     <h4>DDR Robot</h4>
-    Il Differential Drive Robot è un robot fisico che esegue le seguenti operazioni:
+    Il Differential Drive Robot &egrave; un robot fisico che esegue le seguenti operazioni:
     <ul>
         <li>si muove avanti e indietro in linea retta</li>
         <li>si ferma</li>
-        <li>ruota di 90° a destra o a sinistra</li>
+        <li>ruota di 90&deg; a destra o a sinistra</li>
     </ul>
     Queste azioni sono eseguite alla ricezione dei relativi comandi da parte del sistema.
     Il client fornisce software capace di interfacciare il DDR robot con altri robot (reali o virtuali): <a href="">unibo.basicrobot23</a>.
-    L'attore QAK <a href="">basicrobot.QAK</a> di unibo.basicrobot23 è in grado di interfacciarsi con il DDR robot e di
+    L'attore QAK <a href="">basicrobot.qak</a> di unibo.basicrobot23 &egrave; in grado di interfacciarsi con il DDR robot e di
     eseguire i comandi di movimento e rotazione.
 
 
-        Il componente <span class="blue">basicrobot</span> viene visto dall’esterno come un servizio che realizza un insieme di funzionalità:
+        Il componente <span class="blue">basicrobot</span> viene visto dall'esterno come un servizio che realizza un insieme di funzionalit&agrave;:
         <ul class="arabic simple">
             <br>
             <li>Esecuzione di richieste di <span class="brown">ingaggio</span>:
@@ -118,15 +118,15 @@ Reply moverobotfailed : moverobotfailed(PLANDONE, PLANTODO)</span></pre></p></li
 
         <!--------------TRANSPORT TROLLEY-------------------------->
         <h4>Transport Trolley</h4>
-        Il carrello di trasporto è un'entità software che deve interagire con il robot DDR. A tal fine,
+        Il carrello di trasporto &egrave; un'entit&agrave; software che deve interagire con il robot DDR. A tal fine,
         il carrello di trasporto deve interfacciarsi con il basicrobot.
         Il carrello di trasporto deve essere in grado di eseguire le stesse azioni del robot DDR, tuttavia il software
-        fornito dal cliente in unibo.basicrobot23 è un attore, e come tale non prevede il concetto di ereditarietà,
-        quindi il carrello di trasporto non può essere formalizzato utilizzando l'ereditarietà.
+        fornito dal cliente in unibo.basicrobot23 &egrave; un attore, e come tale non prevede il concetto di ereditariet&agrave;,
+        quindi il carrello di trasporto non pu&ograve; essere formalizzato utilizzando l'ereditariet&agrave;.
         <br>
         Il trasport trolley ha la forma di un quadrato con dimensione del lato prefissata <b>RD</b>
         <br>
-        Il trasport trolley può essere modellato come modello Qak:
+        Il trasport trolley pu&ograve; essere modellato come modello Qak:
         <pre>
 Dispatch pickingup : pickingup(_)
 Dispatch droppingout : droppingout(MATERIAL)
@@ -161,12 +161,12 @@ QActor transporttrolley context ctxtransporttrolley {
     Goto idle
         </pre>
         <br>
-        Per verificare il corretto funzionamento del carrello di trasporto e capire meglio qual è il comportamento atteso,
+        Per verificare il corretto funzionamento del carrello di trasporto e capire meglio qual &egrave; il comportamento atteso,
         abbiamo preparato alcuni semplici test (<a href=""> TestTransportTrolleyActor.kt </a>).
 
         <!--------------SEQUENZA OPERATIVA-------------------------->
         <h4>Sequenza operativa</h4>
-        Rappresenta le azioni che deve compiere il <bc>Trasport trolley</bc>, che inizialmente è situato in <bc>HOME</bc>:
+        Rappresenta le azioni che deve compiere il <bc>Trasport trolley</bc>, che inizialmente &egrave; situato in <bc>HOME</bc>:
         <ol>
             <br>
             <li>Prendere un carico di cibo da un camion situato alla <bc>INDOOR</bc></li>
@@ -174,7 +174,7 @@ QActor transporttrolley context ctxtransporttrolley {
             <li>Depositare il carico di cibo nella <span class="blue" >ColdRoom</span class="blue"> </li>
             <br>
         </ol>
-        La fase di trasporto del carico di cibo può essere divisa in due fasi:
+        La fase di trasporto del carico di cibo pu&ograve; essere divisa in due fasi:
         <ul>
             <br>
             <li>Fase di <kc>PickingUp</kc>, in cui il robot preleva il carico dal camion, quindi si muove verso la indoor</li>
@@ -185,7 +185,7 @@ QActor transporttrolley context ctxtransporttrolley {
 
     <h2>Problem analysis</h2>
     <!-- Bisogna fare così analisi del progetto -->
-    <!--Naturalmente questo non è l’unico modo di procedere. Il lettore è invitato (come analista e/o come progettista) a individuare alternatve.-->
+    <!--Naturalmente questo non &egrave; l’unico modo di procedere. Il lettore &egrave; invitato (come analista e/o come progettista) a individuare alternatve.-->
     <div class="remark">
 
         <!--        <h3>Archittettura Logica</h3>-->
@@ -203,7 +203,7 @@ QActor transporttrolley context ctxtransporttrolley {
 
     <h2>Project</h2>
     <!-- Farei così -> progetto -->
-    <!--Partendo dal più semplice modo di Interazione sincrona basato su HTTP, risolviamo il problema inviando al robot un comando di movimento in avanti per un tempo abbastanza lungo a garantire una collisione con la parete di fronte. Dopo la collisione inviamo un comando di rotazione a sinistra e ripetiamo il tutto 4 volte.-->
+    <!--Partendo dal più; semplice modo di Interazione sincrona basato su HTTP, risolviamo il problema inviando al robot un comando di movimento in avanti per un tempo abbastanza lungo a garantire una collisione con la parete di fronte. Dopo la collisione inviamo un comando di rotazione a sinistra e ripetiamo il tutto 4 volte.-->
     <div class="remark">
 
         <!--        Codice -->
