@@ -78,7 +78,6 @@
         <key>val</key> MAXW :  Double
         <key>var</key> coldRoomCurrentWeight : Double</pre>
 
-<<<<<<< Updated upstream
 
     <!--------------DDR ROBOT-------------------------->
     <h4>DDR Robot</h4>
@@ -134,8 +133,12 @@ Dispatch pickingup : pickingup(_)
 Dispatch droppingout : droppingout(MATERIAL)
 Dispatch backhome : backhome(_)
 
-QActor transporttrolley context ctxtransporttrolley {
-
+QActor transporttrolley context ctxStorageService {
+    <!-- Il contesto non è relativo al coldStorageService? -->
+    <!-- TODO vedere se inserire variabili-->
+    [#
+        val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
+    #]
     State s0 initial{
         ...
     }
@@ -144,12 +147,13 @@ QActor transporttrolley context ctxtransporttrolley {
     State idle{
         ...
     }
-    Transition t0 whenMsg pickingup -> pickup
+    Transition t0 whenRequest pickup -> pickingup
 
-    State pickup{
+    State pickingup{
         ...
+            replyTo pickUp with chargeTaken : chargeTaken(_)
     }
-    Transition t0 whenMsg droppingout -> dropout
+    Transition t0 whenMsg dropout -> droppingout
 
     State dropout{
         ...
@@ -166,8 +170,6 @@ QActor transporttrolley context ctxtransporttrolley {
         Per verificare il corretto funzionamento del carrello di trasporto e capire meglio qual &egrave; il comportamento atteso,
         abbiamo preparato alcuni semplici test ( <a href="">TestTransportTrolleyActor.kt</a> ).
 
-=======
->>>>>>> Stashed changes
         <!--------------SEQUENZA OPERATIVA-------------------------->
         <h4>Sequenza operativa</h4>
         Rappresenta le azioni che deve compiere il <bc>Transport trolley</bc>, che inizialmente &egrave; situato in <bc>HOME</bc>:
@@ -181,23 +183,18 @@ QActor transporttrolley context ctxtransporttrolley {
         La fase di trasporto del carico di cibo pu&ograve; essere divisa in due fasi:
         <ul>
             <br>
-            <li>Fase di <kc>PickingUp</kc>, in cui il robot preleva il carico dal camion, quindi si muove verso la indoor</li>
+            <li>Fase di <kc>PickingUp</kc>, in cui il robot deve prelevare il carico dal camion, quindi si muove verso la indoor</li>
             <li>Fase di <kc>DroppingOut</kc>, in cui il robot si muove verso la Port della ColdRoom e deposita il carico al suo interno</li>
         </ul>
-<<<<<<< Updated upstream
-
-=======
         Considerando che il driver deve rimuovere il suo furgone il più velocemente possibile dalla <kc>Indoor</kc>, le due fasi possono essere formalizzate rispettivamente attraverso una<kc>Request-response Qak</kc> e un <kc>Dispatch</kc>:
         <pre>
-Request pickup : pickup(Ticet.TICKETID)
-            <!--TODO controllare se noi abbiamo argomenti all'interno-->
-            <!--Si dovrebbe avere come argomento il ticketid relativo allo scarico ?-->
+Request pickup : pickup(Ticet.TICKETID) 
+        <!--TODO controllare se noi abbiamo argomenti all'interno-->
+        <!--Si dovrebbe avere come argomento il ticketid relativo allo scarico ?-->
 Dispatch dropout: dropout(_)
 
 Reply chargeTaken: chargeTaken(_)
         </pre>
-
->>>>>>> Stashed changes
         <!--------------SONAR------------------------->
         <h4>Sonar</h4>
         Rappresenta l'astrazione del sensore fisico 'HC-SR04'. Il cliente ci ha gi&aacute; fornito in precedenza il software relativo al sonar, formalizzando il sonar come un attore <kc>Qak</kc> <a href="https://github.com/anatali/issLab23/tree/main/unibo.sonarqak23">unibo.sonarqak23</a>.<br>
@@ -216,7 +213,6 @@ Event obstacle  :  obstacle(distance)
         </pre>
 
         <!--------------LED-------------------------->
-        <div id="led">
         <h4>Led</h4>
         Il Led &egrave; un dispositivo di output presente nel RaspberryPi; le azioni che pu&oacute; compiere sono:
         <ul>
@@ -259,42 +255,14 @@ QActor ledqakactor context ctxledqak {
     Transition t0 whenMsg turnOn -> on
                     whenMsg turnOff -> off
 }
-        </pre>
-        </div>
-        <!--------------MINT -------------------------->
-        <h4>MINT </h4>
-        Valore prefissato per il quale il trolley in movimento non pu&ograve; essere fermato nuovamento dopo uno stop antecedente.
-        <pre>
-val MINT : Float
-        </pre>
 
-        <!--------------DLIMT-------------------------->
-        <h4>DLIMT</h4>
-        Valore per cui il Transport Trolley deve fermarsi se la distanza rilevata dal Sonar &egrave; minore di DLIMT. Il Transport Trolley verr&agrave; riattivato una
-        volta che il sonar rilevi una distanza maggiore di DLIMT.
-        <pre>
-val DLIMT : Float
         </pre>
-
-        <!--------------FW-------------------------->
-        <h4>FW</h4>
-        Rappresenta il peso in chilogrammi, che si intende depositare nella ColdRoom.
-        <pre>
-var FW :  Float
-        </pre>
-
         <!--------------ServiceAccessGUI-------------------------->
         <h4>ServiceAccessGUI</h4>
         La ServiceAccessGui &egrave; un' interfaccia grafica che consente a una persona di osservare il peso corrente del cibo immagazzinato all'interno
-        della <kc>ColdRoom</kc> e di inviare messaggi al <kc>ColdStorageService</kc> per immagazzinare un nuovo carico di <b>FW</b> kg di cibo.
-        <pre>
-<key>val</key> FW : Double
-        </pre>
-        Se la richiesta &egrave; accetta il servizio assegna un ticket che scade dopo un periodo prefissato <b>TICKETTIME</b> secs.
-        <pre>
-<key>val</key> TICKETTIME : Int
-        </pre>
-        e fornisce un campo per immettere il numero del ticket quando un furgone si trova presso l' <kc>INDOOR</kc>
+        della <kc>ColdRoom</kc>, ma soprattuto consente ai driver che necessitano di depositare del cibo all'interno della <kc>ColdRoom</kc>, di inviare messaggi al <kc>ColdStorageService</kc> per immagazzinare un nuovo carico cibo.
+        Se la richiesta viene accettata viene restituito un <b>TICKET</b>.
+
         <!--------------Ticket-------------------------->
         <h4>Ticket</h4>
         Il ticket &egrave; rappresenta l'oggetto restituito dalla <kc>ServiceAccessGUI</kc>, al momento di arrivo di un nuovo furgone.<br>
@@ -303,24 +271,25 @@ var FW :  Float
 <key>val</key> TICKETID : Int
 <key>val</key> TICKETTIME : Int
         </pre>
+        In cui <b>TICKETID</b> rappresenta l'dentificativo del ticket che dovrà essere presentato in seguito presso l'<kc>INDOOR</kc>, <b>TICKETTIME</b> rappresenta il tempo in secondi entro il quale il driver si deve presentare presso la <kc>INDOOR</kc>
 
         <!--------------Stato corrente del Transport Trolley-------------------------->
         <h4>Stato corrente del Transport Trolley</h4>
-        Indica lo stato del <a href="#Ttrolley"><kc>Transport Trolley</kc></a>, pu&oacute; essere formalizzato come un enumerativo <a href="">TransportTrolleyState.kt</a>
+        Indica lo stato del Transport Trolley, pu&oacute; essere formalizzato come un enumerativo <a href="">TransportTrolleyState.kt</a>
         <pre>
 enum class CurrStateTrolley { IDLE, STOPPED, MOVING, PICKINGUP, DROPPINGOUT }
         </pre>
 
         <!--------------Posizione del Transport Trolley-------------------------->
         <h4>Posizione del Transport Trolley</h4>
-        Indica le varie posizione possibili del <a href="#Ttrolley"><kc>Transport Trolley</kc></a>, pu&oacute; essere formalizzato come un enumerativo <a href="">TransportTrolleyPosition.kt</a>
+        Indica le varie posizione possibili del Transport Trolley, pu&oacute; essere formalizzato come un enumerativo <a href="">TransportTrolleyPosition.kt</a>
         <pre>
 enum class TTPosition { HOME, INDOOR, PORT }
         </pre>
 
         <!--------------Stato del Led-------------------------->
-        <h4>Stato corrente del Led</h4>
-        Indica i vari stati che il <a href="#led"><kc>Led</kc></a> pu&oacute; assumere: On, Blinking, Off .Pu&oacute; essere formalizzato come un enumerativo <a href="">LedState.kt</a>
+        <h4>Posizione del Transport Trolley</h4>
+        Indica i vari stati che il Led pu&oacute; assumere, pu&oacute; essere formalizzato come un enumerativo <a href="">LedState.kt</a>
         <pre>
 enum class CurrStateLed { ON, OFF, BLINKING }
         </pre>
@@ -355,6 +324,10 @@ Reply storeRejected : storeRejected(_)
         Pu&oacute; essere formalizzato come un attore attraverso il linguaggio Qak ( <a href="">ColdStorageService.qak</a> ).
         <pre>
 QActor coldStorageServiceActor context ctxStorageService {
+        <!-- TODO vedere se inserire le variabili tipo peso attuale nella cold room e simili -->
+[#
+    var requestWeightToStore = 0.0
+#]
         State setup initial {
             ...
         }
@@ -366,20 +339,23 @@ QActor coldStorageServiceActor context ctxStorageService {
         Transition t0 whenRequest storeFood -> requestEvaluation
         
         State requestEvaluation {
-            onMsg(storeFood : storeFood(FW)){
-                
-                if[# coldRoom.canStore(requestWeightToStore) #]
-                {
-                    ...
-                    replyTo storeFood with storeAccepted : storeAccepted(Ticket)
-                }
-                else{
-                    replyTo storeFood with storeRejected : storeRejected(_)
-                } 
-            }
+        onMsg(storeFood : storeFood(FW)){
+            ...
         }
-        Goto idle
-    }
+    }Goto acceptRequest if[# coldRoom.canStore(requestWeightToStore) #]
+                            else rejectRequest
+
+    State rejectRequest{
+        replyTo storeFood with storeRejected : storeRejected(_)
+    }Goto idle
+
+    State acceptRequest{
+        replyTo storeFood with storeAccepted : storeAccepted(_)
+        <!--TODO controllare se la modifica di pickup è consistente-->
+        request transporttrolley -m pickup : pickup(Ticket.TICKETID)
+    }Transition t0 whenReply chargeTaken -> idle
+
+}
         </pre>
         Per verificare il corretto funzionamento del servizio, abbiamo implementato dei test (<a href="">TestColdStorageService.kt</a>).
         <pre>
@@ -387,144 +363,61 @@ var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFo
 var asw = conn.request(storeFood)
 assertTrue(asw.contains("storeAccepted"))
 
-var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(1000),1)"      <!--TODO capire che cazzo &egrave; quell'1-->
+var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(1000),1)"
 var asw = conn.request(storeFood)
 assertTrue(asw.contains("storeRejected"))
         </pre>
-
-
-        <!--------------DDR ROBOT-------------------------->
-        <h4>DDR Robot</h4>
-        Il Differential Drive Robot &egrave; un robot fisico che esegue le seguenti operazioni:
-        <ul>
-            <li>si muove avanti e indietro in linea retta</li>
-            <li>si ferma</li>
-            <li>ruota di 90&deg; a destra o a sinistra</li>
-        </ul>
-        Queste azioni sono eseguite alla ricezione dei relativi comandi da parte del sistema.
-        Il cliente fornisce software capace di interfacciare il DDR robot con altri robot (reali o virtuali): <a href="https://github.com/anatali/issLab23/tree/main/unibo.basicrobot23">unibo.basicrobot23</a>.
-        L'attore QAK <a href="https://github.com/anatali/issLab23/blob/main/unibo.basicrobot23/src/basicrobot.qak">basicrobot.qak</a> di unibo.basicrobot23 &egrave; in grado di interfacciarsi con il DDR robot e di
-        eseguire i comandi di movimento e rotazione.
-
-
-        Il componente <span class="blue">basicrobot</span> viene visto dall'esterno come un servizio che realizza un insieme di funzionalit&agrave;:
-        <ul class="arabic simple">
-            <br>
-            <li>Esecuzione di richieste di <span class="brown">ingaggio</span>:
-                <pre><span class="high">Request engage : engage(CALLER)
-Reply   engagedone    : engagedone(ARG)
-Reply   engagerefused : engagerefused(ARG)
-Dispatch disengage    : disengage(ARG)</span></pre>
-            </li>
-            <li>Esecuzione di <span class="brown">comandi elementari</span> di movimento: <pre><span class="high">Dispatch cmd : cmd(MOVE)
-Dispatch end : end(ARG)</span></pre></p>
-            </li>
-            <li>Esecuzione di <span class="brown">step</span> (movimento in avanti per un tempo dato): <pre><span class="high">Request step:step(TIME)
-Reply stepdone : stepdone(V)
-Reply stepfailed : stepfailed(DURATION, CAUSE)</span></pre></p></li>
-            <li>Esecuzione di <span class="brown">sequenze di movimento</span> (piani): <pre><span class="high">Request doplan:doplan(PATH,STEPTIME)
-Reply doplandone : doplandone(ARG)
-Reply doplanfailed : doplanfailed(ARG)</span></pre></p></li>
-            <li>Esecuzione di <span class="brown">posizionamento</span>: <pre><span class="high">Request moverobot:moverobot(TARGETX, TARGETY)
-Reply moverobotdone : moverobotok(ARG)
-Reply moverobotfailed : moverobotfailed(PLANDONE, PLANTODO)</span></pre></p></li>
-        </ul>
-
-
-        <!--------------TRANSPORT TROLLEY-------------------------->
-        <div id="tTrolley">
-        <h4>Transport Trolley</h4>
-        Il carrello di trasporto &egrave; un'entit&agrave; software che deve interagire con il robot DDR. A tal fine,
-        il carrello di trasporto deve interfacciarsi con il basicrobot.
-        Il carrello di trasporto deve essere in grado di eseguire le stesse azioni del robot DDR, tuttavia il software
-        fornito dal cliente in unibo.basicrobot23 &egrave; un attore, e come tale non prevede il concetto di ereditariet&agrave;,
-        quindi il carrello di trasporto non pu&ograve; essere formalizzato utilizzando l'ereditariet&agrave;.
-        <br>
-        Il trasport trolley ha la forma di un quadrato con dimensione del lato prefissata <b>RD</b>
-        <br>
-        Il trasport trolley pu&ograve; essere modellato come modello Qak:
+        <!--------------MINT -------------------------->
+        <h4>MINT </h4>
+        Valore prefissato per il quale il trolley in movimento non pu&ograve; essere fermato nuovamento dopo uno stop antecedente.
         <pre>
-Dispatch pickingup : pickingup(_)
-Dispatch droppingout : droppingout(MATERIAL)
-Dispatch backhome : backhome(_)
-
-QActor transporttrolley context ctxStorageService {
-            <!-- Il contesto non è relativo al coldStorageService? -->
-            <!-- TODO vedere se inserire variabili-->
-    [#
-        val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
-    #]
-    State s0 initial{
-        ...
-    }
-    Goto idle
-
-    State idle{
-        ...
-    }
-    Transition t0 whenRequest pickup -> pickingup
-
-    State pickingup{
-        ...
-            replyTo pickUp with chargeTaken : chargeTaken(_)
-    }
-    Transition t0 whenMsg dropout -> droppingout
-
-    State dropout{
-        ...
-    }
-    Transition t0 whenMsg backhome -> backhome
-                        whenMsg pickingup -> pickup(Ticket.TICKETID)
-
-    State backhome{
-        ...
-    }
-    Goto idle
+val MINT : Float
         </pre>
-        <br>
-        Per verificare il corretto funzionamento del carrello di trasporto e capire meglio qual &egrave; il comportamento atteso,
-        abbiamo preparato alcuni semplici test ( <a href="">TestTransportTrolleyActor.kt</a> ).
-</div>
 
+        <!--------------DLIMT-------------------------->
+        <h4>DLIMT</h4>
+        Valore per cui il Transport Trolley deve fermarsi se la distanza rilevata dal Sonar &egrave; minore di DLIMT. Il Transport Trolley verr&agrave; riattivato una
+        volta che il sonar rilevi una distanza maggiore di DLIMT.
+        <pre>
+val DLIMT : Float
+        </pre>
+
+        <!--------------FW-------------------------->
+        <h4>FW</h4>
+        Rappresenta il peso in chilogrammi, che si intende depositare nella ColdRoom.
+        <pre>
+var FW :  Float 
+        </pre>
     </div>
     <!----------User stories--------------------->
     <div class="remark">
         <h3> User stories </h3>
-        Al fine di rendere le immagini relative alla descrizione delle User Stories
-        pi&ugrave; comprensibili si riporta di seguito una legenda relativa ai simboli che verranno usati.
-        <br><br>
-        <!--<img src="./resources/draw/legenda.png" alt="legenda">-->
-
-        <!-----------Store Food----------------->
-        <h4>Store Food</h4>
-
-        <!-----------Service Status Area----------------->
-        <h4>Service Status Area</h4>
-
     </div>
 
     <h2>Problem analysis</h2>
-<!--  TODO vagliare se rimuovere il titolo Problem Analysis  -->
     <!-- Bisogna fare così analisi del progetto -->
     <!--Naturalmente questo non &egrave; l’unico modo di procedere. Il lettore &egrave; invitato (come analista e/o come progettista) a individuare alternatve.-->
     <div class="remark">
 
-        <h3>Archittettura Logica</h3>
-        <!--<img src="./resources/" alt="architettura logica">-->
+        <!--        <h3>Archittettura Logica</h3>-->
 
     </div>
 
-<!--
-    <h2>Test plans</h2>
 
+    <h2>Test plans</h2>
+    <!-- E' possibile che si debbano modificare le classi per effettuare un testing corretto, modificando
+    il meno possibile.
+     Se, tuttavia, devo modificare troppo faccio un casino.-->
     <div class="remark">
 
     </div>
 
     <h2>Project</h2>
+    <!-- Farei così -> progetto -->
+    <!--Partendo dal più; semplice modo di Interazione sincrona basato su HTTP, risolviamo il problema inviando al robot un comando di movimento in avanti per un tempo abbastanza lungo a garantire una collisione con la parete di fronte. Dopo la collisione inviamo un comando di rotazione a sinistra e ripetiamo il tutto 4 volte.-->
     <div class="remark">
 
-        
+        <!--        Codice -->
 
     </div>
 </div>
@@ -542,7 +435,7 @@ QActor transporttrolley context ctxStorageService {
 
 
 <h2>Maintenance</h2>
--->
+
 <!-- USEFUL
 <table style="width:100%" border="1">
 <tr>
@@ -562,10 +455,11 @@ QActor transporttrolley context ctxStorageService {
     Email: leonardo.focardi@studio.unibo.it, christian.galeone@studio.unibo.it, gianmiriano.porrazzo@studio.unibo.it <br>
     <!--
     <img src="./resources/boys/" alt="" width="8%" height="8%">
-    <img src="./resources/boys/" alt="" width="8%" height="8%">
     -->
-    <img src="./resources/boys/gian.jpg" alt="" width="8%" height="8%">
-    GIT repo: https://github.com/LEOB3TA/issProject2023
+    <img src="./resources/boys/leo.jpg" alt="" width="10%" height="10%">
+    <img src="./resources/boys/gian.jpg" alt="" width="10%" height="10%">
+    <br>
+    GIT repo: <a href="https://github.com/LEOB3TA/issProject2023">https://github.com/LEOB3TA/issProject2023</a>
 </div>
 </body>
 </html>
