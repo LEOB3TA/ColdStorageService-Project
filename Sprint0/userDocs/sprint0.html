@@ -134,7 +134,7 @@ Dispatch droppingout : droppingout(MATERIAL)
 Dispatch backhome : backhome(_)
 
 QActor transporttrolley context ctxtransporttrolley {
-
+    <!-- TODO vedere se inserire variabili-->
     State s0 initial{
         ...
     }
@@ -143,12 +143,13 @@ QActor transporttrolley context ctxtransporttrolley {
     State idle{
         ...
     }
-    Transition t0 whenMsg pickingup -> pickup
+    Transition t0 whenRequest pickup -> pickingup
 
-    State pickup{
+    State pickingup{
         ...
+            replyTo pickUp eith chargeTaken : chargeTaken(_)
     }
-    Transition t0 whenMsg droppingout -> dropout
+    Transition t0 whenMsg dropout -> droppingout
 
     State dropout{
         ...
@@ -181,13 +182,12 @@ QActor transporttrolley context ctxtransporttrolley {
             <li>Fase di <kc>PickingUp</kc>, in cui il robot deve prelevare il carico dal camion, quindi si muove verso la indoor</li>
             <li>Fase di <kc>DroppingOut</kc>, in cui il robot si muove verso la Port della ColdRoom e deposita il carico al suo interno</li>
         </ul>
-        Considerando che il driver deve rimuovere il suo furgone il più velocemente possibile dalla <kc>Indoor</kc>, le due fasi possono essere formalizzate attraverso delle <kc>Request-response Qak</kc>:
+        Considerando che il driver deve rimuovere il suo furgone il più velocemente possibile dalla <kc>Indoor</kc>, le due fasi possono essere formalizzate rispettivamente attraverso una<kc>Request-response Qak</kc> e un <kc>Dispatch</kc>:
         <pre>
 Request pickup : pickup(_) <!--TODO controllare se noi abbiamo argomenti all'interno-->
-Request dropout: dropout(_)
+Dispatch dropout: dropout(_)
 
-Reply pickupdone: pickupdone(_)
-Reply dropoutdone: dropoutdone(_)
+Reply chargeTaken: chargeTaken(_)
         </pre>
         <!--------------SONAR------------------------->
         <h4>Sonar</h4>
@@ -318,6 +318,7 @@ Reply storeRejected : storeRejected(_)
         Pu&oacute; essere formalizzato come un attore attraverso il linguaggio Qak ( <a href="">ColdStorageService.qak</a> ).
         <pre>
 QActor coldStorageServiceActor context ctxStorageService {
+        <!-- TODO vedere se inserire le variabili tipo peso attuale nella cold room e simili -->
         State setup initial {
             ...
         }
@@ -329,20 +330,22 @@ QActor coldStorageServiceActor context ctxStorageService {
         Transition t0 whenRequest storeFood -> requestEvaluation
         
         State requestEvaluation {
-            onMsg(storeFood : storeFood(FW)){
-                
-                if[# coldRoom.canStore(requestWeightToStore) #]
-                {
-                    ...
-                    replyTo storeFood with storeAccepted : storeAccepted(Ticket)
-                }
-                else{
-                    replyTo storeFood with storeRejected : storeRejected(_)
-                } 
-            }
+        onMsg(storeFood : storeFood(FW)){
+            ...
         }
-        Goto idle
-    }
+    }Goto acceptRequest if[# coldRoom.canStore(requestWeightToStore) #]
+                            else rejectRequest
+
+    State rejectRequest{
+        replyTo storeFood with storeRejected : storeRejected(_)
+    }Goto idle
+
+    State acceptRequest{
+        replyTo storeFood with storeAccepted : storeAccepted(_)
+        request transporttrolley -m pickup : pickup
+    }Transition t0 whenReply chargeTaken -> idle
+
+}
         </pre>
         Per verificare il corretto funzionamento del servizio, abbiamo implementato dei test (<a href="">TestColdStorageService.kt</a>).
         <pre>
