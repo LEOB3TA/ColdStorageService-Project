@@ -347,7 +347,7 @@ var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFo
 var asw = conn.request(storeFood)
 assertTrue(asw.contains("storeAccepted"))
 
-var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(1000),1)"      <!--TODO capire che cazzo &egrave; quell'1-->
+var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(1000),1)"
 var asw = conn.request(storeFood)
 assertTrue(asw.contains("storeRejected"))
         </pre>
