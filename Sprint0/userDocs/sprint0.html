@@ -133,8 +133,12 @@ Dispatch pickingup : pickingup(_)
 Dispatch droppingout : droppingout(MATERIAL)
 Dispatch backhome : backhome(_)
 
-QActor transporttrolley context ctxtransporttrolley {
+QActor transporttrolley context ctxStorageService {
+    <!-- Il contesto non è relativo al coldStorageService? -->
     <!-- TODO vedere se inserire variabili-->
+    [#
+        val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
+    #]
     State s0 initial{
         ...
     }
@@ -147,7 +151,7 @@ QActor transporttrolley context ctxtransporttrolley {
 
     State pickingup{
         ...
-            replyTo pickUp eith chargeTaken : chargeTaken(_)
+            replyTo pickUp with chargeTaken : chargeTaken(_)
     }
     Transition t0 whenMsg dropout -> droppingout
 
@@ -184,7 +188,9 @@ QActor transporttrolley context ctxtransporttrolley {
         </ul>
         Considerando che il driver deve rimuovere il suo furgone il più velocemente possibile dalla <kc>Indoor</kc>, le due fasi possono essere formalizzate rispettivamente attraverso una<kc>Request-response Qak</kc> e un <kc>Dispatch</kc>:
         <pre>
-Request pickup : pickup(_) <!--TODO controllare se noi abbiamo argomenti all'interno-->
+Request pickup : pickup(Ticet.TICKETID) 
+        <!--TODO controllare se noi abbiamo argomenti all'interno-->
+        <!--Si dovrebbe avere come argomento il ticketid relativo allo scarico ?-->
 Dispatch dropout: dropout(_)
 
 Reply chargeTaken: chargeTaken(_)
@@ -319,6 +325,9 @@ Reply storeRejected : storeRejected(_)
         <pre>
 QActor coldStorageServiceActor context ctxStorageService {
         <!-- TODO vedere se inserire le variabili tipo peso attuale nella cold room e simili -->
+[#
+    var requestWeightToStore = 0.0
+#]
         State setup initial {
             ...
         }
@@ -342,7 +351,8 @@ QActor coldStorageServiceActor context ctxStorageService {
 
     State acceptRequest{
         replyTo storeFood with storeAccepted : storeAccepted(_)
-        request transporttrolley -m pickup : pickup
+        <!--TODO controllare se la modifica di pickup è consistente-->
+        request transporttrolley -m pickup : pickup(Ticket.TICKETID)
     }Transition t0 whenReply chargeTaken -> idle
 
 }
@@ -356,6 +366,12 @@ assertTrue(asw.contains("storeAccepted"))
 var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(1000),1)"
 var asw = conn.request(storeFood)
 assertTrue(asw.contains("storeRejected"))
+        </pre>
+        <!--------------MINT -------------------------->
+        <h4>MINT </h4>
+        Valore prefissato per il quale il trolley in movimento non pu&ograve; essere fermato nuovamento dopo uno stop antecedente.
+        <pre>
+val MINT : Float
         </pre>
 
         <!--------------DLIMT-------------------------->
@@ -439,10 +455,9 @@ var FW :  Float
     Email: leonardo.focardi@studio.unibo.it, christian.galeone@studio.unibo.it, gianmiriano.porrazzo@studio.unibo.it <br>
     <!--
     <img src="./resources/boys/" alt="" width="8%" height="8%">
-    <img src="./resources/boys/" alt="" width="8%" height="8%">
     -->
-    <img src="./resources/boys/gian.jpg" alt="" width="10%" height="10%">
     <img src="./resources/boys/leo.jpg" alt="" width="10%" height="10%">
+    <img src="./resources/boys/gian.jpg" alt="" width="10%" height="10%">
     <br>
     GIT repo: <a href="https://github.com/LEOB3TA/issProject2023">https://github.com/LEOB3TA/issProject2023</a>
 </div>
