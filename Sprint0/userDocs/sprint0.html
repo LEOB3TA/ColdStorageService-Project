@@ -133,8 +133,12 @@ Dispatch pickingup : pickingup(_)
 Dispatch droppingout : droppingout(MATERIAL)
 Dispatch backhome : backhome(_)
 
-QActor transporttrolley context ctxtransporttrolley {
-
+QActor transporttrolley context ctxStorageService {
+    <!-- Il contesto non è relativo al coldStorageService? -->
+    <!-- TODO vedere se inserire variabili-->
+    [#
+        val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
+    #]
     State s0 initial{
         ...
     }
@@ -143,12 +147,13 @@ QActor transporttrolley context ctxtransporttrolley {
     State idle{
         ...
     }
-    Transition t0 whenMsg pickingup -> pickup
+    Transition t0 whenRequest pickup -> pickingup
 
-    State pickup{
+    State pickingup{
         ...
+            replyTo pickUp with chargeTaken : chargeTaken(_)
     }
-    Transition t0 whenMsg droppingout -> dropout
+    Transition t0 whenMsg dropout -> droppingout
 
     State dropout{
         ...
@@ -178,10 +183,18 @@ QActor transporttrolley context ctxtransporttrolley {
         La fase di trasporto del carico di cibo pu&ograve; essere divisa in due fasi:
         <ul>
             <br>
-            <li>Fase di <kc>PickingUp</kc>, in cui il robot preleva il carico dal camion, quindi si muove verso la indoor</li>
+            <li>Fase di <kc>PickingUp</kc>, in cui il robot deve prelevare il carico dal camion, quindi si muove verso la indoor</li>
             <li>Fase di <kc>DroppingOut</kc>, in cui il robot si muove verso la Port della ColdRoom e deposita il carico al suo interno</li>
         </ul>
+        Considerando che il driver deve rimuovere il suo furgone il più velocemente possibile dalla <kc>Indoor</kc>, le due fasi possono essere formalizzate rispettivamente attraverso una<kc>Request-response Qak</kc> e un <kc>Dispatch</kc>:
+        <pre>
+Request pickup : pickup(Ticet.TICKETID) 
+        <!--TODO controllare se noi abbiamo argomenti all'interno-->
+        <!--Si dovrebbe avere come argomento il ticketid relativo allo scarico ?-->
+Dispatch dropout: dropout(_)
 
+Reply chargeTaken: chargeTaken(_)
+        </pre>
         <!--------------SONAR------------------------->
         <h4>Sonar</h4>
         Rappresenta l'astrazione del sensore fisico 'HC-SR04'. Il cliente ci ha gi&aacute; fornito in precedenza il software relativo al sonar, formalizzando il sonar come un attore <kc>Qak</kc> <a href="https://github.com/anatali/issLab23/tree/main/unibo.sonarqak23">unibo.sonarqak23</a>.<br>
@@ -242,19 +255,14 @@ QActor ledqakactor context ctxledqak {
     Transition t0 whenMsg turnOn -> on
                     whenMsg turnOff -> off
 }
+
         </pre>
         <!--------------ServiceAccessGUI-------------------------->
         <h4>ServiceAccessGUI</h4>
         La ServiceAccessGui &egrave; un' interfaccia grafica che consente a una persona di osservare il peso corrente del cibo immagazzinato all'interno
-        della <kc>ColdRoom</kc> e di inviare messaggi al <kc>ColdStorageService</kc> per immagazzinare un nuovo carico di <b>FW</b> kg di cibo.
-        <pre>
-<key>val</key> FW : Double
-        </pre>
-        Se la richiesta &egrave; accetta il servizio assegna un ticket che scade dopo un periodo prefissato <b>TICKETTIME</b> secs.
-        <pre>
-<key>val</key> TICKETTIME : Int
-        </pre>
-        e fornisce un campo per immettere il numero del ticket quando un furgone si trova presso l' <kc>INDOOR</kc>
+        della <kc>ColdRoom</kc>, ma soprattuto consente ai driver che necessitano di depositare del cibo all'interno della <kc>ColdRoom</kc>, di inviare messaggi al <kc>ColdStorageService</kc> per immagazzinare un nuovo carico cibo.
+        Se la richiesta viene accettata viene restituito un <b>TICKET</b>.
+
         <!--------------Ticket-------------------------->
         <h4>Ticket</h4>
         Il ticket &egrave; rappresenta l'oggetto restituito dalla <kc>ServiceAccessGUI</kc>, al momento di arrivo di un nuovo furgone.<br>
@@ -263,6 +271,7 @@ QActor ledqakactor context ctxledqak {
 <key>val</key> TICKETID : Int
 <key>val</key> TICKETTIME : Int
         </pre>
+        In cui <b>TICKETID</b> rappresenta l'dentificativo del ticket che dovrà essere presentato in seguito presso l'<kc>INDOOR</kc>, <b>TICKETTIME</b> rappresenta il tempo in secondi entro il quale il driver si deve presentare presso la <kc>INDOOR</kc>
 
         <!--------------Stato corrente del Transport Trolley-------------------------->
         <h4>Stato corrente del Transport Trolley</h4>
@@ -315,6 +324,10 @@ Reply storeRejected : storeRejected(_)
         Pu&oacute; essere formalizzato come un attore attraverso il linguaggio Qak ( <a href="">ColdStorageService.qak</a> ).
         <pre>
 QActor coldStorageServiceActor context ctxStorageService {
+        <!-- TODO vedere se inserire le variabili tipo peso attuale nella cold room e simili -->
+[#
+    var requestWeightToStore = 0.0
+#]
         State setup initial {
             ...
         }
@@ -326,20 +339,23 @@ QActor coldStorageServiceActor context ctxStorageService {
         Transition t0 whenRequest storeFood -> requestEvaluation
         
         State requestEvaluation {
-            onMsg(storeFood : storeFood(FW)){
-                
-                if[# coldRoom.canStore(requestWeightToStore) #]
-                {
-                    ...
-                    replyTo storeFood with storeAccepted : storeAccepted(Ticket)
-                }
-                else{
-                    replyTo storeFood with storeRejected : storeRejected(_)
-                } 
-            }
+        onMsg(storeFood : storeFood(FW)){
+            ...
         }
-        Goto idle
-    }
+    }Goto acceptRequest if[# coldRoom.canStore(requestWeightToStore) #]
+                            else rejectRequest
+
+    State rejectRequest{
+        replyTo storeFood with storeRejected : storeRejected(_)
+    }Goto idle
+
+    State acceptRequest{
+        replyTo storeFood with storeAccepted : storeAccepted(_)
+        <!--TODO controllare se la modifica di pickup è consistente-->
+        request transporttrolley -m pickup : pickup(Ticket.TICKETID)
+    }Transition t0 whenReply chargeTaken -> idle
+
+}
         </pre>
         Per verificare il corretto funzionamento del servizio, abbiamo implementato dei test (<a href="">TestColdStorageService.kt</a>).
         <pre>
@@ -347,9 +363,15 @@ var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFo
 var asw = conn.request(storeFood)
 assertTrue(asw.contains("storeAccepted"))
 
-var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(1000),1)"      <!--TODO capire che cazzo &egrave; quell'1-->
+var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(1000),1)"
 var asw = conn.request(storeFood)
 assertTrue(asw.contains("storeRejected"))
+        </pre>
+        <!--------------MINT -------------------------->
+        <h4>MINT </h4>
+        Valore prefissato per il quale il trolley in movimento non pu&ograve; essere fermato nuovamento dopo uno stop antecedente.
+        <pre>
+val MINT : Float
         </pre>
 
         <!--------------DLIMT-------------------------->
@@ -433,10 +455,9 @@ var FW :  Float
     Email: leonardo.focardi@studio.unibo.it, christian.galeone@studio.unibo.it, gianmiriano.porrazzo@studio.unibo.it <br>
     <!--
     <img src="./resources/boys/" alt="" width="8%" height="8%">
-    <img src="./resources/boys/" alt="" width="8%" height="8%">
     -->
-    <img src="./resources/boys/gian.jpg" alt="" width="10%" height="10%">
     <img src="./resources/boys/leo.jpg" alt="" width="10%" height="10%">
+    <img src="./resources/boys/gian.jpg" alt="" width="10%" height="10%">
     <br>
     GIT repo: <a href="https://github.com/LEOB3TA/issProject2023">https://github.com/LEOB3TA/issProject2023</a>
 </div>
