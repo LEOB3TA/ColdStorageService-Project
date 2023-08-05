@@ -401,10 +401,62 @@ QActor transporttrolley context ctxStorageService {
                 <img src="./resouces/images/legenda.png" alt="legenda">
             -->
         <!-------------Store Food--------->
+        <div id="sf">
         <h4>Store Food</h4>
+        Assumendo il punto di vista di un Fridge Truck driver:
+        <ul>
+            <li>Al momendo dell'arrivo interagisco con la <kc>ServiceAccessGUI</kc> <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">1</div> per mandare una richiesta di
+            deposito del carico di cibo. A questo punto attendo la risposta da parte del <kc>ColdStorageService</kc>.
+            La risposta pu&ograve; essere positiva ( <kc>loadaccepted</kc> )<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2a</div>
+                o negativa ( <kc>loadrejected</kc> ) <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2b</div>
+            </li>
+            <li>
+                Se la risposta &egrave; positiva ( <kc>loadaccepted</kc> ) mi aspetto che il <kc>Transport Trolley</kc>
+                raggiunga l'INDOOR<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>, prenda il cibo e mandi il messaggio <b> charge tacken</b> per poi dirigersi verso la
+                <kc>Cold Room </kc> al fine di depositare il cibo<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">4</div>.
+            </li>
+<!--            TODO : riflettere a questo caso, quando si verifica ed eventualmente al caso del load time lungo-->
+            <li>
+                Se la risposta &egrave; negativa ( <kc> loadrejected </kc> ) me ne vado e libero l'area <kc>INDOOR</kc>
+                <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>.
+            </li>
+        </ul>
+        <!-- Double sided images      -->
+        <!--
+            <div style="display: flex; justify-content: space-around;">
+            <img src="./resouces/images/" alt="" style="width: 40%;"><img src="./resouces/images/" alt="" style="width: 40%;">
+        </div>-->
+        </div>
         <!-------------Service Status Area--------->
+        <div id="ssa">
         <h4>Service Status Area</h4>
         <!-- TODO: Discutere le user sories: nomi e se aggiungere altro-->
+            Assumendo il punto di vista di un service-manager, uso la <kc>ServiceStatusGUI</kc> messa a disposizione
+            dal <kc>ColdStorageService </kc> per osservare:
+            <ul>
+                <li>
+                    Lo stato corrente del <kc>Transport Trolley</kc>
+                    (working <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">1</div>, stopped <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2</div>, waiting <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>) e la sua posizione nella stanza.
+<!--                    <br><br>
+                    <img src="./resouces/images/" alt="" style="width: 40%;">
+                    -->
+                </li>
+                <li>
+                    Il peso corrente del cibo deposistato nell <kc>Cold Room </kc>
+                    <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">4</div> .
+                    <!--                    <br><br>
+                     <img src="./resouces/images/" alt="" style="width: 40%;">
+                     -->
+                </li>
+                <li>
+                    Il numero di richieste di deposito rifiutate
+                    <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">5</div>.
+                    <!--                    <br><br>
+                    <img src="./resouces/images/" alt="" style="width: 40%;">
+                    -->
+                </li>
+            </ul>
+        </div>
     </div>
 
     <h2>Problem analysis</h2>
