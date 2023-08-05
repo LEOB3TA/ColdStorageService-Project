@@ -221,4 +221,48 @@ div.stud {
     color: white;
     margin-left: 20%;
     border-radius: 25px;
+    padding-bottom: 16px;
+    padding-top: 16px;
+}
+
+.studentCardRow{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 16px;
+}
+
+.studentCard{
+    width: 30%;
+    height: 240px;
+    border: none;
+    border-radius: 16px;
+    padding: 10px;
+    margin: 10px;
+    background-color: skyblue;
+}
+
+.studentName {
+    font-size: 24px;
+    font-weight: bold;
+    color: midnightblue;
+}
+
+.studentEmail {
+    font-size: 16px;
+    font-weight: lighter;
+    color: royalblue;
+}
+
+.studentAvatar {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    border: none;
+    margin-top: 16px;
+    object-fit: cover;
+}
+
+.repo{
+    margin-bottom: 16px;
 }
