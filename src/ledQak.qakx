@@ -1,4 +1,4 @@
-// non so se può servire avere file distinti
+// non so se può servire avere file distinti in modo da avere l'immagine dell'architettura
 // per attivare il qak modificare l'estensione del file
 
 Dispatch turnOn : turnOn(_)

@@ -4,6 +4,8 @@ Dispatch turnOn : turnOn(_)
 Dispatch turnOff : turnOff(_)
 Dispatch blink : blink(_)
 
+Event sonardate: distance(V)
+
 Request pickup : pickup(_)
 Dispatch dropout : dropout(_)
 Dispatch backhome : backhome(_)
@@ -65,9 +67,9 @@ QActor coldstorageserviceactor context ctxstorageservice {
         	[#
         		try{
         			requestWeightToStore = (payloadArg(1).toFloat())
-        		}catch(e :Exception){
+        		}catch(e : Exception){
         	#]
-        	replyTo storeFood with storeRejected
+        	replyTo storeFood with storeRejected : stereRejected(_)
         	[#
         		}
         	#]
@@ -80,10 +82,16 @@ QActor coldstorageserviceactor context ctxstorageservice {
     }Goto idle
 
     State acceptRequest{
-        replyTo storeFood with storeAccepted : storeAccepted(_)
+    	[#
+    	TICKET = coldstorageservice.Generate.TOKEN
+    	TICKETID = TOKEN.TICKETID	
+    	#]
+        replyTo storeFood with storeAccepted : storeAccepted(TICKET)
         request transporttrolley -m pickup : pickup(TICKETID)
     }Transition t0 whenReply chargeTaken -> idle
-
+    
+    State dropout{				
+	}Transition t0 whenReply storeAccepted -> idle
 }
 
 
@@ -93,27 +101,38 @@ QActor transporttrolley context ctxstorageservice {
         val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
     #]
     State s0 initial{
+    	println("$name	|	setup")
     }
     Goto idle
 
     State idle{
+    	updateResource[#tTstate.toJsonString()#]
     }
     Transition t0 whenRequest pickup -> pickingup
 
     State pickingup{
-            replyTo pickup with chargeTaken : chargeTaken(_)
+    	[#
+			tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.PICKINGUP)
+		#]
+		updateResource[#tTstate.toJsonString()#]
+        replyTo pickup with chargeTaken : chargeTaken(_)
     }
     Transition t0 whenMsg dropout -> droppingout
 
     State droppingout{
     	onMsg(dropout : dropout(_)) {
-    		
+    		[# tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.DROPPINGOUT) #]
+			updateResource[#tTstate.toJsonString()#]
     	}
     }
     Transition t0 whenMsg backhome -> backhome
                         whenRequest pickup -> pickingup
 
     State backhome{
+    	[#
+			tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.MOVING)
+		#]
+		updateResource[#tTstate.toJsonString()#]
     }
     Goto idle
  

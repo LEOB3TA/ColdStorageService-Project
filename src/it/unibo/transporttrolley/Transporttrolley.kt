@@ -23,6 +23,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
+						CommUtils.outblack("$name	|	setup")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -32,38 +33,51 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("idle") { //this:State
 					action { //it:State
+						updateResourceRep(tTstate.toJsonString() 
+						)
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t08",targetState="pickingup",cond=whenRequest("pickup"))
+					 transition(edgeName="t09",targetState="pickingup",cond=whenRequest("pickup"))
 				}	 
 				state("pickingup") { //this:State
 					action { //it:State
+						
+									tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.PICKINGUP)
+						updateResourceRep(tTstate.toJsonString() 
+						)
 						answer("pickup", "chargeTaken", "chargeTaken(_)"   )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t09",targetState="droppingout",cond=whenDispatch("dropout"))
+					 transition(edgeName="t010",targetState="droppingout",cond=whenDispatch("dropout"))
 				}	 
 				state("droppingout") { //this:State
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("dropout(_)"), Term.createTerm("dropout(_)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
+								 tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.DROPPINGOUT)  
+								updateResourceRep(tTstate.toJsonString() 
+								)
 						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t010",targetState="backhome",cond=whenDispatch("backhome"))
-					transition(edgeName="t011",targetState="pickingup",cond=whenRequest("pickup"))
+					 transition(edgeName="t011",targetState="backhome",cond=whenDispatch("backhome"))
+					transition(edgeName="t012",targetState="pickingup",cond=whenRequest("pickup"))
 				}	 
 				state("backhome") { //this:State
 					action { //it:State
+						
+									tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.MOVING)
+						updateResourceRep(tTstate.toJsonString() 
+						)
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
