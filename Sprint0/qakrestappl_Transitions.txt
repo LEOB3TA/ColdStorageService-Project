@@ -1,8 +1,0 @@
-{"actor":"ledqakactor", "msgType":"dispatch", "curstate":"on", "nextstate":"blink", "msgId":"blink"}
-{"actor":"ledqakactor", "msgType":"dispatch", "curstate":"on", "nextstate":"off", "msgId":"turnOff"}
-{"actor":"ledqakactor", "msgType":"dispatch", "curstate":"off", "nextstate":"on", "msgId":"turnOn"}
-{"actor":"ledqakactor", "msgType":"dispatch", "curstate":"off", "nextstate":"blink", "msgId":"blink"}
-{"actor":"ledqakactor", "msgType":"dispatch", "curstate":"blink", "nextstate":"on", "msgId":"turnOn"}
-{"actor":"ledqakactor", "msgType":"dispatch", "curstate":"blink", "nextstate":"off", "msgId":"turnOff"}
-{"actor":"transporttrolley", "msgType":"dispatch", "curstate":"pickingup", "nextstate":"droppingout", "msgId":"dropout"}
-{"actor":"transporttrolley", "msgType":"dispatch", "curstate":"droppingout", "nextstate":"backhome", "msgId":"backhome"}

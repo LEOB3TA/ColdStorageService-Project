@@ -162,6 +162,12 @@ QActor ledqakactor context ctxledqak {
 }
             </pre>
         </div>
+        <!--------------RD-------------------------->
+        <h4>RD</h4>
+        Dimensione relativa alla lunghezza del Transport Trolley.
+        <pre>
+val RD :  Int
+        </pre>
             <!--------------MINT -------------------------->
         <h4>MINT </h4>
         Valore prefissato per il quale il trolley in movimento non pu&ograve; essere fermato nuovamento dopo uno stop antecedente.
@@ -253,8 +259,9 @@ Reply storeRejected : storeRejected(_)
         Pu&oacute; essere formalizzato come un attore attraverso il linguaggio Qak ( <a href="">ColdStorageService.qak</a> ).
         <pre>
 QActor coldStorageServiceActor context ctxStorageService {
-        <!-- TODO vedere se inserire le variabili statiche tipo MAXW -->
+
 [#
+    val maxw =  wasteservice.Constants.MAXW
     var curretWeightStorage = 0.0
     var requestWeightToStore = 0.0
 #]
@@ -394,10 +401,9 @@ QActor transporttrolley context ctxStorageService {
         <h3> User Stories </h3>
             Al fine di rendere le immagini relative alle User Stories di facile comprensione,
             si introduce di seguito una legenda relativa ai simboli usati successivamente.
-            <!--
                 <br><br>
-                <img src="./resources/images/legenda.png" alt="legenda">
-            -->
+                <img src="./resources/images/legenda.drawio.png" alt="legenda" style="width: 78%;>
+
         <!-------------Store Food--------->
         <div id="sf">
         <h4>Store Food</h4>
@@ -405,15 +411,21 @@ QActor transporttrolley context ctxStorageService {
         <ul>
             <li>Al momendo dell'arrivo interagisco con la <kc>ServiceAccessGUI</kc> <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">1</div> per mandare una richiesta di
             deposito del carico di cibo. A questo punto attendo la risposta da parte del <kc>ColdStorageService</kc>.
-            La risposta pu&ograve; essere positiva ( <kc>loadaccepted</kc> )<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2a</div>
-                o negativa ( <kc>loadrejected</kc> ) <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2b</div>
+            La risposta pu&ograve; essere positiva ( <kc>loadaccepted</kc> ) e relativa emissione del Ticket<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2a</div>
+            o negativa ( <kc>loadrejected</kc> ) <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2b</div>
             </li>
             <li>
+<!--                TODO: La freccia di chargeTaken potrebbe essere messa fuori per far vedere che proviene  dal CSS come il ticket? -->
                 Se la risposta &egrave; positiva ( <kc>loadaccepted</kc> ) mi aspetto che il <kc>Transport Trolley</kc>
-                raggiunga l'INDOOR<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>, prenda il cibo e mandi il messaggio <b> chargeTaken</b> per poi dirigersi verso la
-                <kc>Cold Room </kc> al fine di depositare il cibo<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">4</div>.
+                raggiunga l'INDOOR<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>, prenda il cibo per poi dirigersi verso la
+                <kc>Cold Room </kc> al fine di depositare il cibo.
+                Nel mentre il <kc>ColdStorageService</kc> manda il messaggio <b> chargeTaken</b> e il Ticket al driver. <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">4</div>
+                Una volta che il carico &egrave; stato depositato ed il messaggio <b> chargeTaken</b> ricevuto, il
+                furgone deve lasciare l'area <kc> INDOOR</kc>.<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">5</div> <br/>
+                Nel caso in cui il Ticked scada ( ovvero sia passato un tempo maggiore o pari a TicketTime
+                prima di raggiungere <kc>INDOOR</kc>), l'autista esce dal sistema.
             </li>
-<!--            TODO : riflettere a questo caso, quando si verifica ed eventualmente al caso del load time lungo-->
+<!--            TODO : riflettere su quest'ultimo caso, quando si verifica -->
             <li>
                 Se la risposta &egrave; negativa ( <kc> loadrejected </kc> ) me ne vado e libero l'area <kc>INDOOR</kc>
                 <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>.
@@ -423,7 +435,7 @@ QActor transporttrolley context ctxStorageService {
             <div style="display: flex; justify-content: space-around;">
             <img src="./resources/images/requestAccepted.drawio.png" alt="" style="width: 48%;"><img src="./resources/images/requestRejected.drawio.png" alt="" style="width: 40%;">
         </div>
-        </div>
+
         <!-------------Service Status Area--------->
         <div id="ssa">
         <h4>Service Status GUI</h4>

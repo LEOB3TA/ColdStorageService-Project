@@ -46,21 +46,31 @@ QActor ledqakactor context ctxledqak {
 QActor coldstorageserviceactor context ctxstorageservice {
         
 [#
+	val maxw = coldstorageservice.Constants.MAXW
     var curretWeightStorage = 0.0
     var requestWeightToStore = 0.0
 #]
         State setup initial {
-    
+        	println("$name |	setup")
         }
         Goto idle
         
         State idle {
-      
+        	println("$name |	in idle")      
         }
         Transition t0 whenRequest storeFood -> requestEvaluation
         
         State requestEvaluation {
         onMsg(storeFood : storeFood(FW)){
+        	[#
+        		try{
+        			requestWeightToStore = (payloadArg(1).toFloat())
+        		}catch(e :Exception){
+        	#]
+        	replyTo storeFood with storeRejected
+        	[#
+        		}
+        	#]
         }
     }Goto acceptRequest if[# coldRoom.canStore(requestWeightToStore) #]
                             else rejectRequest
