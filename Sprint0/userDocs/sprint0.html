@@ -96,7 +96,7 @@
         </ul>
         Considerando che il driver deve rimuovere il suo furgone il pi&ugrave; velocemente possibile dalla <kc>Indoor</kc>, le due fasi possono essere formalizzate rispettivamente attraverso una<kc>Request-response Qak</kc> e un <kc>Dispatch</kc>:
         <pre>
-Request pickup : pickup(Ticet.TICKETID) <!--TODO controllare se noi abbiamo argomenti all'interno--><!--Si dovrebbe avere come argomento il ticketid relativo allo scarico ?-->
+Request pickup : pickup(Ticket.TICKETID)
 Dispatch dropout: dropout(_)
 Reply chargeTaken: chargeTaken(_)
         </pre>
@@ -253,8 +253,9 @@ Reply storeRejected : storeRejected(_)
         Pu&oacute; essere formalizzato come un attore attraverso il linguaggio Qak ( <a href="">ColdStorageService.qak</a> ).
         <pre>
 QActor coldStorageServiceActor context ctxStorageService {
-        <!-- TODO vedere se inserire le variabili tipo peso attuale nella cold room e simili -->
+        <!-- TODO vedere se inserire le variabili statiche tipo MAXW -->
 [#
+    var curretWeightStorage = 0.0
     var requestWeightToStore = 0.0
 #]
         State setup initial {
@@ -280,7 +281,6 @@ QActor coldStorageServiceActor context ctxStorageService {
 
     State acceptRequest{
         replyTo storeFood with storeAccepted : storeAccepted(_)
-        <!--TODO controllare se la modifica di pickup è consistente-->
         request transporttrolley -m pickup : pickup(Ticket.TICKETID)
     }Transition t0 whenReply chargeTaken -> idle
 
@@ -353,8 +353,6 @@ Dispatch droppingout : droppingout(_)
 Dispatch backhome : backhome(_)
 
 QActor transporttrolley context ctxStorageService {
-            <!-- Il contesto non è relativo al coldStorageService? -->
-            <!-- TODO vedere se inserire variabili-->
     [#
         val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
     #]
@@ -398,7 +396,7 @@ QActor transporttrolley context ctxStorageService {
             si introduce di seguito una legenda relativa ai simboli usati successivamente.
             <!--
                 <br><br>
-                <img src="./resouces/images/legenda.png" alt="legenda">
+                <img src="./resources/images/legenda.png" alt="legenda">
             -->
         <!-------------Store Food--------->
         <div id="sf">
@@ -422,14 +420,13 @@ QActor transporttrolley context ctxStorageService {
             </li>
         </ul>
         <!-- Double sided images      -->
-        <!--
             <div style="display: flex; justify-content: space-around;">
-            <img src="./resouces/images/" alt="" style="width: 40%;"><img src="./resouces/images/" alt="" style="width: 40%;">
-        </div>-->
+            <img src="./resources/images/requestAccepted.drawio.png" alt="" style="width: 48%;"><img src="./resources/images/requestRejected.drawio.png" alt="" style="width: 40%;">
+        </div>
         </div>
         <!-------------Service Status Area--------->
         <div id="ssa">
-        <h4>Service Status Area</h4>
+        <h4>Service Status GUI</h4>
         <!-- TODO: Discutere le user sories: nomi e se aggiungere altro-->
             Assumendo il punto di vista di un service-manager, uso la <kc>ServiceStatusGUI</kc> messa a disposizione
             dal <kc>ColdStorageService </kc> per osservare:
@@ -437,23 +434,21 @@ QActor transporttrolley context ctxStorageService {
                 <li>
                     Lo stato corrente del <kc>Transport Trolley</kc>
                     (working <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">1</div>, stopped <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2</div>, waiting <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>) e la sua posizione nella stanza.
-<!--                    <br><br>
-                    <img src="./resouces/images/" alt="" style="width: 40%;">
-                    -->
+                  <br><br>
+                    <img src="./resources/images/firstGUI.drawio.png" alt="" style="width: 40%;">
+
                 </li>
                 <li>
                     Il peso corrente del cibo deposistato nell <kc>Cold Room </kc>
                     <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">4</div> .
-                    <!--                    <br><br>
-                     <img src="./resouces/images/" alt="" style="width: 40%;">
-                     -->
+                                   <br><br>
+                     <img src="./resources/images/secondGUI.drawio.png" alt="" style="width: 40%;">
                 </li>
                 <li>
                     Il numero di richieste di deposito rifiutate
                     <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">5</div>.
-                    <!--                    <br><br>
-                    <img src="./resouces/images/" alt="" style="width: 40%;">
-                    -->
+                                   <br><br>
+                    <img src="./resources/images/thirdGUI.drawio.png" alt="" style="width: 40%;">
                 </li>
             </ul>
         </div>
@@ -468,7 +463,7 @@ QActor transporttrolley context ctxStorageService {
         <h3>Architettura Logica</h3>
         <!--
             <br><br>
-            <img src="./resouces/images/" alt="architettura logica">
+            <img src="./resources/images/" alt="architettura logica">
          -->
 
     </div>
@@ -504,7 +499,7 @@ QActor transporttrolley context ctxStorageService {
 <!-- USEFUL
 <table style="width:100%" border="1">
 <tr>
-<td style="width:50%">
+<td style="width:40%">
 </td>
 <td></td>
 </tr>
