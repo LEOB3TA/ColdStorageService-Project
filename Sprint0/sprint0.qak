@@ -1,0 +1,111 @@
+System coldstorageservice
+
+Dispatch turnOn : turnOn(_)
+Dispatch turnOff : turnOff(_)
+Dispatch blink : blink(_)
+
+Request pickup : pickup(_)
+Dispatch dropout : dropout(_)
+Dispatch backhome : backhome(_)
+
+Request storeFood : storeFood(_)
+Reply storeAccepted : storeAccepted(TICKET)
+Reply storeRejected : storeRejected(_)
+Reply chargeTaken : chargeTaken(_)
+
+
+Context ctxledqak ip [host="192.168.1.xxx" port=8086]  //Raspberry
+Context ctxstorageservice ip [host="localhost" port=8090] //porta a caso
+
+QActor ledqakactor context ctxledqak {
+
+    State setup initial {
+        println("$name | setup")
+    }Goto off
+
+    State on {
+
+    }
+    Transition t0 whenMsg blink -> blink
+                    whenMsg turnOff -> off
+
+
+    State off{
+    }
+    Transition t0 whenMsg turnOn -> on
+                    whenMsg blink -> blink
+
+
+    State blink{
+    }
+    Transition t0 whenMsg turnOn -> on
+                    whenMsg turnOff -> off
+}
+
+
+QActor coldstorageserviceactor context ctxstorageservice {
+        
+[#
+    var curretWeightStorage = 0.0
+    var requestWeightToStore = 0.0
+#]
+        State setup initial {
+    
+        }
+        Goto idle
+        
+        State idle {
+      
+        }
+        Transition t0 whenRequest storeFood -> requestEvaluation
+        
+        State requestEvaluation {
+        onMsg(storeFood : storeFood(FW)){
+        }
+    }Goto acceptRequest if[# coldRoom.canStore(requestWeightToStore) #]
+                            else rejectRequest
+
+    State rejectRequest{
+        replyTo storeFood with storeRejected : storeRejected(_)
+    }Goto idle
+
+    State acceptRequest{
+        replyTo storeFood with storeAccepted : storeAccepted(_)
+        request transporttrolley -m pickup : pickup(TICKETID)
+    }Transition t0 whenReply chargeTaken -> idle
+
+}
+
+
+
+QActor transporttrolley context ctxstorageservice {
+    [#
+        val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
+    #]
+    State s0 initial{
+    }
+    Goto idle
+
+    State idle{
+    }
+    Transition t0 whenRequest pickup -> pickingup
+
+    State pickingup{
+            replyTo pickup with chargeTaken : chargeTaken(_)
+    }
+    Transition t0 whenMsg dropout -> droppingout
+
+    State droppingout{
+    	onMsg(dropout : dropout(_)) {
+    		
+    	}
+    }
+    Transition t0 whenMsg backhome -> backhome
+                        whenRequest pickup -> pickingup
+
+    State backhome{
+    }
+    Goto idle
+ 
+}
+            
