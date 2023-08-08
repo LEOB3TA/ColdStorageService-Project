@@ -111,7 +111,7 @@ Event sonar               : distance(V)
         </pre>
 <!--        TODO: Inserire qui l'architettura-->
         <br>
-         L'attore <bc>distanceFilter</bc> filtra e invia al prossimo attore eventi di tipo ostacolo: l'evento viene creato solo quando la distanza 'filtrata' rilevata &egrave; minore di una distanza fissa predefinita <kc>DLIMT</kc>.
+         L'attore <bc>distanceFilter</bc> filtra e invia al prossimo attore eventi di tipo ostacolo: l'evento viene creato solo quando la distanza 'filtrata' rilevata &egrave; minore di una distanza fissa predefinita <kc>DLIMIT</kc>.
         <pre>
 Event obstacle  :  obstacle(distance)
         </pre>
@@ -169,12 +169,12 @@ QActor ledqakactor context ctxledqak {
 val MINT : Float
         </pre>
 
-            <!--------------DLIMT-------------------------->
-        <h4>DLIMT</h4>
-        Valore per cui il Transport Trolley deve fermarsi se la distanza rilevata dal Sonar &egrave; minore di DLIMT. Il Transport Trolley verr&agrave; riattivato una
-        volta che il sonar rilevi una distanza maggiore di DLIMT.
+            <!--------------DLIMIT-------------------------->
+        <h4>DLIMIT</h4>
+        Valore per cui il Transport Trolley deve fermarsi se la distanza rilevata dal Sonar &egrave; minore di DLIMIT. Il Transport Trolley verr&agrave; riattivato una
+        volta che il sonar rilevi una distanza maggiore di DLIMIT.
         <pre>
-val DLIMT : Float
+val DLIMIT : Float
         </pre>
 
             <!--------------FW-------------------------->
