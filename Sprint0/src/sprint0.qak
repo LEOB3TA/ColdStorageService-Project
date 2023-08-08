@@ -52,7 +52,7 @@ QActor ledqakactor context ctxledqak { //aggiungere comandi per accenderlo e spe
 	Transition t0 whenMsg ledCmd -> doCmd
 }
 
-QActor controller23 context ctxledqak{ //ctxpc{ 
+QActor controller23 context ctxledqak{  
 [# val DLIMIT = 30 #] //valore casuale 
 	State s0 initial{
 		println("${name} STARTS - Activates the sonar")
