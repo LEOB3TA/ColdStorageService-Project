@@ -19,11 +19,13 @@ class Coldstorageserviceactor ( name: String, scope: CoroutineScope  ) : ActorBa
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		
+			val maxw = coldstorageservice.Constants.MAXW
 		    var curretWeightStorage = 0.0
 		    var requestWeightToStore = 0.0
 		return { //this:ActionBasciFsm
 				state("setup") { //this:State
 					action { //it:State
+						CommUtils.outblack("$name |	setup")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -33,6 +35,7 @@ class Coldstorageserviceactor ( name: String, scope: CoroutineScope  ) : ActorBa
 				}	 
 				state("idle") { //this:State
 					action { //it:State
+						CommUtils.outblack("$name |	in idle")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -44,6 +47,13 @@ class Coldstorageserviceactor ( name: String, scope: CoroutineScope  ) : ActorBa
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("storeFood(_)"), Term.createTerm("storeFood(FW)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
+								
+								        		try{
+								        			requestWeightToStore = (payloadArg(1).toFloat())
+								        		}catch(e : Exception){
+								answer("storeFood", "storeRejected", "stereRejected(_)"   )  
+								
+								        		}
 						}
 						//genTimer( actor, state )
 					}
@@ -67,7 +77,10 @@ class Coldstorageserviceactor ( name: String, scope: CoroutineScope  ) : ActorBa
 				}	 
 				state("acceptRequest") { //this:State
 					action { //it:State
-						answer("storeFood", "storeAccepted", "storeAccepted(_)"   )  
+						
+						    	TICKET = coldstorageservice.Generate.TOKEN
+						    	TICKETID = TOKEN.TICKETID	
+						answer("storeFood", "storeAccepted", "storeAccepted(TICKET)"   )  
 						request("pickup", "pickup(TICKETID)" ,"transporttrolley" )  
 						//genTimer( actor, state )
 					}
@@ -75,6 +88,15 @@ class Coldstorageserviceactor ( name: String, scope: CoroutineScope  ) : ActorBa
 					sysaction { //it:State
 					}	 	 
 					 transition(edgeName="t06",targetState="idle",cond=whenReply("chargeTaken"))
+				}	 
+				state("dropout") { //this:State
+					action { //it:State
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t08",targetState="idle",cond=whenReply("storeAccepted"))
 				}	 
 			}
 		}
