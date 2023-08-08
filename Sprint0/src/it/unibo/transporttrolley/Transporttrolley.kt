@@ -37,7 +37,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t08",targetState="pickingup",cond=whenRequest("pickup"))
+					 transition(edgeName="t07",targetState="pickingup",cond=whenRequest("pickup"))
 				}	 
 				state("pickingup") { //this:State
 					action { //it:State
@@ -47,7 +47,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t09",targetState="droppingout",cond=whenDispatch("dropout"))
+					 transition(edgeName="t08",targetState="droppingout",cond=whenDispatch("dropout"))
 				}	 
 				state("droppingout") { //this:State
 					action { //it:State
@@ -59,8 +59,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t010",targetState="backhome",cond=whenDispatch("backhome"))
-					transition(edgeName="t011",targetState="pickingup",cond=whenRequest("pickup"))
+					 transition(edgeName="t09",targetState="backhome",cond=whenDispatch("backhome"))
+					transition(edgeName="t010",targetState="pickingup",cond=whenRequest("pickup"))
 				}	 
 				state("backhome") { //this:State
 					action { //it:State

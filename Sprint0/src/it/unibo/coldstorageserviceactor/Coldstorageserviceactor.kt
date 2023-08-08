@@ -38,7 +38,7 @@ class Coldstorageserviceactor ( name: String, scope: CoroutineScope  ) : ActorBa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t06",targetState="requestEvaluation",cond=whenRequest("storeFood"))
+					 transition(edgeName="t05",targetState="requestEvaluation",cond=whenRequest("storeFood"))
 				}	 
 				state("requestEvaluation") { //this:State
 					action { //it:State
@@ -74,7 +74,7 @@ class Coldstorageserviceactor ( name: String, scope: CoroutineScope  ) : ActorBa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t07",targetState="idle",cond=whenReply("chargeTaken"))
+					 transition(edgeName="t06",targetState="idle",cond=whenReply("chargeTaken"))
 				}	 
 			}
 		}

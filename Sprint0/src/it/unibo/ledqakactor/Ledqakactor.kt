@@ -14,50 +14,42 @@ import kotlinx.coroutines.runBlocking
 class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
-		return "setup"
+		return "s0"
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		return { //this:ActionBasciFsm
-				state("setup") { //this:State
+				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outblack("$name | setup")
+						CommUtils.outblack("${name} STARTS")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="off", cond=doswitch() )
+					 transition(edgeName="t00",targetState="doCmd",cond=whenDispatch("ledCmd"))
 				}	 
-				state("on") { //this:State
+				state("doCmd") { //this:State
 					action { //it:State
+						if( checkMsgContent( Term.createTerm("ledCmd(ONOFFBLINK)"), Term.createTerm("ledCmd(V)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 var Cmd = payloadArg(0)  
+								if(  Cmd=="on"  
+								 ){CommUtils.outmagenta("${name} - on")
+								}
+								if(  Cmd=="off"  
+								 ){CommUtils.outmagenta("${name} - off")
+								}
+								else
+								 {CommUtils.outmagenta("${name} - blink")
+								 }
+						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t00",targetState="blink",cond=whenDispatch("blink"))
-					transition(edgeName="t01",targetState="off",cond=whenDispatch("turnOff"))
-				}	 
-				state("off") { //this:State
-					action { //it:State
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t02",targetState="on",cond=whenDispatch("turnOn"))
-					transition(edgeName="t03",targetState="blink",cond=whenDispatch("blink"))
-				}	 
-				state("blink") { //this:State
-					action { //it:State
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t04",targetState="on",cond=whenDispatch("turnOn"))
-					transition(edgeName="t05",targetState="off",cond=whenDispatch("turnOff"))
+					 transition(edgeName="t01",targetState="doCmd",cond=whenDispatch("ledCmd"))
 				}	 
 			}
 		}

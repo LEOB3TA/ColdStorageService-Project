@@ -1,8 +1,8 @@
 System coldstorageservice
 
-Dispatch turnOn : turnOn(_)
-Dispatch turnOff : turnOff(_)
-Dispatch blink : blink(_)
+Dispatch sonaractivate   : info(ARG)  
+Dispatch sonardeactivate : info(ARG)
+Dispatch ledCmd          : ledCmd(ONOFFBLINK)
 
 Request pickup : pickup(_)
 Dispatch dropout : dropout(_)
@@ -13,41 +13,73 @@ Reply storeAccepted : storeAccepted(TICKET)
 Reply storeRejected : storeRejected(_)
 Reply chargeTaken : chargeTaken(_)
 
-//--------For this system-----------
 Event sonardata : distance(D)   //emitted  by datacleaner
 Event obstacle  : obstacle(D)   //emitted as stream by distancefilter
+Event robotmoving : robotmoving(_)
 
 Context ctxsonarqak23 ip [ host= "localhost" port= 8128 ]
 Context ctxledqak ip [host="192.168.1.xxx" port=8086]  //Raspberry
 Context ctxstorageservice ip [host="localhost" port=8090] //porta a caso
 
-CodedQActor sonar  context ctxsonarqak23 className "sonarSimulator"           //IN LOCALE
+CodedQActor sonar23  context ctxsonarqak23 className "sonarSimulator"           //IN LOCALE
 //CodedQActor sonar  context ctxsonarqak23 className "sonarHCSR04Support23"   //SU RASP
 
-QActor ledqakactor context ctxledqak {
+QActor ledqakactor context ctxledqak { //aggiungere comandi per accenderlo e spegnerlo nel raspberry
 
-    State setup initial {
-        println("$name | setup")
-    }Goto off
-
-    State on {
-
-    }
-    Transition t0 whenMsg blink -> blink
-                    whenMsg turnOff -> off
-
-
-    State off{
-    }
-    Transition t0 whenMsg turnOn -> on
-                    whenMsg blink -> blink
-
-
-    State blink{
-    }
-    Transition t0 whenMsg turnOn -> on
-                    whenMsg turnOff -> off
+  State s0 initial{
+		println("${name} STARTS")
+	}  
+	Transition t0 whenMsg ledCmd -> doCmd
+	
+	State doCmd{
+		//printCurrentMessage
+		onMsg( ledCmd : ledCmd(V) ){
+			[# var Cmd = payloadArg(0) #]
+			if [# Cmd=="on" #]{
+				//[# CommUtils.outyellow( "${name} - on") #]		
+				println("${name} - on") color magenta	 		
+			} if [# Cmd=="off" #]{
+				//[# CommUtils.outyellow( "${name} - off")#]
+				println("${name} - off") color magenta
+			}else{
+				//[# CommUtils.outyellow( "${name} - off")#]
+				println("${name} - blink") color magenta
+			}
+		}	 
+	}
+	Transition t0 whenMsg ledCmd -> doCmd
 }
+
+QActor controller23 context ctxledqak{ //ctxpc{ 
+[# val DLIMIT = 30 #] //valore casuale 
+	State s0 initial{
+		println("${name} STARTS - Activates the sonar")
+		forward sonar23 -m sonaractivate : info(ok)
+	} 
+	Transition t0 whenEvent sonardata -> doBusinessWork
+				whenEvent robotmoving -> doBusinessWork
+	
+	State doBusinessWork{
+		//printCurrentMessage
+		onMsg( sonardata : distance(D)){
+			[# var D = payloadArg(0).toInt() #]
+			//Interact with the Led
+			if [# D <= DLIMIT #]{
+ 				//println("${name} - Turn the Led on")
+				forward ledqakactor -m ledCmd : ledCmd(on)
+			}else{ //TODO in the project: if Led is on ....
+ 				//println("${name} - Turn the Led off")
+				forward ledqakactor -m ledCmd : ledCmd(off)				
+			}
+		}
+		onMsg( robotmoving : robotmoving(_)){
+			forward ledqakactor -m ledCmd : ledCmd(blink)		
+		}
+	}
+	Transition t0 whenEvent sonardata -> doBusinessWork
+	
+}
+
 
 
 QActor coldstorageserviceactor context ctxstorageservice {

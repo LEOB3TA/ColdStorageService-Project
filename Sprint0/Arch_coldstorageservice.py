@@ -20,11 +20,16 @@ with Diagram('coldstorageserviceArch', show=False, outformat='png', graph_attr=g
   with Cluster('env'):
      sys = Custom('','./qakicons/system.png')
      with Cluster('ctxsonarqak23', graph_attr=nodeattr):
-          sonar=Custom('sonar(coded)','./qakicons/codedQActor.png')
+          sonar23=Custom('sonar23(coded)','./qakicons/codedQActor.png')
      with Cluster('ctxledqak', graph_attr=nodeattr):
           ledqakactor=Custom('ledqakactor','./qakicons/symActorSmall.png')
+          controller23=Custom('controller23','./qakicons/symActorSmall.png')
      with Cluster('ctxstorageservice', graph_attr=nodeattr):
           coldstorageserviceactor=Custom('coldstorageserviceactor','./qakicons/symActorSmall.png')
           transporttrolley=Custom('transporttrolley','./qakicons/symActorSmall.png')
+     controller23 >> Edge(color='blue', style='solid', xlabel='sonaractivate', fontcolor='blue') >> sonar23
+     sys >> Edge(color='red', style='dashed', xlabel='sonardata', fontcolor='red') >> controller23
+     sys >> Edge(color='red', style='dashed', xlabel='robotmoving', fontcolor='red') >> controller23
+     controller23 >> Edge(color='blue', style='solid', xlabel='ledCmd', fontcolor='blue') >> ledqakactor
      coldstorageserviceactor >> Edge(color='magenta', style='solid', xlabel='pickup', fontcolor='magenta') >> transporttrolley
 diag
