@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: :uniboInterfaces:" type="java-imported" external-system-id="GRADLE">
+    <properties artifactId="uniboInterfaces" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/unibolibs/uniboInterfaces.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

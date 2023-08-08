@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: :unibo.basicomm23-1.0:" type="java-imported" external-system-id="GRADLE">
+    <properties artifactId="unibo.basicomm23-1.0" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/unibolibs/unibo.basicomm23-1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
