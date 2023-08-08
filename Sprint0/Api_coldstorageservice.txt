@@ -1,2 +1,1 @@
 {"actor":"transporttrolley", "msgType":"request", "sender":"coldstorageserviceactor", "msgId":"pickup"}
-{"actor":"transporttrolley", "msgType":"request", "sender":"coldstorageserviceactor", "msgId":"pickup"}

@@ -13,9 +13,16 @@ Reply storeAccepted : storeAccepted(TICKET)
 Reply storeRejected : storeRejected(_)
 Reply chargeTaken : chargeTaken(_)
 
+//--------For this system-----------
+Event sonardata : distance(D)   //emitted  by datacleaner
+Event obstacle  : obstacle(D)   //emitted as stream by distancefilter
 
+Context ctxsonarqak23 ip [ host= "localhost" port= 8128 ]
 Context ctxledqak ip [host="192.168.1.xxx" port=8086]  //Raspberry
 Context ctxstorageservice ip [host="localhost" port=8090] //porta a caso
+
+CodedQActor sonar  context ctxsonarqak23 className "sonarSimulator"           //IN LOCALE
+//CodedQActor sonar  context ctxsonarqak23 className "sonarHCSR04Support23"   //SU RASP
 
 QActor ledqakactor context ctxledqak {
 
