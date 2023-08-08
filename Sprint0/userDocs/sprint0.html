@@ -130,8 +130,8 @@ Event obstacle  :  obstacle(distance)
         Il cliente ci ha fornito in precedenza il software per il Led: <a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarRystem23</a> <br>
         Il comportamento del Led pu&oacute; essere espresso tremite un attore Qak:
         <pre>
-Dispatch turnOn : turnOn(_)
-Dispatch turnOff : turnOff(_)
+Dispatch turnon : turnon(_)
+Dispatch turnoff : turnoff(_)
 Dispatch blink : blink(_)
 
 QActor ledqakactor context ctxledqak {
@@ -144,21 +144,21 @@ QActor ledqakactor context ctxledqak {
         ...
     }
     Transition t0 whenMsg blink -> blink
-                    whenMsg turnOff -> off
+                    whenMsg turnoff -> off
 
 
     State off{
         ...
     }
-    Transition t0 whenMsg turnOn -> on
+    Transition t0 whenMsg turnon -> on
                     whenMsg blink -> blink
 
 
     State blink{
         ...
     }
-    Transition t0 whenMsg turnOn -> on
-                    whenMsg turnOff -> off
+    Transition t0 whenMsg turnon -> on
+                    whenMsg turnoff -> off
 }
             </pre>
         </div>
@@ -258,7 +258,7 @@ Reply storeRejected : storeRejected(_)
         Per questo &egrave; un entit&aacute; <b>attiva</b> che deve essere in grado di ricevere richiesta ( <kc>storeFood</kc>)  e mandare risposte (<kc>storeAccepted</kc>, <kc>storeRejected</kc>).<br>
         Pu&oacute; essere formalizzato come un attore attraverso il linguaggio Qak ( <a href="">ColdStorageService.qak</a> ).
         <pre>
-QActor coldStorageserviceactor context ctxstorageservice {
+QActor coldstorageserviceactor context ctxstorageservice {
 
 [#
     val maxw =  wasteservice.Constants.MAXW
