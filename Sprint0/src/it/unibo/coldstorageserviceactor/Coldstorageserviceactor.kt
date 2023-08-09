@@ -51,7 +51,7 @@ class Coldstorageserviceactor ( name: String, scope: CoroutineScope  ) : ActorBa
 								        		try{
 								        			requestWeightToStore = (payloadArg(1).toFloat())
 								        		}catch(e : Exception){
-								answer("storeFood", "storeRejected", "stereRejected(_)"   )  
+								answer("storeFood", "storeRejected", "storeRejected(_)"   )  
 								
 								        		}
 						}
@@ -87,16 +87,18 @@ class Coldstorageserviceactor ( name: String, scope: CoroutineScope  ) : ActorBa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t06",targetState="idle",cond=whenReply("chargeTaken"))
+					 transition(edgeName="t06",targetState="dropout",cond=whenReply("chargeTaken"))
 				}	 
 				state("dropout") { //this:State
 					action { //it:State
+						forward("dropout", "dropout(_)" ,"transporttrolley" ) 
+						forward("backhome", "backhome(_)" ,"transporttrolley" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t07",targetState="idle",cond=whenReply("storeAccepted"))
+					 transition( edgeName="goto",targetState="idle", cond=doswitch() )
 				}	 
 			}
 		}

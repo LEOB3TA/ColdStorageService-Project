@@ -6,6 +6,21 @@ Dispatch ledCmd          : ledCmd(ONOFFBLINK)
 
 Event sonardate: distance(V)
 
+Dispatch cmd       : cmd(MOVE)  
+Dispatch end       	: end(ARG) 
+Request step       : step(TIME)	  
+Reply stepdone     : stepdone(V)  
+Reply stepfailed   : stepfailed(DURATION, CAUSE)
+Request  doplan     : doplan( PATH, STEPTIME )
+Reply doplandone    : doplandone( ARG ) 
+Reply doplanfailed  : doplanfailed( ARG )
+Request engage        : engage(OWNER, STEPTIME)	
+Reply   engagedone    : engagedone(ARG)
+Reply   engagerefused : engagerefused(ARG)
+Dispatch disengage    : disengage(ARG)
+//Dispatch engaged      : engaged(ARG)
+//Dispatch disengaged   : disengage(ARG)
+
 Request pickup : pickup(_)
 Dispatch dropout : dropout(_)
 Dispatch backhome : backhome(_)
@@ -19,14 +34,15 @@ Event sonardata : distance(D)   //emitted  by datacleaner
 Event obstacle  : obstacle(D)   //emitted as stream by distancefilter
 Event robotmoving : robotmoving(_)
 
-Context ctxsonarqak23 ip [ host= "localhost" port= 8128 ]
-Context ctxledqak ip [host="192.168.1.xxx" port=8086]  //Raspberry
+Context ctxbasicrobot      ip [host="127.0.0.1" port=8020]   
+Context ctxrasp ip [host="192.168.1.xxx" port=8086]  //Raspberry
 Context ctxstorageservice ip [host="localhost" port=8090] //porta a caso
 
-CodedQActor sonar23  context ctxsonarqak23 className "sonarSimulator"           //IN LOCALE
-//CodedQActor sonar  context ctxsonarqak23 className "sonarHCSR04Support23"   //SU RASP
+ExternalQActor basicrobot context ctxbasicrobot  
+CodedQActor sonar23  context ctxrasp className "sonarSimulator"           //IN LOCALE
+//CodedQActor sonar  context ctxrasp className "sonarHCSR04Support23"   //SU RASP
 
-QActor ledqakactor context ctxledqak { //aggiungere comandi per accenderlo e spegnerlo nel raspberry
+QActor ledqakactor context ctxrasp { //aggiungere comandi per accenderlo e spegnerlo nel raspberry
 
   State s0 initial{
 		println("${name} STARTS")
@@ -52,7 +68,7 @@ QActor ledqakactor context ctxledqak { //aggiungere comandi per accenderlo e spe
 	Transition t0 whenMsg ledCmd -> doCmd
 }
 
-QActor controller23 context ctxledqak{ //ctxpc{ 
+QActor controller23 context ctxrasp{ //ctxpc{ 
 [# val DLIMIT = 30 #] //valore casuale 
 	State s0 initial{
 		println("${name} STARTS - Activates the sonar")
@@ -69,7 +85,7 @@ QActor controller23 context ctxledqak{ //ctxpc{
 			if [# D <= DLIMIT #]{
  				//println("${name} - Turn the Led on")
 				forward ledqakactor -m ledCmd : ledCmd(on)
-			}else{ //TODO in the project: if Led is on ....
+			}else{
  				//println("${name} - Turn the Led off")
 				forward ledqakactor -m ledCmd : ledCmd(off)				
 			}
@@ -98,8 +114,9 @@ QActor coldstorageserviceactor context ctxstorageservice {
         
         State idle {
         	println("$name |	in idle")      
-        }
+        }  
         Transition t0 whenRequest storeFood -> requestEvaluation
+
         
         State requestEvaluation {
         onMsg(storeFood : storeFood(FW)){
@@ -108,12 +125,12 @@ QActor coldstorageserviceactor context ctxstorageservice {
         			requestWeightToStore = (payloadArg(1).toFloat())
         		}catch(e : Exception){
         	#]
-        	replyTo storeFood with storeRejected : stereRejected(_)
+        	replyTo storeFood with storeRejected : storeRejected(_)
         	[#
         		}
         	#]
         }
-    }Goto acceptRequest if[# coldRoom.canStore(requestWeightToStore) #]
+    } Goto acceptRequest if[# coldRoom.canStore(requestWeightToStore) #]
                             else rejectRequest
 
     State rejectRequest{
@@ -127,10 +144,12 @@ QActor coldstorageserviceactor context ctxstorageservice {
     	#]
         replyTo storeFood with storeAccepted : storeAccepted(TICKET)
         request transporttrolley -m pickup : pickup(TICKETID)
-    }Transition t0 whenReply chargeTaken -> idle
+    }Transition t0 whenReply chargeTaken -> dropout
     
-    State dropout{				
-	}Transition t0 whenReply storeAccepted -> idle
+    State dropout{
+    	forward transporttrolley -m dropout : dropout(_)
+    	forward transporttrolley -m backhome : backhome(_) //tanto per farlo apparire nel grafico, poi va da un altra parte
+	}Goto idle
 }
 
 
@@ -141,6 +160,14 @@ QActor transporttrolley context ctxstorageservice {
     #]
     State s0 initial{
     	println("$name	|	setup")
+    	//scritte solo per farlo apparire nei grafici
+    	request basicrobot -m step : step(100)
+    	forward basicrobot -m cmd : cmd(w)	
+    	forward basicrobot -m end : end(0)	
+    	request basicrobot -m doplan : doplan("wwwlll",100)
+    	request basicrobot -m engage : engage("me",100)
+    	forward basicrobot -m disengage : disengage(0)	
+    	
     }
     Goto idle
 
@@ -148,6 +175,7 @@ QActor transporttrolley context ctxstorageservice {
     	updateResource[#tTstate.toJsonString()#]
     }
     Transition t0 whenRequest pickup -> pickingup
+    			
 
     State pickingup{
     	[#
