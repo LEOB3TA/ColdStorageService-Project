@@ -1,4 +1,4 @@
-System coldstorageservice
+System /* -trace*/coldstorageservice
 
 Dispatch sonaractivate   : info(ARG)  
 Dispatch sonardeactivate : info(ARG)
@@ -37,9 +37,10 @@ Event robotmoving : robotmoving(_)
 Context ctxbasicrobot      ip [host="127.0.0.1" port=8020]   
 Context ctxrasp ip [host="192.168.1.xxx" port=8086]  //Raspberry
 Context ctxstorageservice ip [host="localhost" port=8090] //porta a caso
+Context ctxtruck ip [host="192.168.1.xxx" port= 8085]
 
 ExternalQActor basicrobot context ctxbasicrobot  
-CodedQActor sonar23  context ctxrasp className "sonarSimulator"           //IN LOCALE
+CodedQActor sonar23  context ctxrasp className "rx.sonarSimulator"           //IN LOCALE
 //CodedQActor sonar  context ctxrasp className "sonarHCSR04Support23"   //SU RASP
 
 QActor ledqakactor context ctxrasp { //aggiungere comandi per accenderlo e spegnerlo nel raspberry
@@ -100,7 +101,7 @@ QActor controller23 context ctxrasp{ //ctxpc{
 
 
 
-QActor coldstorageserviceactor context ctxstorageservice {
+QActor coldstorageservice context ctxstorageservice {
         
 [#
 	val maxw = coldstorageservice.Constants.MAXW
@@ -113,7 +114,8 @@ QActor coldstorageserviceactor context ctxstorageservice {
         Goto idle
         
         State idle {
-        	println("$name |	in idle")      
+        	println("$name |	in idle")
+        	updateResource[#maxw.toJsonString()#]
         }  
         Transition t0 whenRequest storeFood -> requestEvaluation
 
@@ -203,5 +205,18 @@ QActor transporttrolley context ctxstorageservice {
     }
     Goto idle
  
+}
+
+
+QActor serviceaccesgui context ctxtruck {
+    
+    State s0 initial{
+        request coldstorageservice -m storeFood : idle
+    }Goto idle
+    
+    State idle {
+        	println("$name |	in idle")
+        	
+    } 
 }
             
