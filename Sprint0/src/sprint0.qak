@@ -125,16 +125,7 @@ QActor coldstorageservice context ctxstorageservice {
         
         State requestEvaluation {
         onMsg(storeFood : storeFood(FW)){
-        	[#
-        		try{
-        			requestWeightToStore = (payloadArg(1).toFloat())
-        		}catch(e : Exception){
-        	#]
-        	replyTo storeFood with storeRejected : storeRejected(_)
         	forward servicestatusgui -m updategui : updategui(_) //possibile che vada anche da altre parti
-        	[#
-        		}
-        	#]
         }
     } Goto acceptRequest if[# coldRoom.canStore(requestWeightToStore) #]
                             else rejectRequest
