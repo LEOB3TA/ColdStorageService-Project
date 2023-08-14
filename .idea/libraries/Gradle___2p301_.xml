@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: :2p301:" type="java-imported" external-system-id="GRADLE">
+    <properties artifactId="2p301" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/unibolibs/2p301.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

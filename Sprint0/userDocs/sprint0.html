@@ -96,7 +96,7 @@
         </ul>
         Considerando che il driver deve rimuovere il suo furgone il pi&ugrave; velocemente possibile dalla <kc>Indoor</kc>, le due fasi possono essere formalizzate rispettivamente attraverso una<kc>Request-response Qak</kc> e un <kc>Dispatch</kc>:
         <pre>
-Request pickup : pickup(Ticet.TICKETID) <!--TODO controllare se noi abbiamo argomenti all'interno--><!--Si dovrebbe avere come argomento il ticketid relativo allo scarico ?-->
+Request pickup : pickup(Ticket.TICKETID)
 Dispatch dropout: dropout(_)
 Reply chargeTaken: chargeTaken(_)
         </pre>
@@ -109,9 +109,13 @@ Dispatch sonaractivate     : info(ARG)
 Dispatch sonardeactivate   : info(ARG)
 Event sonar               : distance(V)
         </pre>
-<!--        TODO: Inserire qui l'architettura-->
+        <br><br>
+        <img src="./resources/images/sonarpipenano.png" alt="legenda" style="width: 78%;>
+
+        <!-------------Store Food--------->
+        <div id="sf">
         <br>
-         L'attore <bc>distanceFilter</bc> filtra e invia al prossimo attore eventi di tipo ostacolo: l'evento viene creato solo quando la distanza 'filtrata' rilevata &egrave; minore di una distanza fissa predefinita <kc>DLIMT</kc>.
+         L'attore <bc>distanceFilter</bc> filtra e invia al prossimo attore eventi di tipo ostacolo: l'evento viene creato solo quando la distanza 'filtrata' rilevata &egrave; minore di una distanza fissa predefinita <kc>DLIMIT</kc>.
         <pre>
 Event obstacle  :  obstacle(distance)
         </pre>
@@ -130,8 +134,8 @@ Event obstacle  :  obstacle(distance)
         Il cliente ci ha fornito in precedenza il software per il Led: <a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarRystem23</a> <br>
         Il comportamento del Led pu&oacute; essere espresso tremite un attore Qak:
         <pre>
-Dispatch turnOn : turnOn(_)
-Dispatch turnOff : turnOff(_)
+Dispatch turnon : turnon(_)
+Dispatch turnoff : turnoff(_)
 Dispatch blink : blink(_)
 
 QActor ledqakactor context ctxledqak {
@@ -144,24 +148,30 @@ QActor ledqakactor context ctxledqak {
         ...
     }
     Transition t0 whenMsg blink -> blink
-                    whenMsg turnOff -> off
+                    whenMsg turnoff -> off
 
 
     State off{
         ...
     }
-    Transition t0 whenMsg turnOn -> on
+    Transition t0 whenMsg turnon -> on
                     whenMsg blink -> blink
 
 
     State blink{
         ...
     }
-    Transition t0 whenMsg turnOn -> on
-                    whenMsg turnOff -> off
+    Transition t0 whenMsg turnon -> on
+                    whenMsg turnoff -> off
 }
             </pre>
         </div>
+        <!--------------RD-------------------------->
+        <h4>RD</h4>
+        Dimensione relativa alla lunghezza del Transport Trolley.
+        <pre>
+val RD :  Int
+        </pre>
             <!--------------MINT -------------------------->
         <h4>MINT </h4>
         Valore prefissato per il quale il trolley in movimento non pu&ograve; essere fermato nuovamento dopo uno stop antecedente.
@@ -169,12 +179,12 @@ QActor ledqakactor context ctxledqak {
 val MINT : Float
         </pre>
 
-            <!--------------DLIMT-------------------------->
-        <h4>DLIMT</h4>
-        Valore per cui il Transport Trolley deve fermarsi se la distanza rilevata dal Sonar &egrave; minore di DLIMT. Il Transport Trolley verr&agrave; riattivato una
-        volta che il sonar rilevi una distanza maggiore di DLIMT.
+            <!--------------DLIMIT-------------------------->
+        <h4>DLIMIT</h4>
+        Valore per cui il Transport Trolley deve fermarsi se la distanza rilevata dal Sonar &egrave; minore di DLIMIT. Il Transport Trolley verr&agrave; riattivato una
+        volta che il sonar rilevi una distanza maggiore di DLIMIT.
         <pre>
-val DLIMT : Float
+val DLIMIT : Float
         </pre>
 
             <!--------------FW-------------------------->
@@ -252,9 +262,11 @@ Reply storeRejected : storeRejected(_)
         Per questo &egrave; un entit&aacute; <b>attiva</b> che deve essere in grado di ricevere richiesta ( <kc>storeFood</kc>)  e mandare risposte (<kc>storeAccepted</kc>, <kc>storeRejected</kc>).<br>
         Pu&oacute; essere formalizzato come un attore attraverso il linguaggio Qak ( <a href="">ColdStorageService.qak</a> ).
         <pre>
-QActor coldStorageServiceActor context ctxStorageService {
-        <!-- TODO vedere se inserire le variabili tipo peso attuale nella cold room e simili -->
+QActor coldstorageserviceactor context ctxstorageservice {
+
 [#
+    val maxw =  wasteservice.Constants.MAXW
+    var curretWeightStorage = 0.0
     var requestWeightToStore = 0.0
 #]
         State setup initial {
@@ -280,10 +292,11 @@ QActor coldStorageServiceActor context ctxStorageService {
 
     State acceptRequest{
         replyTo storeFood with storeAccepted : storeAccepted(_)
-        <!--TODO controllare se la modifica di pickup è consistente-->
         request transporttrolley -m pickup : pickup(Ticket.TICKETID)
     }Transition t0 whenReply chargeTaken -> idle
 
+    State dropout{
+	}Transition t0 whenReply storeAccepted -> idle
 }
         </pre>
         Per verificare il corretto funzionamento del servizio, abbiamo implementato dei test (<a href="">TestColdStorageService.kt</a>).
@@ -348,13 +361,11 @@ Reply moverobotfailed : moverobotfailed(PLANDONE, PLANTODO)</span></pre></p></li
         <br>
         Il trasport trolley pu&ograve; essere modellato come modello Qak:
         <pre>
-Dispatch pickingup : pickingup(_)
-Dispatch droppingout : droppingout(_)
+Request pickup : pickup(_)
+Dispatch dropout : dropout(_)
 Dispatch backhome : backhome(_)
 
-QActor transporttrolley context ctxStorageService {
-            <!-- Il contesto non è relativo al coldStorageService? -->
-            <!-- TODO vedere se inserire variabili-->
+QActor transporttrolley context ctxstorageservice {
     [#
         val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
     #]
@@ -396,10 +407,9 @@ QActor transporttrolley context ctxStorageService {
         <h3> User Stories </h3>
             Al fine di rendere le immagini relative alle User Stories di facile comprensione,
             si introduce di seguito una legenda relativa ai simboli usati successivamente.
-            <!--
                 <br><br>
-                <img src="./resouces/images/legenda.png" alt="legenda">
-            -->
+                <img src="./resources/images/legenda.drawio.png" alt="legenda" style="width: 78%;>
+
         <!-------------Store Food--------->
         <div id="sf">
         <h4>Store Food</h4>
@@ -407,104 +417,101 @@ QActor transporttrolley context ctxStorageService {
         <ul>
             <li>Al momendo dell'arrivo interagisco con la <kc>ServiceAccessGUI</kc> <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">1</div> per mandare una richiesta di
             deposito del carico di cibo. A questo punto attendo la risposta da parte del <kc>ColdStorageService</kc>.
-            La risposta pu&ograve; essere positiva ( <kc>loadaccepted</kc> )<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2a</div>
-                o negativa ( <kc>loadrejected</kc> ) <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2b</div>
+            La risposta pu&ograve; essere positiva ( <kc>loadaccepted</kc> ) e relativa emissione del Ticket<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2a</div>
+            o negativa ( <kc>loadrejected</kc> ) <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2b</div>
             </li>
             <li>
+<!--                TODO: La freccia di chargeTaken potrebbe essere messa fuori per far vedere che proviene  dal CSS come il ticket? -->
                 Se la risposta &egrave; positiva ( <kc>loadaccepted</kc> ) mi aspetto che il <kc>Transport Trolley</kc>
-                raggiunga l'INDOOR<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>, prenda il cibo e mandi il messaggio <b> chargeTaken</b> per poi dirigersi verso la
-                <kc>Cold Room </kc> al fine di depositare il cibo<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">4</div>.
+                raggiunga l'INDOOR<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>, prenda il cibo per poi dirigersi verso la
+                <kc>Cold Room </kc> al fine di depositare il cibo.
+                Nel mentre il <kc>ColdStorageService</kc> manda il messaggio <b> chargeTaken</b> e il Ticket al driver. <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">4</div>
+                Una volta che il carico &egrave; stato depositato ed il messaggio <b> chargeTaken</b> ricevuto, il
+                furgone deve lasciare l'area <kc> INDOOR</kc>.<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">5</div> <br/>
+                Nel caso in cui il Ticket scada ( ovvero sia passato un tempo maggiore o pari a TicketTime
+                prima di raggiungere <kc>INDOOR</kc>), l'autista esce dal sistema.
             </li>
-<!--            TODO : riflettere a questo caso, quando si verifica ed eventualmente al caso del load time lungo-->
+<!--            TODO : riflettere su quest'ultimo caso, quando si verifica -->
             <li>
                 Se la risposta &egrave; negativa ( <kc> loadrejected </kc> ) me ne vado e libero l'area <kc>INDOOR</kc>
                 <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>.
             </li>
         </ul>
         <!-- Double sided images      -->
-        <!--
             <div style="display: flex; justify-content: space-around;">
-            <img src="./resouces/images/" alt="" style="width: 40%;"><img src="./resouces/images/" alt="" style="width: 40%;">
-        </div>-->
+            <img src="./resources/images/requestAccepted.drawio.png" alt="" style="width: 48%;"><img src="./resources/images/requestRejected.drawio.png" alt="" style="width: 40%;">
         </div>
+
         <!-------------Service Status Area--------->
         <div id="ssa">
-        <h4>Service Status Area</h4>
-        <!-- TODO: Discutere le user sories: nomi e se aggiungere altro-->
+        <h4>Service Status GUI</h4>
+
             Assumendo il punto di vista di un service-manager, uso la <kc>ServiceStatusGUI</kc> messa a disposizione
             dal <kc>ColdStorageService </kc> per osservare:
             <ul>
                 <li>
                     Lo stato corrente del <kc>Transport Trolley</kc>
                     (working <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">1</div>, stopped <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2</div>, waiting <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>) e la sua posizione nella stanza.
-<!--                    <br><br>
-                    <img src="./resouces/images/" alt="" style="width: 40%;">
-                    -->
+                  <br><br>
+                    <img src="./resources/images/firstGUI.drawio.png" alt="" style="width: 40%;">
+
                 </li>
                 <li>
                     Il peso corrente del cibo deposistato nell <kc>Cold Room </kc>
                     <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">4</div> .
-                    <!--                    <br><br>
-                     <img src="./resouces/images/" alt="" style="width: 40%;">
-                     -->
+                                   <br><br>
+                     <img src="./resources/images/secondGUI.drawio.png" alt="" style="width: 40%;">
                 </li>
                 <li>
                     Il numero di richieste di deposito rifiutate
                     <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">5</div>.
-                    <!--                    <br><br>
-                    <img src="./resouces/images/" alt="" style="width: 40%;">
-                    -->
+                                   <br><br>
+                    <img src="./resources/images/thirdGUI.drawio.png" alt="" style="width: 40%;">
                 </li>
             </ul>
         </div>
     </div>
-
-    <h2>Problem analysis</h2>
-<!--    TODO: Vagliare se rimuovere il titolo Problem Analysis-->
-    <!-- Bisogna fare così analisi del progetto -->
-    <!--Naturalmente questo non &egrave; l’unico modo di procedere. Il lettore &egrave; invitato (come analista e/o come progettista) a individuare alternatve.-->
+    <h2>Architettura Logica</h2>
     <div class="remark">
-
-        <h3>Architettura Logica</h3>
-        <!--
-            <br><br>
-            <img src="./resouces/images/" alt="architettura logica">
-         -->
+            <br>
+        Modello: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/a0bcf0ba466cc85a2ed10fe19655c7cef2e7af5a/Sprint0/src/sprint0.qak" target="_blank">sprint0.qak</a>
+        <br>
+            <img src="./resources/images/coldstorageservicearch.png" alt="architettura logica">
 
     </div>
 
+
+        <h2>Piano di lavoro</h2>
+         <div class="remark">
+
+        </div>
     <!--
-        <h2>Test plans</h2>
-         <div class="remark">
+            <h2>Project</h2>
+             <div class="remark">
+
+
+
+            </div>
+        </div>
+
+        <h2>Testing</h2>
+        <div class="remark">
 
         </div>
 
-        <h2>Project</h2>
-         <div class="remark">
 
-
+        <h2>Deployment</h2>
+        <div class="remark">
 
         </div>
-    </div>
-
-    <h2>Testing</h2>
-    <div class="remark">
-
-    </div>
 
 
-    <h2>Deployment</h2>
-    <div class="remark">
-
-    </div>
-
-
-    <h2>Maintenance</h2>
-    -->
+        <h2>Maintenance</h2>
+        -->
 <!-- USEFUL
 <table style="width:100%" border="1">
 <tr>
-<td style="width:50%">
+<td style="width:40%">
 </td>
 <td></td>
 </tr>

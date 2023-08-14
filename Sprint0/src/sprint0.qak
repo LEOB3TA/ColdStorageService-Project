@@ -1,0 +1,235 @@
+System /* -trace*/coldstorageservice
+
+Dispatch sonaractivate   : info(ARG)  
+Dispatch sonardeactivate : info(ARG)
+Dispatch ledCmd          : ledCmd(ONOFFBLINK)
+
+Event sonardate: distance(V)
+
+Dispatch cmd       : cmd(MOVE)  
+Dispatch end       	: end(ARG) 
+Request step       : step(TIME)	  
+Reply stepdone     : stepdone(V)  
+Reply stepfailed   : stepfailed(DURATION, CAUSE)
+Request  doplan     : doplan( PATH, STEPTIME )
+Reply doplandone    : doplandone( ARG ) 
+Reply doplanfailed  : doplanfailed( ARG )
+Request engage        : engage(OWNER, STEPTIME)	
+Reply   engagedone    : engagedone(ARG)
+Reply   engagerefused : engagerefused(ARG)
+Dispatch disengage    : disengage(ARG)
+//Dispatch engaged      : engaged(ARG)
+//Dispatch disengaged   : disengage(ARG)
+
+Request pickup : pickup(_)
+Dispatch dropout : dropout(_)
+Dispatch backhome : backhome(_)
+
+Request storeFood : storeFood(_)
+Reply storeAccepted : storeAccepted(TICKET)
+Reply storeRejected : storeRejected(_)
+Reply chargeTaken : chargeTaken(_)
+
+Event sonardata : distance(D)   //emitted  by datacleaner
+Event obstacle  : obstacle(D)   //emitted as stream by distancefilter
+Event robotmoving : robotmoving(_)
+
+Dispatch updategui : updategui(_)
+
+Context ctxbasicrobot      ip [host="localhost" port=8020]   //Locale
+Context ctxrasp ip [host="192.168.1.xxx" port=8086]  //Raspberry
+Context ctxstorageservice ip [host="localhost" port=8090] //porta a caso
+Context ctxtruck ip [host="localhost" port= 8087] //contesto casuale
+Context ctxmanager ip [host="localhost" port= 8085] //contestocasuale
+
+ExternalQActor basicrobot context ctxbasicrobot  
+CodedQActor sonar23  context ctxrasp className "rx.sonarSimulator"           //IN LOCALE
+//CodedQActor sonar  context ctxrasp className "sonarHCSR04Support23"   //SU RASP
+
+QActor ledqakactor context ctxrasp {
+
+  State s0 initial{
+		println("${name} STARTS")
+	}  
+	Transition t0 whenMsg ledCmd -> doCmd
+	
+	State doCmd{ //da codificare i comandi del raspberry
+		//printCurrentMessage
+		onMsg( ledCmd : ledCmd(V) ){
+			[# var Cmd = payloadArg(0) #]
+			if [# Cmd=="on" #]{
+				//[# CommUtils.outyellow( "${name} - on") #]		
+				println("${name} - on") color magenta	 		
+			} if [# Cmd=="off" #]{
+				//[# CommUtils.outyellow( "${name} - off")#]
+				println("${name} - off") color magenta
+			}else{
+				//[# CommUtils.outyellow( "${name} - off")#]
+				println("${name} - blink") color magenta
+			}
+		}	 
+	}
+	Transition t0 whenMsg ledCmd -> doCmd
+}
+
+QActor controller23 context ctxrasp{ //ctxpc{ 
+[# val DLIMIT = 30 #] //valore casuale 
+	State s0 initial{
+		println("${name} STARTS - Activates the sonar")
+		forward sonar23 -m sonaractivate : info(ok)
+	} 
+	Transition t0 whenEvent sonardata -> doBusinessWork
+				whenEvent robotmoving -> doBusinessWork
+	
+	State doBusinessWork{
+		//printCurrentMessage
+		onMsg( sonardata : distance(D)){
+			[# var D = payloadArg(0).toInt() #]
+			//Interact with the Led
+			if [# D <= DLIMIT #]{
+ 				//println("${name} - Turn the Led on")
+				forward ledqakactor -m ledCmd : ledCmd(on)
+			}else{
+ 				//println("${name} - Turn the Led off")
+				forward ledqakactor -m ledCmd : ledCmd(off)				
+			}
+		}
+		onMsg( robotmoving : robotmoving(_)){
+			forward ledqakactor -m ledCmd : ledCmd(blink)		
+		}
+	}
+	Transition t0 whenEvent sonardata -> doBusinessWork
+	
+}
+
+
+
+QActor coldstorageservice context ctxstorageservice {
+        
+[#
+	val maxw = coldstorageservice.Constants.MAXW
+    var curretWeightStorage = 0.0
+    var requestWeightToStore = 0.0
+#]
+        State setup initial {
+        	println("$name |	setup")
+        }
+        Goto idle
+        
+        State idle {
+        	println("$name |	in idle")
+        	updateResource[#maxw.toJsonString()#]
+        }  
+        Transition t0 whenRequest storeFood -> requestEvaluation
+
+        
+        State requestEvaluation {
+        onMsg(storeFood : storeFood(FW)){
+        	[#
+        		try{
+        			requestWeightToStore = (payloadArg(1).toFloat())
+        		}catch(e : Exception){
+        	#]
+        	replyTo storeFood with storeRejected : storeRejected(_)
+        	forward servicestatusgui -m updategui : updategui(_) //possibile che vada anche da altre parti
+        	[#
+        		}
+        	#]
+        }
+    } Goto acceptRequest if[# coldRoom.canStore(requestWeightToStore) #]
+                            else rejectRequest
+
+    State rejectRequest{
+        replyTo storeFood with storeRejected : storeRejected(_)
+    }Goto idle
+
+    State acceptRequest{
+    	[#
+    	TICKET = coldstorageservice.Generate.TOKEN
+    	TICKETID = TOKEN.TICKETID	
+    	#]
+        replyTo storeFood with storeAccepted : storeAccepted(TICKET)
+        request transporttrolley -m pickup : pickup(TICKETID)
+    }Transition t0 whenReply chargeTaken -> dropout
+    
+    State dropout{
+    	forward transporttrolley -m dropout : dropout(_)
+    	forward transporttrolley -m backhome : backhome(_) //non è detto che debba stare qui
+	}Goto idle
+}
+
+
+
+QActor transporttrolley context ctxstorageservice {
+    [#
+        val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
+    #]
+    State s0 initial{
+    	println("$name	|	setup")
+    }
+    Goto idle
+
+    State idle{
+    	updateResource[#tTstate.toJsonString()#]
+    }
+    Transition t0 whenRequest pickup -> pickingup
+    			
+
+    State pickingup{
+    	[#
+			tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.PICKINGUP)
+		#]
+		updateResource[#tTstate.toJsonString()#]
+        replyTo pickup with chargeTaken : chargeTaken(_)
+    }
+    Transition t0 whenMsg dropout -> droppingout
+
+    State droppingout{
+    	onMsg(dropout : dropout(_)) {
+    		[# tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.DROPPINGOUT) #]
+			updateResource[#tTstate.toJsonString()#]
+    	}
+    }
+    Transition t0 whenMsg backhome -> backhome
+                        whenRequest pickup -> pickingup
+
+    State backhome{
+    	[#
+			tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.MOVING)
+		#]
+		updateResource[#tTstate.toJsonString()#]
+    }
+    Goto idle
+ 
+}
+
+
+QActor serviceaccesgui context ctxtruck {
+    
+    State s0 initial{
+        
+    }Goto idle
+    
+    State idle {
+        	println("$name |	in idle")
+    } //TODO transizione
+    
+    State sendmessage {
+    	request coldstorageservice -m storeFood : storeFood(_)
+    	//TODO timer
+    } Transition t0 whenReply chargeTaken -> idle 
+}
+QActor servicestatusgui context ctxmanager {
+    
+    State s0 initial{
+    }Goto idle
+    
+    State idle {
+        	println("$name |	in idle")
+    } Transition t0 whenMsg updategui -> updategui
+    
+    State updategui{
+    	//TODO update
+    } Goto idle
+}
+            

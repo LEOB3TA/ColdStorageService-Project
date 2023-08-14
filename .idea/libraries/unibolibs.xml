@@ -1,0 +1,17 @@
+<component name="libraryTable">
+  <library name="unibolibs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/unibolibs/unibo.planner23-1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/unibolibs/unibonoawtsupports.jar!/" />
+      <root url="jar://$PROJECT_DIR$/unibolibs/it.unibo.radarSystem22.domain-1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/unibolibs/unibo.basicomm23-1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/unibolibs/unibo.qakactor23-3.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/unibolibs/actors23-1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/unibolibs/2p301.jar!/" />
+      <root url="jar://$PROJECT_DIR$/unibolibs/uniboInterfaces.jar!/" />
+      <root url="jar://$PROJECT_DIR$/unibolibs/radarPojo.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
