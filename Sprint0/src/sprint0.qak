@@ -34,23 +34,26 @@ Event sonardata : distance(D)   //emitted  by datacleaner
 Event obstacle  : obstacle(D)   //emitted as stream by distancefilter
 Event robotmoving : robotmoving(_)
 
-Context ctxbasicrobot      ip [host="127.0.0.1" port=8020]   
+Dispatch updategui : updategui(_)
+
+Context ctxbasicrobot      ip [host="localhost" port=8020]   //Locale
 Context ctxrasp ip [host="192.168.1.xxx" port=8086]  //Raspberry
 Context ctxstorageservice ip [host="localhost" port=8090] //porta a caso
-Context ctxtruck ip [host="192.168.1.xxx" port= 8085]
+Context ctxtruck ip [host="localhost" port= 8087] //contesto casuale
+Context ctxmanager ip [host="localhost" port= 8085] //contestocasuale
 
 ExternalQActor basicrobot context ctxbasicrobot  
 CodedQActor sonar23  context ctxrasp className "rx.sonarSimulator"           //IN LOCALE
 //CodedQActor sonar  context ctxrasp className "sonarHCSR04Support23"   //SU RASP
 
-QActor ledqakactor context ctxrasp { //aggiungere comandi per accenderlo e spegnerlo nel raspberry
+QActor ledqakactor context ctxrasp {
 
   State s0 initial{
 		println("${name} STARTS")
 	}  
 	Transition t0 whenMsg ledCmd -> doCmd
 	
-	State doCmd{
+	State doCmd{ //da codificare i comandi del raspberry
 		//printCurrentMessage
 		onMsg( ledCmd : ledCmd(V) ){
 			[# var Cmd = payloadArg(0) #]
@@ -128,6 +131,7 @@ QActor coldstorageservice context ctxstorageservice {
         		}catch(e : Exception){
         	#]
         	replyTo storeFood with storeRejected : storeRejected(_)
+        	forward servicestatusgui -m updategui : updategui(_) //possibile che vada anche da altre parti
         	[#
         		}
         	#]
@@ -150,7 +154,7 @@ QActor coldstorageservice context ctxstorageservice {
     
     State dropout{
     	forward transporttrolley -m dropout : dropout(_)
-    	forward transporttrolley -m backhome : backhome(_) //tanto per farlo apparire nel grafico, poi va da un altra parte
+    	forward transporttrolley -m backhome : backhome(_) //non è detto che debba stare qui
 	}Goto idle
 }
 
@@ -162,14 +166,6 @@ QActor transporttrolley context ctxstorageservice {
     #]
     State s0 initial{
     	println("$name	|	setup")
-    	//scritte solo per farlo apparire nei grafici
-    	request basicrobot -m step : step(100)
-    	forward basicrobot -m cmd : cmd(w)	
-    	forward basicrobot -m end : end(0)	
-    	request basicrobot -m doplan : doplan("wwwlll",100)
-    	request basicrobot -m engage : engage("me",100)
-    	forward basicrobot -m disengage : disengage(0)	
-    	
     }
     Goto idle
 
@@ -211,12 +207,29 @@ QActor transporttrolley context ctxstorageservice {
 QActor serviceaccesgui context ctxtruck {
     
     State s0 initial{
-        request coldstorageservice -m storeFood : idle
+        
     }Goto idle
     
     State idle {
         	println("$name |	in idle")
-        	
-    } 
+    } //TODO transizione
+    
+    State sendmessage {
+    	request coldstorageservice -m storeFood : storeFood(_)
+    	//TODO timer
+    } Transition t0 whenReply chargeTaken -> idle 
+}
+QActor servicestatusgui context ctxmanager {
+    
+    State s0 initial{
+    }Goto idle
+    
+    State idle {
+        	println("$name |	in idle")
+    } Transition t0 whenMsg updategui -> updategui
+    
+    State updategui{
+    	//TODO update
+    } Goto idle
 }
             

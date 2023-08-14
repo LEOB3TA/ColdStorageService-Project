@@ -24,12 +24,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outblack("$name	|	setup")
-						request("step", "step(100)" ,"basicrobot" )  
-						forward("cmd", "cmd(w)" ,"basicrobot" ) 
-						forward("end", "end(0)" ,"basicrobot" ) 
-						request("doplan", "doplan("wwwlll",100)" ,"basicrobot" )  
-						request("engage", "engage("me",100)" ,"basicrobot" )  
-						forward("disengage", "disengage(0)" ,"basicrobot" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

@@ -2,3 +2,4 @@
 {"actor":"ledqakactor", "msgType":"dispatch", "curstate":"doCmd", "nextstate":"doCmd", "msgId":"ledCmd"}
 {"actor":"transporttrolley", "msgType":"dispatch", "curstate":"pickingup", "nextstate":"droppingout", "msgId":"dropout"}
 {"actor":"transporttrolley", "msgType":"dispatch", "curstate":"droppingout", "nextstate":"backhome", "msgId":"backhome"}
+{"actor":"servicestatusgui", "msgType":"dispatch", "curstate":"idle", "nextstate":"updategui", "msgId":"updategui"}

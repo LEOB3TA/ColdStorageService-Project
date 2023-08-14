@@ -54,6 +54,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 								        			requestWeightToStore = (payloadArg(1).toFloat())
 								        		}catch(e : Exception){
 								answer("storeFood", "storeRejected", "storeRejected(_)"   )  
+								forward("updategui", "updategui(_)" ,"servicestatusgui" ) 
 								
 								        		}
 						}
