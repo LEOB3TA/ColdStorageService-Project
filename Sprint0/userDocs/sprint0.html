@@ -39,6 +39,7 @@
             <b class="ks">QActor meta-model</b> (QAK) per
             soddisfare questi requisiti. La documentazione di questo meta-model si trova a questo indirizzo:
         <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/QakActors23.html">QActor meta-model</a>
+        I requisiti verranno riportati di seguito in ordine di importanza.
 
         <!--------------SERVICE AREA-------------------------->
         <h4>Service Area</h4>
@@ -78,6 +79,96 @@
         <key>val</key> MAXW :  Double
         <key>var</key> coldRoomCurrentWeight : Double</pre>
 
+        <!--------------DDR ROBOT-------------------------->
+        <h4>DDR Robot</h4>
+        Il Differential Drive Robot &egrave; un robot fisico che esegue le seguenti operazioni:
+        <ul>
+            <li>si muove avanti e indietro in linea retta</li>
+            <li>si ferma</li>
+            <li>ruota di 90&deg; a destra o a sinistra</li>
+        </ul>
+        Queste azioni sono eseguite alla ricezione dei relativi comandi da parte del sistema.
+        Il cliente fornisce software capace di interfacciare il DDR robot con altri robot (reali o virtuali): <a href="https://github.com/anatali/issLab23/tree/main/unibo.basicrobot23">unibo.basicrobot23</a>.
+        L'attore QAK <a href="https://github.com/anatali/issLab23/blob/main/unibo.basicrobot23/src/basicrobot.qak">basicrobot.qak</a> di unibo.basicrobot23 &egrave; in grado di interfacciarsi con il DDR robot e di
+        eseguire i comandi di movimento e rotazione.
+
+
+        Il componente <span class="blue">basicrobot</span> viene visto dall'esterno come un servizio che realizza un insieme di funzionalit&agrave;:
+        <ul class="arabic simple">
+            <br>
+            <li>Esecuzione di richieste di <span class="brown">ingaggio</span>:
+                <pre><span class="high">Request engage : engage(CALLER)
+Reply   engagedone    : engagedone(ARG)
+Reply   engagerefused : engagerefused(ARG)
+Dispatch disengage    : disengage(ARG)</span></pre>
+            </li>
+            <li>Esecuzione di <span class="brown">comandi elementari</span> di movimento: <pre><span class="high">Dispatch cmd : cmd(MOVE)
+Dispatch end : end(ARG)</span></pre></p>
+            </li>
+            <li>Esecuzione di <span class="brown">step</span> (movimento in avanti per un tempo dato): <pre><span class="high">Request step:step(TIME)
+Reply stepdone : stepdone(V)
+Reply stepfailed : stepfailed(DURATION, CAUSE)</span></pre></p></li>
+            <li>Esecuzione di <span class="brown">sequenze di movimento</span> (piani): <pre><span class="high">Request doplan:doplan(PATH,STEPTIME)
+Reply doplandone : doplandone(ARG)
+Reply doplanfailed : doplanfailed(ARG)</span></pre></p></li>
+            <li>Esecuzione di <span class="brown">posizionamento</span>: <pre><span class="high">Request moverobot:moverobot(TARGETX, TARGETY)
+Reply moverobotdone : moverobotok(ARG)
+Reply moverobotfailed : moverobotfailed(PLANDONE, PLANTODO)</span></pre></p></li>
+        </ul>
+
+
+        <!--------------TRANSPORT TROLLEY-------------------------->
+        <div id="tRolley">
+            <h4>Transport Trolley</h4>
+            Il carrello di trasporto &egrave; un'entit&agrave; software che deve interagire con il robot DDR. A tal fine,
+            il carrello di trasporto deve interfacciarsi con il basicrobot.
+            Il carrello di trasporto deve essere in grado di eseguire le stesse azioni del robot DDR, tuttavia il software
+            fornito dal cliente in unibo.basicrobot23 &egrave; un attore, e come tale non prevede il concetto di ereditariet&agrave;,
+            quindi il carrello di trasporto non pu&ograve; essere formalizzato utilizzando l'ereditariet&agrave;.
+            <br>
+            Il trasport trolley ha la forma di un quadrato con dimensione del lato prefissata <b>RD</b>
+            <br>
+            Il trasport trolley pu&ograve; essere modellato come modello Qak:
+            <pre>
+Request pickup : pickup(_)
+Dispatch dropout : dropout(_)
+Dispatch backhome : backhome(_)
+
+QActor transporttrolley context ctxstorageservice {
+    [#
+        val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
+    #]
+    State s0 initial{
+        ...
+    }
+    Goto idle
+
+    State idle{
+        ...
+    }
+    Transition t0 whenRequest pickup -> pickingup
+
+    State pickingup{
+        ...
+            replyTo pickUp with chargeTaken : chargeTaken(_)
+    }
+    Transition t0 whenMsg dropout -> droppingout
+
+    State droppingout{
+        ...
+    }Transition t0 whenMsg backhome -> backhome
+                        whenRequest pickup -> pickingup
+
+    State backhome{
+        ...
+    }
+    Goto idle
+        </pre>
+            <br>
+            Per verificare il corretto funzionamento del carrello di trasporto e capire meglio qual &egrave; il comportamento atteso,
+            abbiamo preparato alcuni semplici test ( <a href="">TestTransportTrolleyActor.kt</a> ).
+        </div>
+
         <!--------------SEQUENZA OPERATIVA-------------------------->
         <h4>Sequenza operativa</h4>
         Rappresenta le azioni che deve compiere il <bc>Transport trolley</bc>, che inizialmente &egrave; situato in <bc>HOME</bc>:
@@ -96,7 +187,7 @@
         </ul>
         Considerando che il driver deve rimuovere il suo furgone il pi&ugrave; velocemente possibile dalla <kc>Indoor</kc>, le due fasi possono essere formalizzate rispettivamente attraverso una<kc>Request-response Qak</kc> e un <kc>Dispatch</kc>:
         <pre>
-Request pickup : pickup(Ticket.TICKETID)
+Request pickup : pickup(TICKET)
 Dispatch dropout: dropout(_)
 Reply chargeTaken: chargeTaken(_)
         </pre>
@@ -134,36 +225,30 @@ Event obstacle  :  obstacle(distance)
         Il cliente ci ha fornito in precedenza il software per il Led: <a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarRystem23</a> <br>
         Il comportamento del Led pu&oacute; essere espresso tremite un attore Qak:
         <pre>
-Dispatch turnon : turnon(_)
-Dispatch turnoff : turnoff(_)
-Dispatch blink : blink(_)
+Dispatch ledCmd          : ledCmd(ONOFFBLINK)
 
-QActor ledqakactor context ctxledqak {
+QActor ledqakactor context ctxrasp {
 
-    State setup initial {
-        println("$name | setup")
-    }Goto off
+  State s0 initial{
+		println("${name} STARTS")
+	}
+	Transition t0 whenMsg ledCmd -> doCmd
 
-    State on {
-        ...
-    }
-    Transition t0 whenMsg blink -> blink
-                    whenMsg turnoff -> off
-
-
-    State off{
-        ...
-    }
-    Transition t0 whenMsg turnon -> on
-                    whenMsg blink -> blink
-
-
-    State blink{
-        ...
-    }
-    Transition t0 whenMsg turnon -> on
-                    whenMsg turnoff -> off
+	State doCmd{
+		onMsg( ledCmd : ledCmd(V) ){
+			[# var Cmd = payloadArg(0) #]
+			if [# Cmd=="on" #]{
+				...
+			} if [# Cmd=="off" #]{
+				...
+			}else{
+				...
+			}
+		}
+	}
+	Transition t0 whenMsg ledCmd -> doCmd
 }
+
             </pre>
         </div>
         <!--------------RD-------------------------->
@@ -243,7 +328,7 @@ Request storeFood : storeFood(FW)
         <!--------------Scarico consentito-------------------------->
         <h4>Scarico consentito</h4>
         Nel caso in cui <kc>ColdStorageService</kc>, a seguito di una <kc>Request storeFood</kc>, rispondesse in modo affermativo &egrave; possibile scaricare il cibo nella <kc>ColdRoom</kc>;in questo caso viene generato un <b>TICKET</b> che viene assegnato al driver.
-        La formalizzazione di questo concetto può essere espressa attraverso il linguaggio Qak.
+        La formalizzazione di questo concetto pu&ograve; essere espressa attraverso il linguaggio Qak.
         <pre>
 Reply storeAccepted : storeAccepted(Ticket)
         </pre>
@@ -259,10 +344,10 @@ Reply storeRejected : storeRejected(_)
         <!--------------Cold Storage Service-------------------------->
         <h4>Cold Storage Service</h4>
        &Egrave; il servizio che coordina il deposito del cibo, interfacciandosi con il <kc>Transport Trolley</kc> per effettuare le azioni necessarie.<br>
-        Per questo &egrave; un entit&aacute; <b>attiva</b> che deve essere in grado di ricevere richiesta ( <kc>storeFood</kc>)  e mandare risposte (<kc>storeAccepted</kc>, <kc>storeRejected</kc>).<br>
-        Pu&oacute; essere formalizzato come un attore attraverso il linguaggio Qak ( <a href="">ColdStorageService.qak</a> ).
+        Per questo &egrave; un entit&agrave; <b>attiva</b> che deve essere in grado di ricevere richiesta ( <kc>storeFood</kc>)  e mandare risposte (<kc>storeAccepted</kc>, <kc>storeRejected</kc>).<br>
+        Pu&ograve; essere formalizzato come un attore attraverso il linguaggio Qak:
         <pre>
-QActor coldstorageserviceactor context ctxstorageservice {
+QActor coldstorageservice context ctxstorageservice {
 
 [#
     val maxw =  wasteservice.Constants.MAXW
@@ -292,11 +377,12 @@ QActor coldstorageserviceactor context ctxstorageservice {
 
     State acceptRequest{
         replyTo storeFood with storeAccepted : storeAccepted(_)
-        request transporttrolley -m pickup : pickup(Ticket.TICKETID)
+        request transporttrolley -m pickup : pickup(TICKETID)
     }Transition t0 whenReply chargeTaken -> idle
 
     State dropout{
-	}Transition t0 whenReply storeAccepted -> idle
+            ...
+	}Goto idle
 }
         </pre>
         Per verificare il corretto funzionamento del servizio, abbiamo implementato dei test (<a href="">TestColdStorageService.kt</a>).
@@ -309,97 +395,6 @@ var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFo
 var asw = conn.request(storeFood)
 assertTrue(asw.contains("storeRejected"))
         </pre>
-
-        <!--------------DDR ROBOT-------------------------->
-        <h4>DDR Robot</h4>
-        Il Differential Drive Robot &egrave; un robot fisico che esegue le seguenti operazioni:
-        <ul>
-            <li>si muove avanti e indietro in linea retta</li>
-            <li>si ferma</li>
-            <li>ruota di 90&deg; a destra o a sinistra</li>
-        </ul>
-        Queste azioni sono eseguite alla ricezione dei relativi comandi da parte del sistema.
-        Il cliente fornisce software capace di interfacciare il DDR robot con altri robot (reali o virtuali): <a href="https://github.com/anatali/issLab23/tree/main/unibo.basicrobot23">unibo.basicrobot23</a>.
-        L'attore QAK <a href="https://github.com/anatali/issLab23/blob/main/unibo.basicrobot23/src/basicrobot.qak">basicrobot.qak</a> di unibo.basicrobot23 &egrave; in grado di interfacciarsi con il DDR robot e di
-        eseguire i comandi di movimento e rotazione.
-
-
-        Il componente <span class="blue">basicrobot</span> viene visto dall'esterno come un servizio che realizza un insieme di funzionalit&agrave;:
-        <ul class="arabic simple">
-            <br>
-            <li>Esecuzione di richieste di <span class="brown">ingaggio</span>:
-                <pre><span class="high">Request engage : engage(CALLER)
-Reply   engagedone    : engagedone(ARG)
-Reply   engagerefused : engagerefused(ARG)
-Dispatch disengage    : disengage(ARG)</span></pre>
-            </li>
-            <li>Esecuzione di <span class="brown">comandi elementari</span> di movimento: <pre><span class="high">Dispatch cmd : cmd(MOVE)
-Dispatch end : end(ARG)</span></pre></p>
-            </li>
-            <li>Esecuzione di <span class="brown">step</span> (movimento in avanti per un tempo dato): <pre><span class="high">Request step:step(TIME)
-Reply stepdone : stepdone(V)
-Reply stepfailed : stepfailed(DURATION, CAUSE)</span></pre></p></li>
-            <li>Esecuzione di <span class="brown">sequenze di movimento</span> (piani): <pre><span class="high">Request doplan:doplan(PATH,STEPTIME)
-Reply doplandone : doplandone(ARG)
-Reply doplanfailed : doplanfailed(ARG)</span></pre></p></li>
-            <li>Esecuzione di <span class="brown">posizionamento</span>: <pre><span class="high">Request moverobot:moverobot(TARGETX, TARGETY)
-Reply moverobotdone : moverobotok(ARG)
-Reply moverobotfailed : moverobotfailed(PLANDONE, PLANTODO)</span></pre></p></li>
-        </ul>
-
-
-        <!--------------TRANSPORT TROLLEY-------------------------->
-        <div id="tRolley">
-        <h4>Transport Trolley</h4>
-        Il carrello di trasporto &egrave; un'entit&agrave; software che deve interagire con il robot DDR. A tal fine,
-        il carrello di trasporto deve interfacciarsi con il basicrobot.
-        Il carrello di trasporto deve essere in grado di eseguire le stesse azioni del robot DDR, tuttavia il software
-        fornito dal cliente in unibo.basicrobot23 &egrave; un attore, e come tale non prevede il concetto di ereditariet&agrave;,
-        quindi il carrello di trasporto non pu&ograve; essere formalizzato utilizzando l'ereditariet&agrave;.
-        <br>
-        Il trasport trolley ha la forma di un quadrato con dimensione del lato prefissata <b>RD</b>
-        <br>
-        Il trasport trolley pu&ograve; essere modellato come modello Qak:
-        <pre>
-Request pickup : pickup(_)
-Dispatch dropout : dropout(_)
-Dispatch backhome : backhome(_)
-
-QActor transporttrolley context ctxstorageservice {
-    [#
-        val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
-    #]
-    State s0 initial{
-        ...
-    }
-    Goto idle
-
-    State idle{
-        ...
-    }
-    Transition t0 whenRequest pickup -> pickingup
-
-    State pickingup{
-        ...
-            replyTo pickUp with chargeTaken : chargeTaken(_)
-    }
-    Transition t0 whenMsg dropout -> droppingout
-
-    State dropout{
-        ...
-    }
-    Transition t0 whenMsg backhome -> backhome
-                        whenMsg pickingup -> pickup(Ticket.TICKETID)
-
-    State backhome{
-        ...
-    }
-    Goto idle
-        </pre>
-        <br>
-        Per verificare il corretto funzionamento del carrello di trasporto e capire meglio qual &egrave; il comportamento atteso,
-        abbiamo preparato alcuni semplici test ( <a href="">TestTransportTrolleyActor.kt</a> ).
-        </div>
 
     </div>
     <!----------User stories--------------------->

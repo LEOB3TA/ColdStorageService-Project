@@ -49,14 +49,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("storeFood(_)"), Term.createTerm("storeFood(FW)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								
-								        		try{
-								        			requestWeightToStore = (payloadArg(1).toFloat())
-								        		}catch(e : Exception){
-								answer("storeFood", "storeRejected", "storeRejected(_)"   )  
 								forward("updategui", "updategui(_)" ,"servicestatusgui" ) 
-								
-								        		}
 						}
 						//genTimer( actor, state )
 					}
