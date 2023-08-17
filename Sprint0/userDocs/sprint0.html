@@ -416,7 +416,6 @@ assertTrue(asw.contains("storeRejected"))
             o negativa ( <kc>loadrejected</kc> ) <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2b</div>
             </li>
             <li>
-<!--                TODO: La freccia di chargeTaken potrebbe essere messa fuori per far vedere che proviene  dal CSS come il ticket? -->
                 Se la risposta &egrave; positiva ( <kc>loadaccepted</kc> ) mi aspetto che il <kc>Transport Trolley</kc>
                 raggiunga l'INDOOR<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>, prenda il cibo per poi dirigersi verso la
                 <kc>Cold Room </kc> al fine di depositare il cibo.
@@ -426,7 +425,6 @@ assertTrue(asw.contains("storeRejected"))
                 Nel caso in cui il Ticket scada ( ovvero sia passato un tempo maggiore o pari a TicketTime
                 prima di raggiungere <kc>INDOOR</kc>), l'autista esce dal sistema.
             </li>
-<!--            TODO : riflettere su quest'ultimo caso, quando si verifica -->
             <li>
                 Se la risposta &egrave; negativa ( <kc> loadrejected </kc> ) me ne vado e libero l'area <kc>INDOOR</kc>
                 <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>.
@@ -478,8 +476,42 @@ assertTrue(asw.contains("storeRejected"))
 
         <h2>Piano di lavoro</h2>
          <div class="remark">
-
+             Tutti gli sprint sotto intendono delle migliorie e delle eventuali modifiche del lavoro fatto negli sprint precedenti
+            <h3>Sprint 1 (Tempo stimato per lo sviluppo : 1 settimana circa)</h3>
+             Core business dell'applicazione:
+             <ul>
+                 <li>Transport trolley e interfacciamento con il basic robot</li>
+                 <li>Cold storage service</li>
+                 <li>Simulatore dei driver</li>
+             </ul>
+             <h3>Sprint 2</h3>
+             Aggiunta specifiche di movimento del transport trolley:
+             <ul>
+                 <li>Led</li>
+                 <li>Controller</li>
+                 <li>Sonar</li>
+             </ul>
+             <h3>Sprint 3</h3>
+             Sviluppo inteerfacce grafiche:
+             <ul>
+                 <li>ServiceStatusGui</li>
+                 <li>ServiceAccessGui</li>
+             <h3>Sprint 4</h3>
+                 Deploy sul raspberry:
+                 <ul>
+                     <li>Creazione del supporto per led fisico</li>
+                     <li>Deploy del sonar</li>
+                     <li>Deploy del basic robot</li>
+                 </ul>
+             </ul>
         </div>
+
+   <!-- <h2>Project</h2>
+    <div class="remark">
+-->
+
+
+    </div>
     <!--
             <h2>Project</h2>
              <div class="remark">
@@ -487,7 +519,6 @@ assertTrue(asw.contains("storeRejected"))
 
 
             </div>
-        </div>
 
         <h2>Testing</h2>
         <div class="remark">
