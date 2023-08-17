@@ -1,10 +1,22 @@
-package unibo.testsensors
+package test.it.unibo.testsensors
 
-import unibo.basicomm23.interfaces.Interaction2023
+import unibo.basicomm23.interfaces.Interaction2021
+import it.unibo.kactor.QakContext
+import junit.framework.Assert.assertEquals
+import main.it.unibo.ctxledqak.main
+import org.junit.Before
+import org.junit.Test
+import resources.LedState
+import resources.SonarState
+import test.it.unibo.coapobs.TypedCoapTestObserver
+import unibo.basicomm23.coap.CoapConnection
+import unibo.basicomm23.tcp.TcpClientSupport
+import unibo.basicomm23.utils.CommUtils
+import java.util.concurrent.ArrayBlockingQueue
 
 class TestSonarActor{
-    private lateinit var conn: Interaction2023
-    private lateinit var : TypedCoapTestObserver<LedState>
+    private lateinit var conn: Interaction2021
+    private lateinit var obs : TypedCoapTestObserver<SonarState>
     private var setupOk = false
 
     @Before
@@ -41,7 +53,7 @@ class TestSonarActor{
         val setupOk = ArrayBlockingQueue<Boolean>(1)
         object : Thread(){
             override fun run(){
-                obs = TypedCoapTestObserver { SonarState.fromJsonString(it) } //TODO: SonarState
+                obs = TypedCoapTestObserver { SonarState.fromJsonString(it) }
                 var ctx  = "ctxrasp"
                 var act  = "sonar23"
                 var path = "$ctx/$act"

@@ -1,13 +1,23 @@
-package unibo.testcoldstorageservice
+package test.it.unibo.testcoldstorageservice
 
+import it.unibo.kactor.QakContext.Companion.getActor
+import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertTrue
+import main.it.unibo.ctxstorageservice.main
+import org.junit.Before
+import org.junit.Test
+import resources.ColdStorageServiceState
+import test.it.unibo.coapobs.TypedCoapTestObserver
+import unibo.basicomm23.coap.CoapConnection
+import unibo.basicomm23.interfaces.Interaction2021
 import unibo.basicomm23.tcp.TcpClientSupport
 import unibo.basicomm23.utils.CommUtils
 import java.util.concurrent.ArrayBlockingQueue
 
 class TestColdStorageServiceActor{
     private lateinit var conn : Interaction2021
-    private lateinit var obs : TypedCoapTestObesrver<WasteServiceState>
-    pricavate var setupOk = false
+    private lateinit var obs : TypedCoapTestObserver<ColdStorageServiceState>
+    private var setupOk = false
 
     private val weight = 100.0
     @Before
@@ -76,7 +86,7 @@ class TestColdStorageServiceActor{
         assertTrue(asw.contains("loadaccept"))
 
         var newState = obs.getNext()
-        assertEquals(prevState.curretWeightStorage+weight, newState.curretWeightStorage)
+        assertEquals(prevState.getCurrentBoxWeight()+weight, newState.getCurrentBoxWeight())
 
     }
 
@@ -91,8 +101,9 @@ class TestColdStorageServiceActor{
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        var newState = obs.getNext()
         assertTrue(asw.contains("loadrejected"))
-        assertEquals(prevState.curretWeightStorage+weight, newState.curretWeightStorage )
+        assertEquals(prevState.getCurrentBoxWeight()+weight, newState.getCurrentBoxWeight())
 
     }
 }

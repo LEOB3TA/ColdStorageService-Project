@@ -1,21 +1,21 @@
 package it.unibo.testtransporttrolley
 
-import main.it.unibo.transporttrolley.Transporttrolley
 import main.it.unibo.ctxstorageservice.*
 import it.unibo.kactor.QakContext.Companion.getActor
-import org.junit.Before
-import org.junit.Test
+import junit.framework.Assert.assertEquals
+import org.junit.*
+import resources.TransportTrolleyState
+import test.it.unibo.coapobs.TypedCoapTestObserver
 import unibo.basicomm23.coap.CoapConnection
 import unibo.basicomm23.tcp.TcpClientSupport
 import unibo.basicomm23.utils.CommUtils
 import java.util.concurrent.ArrayBlockingQueue
 import kotlin.jvm.Throws
-import coapobs.*
-import unibo.basicomm23.interfaces.Interaction2023
+import unibo.basicomm23.interfaces.Interaction2021
 
 class TestTransportTrolleyActor{
-    private lateinit var conn: Interaction2023
-    private lateinit var obs : TypedCoapTestOberver<TransportTrolleyState>
+    private lateinit var conn: Interaction2021
+    private lateinit var obs : TypedCoapTestObserver<TransportTrolleyState>
     private var setupOk = false
 
     @Before

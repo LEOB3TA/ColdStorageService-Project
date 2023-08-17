@@ -1,9 +1,9 @@
-package coapobs
+package test.it.unibo.coapobs
 
 import org.eclipse.californium.core.CoapResponse
 import java.util.concurrent.ArrayBlockingQueue
 
-class TypedCoapTestOberver<T> ( private val mapper : (String) -> T
+class TypedCoapTestObserver<T> (private val mapper : (String) -> T
     ): CoapTestObserver(){
 
         var currentTypedState : T? = null

@@ -1,4 +1,4 @@
-package coapobs
+package test.it.unibo.coapobs
 
 import org.eclipse.californium.core.CoapHandler
 import org.eclipse.californium.core.CoapResponse
