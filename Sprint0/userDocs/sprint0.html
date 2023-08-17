@@ -164,9 +164,6 @@ QActor transporttrolley context ctxstorageservice {
     }
     Goto idle
         </pre>
-            <br>
-            Per verificare il corretto funzionamento del carrello di trasporto e capire meglio qual &egrave; il comportamento atteso,
-            abbiamo preparato alcuni semplici test ( <a href="">TestTransportTrolleyActor.kt</a> ).
         </div>
 
         <!--------------SEQUENZA OPERATIVA-------------------------->
@@ -385,17 +382,6 @@ QActor coldstorageservice context ctxstorageservice {
 	}Goto idle
 }
         </pre>
-        Per verificare il corretto funzionamento del servizio, abbiamo implementato dei test (<a href="">TestColdStorageService.kt</a>).
-        <pre>
-var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(100),1)"
-var asw = conn.request(storeFood)
-assertTrue(asw.contains("storeAccepted"))
-
-var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(1000),1)"
-var asw = conn.request(storeFood)
-assertTrue(asw.contains("storeRejected"))
-        </pre>
-
     </div>
     <!----------User stories--------------------->
     <div class="remark">
@@ -519,13 +505,55 @@ assertTrue(asw.contains("storeRejected"))
 
 
             </div>
-
+-->
         <h2>Testing</h2>
         <div class="remark">
-
+            Per verificare il corretto funzionamento di tutte e componenti del software abbiamo implementato una prima versione dei test
+            <br>
+            <br>
+            <table style="width:50%; text-align: center" border="1">
+                <tr>
+                    <td style="width: 50%">
+                        <b>Attori</b>
+                    </td>
+                    <td><b>Test</b></td>
+                </tr>
+                <tr>
+                    <td style="width: 50%">
+                       Transport Trolley
+                    </td>
+                    <td>
+                        <a href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0/src/test/it.unibo/testtransporttrolley/TestTransportTrolleyActor.kt">TestTrasportTrolley.kt</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 50%">
+                        Cold Storage Service
+                    </td>
+                    <td>
+                        <a href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0/src/test/it.unibo/testcoldstorageservice/TestColdStorageServiceActor.kt">TestColdStorageService.kt</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 50%">
+                        Led
+                    </td>
+                    <td>
+                        <a href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0/src/test/it.unibo/testsensors/TestLedActor.kt">TestLedActor.kt</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 50%">
+                        Sonar
+                    </td>
+                    <td>
+                        <a href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0/src/test/it.unibo/testsensors/TestSonarActor.kt">TestSonarActor.kt</a>
+                    </td>
+                </tr>
+            </table>
         </div>
 
-
+<!--
         <h2>Deployment</h2>
         <div class="remark">
 
