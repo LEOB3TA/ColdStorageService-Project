@@ -38,7 +38,7 @@ Dispatch updategui : updategui(_)
 
 Context ctxbasicrobot      ip [host="localhost" port=8020]   //Locale
 Context ctxrasp ip [host="192.168.1.xxx" port=8086]  //Raspberry
-Context ctxstorageservice ip [host="localhost" port=8090] //porta a caso
+Context ctxstorageservice ip [host="localhost" port=8092] //porta a caso
 Context ctxtruck ip [host="localhost" port= 8087] //contesto casuale
 Context ctxmanager ip [host="localhost" port= 8085] //contestocasuale
 
