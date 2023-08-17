@@ -6,15 +6,15 @@ import it.unibo.kactor.QakContext.Companion.getActor
 import org.junit.Before
 import org.junit.Test
 import unibo.basicomm23.coap.CoapConnection
-import unibo.basicomm23.interfaces.Interaction2021
 import unibo.basicomm23.tcp.TcpClientSupport
 import unibo.basicomm23.utils.CommUtils
 import java.util.concurrent.ArrayBlockingQueue
 import kotlin.jvm.Throws
 import coapobs.*
+import unibo.basicomm23.interfaces.Interaction2023
 
 class TestTransportTrolleyActor{
-    private lateinit var conn: Interaction2021
+    private lateinit var conn: Interaction2023
     private lateinit var obs : TypedCoapTestOberver<TransportTrolleyState>
     private var setupOk = false
 
