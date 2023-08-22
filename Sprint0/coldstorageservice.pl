@@ -3,7 +3,7 @@
 %====================================================================================
 context(ctxbasicrobot, "localhost",  "TCP", "8020").
 context(ctxrasp, "192.168.1.xxx",  "TCP", "8086").
-context(ctxstorageservice, "localhost",  "TCP", "8090").
+context(ctxstorageservice, "localhost",  "TCP", "8092").
 context(ctxtruck, "localhost",  "TCP", "8087").
 context(ctxmanager, "localhost",  "TCP", "8085").
  qactor( basicrobot, ctxbasicrobot, "external").
