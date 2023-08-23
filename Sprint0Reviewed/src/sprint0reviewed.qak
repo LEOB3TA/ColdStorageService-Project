@@ -1,10 +1,4 @@
 System /* -trace*/coldstorageservice
-//Contesti
-
-Context ctxstorageservice ip [host="localhost" port=8092] //porta a caso
-Context ctxbasicrobot ip [host="localhost" port=8020] //porta a caso
-Context ctxtruck ip [host="localhost" port=8087] //porta a caso
-Context ctxrasp ip [host="192.168.1.xxx" port=8086]  //Raspberry
 
 //Messaggi led
 Dispatch turnOn : turnOn(_)
@@ -23,6 +17,13 @@ Request pickup : pickup(_)
 
 Request deposit : deposit(TICKET)
 Request storeFood : storeFood(FW)
+
+//Contesti
+
+Context ctxstorageservice ip [host="localhost" port=8092] //porta a caso
+Context ctxbasicrobot ip [host="localhost" port=8020] //porta a caso
+Context ctxtruck ip [host="localhost" port=8087] //porta a caso
+Context ctxrasp ip [host="192.168.1.xxx" port=8086]  //Raspberry
 
 //External actor
 
