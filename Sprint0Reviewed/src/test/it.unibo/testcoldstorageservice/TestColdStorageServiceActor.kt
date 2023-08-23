@@ -104,6 +104,21 @@ class TestColdStorageServiceActor{
         var newState = obs.getNext()
         assertTrue(asw.contains("loadrejected"))
         assertEquals(prevState.getCurrentBoxWeight()+weight, newState.getCurrentBoxWeight())
-
+    }
+    @Test
+    fun testChargeTaken() {
+        val prevState =obs.currentTypedState!!
+        val deposit = "msg(deposit, request, testunit, coldstorageserviceactor, deposit(TICKET),1)"
+        println("TestColdStorageServiceActor	|	testChargeTacken on message: $deposit")
+        var asw = ""
+        try {
+            asw = conn.request(deposit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        var newState = obs.getNext()
+        assertTrue(asw.contains("chargeTaken"))
+        // TODO: vedere se fare una assert sul TICKET
+//        assertEquals(prevState.getCurrentBoxWeight()+weight, newState.getCurrentBoxWeight())
     }
 }

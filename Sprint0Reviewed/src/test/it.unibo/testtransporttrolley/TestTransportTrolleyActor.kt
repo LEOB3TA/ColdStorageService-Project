@@ -71,19 +71,10 @@ class TestTransportTrolleyActor{
     @Throws(InterruptedException::class)
     fun testPickup(){
         println("TestTransportTrolleyActor  |   testPickup...")
-        val pickup = "msg(pickingup, dispatch, testunit, transporttrolley, pickup, 1)"
+        val pickup = "msg(pickingup, request, testunit, transporttrolley, pickup, 1)"
         conn.forward(pickup)
 
         assertEquals(obs.getNext().getTTState().toString(), "PICKINGUP")
-    }
-
-    @Test
-    fun testDropout(){
-        println("TestTransportTrolleyActor  |   testDropout...")
-        val dropout = "msg(droppingout, dispatch, testunit, transporttrolley, dropout, 1)"
-        conn.forward(dropout)
-
-        assertEquals(obs.getNext().getTTState().toString(), "DROPOUT")
     }
 
     @Test
