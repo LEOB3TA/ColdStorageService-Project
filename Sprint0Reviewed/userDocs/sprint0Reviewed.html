@@ -133,38 +133,32 @@ Reply moverobotfailed : moverobotfailed(PLANDONE, PLANTODO)</span></pre></p></li
             Il trasport trolley pu&ograve; essere modellato come modello Qak:
             <pre>
 Request pickup : pickup(_)
-Dispatch dropout : dropout(_)
 Dispatch backhome : backhome(_)
 
-QActor transporttrolley context ctxstorageservice {
+QActor transporttrolley context ctxstorageservice{
     [#
         val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
     #]
     State s0 initial{
-        ...
+    	...
     }
     Goto idle
 
     State idle{
-        ...
+    	...
     }
     Transition t0 whenRequest pickup -> pickingup
 
+
     State pickingup{
-        ...
-            replyTo pickUp with chargeTaken : chargeTaken(_)
+    	...
+        replyTo pickup with chargeTaken : chargeTaken(_)
     }
-    Transition t0 whenMsg dropout -> droppingout
-
-    State droppingout{
-        ...
-    }Transition t0 whenMsg backhome -> backhome
-                        whenRequest pickup -> pickingup
-
     State backhome{
         ...
     }
     Goto idle
+}
         </pre>
             <br>
             Per verificare il corretto funzionamento del carrello di trasporto e capire meglio qual &egrave; il comportamento atteso,
@@ -181,17 +175,15 @@ QActor transporttrolley context ctxstorageservice {
             <li>Depositare il carico di cibo nella <span class="blue" >ColdRoom</span class="blue"> </li>
             <br>
         </ol>
-        La fase di trasporto del carico di cibo pu&ograve; essere divisa in due fasi:
-        <ul>
-            <br>
-            <li>Fase di <kc>PickingUp</kc>, in cui il robot deve prelevare il carico dal camion, quindi si muove verso la indoor</li>
-            <li>Fase di <kc>DroppingOut</kc>, in cui il robot si muove verso la Port della ColdRoom e deposita il carico al suo interno</li>
-        </ul>
+<!--        La fase di trasporto del carico di cibo pu&ograve; essere divisa in due fasi:-->
+<!--        <ul>-->
+<!--            <br>-->
+<!--            <li>Fase di <kc>PickingUp</kc>, in cui il robot deve prelevare il carico dal camion, quindi si muove verso la indoor</li>-->
+<!--            <li>Fase di <kc>DroppingOut</kc>, in cui il robot si muove verso la Port della ColdRoom e deposita il carico al suo interno</li>-->
+<!--        </ul>-->
         Considerando che il driver deve rimuovere il suo furgone il pi&ugrave; velocemente possibile dalla <kc>Indoor</kc>, le due fasi possono essere formalizzate rispettivamente attraverso una<kc>Request-response Qak</kc> e un <kc>Dispatch</kc>:
         <pre>
-Request pickup : pickup(TICKET)
-Dispatch dropout: dropout(_)
-Reply chargeTaken: chargeTaken(_)
+Request pickup : pickup(_)
         </pre>
         <!--------------SONAR------------------------->
         <h4>Sonar</h4>
@@ -224,33 +216,37 @@ Event obstacle  :  obstacle(distance)
             <li>Led Blink: quando il Transport Trolley si sta muovendo</li>
             <br>
         </ul>
-        Il cliente ci ha fornito in precedenza il software per il Led: <a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarRystem23</a> <br>
+        Il cliente ci ha fornito in precedenza il software per il Led che potrebbe essere utilizzato: <a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarRystem23</a> <br>
         Il comportamento del Led pu&oacute; essere espresso tremite un attore Qak:
         <pre>
-Dispatch ledCmd          : ledCmd(ONOFFBLINK)
+Dispatch turnOn : turnOn(_)
+Dispatch turnOff : turnOff(_)
+Dispatch blink : blink(_)
 
-QActor ledqakactor context ctxrasp {
+QActor led context ctxrasp {
 
-  State s0 initial{
-		println("${name} STARTS")
-	}
-	Transition t0 whenMsg ledCmd -> doCmd
+    State setup initial {
+        println("$name | setup")
+    }Goto off
 
-	State doCmd{
-		onMsg( ledCmd : ledCmd(V) ){
-			[# var Cmd = payloadArg(0) #]
-			if [# Cmd=="on" #]{
-				...
-			} if [# Cmd=="off" #]{
-				...
-			}else{
-				...
-			}
-		}
-	}
-	Transition t0 whenMsg ledCmd -> doCmd
+    State on {
+
+    }
+    Transition t0 whenMsg blink -> blink
+                    whenMsg turnOff -> off
+
+
+    State off{
+    }
+    Transition t0 whenMsg turnOn -> on
+                    whenMsg blink -> blink
+
+
+    State blink{
+    }
+    Transition t0 whenMsg turnOn -> on
+                    whenMsg turnOff -> off
 }
-
             </pre>
         </div>
         <!--------------RD-------------------------->
@@ -294,15 +290,15 @@ var FW :  Float
         Possiede due campi:
         <pre>
 <key>val</key> TICKETID : Int
-<key>val</key> TICKETTIME : Int
+<key>val</key> TICKETTIME : UInt
         </pre>
-        In cui <b>TICKETID</b> rappresenta l'dentificativo del ticket che dovrà essere presentato in seguito presso l'<kc>INDOOR</kc>, <b>TICKETTIME</b> rappresenta il tempo in secondi entro il quale il driver si deve presentare presso la <kc>INDOOR</kc>
+        In cui <b>TICKETID</b> rappresenta l'dentificativo del ticket che dovr&agrave; essere presentato in seguito presso l'<kc>INDOOR</kc>, <b>TICKETTIME</b> rappresenta il tempo in secondi entro il quale il driver si deve presentare presso la <kc>INDOOR</kc>
 
         <!--------------Stato corrente del Transport Trolley-------------------------->
         <h4>Stato corrente del Transport Trolley</h4>
         Indica lo stato del <a href="#Ttrolley"><kc>Transport Trolley</kc></a>, pu&oacute; essere formalizzato come un enumerativo <a href="">TransportTrolleyState.kt</a>
         <pre>
-enum class CurrStateTrolley { IDLE, STOPPED, MOVING, PICKINGUP, DROPPINGOUT }
+enum class CurrStateTrolley { IDLE, STOPPED, MOVING, PICKINGUP }
         </pre>
 
         <!--------------Posizione del Transport Trolley-------------------------->
@@ -332,7 +328,7 @@ Request storeFood : storeFood(FW)
         Nel caso in cui <kc>ColdStorageService</kc>, a seguito di una <kc>Request storeFood</kc>, rispondesse in modo affermativo &egrave; possibile scaricare il cibo nella <kc>ColdRoom</kc>;in questo caso viene generato un <b>TICKET</b> che viene assegnato al driver.
         La formalizzazione di questo concetto pu&ograve; essere espressa attraverso il linguaggio Qak.
         <pre>
-Reply storeAccepted : storeAccepted(Ticket)
+Reply storeAccepted : storeAccepted(TICKET)
         </pre>
 
         <!--------------Scarico non consentito-------------------------->
@@ -365,6 +361,7 @@ QActor coldstorageservice context ctxstorageservice {
             ...
         }
         Transition t0 whenRequest storeFood -> requestEvaluation
+                      whenRequest deposit -> depositEvaluation
         
         State requestEvaluation {
         onMsg(storeFood : storeFood(FW)){
@@ -373,6 +370,14 @@ QActor coldstorageservice context ctxstorageservice {
     }Goto acceptRequest if[# coldRoom.canStore(requestWeightToStore) #]
                             else rejectRequest
 
+            State depositEvaluation{
+            onMsg(deposit : deposit(TICKET)){
+            }
+        } Goto charged
+
+        State charged{
+            replyTo deposit with chargeTaken : chargeTaken(_)
+        }Goto idle
     State rejectRequest{
         replyTo storeFood with storeRejected : storeRejected(_)
     }Goto idle
@@ -382,22 +387,8 @@ QActor coldstorageservice context ctxstorageservice {
         request transporttrolley -m pickup : pickup(TICKETID)
     }Transition t0 whenReply chargeTaken -> idle
 
-    State dropout{
-            ...
-	}Goto idle
 }
         </pre>
-        Per verificare il corretto funzionamento del servizio, abbiamo implementato dei test (<a href="">TestColdStorageService.kt</a>).
-        <pre>
-var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(100),1)"
-var asw = conn.request(storeFood)
-assertTrue(asw.contains("storeAccepted"))
-
-var storeFood = "msg(storeFood, request, testunit, coldRoomServiceActor, storeFood(1000),1)"
-var asw = conn.request(storeFood)
-assertTrue(asw.contains("storeRejected"))
-        </pre>
-
     </div>
     <!----------User stories--------------------->
     <div class="remark">
