@@ -1,0 +1,34 @@
+System /* -trace*/coldstorageservice
+Context ctxstorageservice ip [host="localhost" port=8092] //porta a caso
+Context ctxtruck ip [host="localhost" port=8087] //porta a caso
+
+Request deposit : deposit(TICKET)
+Request storeFood : storeFood(FW)
+
+ExternalQActor coldstorageservice context ctxstorageservice
+
+QActor serviceaccesgui context ctxtruck{
+    [#
+        val FW = serviceaccesgui.FW
+    #]
+    State s0 initial{
+
+    }Goto idle
+
+    State idle {
+        println("$name |	in idle")
+    } //TODO transizione
+
+    State sendStore {
+        request coldstorageservice -m storeFood : storeFood(FW)
+        //TODO timer
+    } Transition t0 whenReply storeAccepted -> idle
+                    whenReply storeRejected -> idle
+
+    State sendDeposit{
+        request coldstorageservice -m deposit : deposit(TICKET)
+    } Transition t0 whenReply chargeTaken -> idle
+
+}
+
+
