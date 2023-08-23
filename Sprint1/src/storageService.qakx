@@ -1,0 +1,103 @@
+System /* -trace*/coldstorageservice
+Context ctxstorageservice ip [host="localhost" port=8092] //porta a caso
+Context ctxbasicrobot ip [host="localhost" port=8020] //porta a caso
+Context ctxtruck ip [host="localhost" port=8087] //porta a caso
+
+Reply storeAccepted : storeAccepted(TICKET)
+Reply storeRejected : storeRejected(_)
+Reply chargeTaken : chargeTaken(_)
+
+Request pickup : pickup(_)
+
+ExternalQActor basicrobot context ctxbasicrobot
+ExternalQActor serviceaccesgui context ctxtruck
+
+QActor servicestatusgui context ctxstorageservice{
+
+    State s0 initial{
+    }Goto idle
+
+    State idle {
+        	println("$name |	in idle")
+    }
+}
+
+QActor transporttrolley context ctxstorageservice{
+    [#
+        val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
+    #]
+    State s0 initial{
+    	println("$name	|	setup")
+    }
+    Goto idle
+
+    State idle{
+    	updateResource[#tTstate.toJsonString()#]
+    }
+    Transition t0 whenRequest pickup -> pickingup
+
+
+    State pickingup{
+    	[#
+			tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.PICKINGUP)
+		#]
+		updateResource[#tTstate.toJsonString()#]
+        replyTo pickup with chargeTaken : chargeTaken(_)
+    }
+    // TODO: come arrivare a backhome
+    State backhome{
+        [#
+    	    tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.MOVING)
+    	#]
+        updateResource[#tTstate.toJsonString()#]
+    }
+    Goto idle
+}
+
+QActor coldstorageservice context ctxstorageservice{
+[#
+	val maxw = coldstorageservice.Constants.MAXW
+    var curretWeightStorage = 0.0
+    var requestWeightToStore = 0.0
+#]
+        State setup initial {
+        	println("$name |	setup")
+        }
+        Goto idle
+
+        State idle {
+        	println("$name |	in idle")
+        	updateResource[#maxw.toJsonString()#]
+        }
+        Transition t0 whenRequest storeFood -> requestEvaluation
+                      whenRequest deposit -> depositEvaluation
+
+
+        State requestEvaluation {
+            onMsg(storeFood : storeFood(FW)){
+        	}
+        } Goto acceptRequest if[# coldRoom.canStore(requestWeightToStore) #]
+                            else rejectRequest
+
+        State depositEvaluation{
+            onMsg(deposit : deposit(TICKET)){
+            }
+        } Goto charged
+
+        State charged{
+            replyTo deposit with chargeTaken : chargeTaken(_)
+        }Goto idle
+
+        State rejectRequest{
+            replyTo storeFood with storeRejected : storeRejected(_)
+        }Goto idle
+
+        State acceptRequest{
+    	    [#
+    	    TICKET = coldstorageservice.Generate.TOKEN
+    	    TICKETID = TOKEN.TICKETID
+    	    #]
+            replyTo storeFood with storeAccepted : storeAccepted(TICKET)
+            request transporttrolley -m pickup : pickup(_)
+        }
+}
