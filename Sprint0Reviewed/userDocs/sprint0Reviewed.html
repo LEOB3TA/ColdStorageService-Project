@@ -154,6 +154,13 @@ QActor transporttrolley context ctxstorageservice{
     	...
         replyTo pickup with chargeTaken : chargeTaken(_)
     }
+    Transition t0 whenMsg dropout -> droppingout
+
+    State droppingout{
+        ...
+    }Transition t0 whenMsg backhome -> backhome
+                        whenRequest pickup -> pickingup
+
     State backhome{
         ...
     }
@@ -362,7 +369,7 @@ QActor coldstorageservice context ctxstorageservice {
         }
         Transition t0 whenRequest storeFood -> requestEvaluation
                       whenRequest deposit -> depositEvaluation
-        
+
         State requestEvaluation {
         onMsg(storeFood : storeFood(FW)){
             ...
@@ -388,8 +395,7 @@ QActor coldstorageservice context ctxstorageservice {
     }Transition t0 whenReply chargeTaken -> idle
 
 }
-        </pre>
-    </div>
+
     <!----------User stories--------------------->
     <div class="remark">
         <h3> User Stories </h3>
@@ -460,7 +466,7 @@ QActor coldstorageservice context ctxstorageservice {
     <h2>Architettura Logica</h2>
     <div class="remark">
             <br>
-        Modello: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0/src/sprint0.qak" target="_blank">sprint0.qak</a>
+        Modello: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0Reviewed/src/sprint0reviewed.qak" target="_blank">sprint0reviewed.qak</a>
         <br>
             <img src="./resources/images/coldstorageservicearchreviewed.png" alt="architettura logica">
 
@@ -499,9 +505,57 @@ QActor coldstorageservice context ctxstorageservice {
              </ul>
         </div>
 
-   <!-- <h2>Project</h2>
+    <h2>Testing</h2>
     <div class="remark">
--->
+        Per verificare il corretto funzionamento di tutte e componenti del software abbiamo implementato una prima versione dei test
+        <br>
+        <br>
+        <table style="width:50%; text-align: center" border="1">
+            <tr>
+                <td style="width: 50%">
+                    <b>Attori</b>
+                </td>
+                <td><b>Test</b></td>
+            </tr>
+            <tr>
+                <td style="width: 50%">
+                    Transport Trolley
+                </td>
+                <td>
+                    <a href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0Reviewed/src/test/it.unibo/testtransporttrolley/TestTransportTrolleyActor.kt">TestTrasportTrolley.kt</a>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 50%">
+                    Cold Storage Service
+                </td>
+                <td>
+                    <a href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0Reviewed/src/test/it.unibo/testcoldstorageservice/TestColdStorageServiceActor.kt">TestColdStorageService.kt</a>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 50%">
+                    Led
+                </td>
+                <td>
+                    <a href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0Reviewed/src/test/it.unibo/testsensors/TestLedActor.kt">TestLedActor.kt</a>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 50%">
+                    Sonar
+                </td>
+                <td>
+                    <a href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0Reviewed/src/test/it.unibo/testsensors/TestSonarActor.kt">TestSonarActor.kt</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+
+    <!-- <h2>Project</h2>
+     <div class="remark">
+ -->
 
 
     </div>
