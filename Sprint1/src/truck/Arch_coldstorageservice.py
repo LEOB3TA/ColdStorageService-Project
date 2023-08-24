@@ -23,5 +23,6 @@ with Diagram('coldstorageserviceArch', show=False, outformat='png', graph_attr=g
           coldstorageservice=Custom('coldstorageservice','./qakicons/symActorSmall.png')
           mocktruck=Custom('mocktruck','./qakicons/symActorSmall.png')
      mocktruck >> Edge(color='magenta', style='solid', xlabel='storeFood', fontcolor='magenta') >> coldstorageservice
+     mocktruck >> Edge(color='magenta', style='solid', xlabel='sendTicket', fontcolor='magenta') >> coldstorageservice
      mocktruck >> Edge(color='magenta', style='solid', xlabel='deposit', fontcolor='magenta') >> coldstorageservice
 diag

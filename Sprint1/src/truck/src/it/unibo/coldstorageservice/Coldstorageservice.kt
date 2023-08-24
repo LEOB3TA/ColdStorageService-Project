@@ -42,7 +42,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					sysaction { //it:State
 					}	 	 
 					 transition(edgeName="t00",targetState="requestEvaluation",cond=whenRequest("storeFood"))
-					transition(edgeName="t01",targetState="depositEvaluation",cond=whenRequest("deposit"))
+					transition(edgeName="t01",targetState="ticketEvaluation",cond=whenRequest("sendTicket"))
 				}	 
 				state("requestEvaluation") { //this:State
 					action { //it:State
@@ -57,19 +57,20 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					}	 	 
 					 transition( edgeName="goto",targetState="acceptRequest", cond=doswitch() )
 				}	 
-				state("depositEvaluation") { //this:State
+				state("ticketEvaluation") { //this:State
 					action { //it:State
+						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
+						 	   
+						answer("sendTicket", "ticketValid", "ticketValid(_)"   )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="charged", cond=doswitch() )
+					 transition(edgeName="t02",targetState="charged",cond=whenRequest("deposit"))
 				}	 
 				state("charged") { //this:State
 					action { //it:State
-						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
-						 	   
 						answer("deposit", "chargeTaken", "chargeTaken(_)"   )  
 						//genTimer( actor, state )
 					}
@@ -92,13 +93,13 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					action { //it:State
 						
 						        		 RT = Random.nextInt(1,101) //numero di ticket casuale
-						answer("storeFood", "storeAccepted", "storeAccepted(1)"   )  
+						answer("storeFood", "storeAccepted", "storeAccepted($RT)"   )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t02",targetState="depositEvaluation",cond=whenRequest("deposit"))
+					 transition(edgeName="t03",targetState="ticketEvaluation",cond=whenRequest("sendTicket"))
 				}	 
 			}
 		}

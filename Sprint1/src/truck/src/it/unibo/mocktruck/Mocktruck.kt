@@ -62,8 +62,8 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t03",targetState="accepted",cond=whenReply("storeAccepted"))
-					transition(edgeName="t04",targetState="rejected",cond=whenReply("storeRejected"))
+					 transition(edgeName="t04",targetState="accepted",cond=whenReply("storeAccepted"))
+					transition(edgeName="t05",targetState="rejected",cond=whenReply("storeRejected"))
 				}	 
 				state("rejected") { //this:State
 					action { //it:State
@@ -94,7 +94,19 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				 	 		stateTimer = TimerActor("timer_accepted", 
 				 	 					  scope, context!!, "local_tout_mocktruck_accepted", DT )
 					}	 	 
-					 transition(edgeName="t05",targetState="sendDeposit",cond=whenTimeout("local_tout_mocktruck_accepted"))   
+					 transition(edgeName="t06",targetState="sendTicket",cond=whenTimeout("local_tout_mocktruck_accepted"))   
+				}	 
+				state("sendTicket") { //this:State
+					action { //it:State
+						request("sendTicket", "sendTicket($TICKETID)" ,"coldstorageservice" )  
+						CommUtils.outgreen("$name |	send ticket")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t07",targetState="sendDeposit",cond=whenReply("ticketValid"))
+					transition(edgeName="t08",targetState="handleTicketExpired",cond=whenReply("ticketExpired"))
 				}	 
 				state("sendDeposit") { //this:State
 					action { //it:State
@@ -104,9 +116,21 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
+				 	 		stateTimer = TimerActor("timer_sendDeposit", 
+				 	 					  scope, context!!, "local_tout_mocktruck_sendDeposit", 60000.toLong() )
 					}	 	 
-					 transition(edgeName="t06",targetState="idle",cond=whenReply("chargeTaken"))
-					transition(edgeName="t07",targetState="handleTicketExpired",cond=whenReply("ticketExpired"))
+					 transition(edgeName="t09",targetState="handleError",cond=whenTimeout("local_tout_mocktruck_sendDeposit"))   
+					transition(edgeName="t010",targetState="idle",cond=whenReply("chargeTaken"))
+				}	 
+				state("handleError") { //this:State
+					action { //it:State
+						CommUtils.outred("$name |	COLD STORAGE SERVICE ERROR")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="idle", cond=doswitch() )
 				}	 
 				state("handleTicketExpired") { //this:State
 					action { //it:State

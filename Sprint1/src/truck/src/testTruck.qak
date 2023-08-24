@@ -1,10 +1,12 @@
 System /* -trace*/coldstorageservice
 
-Request deposit : deposit(TICKETID)
+Request deposit : deposit(_)
+Request sendTicket : sendTicket(TICKETID)
 Request storeFood : storeFood(FW)
 Reply storeAccepted : storeAccepted(TICKETID)
 Reply storeRejected : storeRejected(_)
 Reply chargeTaken : chargeTaken(_)
+Reply ticketValid : ticketValid(_)
 Reply ticketExpired : ticketExpired(_)
 
 Context ctxtruck ip [host="localhost" port=8092] //porta a caso
@@ -23,7 +25,7 @@ QActor coldstorageservice context ctxtruck{
         	println("$name |	in idle") color blue
         }
         Transition t0 whenRequest storeFood -> requestEvaluation
-                      whenRequest deposit -> depositEvaluation
+                      whenRequest sendTicket -> ticketEvaluation
 
 
         State requestEvaluation {
@@ -33,12 +35,12 @@ QActor coldstorageservice context ctxtruck{
         } Goto acceptRequest //sempre accettata
                        
 
-        State depositEvaluation{
-       
-        } Goto charged
+        State ticketEvaluation{
+       	printCurrentMessage
+       	replyTo sendTicket with ticketValid : ticketValid(_)
+        } Transition t0 whenRequest deposit -> charged //il ticket sempre accettato
 
         State charged{
-        	printCurrentMessage
             replyTo deposit with chargeTaken : chargeTaken(_)
         }Goto idle
 
@@ -50,8 +52,8 @@ QActor coldstorageservice context ctxtruck{
         		[#
         		 RT = Random.nextInt(1,101) //numero di ticket casuale
         	#]
-            replyTo storeFood with storeAccepted : storeAccepted(1)
-        }Transition t0 whenRequest deposit -> depositEvaluation
+            replyTo storeFood with storeAccepted : storeAccepted($RT)
+        }Transition t0 whenRequest sendTicket -> ticketEvaluation
 }
 
 
@@ -101,13 +103,23 @@ QActor mocktruck context ctxtruck{
    		}
    	
    		println("$name |	request accepted") color green
-   }Transition t0 whenTimeVar DT -> sendDeposit
+   }Transition t0 whenTimeVar DT -> sendTicket
+   
+   State sendTicket{
+   		 request coldstorageservice -m sendTicket : sendTicket($TICKETID)
+   		 println("$name |	send ticket") color green   
+   } Transition t0 whenReply ticketValid -> sendDeposit
+    				whenReply ticketExpired -> handleTicketExpired
 
     State sendDeposit{
         request coldstorageservice -m deposit : deposit($TICKETID)
         println("$name |	send deposit") color green
-    } Transition t0 whenReply chargeTaken -> idle
-    				whenReply ticketExpired -> handleTicketExpired
+    } Transition t0  whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
+    					whenReply chargeTaken -> idle
+   					
+    State handleError{
+    	println("$name |	COLD STORAGE SERVICE ERROR") color red
+    } Goto idle
     				
 	State handleTicketExpired{
 		println("$name |	ticket expired") color green
