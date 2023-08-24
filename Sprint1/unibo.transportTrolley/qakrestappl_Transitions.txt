@@ -1,0 +1,5 @@
+{"actor":"transporttrolleycore", "msgType":"dispatch", "curstate":"idle", "nextstate":"dropoutMove", "msgId":"dropout"}
+{"actor":"transporttrolleycore", "msgType":"dispatch", "curstate":"idle", "nextstate":"backHome", "msgId":"gotohome"}
+{"actor":"transporttrolleycore", "msgType":"dispatch", "curstate":"idle", "nextstate":"end", "msgId":"exit"}
+{"actor":"transporttrolleymover", "msgType":"dispatch", "curstate":"idle", "nextstate":"end", "msgId":"exit"}
+{"actor":"transporttrolleyexecutor", "msgType":"dispatch", "curstate":"idle", "nextstate":"end", "msgId":"exit"}
