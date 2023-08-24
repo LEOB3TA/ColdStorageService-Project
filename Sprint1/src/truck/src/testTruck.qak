@@ -1,0 +1,118 @@
+System /* -trace*/coldstorageservice
+
+Request deposit : deposit(TICKETID)
+Request storeFood : storeFood(FW)
+Reply storeAccepted : storeAccepted(TICKETID)
+Reply storeRejected : storeRejected(_)
+Reply chargeTaken : chargeTaken(_)
+Reply ticketExpired : ticketExpired(_)
+
+Context ctxtruck ip [host="localhost" port=8092] //porta a caso
+
+QActor coldstorageservice context ctxtruck{
+			[#
+        		var RT = Random.nextInt(1,101) //numero di ticket casuale
+        	#]
+        State setup initial {
+        	println("$name |	setup") color blue
+        	discardMsg Off
+        }
+        Goto idle
+
+        State idle {
+        	println("$name |	in idle") color blue
+        }
+        Transition t0 whenRequest storeFood -> requestEvaluation
+                      whenRequest deposit -> depositEvaluation
+
+
+        State requestEvaluation {
+            onMsg(storeFood : storeFood(FW)){
+            	println("${payloadArg(0)}") color blue
+        	}
+        } Goto acceptRequest //sempre accettata
+                       
+
+        State depositEvaluation{
+       
+        } Goto charged
+
+        State charged{
+        	printCurrentMessage
+            replyTo deposit with chargeTaken : chargeTaken(_)
+        }Goto idle
+
+        State rejectRequest{
+            replyTo storeFood with storeRejected : storeRejected(_)
+        }Goto idle
+
+        State acceptRequest{
+        		[#
+        		 RT = Random.nextInt(1,101) //numero di ticket casuale
+        	#]
+            replyTo storeFood with storeAccepted : storeAccepted(1)
+        }Transition t0 whenRequest deposit -> depositEvaluation
+}
+
+
+QActor mocktruck context ctxtruck{ 
+    [#
+       	var FW = 0
+        var DT = 1000L  //DT= driver time tempo che ci mette il driver dopo aver ricevuto la richiesta per arrivare alla INDOOR
+        var TICKETID = 0
+        
+        fun initDriver(){
+        	FW =  Random.nextInt(1, 101)
+        	DT = Random.nextLong(1, 2001)
+        }
+    #]
+    State s0 initial{
+		println("$name |	started") color green
+		println("this is an infinite loop, you need to kill the program to stop this") color red
+		
+    }Goto idle
+
+    State idle {
+        println("$name |	in idle") color green
+        [#
+        	initDriver()
+        	Thread.sleep(Random.nextLong(1, 2001))	
+        #]
+    }Goto sendStore
+
+    State sendStore {
+    	 println("$name |	sendStore")
+        request coldstorageservice -m storeFood : storeFood($FW)
+   
+    } Transition t0 whenReply storeAccepted -> accepted
+                    whenReply storeRejected -> rejected
+                    
+   State rejected{
+   		printCurrentMessage
+   		println("$name |	request rejected") color green
+   }Goto idle
+   
+    State accepted{
+   		printCurrentMessage
+   		onMsg (storeAccepted : storeAccepted(TICKETID)){
+   		[#
+   			TICKETID = payloadArg(0).toInt()
+   		#]
+   		}
+   	
+   		println("$name |	request accepted") color green
+   }Transition t0 whenTimeVar DT -> sendDeposit
+
+    State sendDeposit{
+        request coldstorageservice -m deposit : deposit($TICKETID)
+        println("$name |	send deposit") color green
+    } Transition t0 whenReply chargeTaken -> idle
+    				whenReply ticketExpired -> handleTicketExpired
+    				
+	State handleTicketExpired{
+		println("$name |	ticket expired") color green
+	} Goto idle
+
+}
+
+

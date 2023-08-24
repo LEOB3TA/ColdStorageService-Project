@@ -4,14 +4,15 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint1" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint1/src/truck" />
         <option name="gradleJvm" value="19" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/Sprint1" />
+            <option value="$PROJECT_DIR$/Sprint1/src/truck" />
           </set>
         </option>
       </GradleProjectSettings>
     </option>
+    <option name="offlineMode" value="true" />
   </component>
 </project>
