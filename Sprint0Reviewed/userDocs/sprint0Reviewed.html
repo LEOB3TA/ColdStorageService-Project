@@ -132,7 +132,6 @@ Reply moverobotfailed : moverobotfailed(PLANDONE, PLANTODO)</span></pre></p></li
             <br>
             Il trasport trolley pu&ograve; essere modellato come modello Qak:
             <pre>
-Request pickup : pickup(_)
 Dispatch backhome : backhome(_)
 
 QActor transporttrolley context ctxstorageservice{
@@ -147,19 +146,16 @@ QActor transporttrolley context ctxstorageservice{
     State idle{
     	...
     }
-    Transition t0 whenRequest pickup -> pickingup
 
 
     State pickingup{
     	...
-        replyTo pickup with chargeTaken : chargeTaken(_)
     }
     Transition t0 whenMsg dropout -> droppingout
 
     State droppingout{
         ...
     }Transition t0 whenMsg backhome -> backhome
-                        whenRequest pickup -> pickingup
 
     State backhome{
         ...
@@ -190,7 +186,6 @@ QActor transporttrolley context ctxstorageservice{
 <!--        </ul>-->
         Considerando che il driver deve rimuovere il suo furgone il pi&ugrave; velocemente possibile dalla <kc>Indoor</kc>, le due fasi possono essere formalizzate rispettivamente attraverso una<kc>Request-response Qak</kc> e un <kc>Dispatch</kc>:
         <pre>
-Request pickup : pickup(_)
         </pre>
         <!--------------SONAR------------------------->
         <h4>Sonar</h4>
@@ -391,7 +386,6 @@ QActor coldstorageservice context ctxstorageservice {
 
     State acceptRequest{
         replyTo storeFood with storeAccepted : storeAccepted(_)
-        request transporttrolley -m pickup : pickup(TICKETID)
     }Transition t0 whenReply chargeTaken -> idle
 
 }
