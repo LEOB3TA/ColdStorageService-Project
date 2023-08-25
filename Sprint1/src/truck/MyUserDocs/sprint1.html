@@ -29,9 +29,58 @@
         <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/TemaFinale23.html">Tema Finale </a>
     </div>
 
-  <!--  <h2>Requirement analysis</h2>
+    <h3>Work plan</h3>
+    <div class="remark">
+        <ul>
+            <li>A partire dallo sprint0 analizzare il core business dell'applicazione</li>
+            <li>Trovare ad analizzare eventuali criticit&agrave; dei requisiti</li>
+            <li>Implementare un simulatore del truck, in modo da simulare un interazione del driver con la <b>ServiceAccessGui</b>, che interagisca con il <b>ColdStorageService</b></li>
+            <li>Implementare il <b>ColdStorageService</b></li>
+            <li>Implementare il <b>TrasportTrolley</b> e interfacciarlo con il <b>BasicRobot</b></li>
+            <li>Testing del sistema</li>
+            <li>Aggregare le varie componenti in modo da creare un primo prototipo del sistema</li>
+        </ul>
+    </div>
 
-    </div> -->
+    <h2>Problem analysis</h2>
+    <div class="remark">
+        <h3>MockTruck</h3>
+        <h5>Obiettivo</h5>
+        Sviluppare un attore che simuli un driver che:
+        <br>
+        <ol>
+            <li>Richieda un <b>Ticket</b></li>
+            <li>Si rechi alla <b>INDOOR</b></li>
+            <li>Presenti il ticket al <b>ColdStorageService</b> e attenda la risposta</li>
+        </ol>
+        <h5>Problemi</h5>
+        Analizzando il testo dei requisiti possiamo dedurre i seguenti problemi:
+        <br>
+        <ol>
+            <li><b>La richiesta del ticket e la presentazione del ticket avvengono in istanti di tempo diversi</b></li>
+            Dai requisiti forniti dal committente si evince che la richiesta di immagazzinamento del cibo e l'effettivo arrivo alla <b>INDOOR</b>, se la richiesta viene accettata, avvengono in due momenti distinti.
+            <li><b>Scadenza del ticket</b></li>
+            Nel caso di richiesta accettata al driver viene fornito un ticket a cui &egrave; associata una scadenza entro la quale il driver deve recarsi presso l'<b>INDOOR</b>; di conseguenza &egrave; emerso un dubbio sul fatto che il driver debba conoscere o meno tale scadenza.
+            <li><b>Problema del load-time lungo</b></li>
+            Quando il driver presenta il ticket &egrave; possibile che il <b>ColdStorageService</b> non riesca a fornire la risposta <b>chargeTaken</b> in tempi brevi, in quanto il <b>TrasportTrolley</b> potrebbe essere occupato, quindi il driver non saprebbe se la sua richiesta &egrave; in attesa di una risposta oppure se il ticket non &egrave; stato accettato.
+            <li><b>Errore interno del ColdStorageService</b></li>
+            Se il <b>ColdStorageService</b> ha degli errori interni che implicano un down del servizio, come reagisce il driver.
+        </ol>
+        <h5>Possibili soluzioni</h5>
+        <ol>
+            <li><b>La richiesta del ticket e la presentazione del ticket avvengono in istanti di tempo diversi</b></li>
+            Il tempo in cui il driver si reca alla <b>INDOOR</b> non &egrave; trascurabile, di conseguenza &egrave; necessario introdurre una variabile <b>DT</b> (driver time) che rappresenta il tempo di viaggio.
+            <li><b>Scadenza del ticket</b></li>
+           Se al driver fosse fornita la scadenza del ticket e supponendo che il driver conosca una stima del tempo di viaggio fino alla <b>INDOOR</b>, gli consentirebbe di decidere se intraprendere il viaggio o meno. In caso contrario, al driver verrebbe fornito solamente il <b>TICKETID</b>, di conseguenza si recherebbe sempre alla <b>INDOOR</b> dove avverrebbe poi il controllo sulla validit&agrave; del ticket.
+            Durante questa fase di sviluppo &egrave; stata adottata la seconda scelta, comunque sono necessarie delle ulteriori informazioni da parte del committente.
+            <li><b>Problema del load-time lungo</b></li>
+            Per sopperire a questo problema &egrave; necessario creare un interazione a due fasi: una in cui il driver presenta il proprio ticket (<b>sendTicket</b>) e riceve una risposta da parte del ColdStorageService (<b>ticketAccepted/ticketRejected</b>); e una in cui il driver invia la richiesta di deposito (<b>deposit</b>) e riceve poi <b>chargeTaken</b>
+            <li><b>Errore interno del ColdStorageService</b></li>
+            &Egrave; possibile introdurre un timeout per ogni richiesta, in modo che il driver abbandoni alla scadenza del timer. Il timer &egrave; stato fissato a <b>60</b> secondi.
+        </ol>
+
+
+    </div>
 
     <!--  <h2>Architettura Logica</h2>
      <div class="remark">

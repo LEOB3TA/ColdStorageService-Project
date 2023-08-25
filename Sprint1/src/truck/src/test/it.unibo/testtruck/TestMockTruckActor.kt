@@ -12,6 +12,8 @@ import unibo.basicomm23.interfaces.Interaction2021
 import unibo.basicomm23.tcp.TcpClientSupport
 import unibo.basicomm23.utils.CommUtils
 import java.util.concurrent.ArrayBlockingQueue
+import kotlin.system.exitProcess
+
 class TestMockTruckActor{
     private lateinit var conn : Interaction2021
     private lateinit var obs : TypedCoapTestObserver<TruckState>
@@ -21,7 +23,7 @@ class TestMockTruckActor{
     @Before
     fun before() {
         if(!setupOk){
-            println("TestServiceAccessGuiActor       | initTest")
+            println("TestMockTruckActor       | initTest")
             object : Thread(){
                 override fun run(){
                     main()
@@ -29,58 +31,59 @@ class TestMockTruckActor{
             }.start()
             var mocktruckactor = getActor("mocktruck")
             while (mocktruckactor == null){
-                println("TestServiceAccessGuiActor       | waiting applicatino start")
+                println("TestMockTruck       | waiting application start")
                 CommUtils.delay(200)
                 mocktruckactor = getActor("mocktruck")
             }
+            println("TestMockTruckActor       | application started")
             try {
-                conn = TcpClientSupport.connect("localhost",8087,5)
+                conn = TcpClientSupport.connect("localhost",8092,5)
             }catch (e: Exception){
-                println("TestServiceAccessGuiActor       | connectino failed")
+                println("TestMockTruck       | connection failed")
+                exitProcess(1)
             }
-            startObs("localhost:8087")
-            obs.getNext()
-            setupOk = true
+            startObs("localhost:8092")
+            println(obs.getNext().toString())
         }else{
+            println("TestMockTruckActor       | clearHistory")
             obs.clearHistory()
         }
     }
 
-    fun startObs(addr:String){
-        val setupOk = ArrayBlockingQueue<Boolean>(1)
+    private fun startObs(addr:String){
+        val setupOkA = ArrayBlockingQueue<Boolean>(1)
         object : Thread(){
             override fun run(){
                 obs = TypedCoapTestObserver {
                     TruckState.fromJsonString(it)
                 }
-                var ctx  = "ctxtruck"
-                var act  = "mocktruck"
-                var path = "$ctx/$act"
+                val ctx  = "ctxtruck"
+                val act  = "mocktruck"
+                val path = "$ctx/$act"
                 val coapConn = CoapConnection(addr, path)
                 coapConn.observeResource(obs)
                 try {
-                    setupOk.put(true)
+                    setupOkA.put(true)
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }
             }
         }.start()
-        setupOk.take()
+        setupOk=setupOkA.take()
     }
     @Test
     @Throws(InterruptedException::class)
     fun testStoreFood(){
         var asw = ""
         val prevState = obs.currentTypedState!!
-        println("TestServiceAccessGuiActor  |   testStoreFood...")
-        val storeFood = "msg(storeFood, request, testunit, transporttrolley, storeFood(100), 1)"
+        println("TestMockTruckActor  |   testStoreFood...")
+        val storeFood = "msg(storeFood, request, testunit, coldstorageservice, storeFood(100), 1)"
         try {
             asw = conn.forward(storeFood).toString()
         }catch (e:Exception){
             e.printStackTrace()
         }
-        var newState = obs.getNext().toString()
-
+        val newState = obs.getNext().toString()
         Assert.assertTrue(newState.contains("storeaccepted"))
     }
 
@@ -88,7 +91,7 @@ class TestMockTruckActor{
     fun testDeposit(){
         var asw = ""
         val prevState = obs.currentTypedState!!
-        println("TestServiceAccessGuiActor  |   testDeposit...")
+        println("TestMockTruckActor  |   testDeposit...")
         val Ticket = "test ticket"
         val deposit = "msg(deposit, request, testunit, transporttrolley, deposit($Ticket), 1)"
         try {

@@ -55,15 +55,18 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("sendStore") { //this:State
 					action { //it:State
-						CommUtils.outblack("$name |	sendStore")
+						CommUtils.outgreen("$name |	sendStore")
 						request("storeFood", "storeFood($FW)" ,"coldstorageservice" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
+				 	 		stateTimer = TimerActor("timer_sendStore", 
+				 	 					  scope, context!!, "local_tout_mocktruck_sendStore", 60000.toLong() )
 					}	 	 
-					 transition(edgeName="t04",targetState="accepted",cond=whenReply("storeAccepted"))
-					transition(edgeName="t05",targetState="rejected",cond=whenReply("storeRejected"))
+					 transition(edgeName="t04",targetState="handleError",cond=whenTimeout("local_tout_mocktruck_sendStore"))   
+					transition(edgeName="t05",targetState="accepted",cond=whenReply("storeAccepted"))
+					transition(edgeName="t06",targetState="rejected",cond=whenReply("storeRejected"))
 				}	 
 				state("rejected") { //this:State
 					action { //it:State
@@ -94,7 +97,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				 	 		stateTimer = TimerActor("timer_accepted", 
 				 	 					  scope, context!!, "local_tout_mocktruck_accepted", DT )
 					}	 	 
-					 transition(edgeName="t06",targetState="sendTicket",cond=whenTimeout("local_tout_mocktruck_accepted"))   
+					 transition(edgeName="t07",targetState="sendTicket",cond=whenTimeout("local_tout_mocktruck_accepted"))   
 				}	 
 				state("sendTicket") { //this:State
 					action { //it:State
@@ -104,13 +107,16 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
+				 	 		stateTimer = TimerActor("timer_sendTicket", 
+				 	 					  scope, context!!, "local_tout_mocktruck_sendTicket", 60000.toLong() )
 					}	 	 
-					 transition(edgeName="t07",targetState="sendDeposit",cond=whenReply("ticketValid"))
-					transition(edgeName="t08",targetState="handleTicketExpired",cond=whenReply("ticketExpired"))
+					 transition(edgeName="t08",targetState="handleError",cond=whenTimeout("local_tout_mocktruck_sendTicket"))   
+					transition(edgeName="t09",targetState="sendDeposit",cond=whenReply("ticketValid"))
+					transition(edgeName="t010",targetState="handleTicketExpired",cond=whenReply("ticketExpired"))
 				}	 
 				state("sendDeposit") { //this:State
 					action { //it:State
-						request("deposit", "deposit($TICKETID)" ,"coldstorageservice" )  
+						request("deposit", "deposit(_)" ,"coldstorageservice" )  
 						CommUtils.outgreen("$name |	send deposit")
 						//genTimer( actor, state )
 					}
@@ -119,8 +125,8 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				 	 		stateTimer = TimerActor("timer_sendDeposit", 
 				 	 					  scope, context!!, "local_tout_mocktruck_sendDeposit", 60000.toLong() )
 					}	 	 
-					 transition(edgeName="t09",targetState="handleError",cond=whenTimeout("local_tout_mocktruck_sendDeposit"))   
-					transition(edgeName="t010",targetState="idle",cond=whenReply("chargeTaken"))
+					 transition(edgeName="t011",targetState="handleError",cond=whenTimeout("local_tout_mocktruck_sendDeposit"))   
+					transition(edgeName="t012",targetState="idle",cond=whenReply("chargeTaken"))
 				}	 
 				state("handleError") { //this:State
 					action { //it:State

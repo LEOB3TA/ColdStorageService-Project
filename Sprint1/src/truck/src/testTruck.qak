@@ -83,10 +83,11 @@ QActor mocktruck context ctxtruck{
     }Goto sendStore
 
     State sendStore {
-    	 println("$name |	sendStore")
+    	 println("$name |	sendStore") color green
         request coldstorageservice -m storeFood : storeFood($FW)
    
-    } Transition t0 whenReply storeAccepted -> accepted
+    } Transition t0 whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
+    whenReply storeAccepted -> accepted
                     whenReply storeRejected -> rejected
                     
    State rejected{
@@ -108,11 +109,13 @@ QActor mocktruck context ctxtruck{
    State sendTicket{
    		 request coldstorageservice -m sendTicket : sendTicket($TICKETID)
    		 println("$name |	send ticket") color green   
-   } Transition t0 whenReply ticketValid -> sendDeposit
+   } Transition t0 whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
+   					whenReply ticketValid -> sendDeposit
     				whenReply ticketExpired -> handleTicketExpired
+    					
 
     State sendDeposit{
-        request coldstorageservice -m deposit : deposit($TICKETID)
+        request coldstorageservice -m deposit : deposit(_)
         println("$name |	send deposit") color green
     } Transition t0  whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
     					whenReply chargeTaken -> idle
