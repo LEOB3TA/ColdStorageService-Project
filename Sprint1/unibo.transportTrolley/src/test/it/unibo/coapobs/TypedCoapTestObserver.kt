@@ -1,4 +1,4 @@
-package test.it.unibo.coapobs
+package coapobs
 
 import org.eclipse.californium.core.CoapResponse
 import java.util.concurrent.ArrayBlockingQueue

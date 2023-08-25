@@ -33,7 +33,7 @@ class Transporttrolleymover ( name: String, scope: CoroutineScope  ) : ActorBasi
 				state("init") { //this:State
 					action { //it:State
 						 unibo.basicomm23.utils.CommUtils.outcyan("$name	|	starting...") 
-						 unibo.planner23Util.initAI()  
+						 unibo.planner23.Planner23Util().initAI()  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -76,9 +76,9 @@ class Transporttrolleymover ( name: String, scope: CoroutineScope  ) : ActorBasi
 				state("plan") { //this:State
 					action { //it:State
 						
-									unibo.planner23Util.setGoal(xDestination, yDestination)
-									unibo.planner23Util.doPlan()
-									PATH = unibo.planner23Util.doPlanCompact()
+									unibo.planner23.Planner23Util().setGoal(xDestination, yDestination)
+									unibo.planner23.Planner23Util().doPlan()
+									PATH = unibo.planner23.Planner23Util().doPlanCompact()
 									unibo.basicomm23.utils.CommUtils.outcyan("$name	|	moving to $destination")
 						//genTimer( actor, state )
 					}
@@ -100,9 +100,9 @@ class Transporttrolleymover ( name: String, scope: CoroutineScope  ) : ActorBasi
 				}	 
 				state("lookForFix") { //this:State
 					action { //it:State
-						 unibo.planner23Util.doPathOnMap(PATH)  
+						 unibo.planner23.Planner23Util().doPathOnMap(PATH)  
 						 someToFix = false  
-						if(  unibo.planner23Util.getDirection() != dir  
+						if(  unibo.planner23.Planner23Util().getDirection() != dir  
 						 ){ someToFix = true  
 						}
 						//genTimer( actor, state )
@@ -118,7 +118,7 @@ class Transporttrolleymover ( name: String, scope: CoroutineScope  ) : ActorBasi
 				state("fixDir") { //this:State
 					action { //it:State
 						 
-									PATH = utility.DirectionFixer.getPathForFixDir(unibo.planner23Util.getDirection(), dir) 
+									PATH = utility.DirectionFixer.getPathForFixDir(unibo.planner23.Planner23Util().getDirection(), dir) 
 								 	unibo.basicomm23.utils.CommUtils.outcyan("$name	|	fixing direction")
 						//genTimer( actor, state )
 					}

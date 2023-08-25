@@ -11,10 +11,10 @@ enum class TTPosition{
     HOME, INDOOR, ONTHEROAD, COLDROOM
 }
 
-data class TransportTrolleyState{
-    private var currState: CurrStateTrolley = CurrStateTrolley.IDLE
+data class TransportTrolleyState(
+    private var currState: CurrStateTrolley = CurrStateTrolley.IDLE,
     private var currPosition: TTPosition = TTPosition.HOME
-}{
+){
     fun setCurrState(state: CurrStateTrolley){
         currState = state
     }

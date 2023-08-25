@@ -1,13 +1,14 @@
 package mockCtx
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import unibo.basicomm23.msg.ApplMessage
-import unibo.basicomm23.utils.CommUtils
-import java.net.Socket
-import kotlin.coroutines.cancellation.CancellationException
 
+import unibo.basicomm23.utils.CommUtils
+import io.ktor.network.selector.*
+import io.ktor.util.network.*
+import io.ktor.utils.io.*
+import io.ktor.network.sockets.*
+import io.ktor.utils.io.CancellationException
+import kotlinx.coroutines.*
+import unibo.basicomm23.msg.ApplMessage
 
 class MockCtxWorker(
     val clientSock: Socket,
@@ -16,20 +17,20 @@ class MockCtxWorker(
     val onMessage: (ApplMessage) -> Unit = {}
 ) {
 
-    private val readChannel = clientSock.getInputStream()
+    private val readChannel = clientSock.openReadChannel()
     private var job : Job? = null
 
     fun start() {
         job = scope.launch {
             try {
-                val port = clientSock.localAddress
+                val port = clientSock.localAddress.toJavaAddress().port
                 while (true) {
                     CommUtils.outblue("mockCtxWorker[$ctxName]    |   waiting for messages on: $port...")
                     val name = readChannel.readUTF8Line()
                     try {
                         onMessage(ApplMessage(name!!))
                     } catch (e : Exception) {
-                        CommUtils.outblue("mockCtxWorker[$ctxName]    |   error: $e")
+                        CommUtils.outred("mockCtxWorker[$ctxName]    |   error: $e")
                     }
                     CommUtils.outblue("mockCtxWorker[$ctxName]    |   received message $name on $port")
                 }

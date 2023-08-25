@@ -49,8 +49,8 @@ ExternalQActor coldstorageservicecore context ctxstorageservice
 QActor transporttrolleycore context ctxtransporttrolley{
 	
 	[#
-		lateint var POS : String
-		val tState = transporttrolley.state.TransportTrolleyState()
+		lateinit var POS : String
+		val tTState = transporttrolley.state.TransportTrolleyState()
 		var updateFlag = 0
 	#]
 	
@@ -104,7 +104,7 @@ QActor transporttrolleycore context ctxtransporttrolley{
 		onMsg(dropout : dropout(FW)){
 			[#	
 				try{
-					FW = payloadArg(0).trim().uppercase()
+					val FW = payloadArg(0).trim().uppercase()
 					POS = "ColdRoom"
 				}catch(e : Exception){}	
 			#]	
@@ -194,7 +194,7 @@ QActor transporttrolleymover context ctxtransporttrolley{
 	
 	State init initial{
 		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	starting...")#]
-		[# unibo.planner23Util.initAI() #]
+		[# unibo.planner23.Planner23Util().initAI() #]
 	}Goto idle
 
 	State idle{
@@ -224,9 +224,9 @@ QActor transporttrolleymover context ctxtransporttrolley{
 	State plan{
 		
 		[#
-			unibo.planner23Util.setGoal(xDestination, yDestination)
-			unibo.planner23Util.doPlan()
-			PATH = unibo.planner23Util.doPlanCompact()
+			unibo.planner23.Planner23Util().setGoal(xDestination, yDestination)
+			unibo.planner23.Planner23Util().doPlan()
+			PATH = unibo.planner23.Planner23Util().doPlanCompact()
 			unibo.basicomm23.utils.CommUtils.outcyan("$name	|	moving to $destination")
 		#]
 
@@ -240,9 +240,9 @@ QActor transporttrolleymover context ctxtransporttrolley{
 					whenReply dopathfail -> moveKo
 				
 	State lookForFix{
-		[# unibo.planner23Util.doPathOnMap(PATH) #] 
+		[# unibo.planner23.Planner23Util().doPathOnMap(PATH) #] 
 		[# someToFix = false #]
-		if[# unibo.planner23Util.getDirection() != dir #]{
+		if[# unibo.planner23.Planner23Util().getDirection() != dir #]{
 			[# someToFix = true #]
 		}
 		
@@ -251,7 +251,7 @@ QActor transporttrolleymover context ctxtransporttrolley{
 				
 	State fixDir{
 		[# 
-			PATH = utility.DirectionFixer.getPathForFixDir(unibo.planner23Util.getDirection(), dir) 
+			PATH = utility.DirectionFixer.getPathForFixDir(unibo.planner23.Planner23Util().getDirection(), dir) 
 		 	unibo.basicomm23.utils.CommUtils.outcyan("$name	|	fixing direction")
 		#]
 		

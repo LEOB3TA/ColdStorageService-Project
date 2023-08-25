@@ -1,6 +1,8 @@
 package utility
 
+import org.json.*
 import org.json.JSONObject
+import com.google.gson.Gson
 import java.io.File
 import java.nio.charset.StandardCharsets
 
@@ -14,7 +16,7 @@ class ServiceAreaDestinationConfig {
             270 to "upDir"
         )
 
-        val config = File("wasteServiceSystemConfig.json").readText(StandardCharsets.UTF_8)
+        val config = File("coldsServiceSystemConfig.json").readText(StandardCharsets.UTF_8)
         val JsonObject = JSONObject(config)
         val LocJsonObj = JSONObject(JsonObject.get("LOCATION").toString())
 

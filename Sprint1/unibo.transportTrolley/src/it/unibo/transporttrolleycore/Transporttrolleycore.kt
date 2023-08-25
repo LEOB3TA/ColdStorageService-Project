@@ -19,8 +19,8 @@ class Transporttrolleycore ( name: String, scope: CoroutineScope  ) : ActorBasic
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		
-				lateint var POS : String
-				val tState = transporttrolley.state.TransportTrolleyState()
+				lateinit var POS : String
+				val tTState = transporttrolley.state.TransportTrolleyState()
 				var updateFlag = 0
 		return { //this:ActionBasciFsm
 				state("init") { //this:State
@@ -101,7 +101,7 @@ class Transporttrolleycore ( name: String, scope: CoroutineScope  ) : ActorBasic
 						                        currentMsg.msgContent()) ) { //set msgArgList
 									
 												try{
-													FW = payloadArg(0).trim().uppercase()
+													val FW = payloadArg(0).trim().uppercase()
 													POS = "ColdRoom"
 												}catch(e : Exception){}	
 						}
