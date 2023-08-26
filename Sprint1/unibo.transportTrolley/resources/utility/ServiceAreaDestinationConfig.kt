@@ -16,7 +16,7 @@ class ServiceAreaDestinationConfig {
             270 to "upDir"
         )
 
-        val config = File("coldsServiceSystemConfig.json").readText(StandardCharsets.UTF_8)
+        val config = File("coldServiceSystemConfig.json").readText(StandardCharsets.UTF_8)
         val JsonObject = JSONObject(config)
         val LocJsonObj = JSONObject(JsonObject.get("LOCATION").toString())
 

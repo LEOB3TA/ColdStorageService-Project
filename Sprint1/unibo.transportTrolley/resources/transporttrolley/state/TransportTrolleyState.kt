@@ -7,8 +7,8 @@ enum class CurrStateTrolley  {
 }
 
 enum class TTPosition{
-    // TODO: vedere se coldroom è necessario
-    HOME, INDOOR, ONTHEROAD, COLDROOM
+    // TODO: modificare COLDROOM con PORT
+    HOME, INDOOR, ONTHEROAD, PORT
 }
 
 data class TransportTrolleyState(

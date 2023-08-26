@@ -42,7 +42,7 @@ class Basicrobot ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						delegate("setrobotstate", "robotpos") 
 						delegate("moverobot", "robotpos") 
 						delegate("setdirection", "robotpos") 
-						uniborobots.robotSupport.create(myself ,"basicrobotConfig.json" )
+						uniborobots.robotSupport.create(myself ,"Sprint1/unibo.basicrobot23/basicrobotConfig.json" )
 						 RobotType = uniborobots.robotSupport.robotKind  
 						delay(3000) 
 						CommUtils.outmagenta("basicrobot | STARTING ... ")

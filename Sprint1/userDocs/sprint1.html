@@ -7,7 +7,7 @@
 
 <head>
 
-    <title>Sprint0</title></head>
+    <title>Sprint1</title></head>
 
 <body>
 <!--
@@ -29,9 +29,343 @@
         <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/TemaFinale23.html">Tema Finale </a>
     </div>
 
-  <!--  <h2>Requirement analysis</h2>
+    <h3>Work plan</h3>
+    <div class="remark">
+        <ul>
+            <li>A partire dallo sprint0 analizzare il core business dell'applicazione</li>
+            <li>Trovare ad analizzare eventuali criticit&agrave; dei requisiti</li>
+            <li>Implementare un simulatore del truck, in modo da simulare un interazione del driver con la <b>ServiceAccessGui</b>, che interagisca con il <b>ColdStorageService</b></li>
+            <li>Implementare il <b>ColdStorageService</b></li>
+            <li>Implementare il <b>TrasportTrolley</b> e interfacciarlo con il <b>BasicRobot</b></li>
+            <li>Testing del sistema</li>
+            <li>Aggregare le varie componenti in modo da creare un primo prototipo del sistema</li>
+        </ul>
+    </div>
 
-    </div> -->
+    <h2>Problem analysis</h2>
+    <div class="remark">
+        <h3>TransportTrolley e BasicRobot</h3>
+        <h6>Obiettivo</h6>
+        Sviluppare un attore che implementi il TransportTrolley e le sue interazioni col BasicRobot, in modo che:
+        <br>
+        <ul>
+            <li>Esegua delle <ks>Azioni di deposito</ks>, consistente nel:</li>
+             <ol>
+                 <li>
+                    Prelevare (<k>PICKUP</k>) il carico di cibo dal <ks>Food truck</ks> arrivato
+                    nella posizione <k>INDOOR</k>
+                 </li>
+                 <li>
+                     Andare dalla posizione <k>INDOOR</k> alla porta della
+                     <ks>COLDROOM</ks>
+                 </li>
+                 <li>
+                     Depositare il carico nella <ks>COLDROOM</ks>
+                 </li>
+
+             </ol>
+            <li>Sia in grado di mandare comandi al <b>BasicRobot</b> e gestire
+            le eventuali risposte</li>
+        </ul>
+        <h6>Muovere il robot verso una destinazione</h6>
+
+        <h4>Orientamento nell'ambiente</h4>
+        Dai requisiti si evince che le dimensioni della stanza siano
+        note, cos&igrave; come le posizioni dei punti di interesse
+        ( <k>HOME</k>, <k>INDOOR</k> e <k>PORT</k>) e altri valori costanti.
+        Per far s&igrave; che il sistema sia a conoscenza di tali informazioni,
+        sarebbe utile avere un modo per configurarlo.
+        <br/><br/>
+        Sono possibili due approcci:
+        <ul>
+            <li>Cablare i valori nel codice </li>
+            <li>Usare un file di configurazione</li>
+        </ul>
+        Visto che il software deve poter essere usato correttamente indipendentemente
+        dalle dimensioni e locazioni dei suddetti punti di interesse, si scarta la prima
+        soluzione poich&eacute; dal momento in cui uno di tali valori dovesse cambiare,
+        si dovrebbe cambiare il codice ed effettuare un <i>rebuild</i> dell'applicazione.
+        Dunque l'uso di un <ks>file di configurazione</ks>, che pu&ograve; essere facilmente
+        modificato senza richiedere cambiamenti di codice, risulta pi&ugrave; adatto.
+        Il file di configurazione &egrave;
+        <a href="./resources/json/coldServiceSystemConfig.json">coldServiceSystemConfig.json</a>
+
+        <pre>
+            {
+                "LOCATION":{
+                    "HOME":...,
+                    "INDOOR":...,
+                    "PORT":...
+                }
+                "MAXW":...,
+                "DLIMIT":...
+            }
+        </pre>
+
+        Da qui si evince una nuova problematica: come rappresentare la posizione
+        dei punti d'interesse ( <k>HOME</k>, <k>INDOOR</k> e <k>PORT</k>) e del robot.
+        <br/><br/>
+        &Egrave; possibile usare uno di questi approcci:
+        <ul>
+            <li>Usare un sistema di coordinate cartesiane X e Y</li>
+            <li>Usare gli elementi strutturali della <kc>Service Area</kc>
+            (pareti o ostacoli) come punti di riferimento</li>
+        </ul>
+        <ks>Coordinate Cartesiane</ks>
+        <br/><br/>
+        L'uso di tali coordinate impone la necessit&agrave; di scegliere un'unit&agrave; di misura in
+        modo da mappare opportunamente la <i>Service Area</i>. Per fare ci&ograve; si pu&ograve; usare
+        il DDR robot come unit&agrave; e mappare la <i>Service Area</i> come una griglia composta da
+        celle di dimensione <kc>RD</kc> (la dimensione del DDR robot).
+<!--        TODO: Inserire immagine-->
+        <br/><br/>
+        I luoghi di interesse verranno rappresentati da una coppia di valori <b>(X,Y)</b>
+        <pre>
+            (0,0) inica la cella home
+            (X,Y) indica la cella che si trova X celle sotto HOME e Y celle alla sua destra
+        </pre>
+        <i>Vantaggi e svantaggi</i>
+        <br/><br/>
+        <pro>+</pro> Possibilit&agrave; di riuso di software gi&agrave; sviluppato per mappare, identificare il
+        percorso ed eseguire il path trovato ( )
+<!--        TODO: Inserire link a progetti-->
+        <br/><br/>
+        <cons>-</cons> Potrebbe essere necessario effettuare degli aggiustamenti in quanto le dimensioni della
+        stanza potrebbero essere multiple di RD.
+        <br/>
+        <cons>-</cons> La stanza deve essere mappata
+        <br/><br/>
+        <ks>Punti di riferimento</ks>
+        Tale soluzione si basa sul <kc>BoundaryWalker</kc>, un robot capace di muoversi lungo il perimetro
+        di una stanza delimitata da pareti, sfruttando le collisioni con le pareti per capire quando fare
+        una rotazione. Sapendo che alcuni punti di interesse si trovano agli angoli delle pareti si potrebbe
+        sfruttare il sonar montato sul DDR robot per rilevare la collisione con le pareti in modo da comprendere
+        se si &egrave; raggiunto un dato punto di interesse.
+        <br/><br/>
+        <i>Vantaggi e svantaggi</i>
+        <br/><br/>
+        <pro>+</pro> Minor complessit&agrave; del caso precedente.
+        <br/>
+        <pro>+</pro> Non necessita l'uso di software esterno, a differenza del caso precedente.
+        <br/><br/>
+        <cons>-</cons> Essendo non tutti i punti di interesse sul bordo della stanza, tale soluzione potrebbe
+        non avere successo, con un eventuale lavoro in pi&ugrave; mirato allo sviluppo di un robot in grado
+        di rilevare anche la posizione di tali punti.
+        <br/>
+        <cons>-</cons> Il codice deve prevedere tutti i percorsi che il robot pu&ograve; effettuare, eventualmente
+        anche non sul bordo per trovare gli altri punti di interesse.
+        <br/>
+        <cons>-</cons> Software poco riusabile
+        <br/><br/>
+        <b>Conclusione</b>
+        <br/><br/>
+        Si consiglia di usare il sistema di coordinate cartesiane, poich&egrave; riusabile anche per <kc>Service Area</kc>
+        differenti e permette di usare software gi&agrave; sviluppato per mappare, pianificare ed eseguire il percorso.
+        <br/>
+        Il file di configurazione avr&agrave; informazioni del tipo:
+        <pre>
+            {
+                "LOCATION":{
+                    "HOME":[0,0],
+                    "INDOOR":[4,1],
+                    "PORT":[2,2]
+                }
+                "MAXW":100,
+                "DLIMIT":50
+            }
+        </pre>
+        <h4>Path finding</h4>
+        Avendo deciso come orientarsi nella stanza e come individuare i punti di interesse, ci possiamo occupare
+        di come comprendere quale percorso si debba scegliere per arrivare in un dato punto di interesse.
+        <br/>
+        Anche qui sono possibili vari approcci:
+        <ul>
+            <li>Muoversi in linea retta</li>
+            <li>Muoversi usando una sequenza di mosse</li>
+        </ul>
+
+        <ks>Linea Retta</ks>
+        Tale soluzione prevede di muovere il roboto lungo una linea retta che collega il punto di partenza
+        con quello di arrivo
+<!--        TODO: figura-->
+        <br/>
+        Il problema relativo a tale soluzione &egrave; che il DDR robot si muove su se stesso di
+        90&ordm;( <!-- TODO: link -->). Per tale motivo il roboto non riesce a muoversi su una linea
+        a diversa angolazione (non linea retta). Un possibile percorso sarebbe il seguente.
+        <!--        TODO: figura-->
+        Per eseguire un percorso diretto si dovrebbe modificare il <kc>basicrobot23</kc> in modo da accettare
+        angolature diverse.
+        <br/><br/>
+        <i>Vantaggi e svantaggi</i>
+        <br/><br/>
+        <pro>+</pro> Percorso pi&ugrave; se si riuscisse a modificare il basicrobot23
+        <br/><br/>
+        <cons>-</cons> Dover apportare modifiche al basicrobot23
+        <cons>-</cons> Impossibili&agrave; di uso di software gi&agrave; sviluppato per pianificare ed eseguire il percorso
+        <br/>
+        <ks>Muoversi usando una sequenza di mosse</ks>
+        Tale soluzione si basa su come il robot &egrave; in grado di muoversi e basa la soluzione su tale modalit&agrave;
+        <!--        TODO: figura-->
+        <br/><br/>
+        <i>Vantaggi e svantaggi</i>
+        <br/><br/>
+        <pro>+</pro> Si possono usare i componenti software a disposizione per pianificare un percorso partendo
+        dalle coordinate cartesiane della destinazione ed eseguirlo.
+        <br/>
+        <pro>+</pro> Non si hanno vincoli su dove si devono trovare i punti di interesse
+        <br/><br/>
+        <cons>-</cons> I percorsi potrebbero essere pi&ugrave; lunghi rispetto al caso precedente
+        <br/><br/>
+        <b>Conclusione</b>
+        Considerando ci&ograve; detto finora, si decide di usare la soluzione che prevede di muoversi
+        mediante una sequenza di mosse perch&egrave; consente di usare il software esistente per pianificare
+        ed eseguire il percorso abbattendo i tempi di sviluppo.
+        <br/><br/>
+        Per quanto riguarda il <kc>pathexecutor</kc> esso &egrave; modellato come un attore, utilizzando il linguaggio QAk,
+        che riceve una richiesta di eseguire un percorso e risponde con un messaggio di conferma una volta completato
+        il percorso o con una risposta di fallimento in caso contrario, specificando la parte di percorso non eseguita. Il codice QAk del pathexecutor &egrave; consultabile qui
+<!--        TODO: link-->
+        <pre>
+Request dopath: dopath(PATH)
+Reply dopathdone: dopathdone(ARG)
+Reply dopathfail: dopathfail(PATHSTILLTODO)
+        </pre>
+        L'uso dell'attore pathexecutor modifica l'architettura logica, questo si trova nel contesto del
+        basicrobot:
+<!--        TODO: immagine-->
+        <br/>
+        Per quanto riguarda il <kc>planner23</kc> questo permette di calcolare il percorso da fare per
+        arrivare in un punto individuato dalle coordinate (X,Y). Il suo utilizzo &egrave; semplice: ad esempio
+        per arrivare in (2,4):
+        <pre>
+val planner = new planner23Util()
+planner.initAI()
+planner.setGoal(2,4)
+planner.doPlan()
+        </pre>
+        <h4>Gestione delle azioni di deposito e movimento</h4>
+        Bisogna a questo punto comprendere quale componente del sistema debba essere il responsabile delle operazioni di deposito e movimento.
+        Tali operazioni devono essere responsabilit&agrave; del <kc>ColdStorageServiceService</kc>, del <kc>transportTrolley</kc> o sarebbe opportuno
+        dividere le responsabilit&agrave; tra i due attori? <br><br>
+        Risulta evidente assegnare al <i>ColdStorageServiceService</i> la responsabilit&agrave; delle operazioni di deposito, in quanto esso &egrave; il destinatario
+        delle richieste di deposito provenienti dal truck. <br>
+        Per quanto riguarda invece le operazioni di movimento, tale responsabilit&agrave; può essere assegnato sia al <i>ColdStorageServiceService</i> che al <i>transportTrolley</i>.
+        Tuttavia, volendo rispettare il principio di <a href="https://it.wikipedia.org/wiki/Principio_di_singola_responsabilit%C3%A0"><i><b>singola responsabilit&agrave;</b></i></a> e volendo evitare di avere un attore troppo complesso,
+        si consiglia agli sviluppatori di assegnare al <i>transportTrolley</i> la responsabilit&agrave; delle operazioni di movimento. In tal modo il <i>transportTrolley</i>
+        funger&agrave; da attuatore, e nel caso in cui esso debba far uso di un <kc>planner</kc>, potrebbe essere posto su di un nodo computazionale più potente,
+        senza causare un eccessivo <i>overhead</i> sulla rete dovuto ai messaggi di movimento. <br><br>
+        In ultima analisi, si potrebbe decidere di attuare un'ulteriore separazione delle responsabilit&agrave; operando come segue: <br><br>
+        Attribuire al componente <i>ColdStorageServiceService</i> le responsabilit&agrave; di:
+        <ol>
+            <li>Accettare/Rifiutare richieste da parte del <i>truckDriver</i></li>
+            <li>Coordinare le operazioni di carico e scarico, cio&egrave; richiedere o comandare al <i>transportTrolley</i> l'esecuzione di qualche azione</li>
+        </ol>
+        Attribuire al componente <i>transportTrolley</i> le responsabilit&agrave; di:
+        <ol>
+            <li>Muovere il DDR robot verso la destinazione stabilita</li>
+            <li>Eseguire le azioni di carico e scarico del materiale</li>
+        </ol>
+
+        Seguire tale approccio richiederebbe, quindi, una modifica dell'architettura logica del sistema, in quanto prevederebbe la suddivisione del <i>ColdStorageServiceService</i> in due componenti
+        distinti, uno dedito alla ricezione e valutazione delle richieste di deposito e uno dedito alla coordinazione delle operazioni carico/scarico. Allo stesso modo, bisognerebbe
+        operare una modifica nell'architettura del <i>transportTrolley</i>, in quanto sarebbe opportuno attribuire ad un componente la responsabilit&agrave; delle operazioni di movimento e
+        ad un altro la responsabilit&agrave; delle operazioni di carico/scarico. <br><br>
+        <ks>Seguire questa strada permetterebbe di ottenere componenti che adempiono ad una singola responsabilit&agrave; e tale responsabilit&agrave; sarebbe totalmente incapsulata nel componente stesso.</ks>
+
+        <h6>Interazioni</h6>
+
+        Per quanto riguarda l'interazione tra i componenti possiamo, in prima battuta, affermare che essi interagiscono a scambio di messaggi.
+        L'utilizzo del linguagguio <kc>QAk</kc> ci permette di tipizzare i messaggi in modo tale da avere un controllo maggiore sulle interazioni tra i componenti.
+        Nasce quindi il problema di individuare il tipo di messaggio per ogni interazione:
+
+        <h4>Richiesta di deposito</h4>
+
+        Come detto in precedenza, il <kc>ColdStorageServiceService</kc> &egrave; il destinatario delle richieste di deposito provenienti dal <kc>truck</kc>.
+        Come risulta gi&agrave; evidente in fase di analisi questa interazione &egrave; di tipo <kc>request-reply</kc>:
+<!--        TODO: rivedere le azioni che fa' @elgaleon-->
+        <pre>
+Request storewaste   : storewaste(FW)
+Reply   loadaccept   : loadaccept(_)
+Reply   loadrejected : loadrejected(_)
+</pre>
+
+        <h4>Deposito</h4>
+        L'azione di deposito &egrave; costituita da due fasi: la fase di <kc>pickup</kc> e la fase di <kc>dropout</kc>. <br>
+        Come analizzato, l'azione di deposito &egrave; gestita dal <kc>ColdStorageServiceService</kc> ma viene eseguita dal
+        <kc>transportTrolley</kc>. E' necessario quindi che i due si scambino opportuni messaggi. <br><br>
+
+        <b><ks>Pickup</ks></b><br><br>
+        Quando il <i>ColdStorageServiceService</i> accetta un carico, invia al <i>transportTrolley</i> un messaggio di <i>pickup</i> in modo che
+        esso muova il <kc>DDR robot</kc> fino alla <kc>INDOOR</kc> e prelevi il carico. L'interazione può avvenire in due differti modi:
+        <ul>
+            <li><b>Dispatch</b>: messaggio <i>fire&forget</i> che non richiede una risposta da parte del destinatario</li>
+            <li><b>Request</b>: messaggio che richiede una risposta da parte del destinatario</li>
+        </ul>
+        Dal momento che il <i>ColdStorageServiceService</i> gestisce l'azione di deposito in tutte le sue parti, esso &egrave; interessato a sapere quando il
+        <i>transportTrolley</i> ha concluso tale operazione in modo da potergli comandare l'esecuzione di un'altra azione, per tale motivo
+        sarebbe opportuno utilizzare un messaggio di tipo <kc>request-reply</kc>:
+        <pre>
+Request pickup     : pickup(_)
+Reply   pickupdone : pickupdone(_)</pre>
+
+        <div id="drp"><b><ks>Dropout</ks></b><br><br></div>
+        Quando il <i>ColdStorageServiceService</i> riceve il messaggio di <kc>pickupdone</kc> invia al <i>transportTrolley</i> un messaggio di <i>dropout</i>, in modo che esso
+        possa muovere il <i>DDR robot</i> verso il container e vi depositi il carico. Anche in questo caso l'interazione può avvenire in due differti modi:
+        <ul>
+            <li><b>Dispatch</b></li>
+            <li><b>Request</b></li>
+        </ul>
+        Poich&egrave; il committente ha specificato che sarebbe opportuno mandar via il <i>truck</i> il prima possibile,
+        bisognerebbe evitare che il <i>ColdStorageServiceService</i> debba attendere la conclusione dell'azione di <i>dropout</i>
+        prima di poter gestire la richiesta di un altro <i>truck</i>. Per tale motivo utilizzare un messaggio di tipo <i>request-reply</i>
+        risulta poco pratico, sarebbe meglio utilizzare un messaggio di tipo <kc>dispatch</kc>, in modo che, mentre il <i>transportTrolley</i>
+        esegue il <i>dropout</i>, il <i>ColdStorageServiceService</i> possa gestire la richiesta di un altro <i>truck</i>:
+
+        <pre>
+Dispatch dropout : dropout(FW)
+        </pre>
+
+        <h6>Gestione stati</h6>
+
+        <h4>Stato TransportTrolley</h4>
+        In previsione delle fasi successive del progetto, sarebbe opportuno mantenere lo stato del <i>transportTrolley</i>. In particolare occorrerebe tenere traccia della posizione
+        del <i>transportTrolley</i> e del suo stato (inteso come stato di attivit&agrave;). <br>
+<!--            TODO: rivedere link-->
+        Dall'<a href="../../Sprint0/userDocs/sprint0.html">analisi dei requisiti </a> &egrave; emerso che lo stato del <i>transportTrolley</i> e la sua posizione nella stanza possono essere
+        rappresentati dai seguenti enumerativi:
+        <pre>
+<key>enum</key> <key>class</key> CurrStateTrolley { IDLE, STOPPED, MOVING, PICKINGUP, DROPPINGOUT }</pre>
+        <pre>
+<key>enum</key> <key>class</key> TTPosition { HOME, INDOOR, ONTHEROAD, PORT }</pre>
+
+        Sebbene quanto stabilito in fase di analisi dei requisiti sia corretto, occorre tenere presente che il <i>transportTrolley</i> potrebbe trovarsi in una posizione diffirente da
+        quelle indicate nell'enumerativo <kc>TTPosition</kc>. In particolare, durante un'azione di movimento, il <i>transportTrolley</i> potrebbe trovarsi in una posizione
+        intermedia tra due punti d'interesse della stanza. Per questo motivo riteniamo necessaria la seguente modifica dell'enumerativo <i>TTPosition</i>:
+        <pre>
+<key>enum</key> <key>class</key> TTPosition { <i>HOME</i>, <i>INDOOR</i>, <i>PLASTICBOX</i>, <i>GLASSBOX</i>, <i>ONTHEROAD</i> }</pre>
+        Come nel caso precedente, le soluzioni possibili per mantenere lo stato del <i>transportTrolley</i> sono diverse.Si decide di adottare la soluzione che
+        prevede di mantenere lo stato in una classe in modo che esso sia accessibile da terze parti, come riportato di seguito:
+        <pre>
+<key>enum class</key> CurrStateTrolley {
+    IDLE, STOPPED, MOVING, PICKINGUP, DROPPINGOUT
+}
+<key>enum class</key> TTPosition{
+   HOME, INDOOR, ONTHEROAD, PORT
+}
+<key>data class</key> TransportTrolleyState(
+        <key>private var</key> currState : CurrStateTrolley = CurrStateTrolley.IDLE,
+        <key>private var</key> currPosition : TTPosition = TTPosition.HOME
+){
+    <key>fun</key> setCurrState(state : CurrStateTrolley) {...}
+    <key>fun</key> setCurrPosition(position : TTPosition) {...}
+    <key>fun</key> getCurrState() : CurrStateTrolley {...}
+    <key>fun</key> getCurrPosition() : TTPosition {...}
+}</pre>
+<!--TODO: revisionare link -->
+        Il codice completo di questa classe &egrave; consultabile in <a href="./resources/kotlin/TransportTrolleyState.kt">TransportTrolleyState.kt</a>
+
+
+    </div>
 
     <!--  <h2>Architettura Logica</h2>
      <div class="remark">
@@ -43,54 +377,54 @@
      </div> -->
 
 
-       <!--  <h2>Piano di lavoro</h2>
+    <!--  <h2>Piano di lavoro</h2>
 
-         </div> -->
+      </div> -->
 
-     <!--
-             <h2>Project</h2>
-              <div class="remark">
-
-
-
-             </div>
-
-         <h2>Testing</h2>
-         <div class="remark">
-
-         </div>
+    <!--
+            <h2>Project</h2>
+             <div class="remark">
 
 
-         <h2>Deployment</h2>
-         <div class="remark">
 
-         </div>
+            </div>
+
+        <h2>Testing</h2>
+        <div class="remark">
+
+        </div>
 
 
-         <h2>Maintenance</h2>
-         -->
-<!-- USEFUL
-<table style="width:100%" border="1">
-<tr>
-<td style="width:40%">
-</td>
-<td></td>
-</tr>
-</table>
--->
+        <h2>Deployment</h2>
+        <div class="remark">
 
-<br/><br/>
+        </div>
+
+
+        <h2>Maintenance</h2>
+        -->
+    <!-- USEFUL
+    <table style="width:100%" border="1">
+    <tr>
+    <td style="width:40%">
+    </td>
+    <td></td>
+    </tr>
+    </table>
+    -->
+
+    <br/><br/>
 </div>
 
 <div class="stud">
     By Students: <br>
     <div class="studentCardRow">
-    <div class="studentCard">
-        <div class="studentName">Leonardo Focardi</div>
-        <div class="studentEmail"><a href= "mailto:leonardo.focardi@studio.unibo.it">leonardo.focardi@studio.unibo.it</a>
+        <div class="studentCard">
+            <div class="studentName">Leonardo Focardi</div>
+            <div class="studentEmail"><a href= "mailto:leonardo.focardi@studio.unibo.it">leonardo.focardi@studio.unibo.it</a>
             </div>
-        <div class="studentImg"><img class="studentAvatar" src="./resources/boys/leo.jpg"></div>
-    </div>
+            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/leo.jpg"></div>
+        </div>
         <div class="studentCard">
             <div class="studentName">Christian Galeone</div>
             <div class="studentEmail"><a href= "mailto:christian.galeone@studio.unibo.it">christian.galeone@studio.unibo.it</a></div>

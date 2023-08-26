@@ -27,7 +27,7 @@ Reply execko :	execko(_)
 /*Messaggi Pathexec  */
 Request dopath: dopath(PATH)
 Reply dopathdone: dopathdone(ARG)
-Reply dopathfail: dopathfail(ARG)
+Reply dopathfail: dopathfail(PATHSTILLTODO)
 
 /*Basicrobot */
 Dispatch cmd	:cmd(MOVE) // MOVE = w | s | l | r | h
@@ -52,6 +52,7 @@ QActor transporttrolleycore context ctxtransporttrolley{
 		lateinit var POS : String
 		val tTState = transporttrolley.state.TransportTrolleyState()
 		var updateFlag = 0
+		var FW = 0F
 	#]
 	
 	State init initial{
@@ -104,8 +105,8 @@ QActor transporttrolleycore context ctxtransporttrolley{
 		onMsg(dropout : dropout(FW)){
 			[#	
 				try{
-					val FW = payloadArg(0).trim().uppercase()
-					POS = "ColdRoom"
+					FW = payloadArg(0).trim().uppercase().toFloat()
+					POS = "PORT"
 				}catch(e : Exception){}	
 			#]	
 		}
@@ -180,7 +181,7 @@ QActor transporttrolleycore context ctxtransporttrolley{
 QActor transporttrolleymover context ctxtransporttrolley{
 	
 	[#
-		
+		val planner = unibo.planner23.Planner23Util()
 		lateinit var destination  : String
 		var xDestination : Int = 0
 		var yDestination : Int = 0
@@ -194,7 +195,7 @@ QActor transporttrolleymover context ctxtransporttrolley{
 	
 	State init initial{
 		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	starting...")#]
-		[# unibo.planner23.Planner23Util().initAI() #]
+		[# planner.initAI() #]
 	}Goto idle
 
 	State idle{
@@ -224,9 +225,9 @@ QActor transporttrolleymover context ctxtransporttrolley{
 	State plan{
 		
 		[#
-			unibo.planner23.Planner23Util().setGoal(xDestination, yDestination)
-			unibo.planner23.Planner23Util().doPlan()
-			PATH = unibo.planner23.Planner23Util().doPlanCompact()
+			planner.setGoal(xDestination, yDestination)
+			planner.doPlan()
+			PATH = planner.doPlanCompact()
 			unibo.basicomm23.utils.CommUtils.outcyan("$name	|	moving to $destination")
 		#]
 
@@ -240,9 +241,9 @@ QActor transporttrolleymover context ctxtransporttrolley{
 					whenReply dopathfail -> moveKo
 				
 	State lookForFix{
-		[# unibo.planner23.Planner23Util().doPathOnMap(PATH) #] 
+		[# planner.doPathOnMap(PATH) #] 
 		[# someToFix = false #]
-		if[# unibo.planner23.Planner23Util().getDirection() != dir #]{
+		if[# planner.getDirection() != dir #]{
 			[# someToFix = true #]
 		}
 		
@@ -251,7 +252,7 @@ QActor transporttrolleymover context ctxtransporttrolley{
 				
 	State fixDir{
 		[# 
-			PATH = utility.DirectionFixer.getPathForFixDir(unibo.planner23.Planner23Util().getDirection(), dir) 
+			PATH = utility.DirectionFixer.getPathForFixDir(planner.getDirection(), dir) 
 		 	unibo.basicomm23.utils.CommUtils.outcyan("$name	|	fixing direction")
 		#]
 		

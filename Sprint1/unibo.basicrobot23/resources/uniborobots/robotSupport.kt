@@ -20,7 +20,7 @@ object robotSupport{
 	var jsonParser = JSONParser()
 
 	fun readStepTime(   ) : String{
- 		val config = File("stepTimeConfig.json").readText(Charsets.UTF_8)
+ 		val config = File("Sprint1/unibo.basicrobot23/stepTimeConfig.json").readText(Charsets.UTF_8)
 		val jsonObject   = jsonParser.parse( config ) as JSONObject
 		return jsonObject.get("step").toString()
 	}

@@ -19,7 +19,7 @@ class Transporttrolleymover ( name: String, scope: CoroutineScope  ) : ActorBasi
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		
-				
+				val planner = unibo.planner23.Planner23Util()
 				lateinit var destination  : String
 				var xDestination : Int = 0
 				var yDestination : Int = 0
@@ -33,7 +33,7 @@ class Transporttrolleymover ( name: String, scope: CoroutineScope  ) : ActorBasi
 				state("init") { //this:State
 					action { //it:State
 						 unibo.basicomm23.utils.CommUtils.outcyan("$name	|	starting...") 
-						 unibo.planner23.Planner23Util().initAI()  
+						 planner.initAI()  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -76,9 +76,9 @@ class Transporttrolleymover ( name: String, scope: CoroutineScope  ) : ActorBasi
 				state("plan") { //this:State
 					action { //it:State
 						
-									unibo.planner23.Planner23Util().setGoal(xDestination, yDestination)
-									unibo.planner23.Planner23Util().doPlan()
-									PATH = unibo.planner23.Planner23Util().doPlanCompact()
+									planner.setGoal(xDestination, yDestination)
+									planner.doPlan()
+									PATH = planner.doPlanCompact()
 									unibo.basicomm23.utils.CommUtils.outcyan("$name	|	moving to $destination")
 						//genTimer( actor, state )
 					}
@@ -100,9 +100,9 @@ class Transporttrolleymover ( name: String, scope: CoroutineScope  ) : ActorBasi
 				}	 
 				state("lookForFix") { //this:State
 					action { //it:State
-						 unibo.planner23.Planner23Util().doPathOnMap(PATH)  
+						 planner.doPathOnMap(PATH)  
 						 someToFix = false  
-						if(  unibo.planner23.Planner23Util().getDirection() != dir  
+						if(  planner.getDirection() != dir  
 						 ){ someToFix = true  
 						}
 						//genTimer( actor, state )
@@ -118,7 +118,7 @@ class Transporttrolleymover ( name: String, scope: CoroutineScope  ) : ActorBasi
 				state("fixDir") { //this:State
 					action { //it:State
 						 
-									PATH = utility.DirectionFixer.getPathForFixDir(unibo.planner23.Planner23Util().getDirection(), dir) 
+									PATH = utility.DirectionFixer.getPathForFixDir(planner.getDirection(), dir) 
 								 	unibo.basicomm23.utils.CommUtils.outcyan("$name	|	fixing direction")
 						//genTimer( actor, state )
 					}
@@ -143,7 +143,7 @@ class Transporttrolleymover ( name: String, scope: CoroutineScope  ) : ActorBasi
 					action { //it:State
 						 unibo.basicomm23.utils.CommUtils.outcyan("$name	|	moveKo") 
 						attempt++ 
-						if( checkMsgContent( Term.createTerm("dopathfail(ARG)"), Term.createTerm("dopathfail(ARG)"), 
+						if( checkMsgContent( Term.createTerm("dopathfail(PATHSTILLTODO)"), Term.createTerm("dopathfail(ARG)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 									
 												try{

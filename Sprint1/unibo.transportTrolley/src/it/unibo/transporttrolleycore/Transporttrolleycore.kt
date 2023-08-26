@@ -22,6 +22,7 @@ class Transporttrolleycore ( name: String, scope: CoroutineScope  ) : ActorBasic
 				lateinit var POS : String
 				val tTState = transporttrolley.state.TransportTrolleyState()
 				var updateFlag = 0
+				var FW = 0F
 		return { //this:ActionBasciFsm
 				state("init") { //this:State
 					action { //it:State
@@ -101,8 +102,8 @@ class Transporttrolleycore ( name: String, scope: CoroutineScope  ) : ActorBasic
 						                        currentMsg.msgContent()) ) { //set msgArgList
 									
 												try{
-													val FW = payloadArg(0).trim().uppercase()
-													POS = "ColdRoom"
+													FW = payloadArg(0).trim().uppercase().toFloat()
+													POS = "PORT"
 												}catch(e : Exception){}	
 						}
 						request("moveto", "moveto($POS)" ,"transporttrolleymover" )  

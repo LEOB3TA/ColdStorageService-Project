@@ -17,7 +17,6 @@ import unibo.basicomm23.utils.CommUtils
 import unibo.basicomm23.tcp.TcpClientSupport
 import java.util.concurrent.ArrayBlockingQueue
 
-
 class TestTransportTrolleyCore {
     companion object{
 
