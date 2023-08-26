@@ -8,7 +8,14 @@
       <module name="Sprint1.unibo.coldstorageservice" target="11" />
       <module name="Sprint1.unibo.coldstorageservice.main" target="11" />
       <module name="Sprint1.unibo.coldstorageservice.test" target="11" />
+      <module name="truck.unibo.coldstorageservice" target="11" />
+      <module name="truck.unibo.coldstorageservice.main" target="11" />
       <module name="truck.unibo.coldstorageservice.test" target="11" />
+      <module name="unibo.basicrobot23" target="1.8" />
+      <module name="unibo.basicrobot23.main" target="1.8" />
+      <module name="unibo.basicrobot23.test" target="1.8" />
+      <module name="unibo.coldstorageservice" target="11" />
+      <module name="unibo.coldstorageservice.main" target="11" />
       <module name="unibo.coldstorageservice.test" target="11" />
     </bytecodeTargetLevel>
   </component>

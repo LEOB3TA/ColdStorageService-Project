@@ -1,4 +1,4 @@
-System /* -trace*/coldstorageservice
+System /* -trace*/mocktruck
 
 Request deposit : deposit(_)
 Request sendTicket : sendTicket(TICKETID)
