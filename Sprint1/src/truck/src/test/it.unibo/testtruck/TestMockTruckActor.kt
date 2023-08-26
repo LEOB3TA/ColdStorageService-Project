@@ -3,6 +3,7 @@ package test.it.unibo.testtruck
 import it.unibo.kactor.QakContext.Companion.getActor
 import junit.framework.Assert
 import it.unibo.ctxtruck.main
+import it.unibo.mocktruck.Mocktruck
 import org.junit.Before
 import org.junit.Test
 import resources.TruckState
@@ -50,39 +51,40 @@ class TestMockTruckActor{
         }
     }
 
-    private fun startObs(addr:String){
-        val setupOkA = ArrayBlockingQueue<Boolean>(1)
-        object : Thread(){
-            override fun run(){
-                obs = TypedCoapTestObserver {
+
+    fun startObs(addr: String?) {
+        val setupOk = ArrayBlockingQueue<Boolean>(1)
+
+        object : Thread() {
+            override fun run() {
+                obs = TypedCoapTestObserver{
                     TruckState.fromJsonString(it)
                 }
-                val ctx  = "ctxtruck"
-                val act  = "mocktruck"
-                val path = "$ctx/$act"
+                val ctx = "ctxtransporttrolley"
+                val actor = "transporttrolleycore"
+                val path = "$ctx/$actor"
                 val coapConn = CoapConnection(addr, path)
                 coapConn.observeResource(obs)
                 try {
-                    setupOkA.put(true)
+                    setupOk.put(true)
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }
             }
         }.start()
-        setupOk=setupOkA.take()
+        setupOk.take()
     }
     @Test
     @Throws(InterruptedException::class)
     fun testStoreFood(){
-        var asw = ""
+      /*  var asw = ""
         val prevState = obs.currentTypedState!!
         println("TestMockTruckActor  |   testStoreFood...")
-        val storeFood = "msg(storeFood, request, testunit, coldstorageservice, storeFood(100), 1)"
         try {
-            asw = conn.forward(storeFood).toString()
+            conn.reply("msg(requestAccepted, request, testunit, mockTruck, requestAccepted(1), 1)")
         }catch (e:Exception){
             e.printStackTrace()
-        }
+        }*/
         val newState = obs.getNext().toString()
         Assert.assertTrue(newState.contains("storeaccepted"))
     }

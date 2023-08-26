@@ -34,7 +34,7 @@
         <ul>
             <li>A partire dallo sprint0 analizzare il core business dell'applicazione</li>
             <li>Trovare ad analizzare eventuali criticit&agrave; dei requisiti</li>
-            <li>Implementare un simulatore del truck, in modo da simulare un interazione del driver con la <b>ServiceAccessGui</b>, che interagisca con il <b>ColdStorageService</b></li>
+            <li>Implementare un <b>MockTruck</b> in modo da simulare un interazione del driver con la <b>ServiceAccessGui</b>, che interagisca con il <b>ColdStorageService</b></li>
             <li>Implementare il <b>ColdStorageService</b></li>
             <li>Implementare il <b>TrasportTrolley</b> e interfacciarlo con il <b>BasicRobot</b></li>
             <li>Testing del sistema</li>
@@ -65,6 +65,8 @@
             Quando il driver presenta il ticket &egrave; possibile che il <b>ColdStorageService</b> non riesca a fornire la risposta <b>chargeTaken</b> in tempi brevi, in quanto il <b>TrasportTrolley</b> potrebbe essere occupato, quindi il driver non saprebbe se la sua richiesta &egrave; in attesa di una risposta oppure se il ticket non &egrave; stato accettato.
             <li><b>Errore interno del ColdStorageService</b></li>
             Se il <b>ColdStorageService</b> ha degli errori interni che implicano un down del servizio, come reagisce il driver.
+            <li><b>Quando il driver deve liberare la indoor</b></li>
+            Il driver deve liberare la <b>INDOOR</b> appena "as soon as possible" cio&egrave; appena preso il carico, oppure deve aspettare che il carico sia stato scaricato all'interno della <b>ColdRoom</b>
         </ol>
         <h5>Possibili soluzioni</h5>
         <ol>
@@ -77,39 +79,71 @@
             Per sopperire a questo problema &egrave; necessario creare un interazione a due fasi: una in cui il driver presenta il proprio ticket (<b>sendTicket</b>) e riceve una risposta da parte del ColdStorageService (<b>ticketAccepted/ticketRejected</b>); e una in cui il driver invia la richiesta di deposito (<b>deposit</b>) e riceve poi <b>chargeTaken</b>
             <li><b>Errore interno del ColdStorageService</b></li>
             &Egrave; possibile introdurre un timeout per ogni richiesta, in modo che il driver abbandoni alla scadenza del timer. Il timer &egrave; stato fissato a <b>60</b> secondi.
+            <li><b>Quando il driver deve liberare la indoor</b></li>
+            In questa fase di sviluppo &egrave; stato adottato l'approccio "as soon as possible"
         </ol>
-
-
     </div>
 
-    <!--  <h2>Architettura Logica</h2>
+    <h2>Architettura Logica</h2>
      <div class="remark">
              <br>
-         Modello: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0/src/sprint0.qak" target="_blank">sprint0.qak</a>
+         Modello: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint1/src/sprint1.qak" target="_blank">sprint1.qak</a> <!-- TODO fare il modello completo -->
          <br>
-             <img src="./resources/images/coldstorageservicearch.png" alt="architettura logica">
+             <img src="./resources/images/coldstorageservicearch.png" alt="architettura logica"> <!-- TODO inserire l'immagine corretta-->
 
-     </div> -->
+     </div>
 
 
        <!--  <h2>Piano di lavoro</h2>
 
          </div> -->
 
-     <!--
              <h2>Project</h2>
               <div class="remark">
-
-
-
+                  <h3>MockTruck</h3>
+                  Il MockTruck &egrave; stato modellato come un <b>Attore Qak</b>, si compone di diversi stati che vengono ripetuti ciclicamente, in modo da rispettare l'obiettivo di simulare un driver che interagisce con la <b>ServiceAccessGUI</b><br>
+                  Il comportamento creato non implica pi&ugrave; driver contemporanei ma solo uno che tenta il deposito ciclicamente.<br>
+                  In seguito viene riportato il diagramma degli stati.<br>
+                  <img src="./resources/images/MockTruckState.drawio.png" alt="MockTruckState">
+                  <br>
+                  Gli stati che rappresentato un rifiuto o un errore del sistema (Rejected, HandleError, handleTicketExpired), stampano degli errori e ripetono il ciclo.<br>
+                  La transizione tra lo stato <b>Accepted</b> e <b>SendTicket</b> rappresenta il viaggio che deve compiere il driver per arrivare alla <b>INDOOR</b>.<br>
+                  Lo stato <b>SendDeposit</b> implementa l'approccio "as soon as possible" descritto nell'analisi del problema, quindi al momento della ricezione del messaggio <b>chargeTaken</b> il driver abbandona l'indoor.
+                  Prima di ripere il ciclo, all'interno dello stato <b>IDLE</b> &egrave; presente una sleep.
+                  <pre>
+Thread.sleep(Random.nextLong(1, 2001))
+                  </pre>
+                  <br>
+                  Sono presenti tre variabili che vengono modificate a ogni ciclo.
+                  <pre>
+var FW = 0
+var DT = 1000L
+var TICKETID = 0
+                  </pre>
+                  In particolare, le variabili <b>FW</b> e <b>DT</b> vengono inizializzate a dei valori casuali attraverso una funzione all'interno dello stato <b>IDLE</b>:
+                  <pre>
+fun initDriver(){
+    FW =  Random.nextInt(1, 101)
+    DT = Random.nextLong(1, 2001)
+}
+                  </pre>
+                  Invece la variabile <b>TICKETID</b> viene assegnata all'interno dello stato <b>Accepted</b>, prendendo il valore dalla risposta <b>storeAccepted</b>
+                  <pre>
+onMsg (storeAccepted : storeAccepted(TICKETID)){
+   		[#
+   			TICKETID = payloadArg(0).toInt()
+   		#]
+}
+                  </pre>
              </div>
 
          <h2>Testing</h2>
          <div class="remark">
+             <h3>MockTruck</h3>
 
          </div>
 
-
+<!--
          <h2>Deployment</h2>
          <div class="remark">
 

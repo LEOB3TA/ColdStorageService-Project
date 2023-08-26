@@ -17,7 +17,7 @@ class TypedCoapTestObserver<T> (private val mapper : (String) -> T
                 currentTypedState = null
             else{
                 currentTypedState = mapper(currState!!)
-                stateHistory.put(currentTypedState)
+                currentTypedState?.let { stateHistory.put(it) }
             }
 
 
