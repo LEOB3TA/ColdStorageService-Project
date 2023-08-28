@@ -1,0 +1,618 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<!--
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<link rel="stylesheet" type="text/css" href="resources/css/sprint0.css">
+
+<head>
+
+    <title>Sprint0</title></head>
+
+<body>
+<!--
+<div id="top">
+    <h1><b>PROGETTO DI INGEGNERIA DEI SISTEMI SOFTWARE</b> - SPRINT 0 <font size="5"></font></h1>
+    <h3>Gruppo di lavoro: Focardi, Galeone, Porrazzo <font size="3"></font></h3>
+</div>
+-->
+<div class="body">
+    <h2>Introduction</h2>
+    <div class="remark"> Progetto finale di ISS, finalizzato allo sviluppo software di un magazzino refrigerato, nel
+        quale
+        vi &egrave; un robot che ha il compito di trasportare del cibo da un punto di partenza - chiamato INDOOR - alla cella
+        frigorifera.
+    </div>
+
+    <h2>Requirements</h2>
+    <div class="remark">
+        <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/TemaFinale23.html">Tema Finale </a>
+    </div>
+
+    <h2>Requirement analysis</h2>
+    <div class="remark">
+        <h3>Formalizzazione dei requisiti</h3>
+        Per la formalizzazione dei requisiti verr&agrave; usato il linguaggio Kotlin.<br>
+        D'altra parte, alcuni requisiti introducono un <i>abstraction gap</i>, per il quale non bastano i costrutti
+            dei
+            linguaggi di programmazione pi&ugrave; diffusi. Per questo motivo, la nostra software house ha creato su misura il
+            <b class="ks">QActor meta-model</b> (QAK) per
+            soddisfare questi requisiti. La documentazione di questo meta-model si trova a questo indirizzo:
+        <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/QakActors23.html">QActor meta-model</a>
+        I requisiti verranno riportati di seguito in ordine di importanza.
+        <br /> <br />
+        Di seguito si riporta del software gi&agrave; scritto, si riserva la possibilit&agrave; di
+        apportare alcune modifiche a tale software.
+        <!--------------SERVICE AREA-------------------------->
+        <h4>Service Area</h4>
+        Stanza rettangolare piana di dimensioni note, priva di ostacoli interni e delimitata da pareti solide.
+        All'interno della
+        stanza troviamo una
+        <bc>INDOOR port</bc>
+        , dalla quale viene prelevato il cibo, e una
+        <bc>ColdRoom</bc>
+        , nella quale viene depositato il cibo.
+        Possiamo formalizzare le dimensioni della stanza con due valori
+        <kc>serviceAreaLength</kc>
+        e
+        <kc>serviceAreaWidth</kc>
+        , che rappresentano rispettivamente la lunghezza e la larghezza della stanza.
+        <pre>
+        <key>val</key> serviceAreaLength :  Float
+        <key>val</key> serviceAreaWidth   :  Float</pre>
+
+        <!--------------COLD ROOM-------------------------->
+        <h4>ColdRoom</h4>
+        Stanza refrigerata che ha l'obiettivo di tenere al fresco il cibo che il robot deposita. La stanza pu&ograve; contenere
+        fino a <b>MAXW</b> kg di cibo.
+        Possiamo formalizzare la capacit&agrave; della stanza con
+        <ul>
+            <li> una costante
+                <kc>MAXW</kc>
+                , che rappresenta il peso massimo che la stanza pu&ograve; contenere.
+            </li>
+            <li> una variabile
+                <kc>coldRoomCurrentWeight</kc>
+                , che rappresenta il peso attuale di cibo contenuto nella stanza.
+            </li>
+        </ul>
+
+        <pre>
+        <key>val</key> MAXW :  Double
+        <key>var</key> coldRoomCurrentWeight : Double</pre>
+
+        <!--------------DDR ROBOT-------------------------->
+        <h4>DDR Robot</h4>
+        Il Differential Drive Robot &egrave; un robot fisico che esegue le seguenti operazioni:
+        <ul>
+            <li>si muove avanti e indietro in linea retta</li>
+            <li>si ferma</li>
+            <li>ruota di 90&deg; a destra o a sinistra</li>
+        </ul>
+        Queste azioni sono eseguite alla ricezione dei relativi comandi da parte del sistema.
+        Il cliente fornisce software capace di interfacciare il DDR robot con altri robot (reali o virtuali): <a href="https://github.com/anatali/issLab23/tree/main/unibo.basicrobot23">unibo.basicrobot23</a>.
+        L'attore QAK <a href="https://github.com/anatali/issLab23/blob/main/unibo.basicrobot23/src/basicrobot.qak">basicrobot.qak</a> di unibo.basicrobot23 &egrave; in grado di interfacciarsi con il DDR robot e di
+        eseguire i comandi di movimento e rotazione.
+
+
+        Il componente <span class="blue">basicrobot</span> viene visto dall'esterno come un servizio che realizza un insieme di funzionalit&agrave;:
+        <ul class="arabic simple">
+            <br>
+            <li>Esecuzione di richieste di <span class="brown">ingaggio</span>:
+                <pre><span class="high">Request engage : engage(CALLER)
+Reply   engagedone    : engagedone(ARG)
+Reply   engagerefused : engagerefused(ARG)
+Dispatch disengage    : disengage(ARG)</span></pre>
+            </li>
+            <li>Esecuzione di <span class="brown">comandi elementari</span> di movimento: <pre><span class="high">Dispatch cmd : cmd(MOVE)
+Dispatch end : end(ARG)</span></pre></p>
+            </li>
+            <li>Esecuzione di <span class="brown">step</span> (movimento in avanti per un tempo dato): <pre><span class="high">Request step:step(TIME)
+Reply stepdone : stepdone(V)
+Reply stepfailed : stepfailed(DURATION, CAUSE)</span></pre></p></li>
+            <li>Esecuzione di <span class="brown">sequenze di movimento</span> (piani): <pre><span class="high">Request doplan:doplan(PATH,STEPTIME)
+Reply doplandone : doplandone(ARG)
+Reply doplanfailed : doplanfailed(ARG)</span></pre></p></li>
+            <li>Esecuzione di <span class="brown">posizionamento</span>: <pre><span class="high">Request moverobot:moverobot(TARGETX, TARGETY)
+Reply moverobotdone : moverobotok(ARG)
+Reply moverobotfailed : moverobotfailed(PLANDONE, PLANTODO)</span></pre></p></li>
+        </ul>
+
+
+        <!--------------TRANSPORT TROLLEY-------------------------->
+        <div id="tRolley">
+            <h4>Transport Trolley</h4>
+            Il carrello di trasporto &egrave; un'entit&agrave; software che deve interagire con il robot DDR. A tal fine,
+            il carrello di trasporto deve interfacciarsi con il basicrobot.
+            Il carrello di trasporto deve essere in grado di eseguire le stesse azioni del robot DDR, tuttavia il software
+            fornito dal cliente in unibo.basicrobot23 &egrave; un attore, e come tale non prevede il concetto di ereditariet&agrave;,
+            quindi il carrello di trasporto non pu&ograve; essere formalizzato utilizzando l'ereditariet&agrave;.
+            <br>
+            Il trasport trolley ha la forma di un quadrato con dimensione del lato prefissata <b>RD</b>
+            <br>
+            Il trasport trolley pu&ograve; essere modellato come modello Qak:
+            <pre>
+Dispatch backhome : backhome(_)
+
+QActor transporttrolley context ctxstorageservice{
+    [#
+        val tTstate = transporttrolley.state.TransportTrolleyState(transporttrolley.state.CurrStateTrolley.IDLE)
+    #]
+    State s0 initial{
+    	...
+    }
+    Goto idle
+
+    State idle{
+    	...
+    }
+
+
+    State pickingup{
+    	...
+    }
+    Transition t0 whenMsg dropout -> droppingout
+
+    State droppingout{
+        ...
+    }Transition t0 whenMsg backhome -> backhome
+
+    State backhome{
+        ...
+    }
+    Goto idle
+}
+        </pre>
+            <br>
+            Per verificare il corretto funzionamento del carrello di trasporto e capire meglio qual &egrave; il comportamento atteso,
+            abbiamo preparato alcuni semplici test ( <a href="">TestTransportTrolleyActor.kt</a> ).
+        </div>
+
+        <!--------------SEQUENZA OPERATIVA-------------------------->
+        <h4>Sequenza operativa</h4>
+        Rappresenta le azioni che deve compiere il <bc>Transport trolley</bc>, che inizialmente &egrave; situato in <bc>HOME</bc>:
+        <ol>
+            <br>
+            <li>Prendere un carico di cibo da un camion situato alla <bc>INDOOR</bc></li>
+            <li>Spostarsi dalla <bc>INDOOR</bc> alla <bc>PORT</bc> della <span class="blue" >ColdRoom</span class="blue"> </li>
+            <li>Depositare il carico di cibo nella <span class="blue" >ColdRoom</span class="blue"> </li>
+            <br>
+        </ol>
+<!--        La fase di trasporto del carico di cibo pu&ograve; essere divisa in due fasi:-->
+<!--        <ul>-->
+<!--            <br>-->
+<!--            <li>Fase di <kc>PickingUp</kc>, in cui il robot deve prelevare il carico dal camion, quindi si muove verso la indoor</li>-->
+<!--            <li>Fase di <kc>DroppingOut</kc>, in cui il robot si muove verso la Port della ColdRoom e deposita il carico al suo interno</li>-->
+<!--        </ul>-->
+        Considerando che il driver deve rimuovere il suo furgone il pi&ugrave; velocemente possibile dalla <kc>Indoor</kc>, le due fasi possono essere formalizzate rispettivamente attraverso una<kc>Request-response Qak</kc> e un <kc>Dispatch</kc>:
+        <pre>
+        </pre>
+        <!--------------SONAR------------------------->
+        <h4>Sonar</h4>
+        Rappresenta l'astrazione del sensore fisico 'HC-SR04'. Il cliente ci ha gi&aacute; fornito in precedenza il software relativo al sonar, formalizzando il sonar come un attore <kc>Qak</kc> <a href="https://github.com/anatali/issLab23/tree/main/unibo.sonarqak23">unibo.sonarqak23</a>.<br>
+        Il software emette evneti a seconda della distanza, inoltre &egrave; possibile usare i comandi <bc> Dispatch </bc>per attivare o disattivare il sonar.
+        <pre>
+Dispatch sonaractivate     : info(ARG)
+Dispatch sonardeactivate   : info(ARG)
+Event sonar                : distance(V)
+        </pre>
+        <br><br>
+        <img src="./resources/images/sonarpipenano.png" alt="legenda" style="width: 78%;>
+
+        <!-------------Store Food--------->
+        <div id="sf">
+        <br>
+         L'attore <bc>distanceFilter</bc> filtra e invia al prossimo attore eventi di tipo ostacolo: l'evento viene creato solo quando la distanza 'filtrata' rilevata &egrave; minore di una distanza fissa predefinita <kc>DLIMIT</kc>.
+        <pre>
+Event obstacle  :  obstacle(distance)
+        </pre>
+
+        <!--------------LED-------------------------->
+        <div id="led">
+        <h4>Led</h4>
+        Il Led &egrave; un dispositivo di output presente nel RaspberryPi; le azioni che pu&oacute; compiere sono:
+        <ul>
+            <br>
+            <li>Led Off: quando il Transport Trolley &egrave; in HOME</li>
+            <li>Led On: quando il Transport Trolley &egrave; fermo </li>
+            <li>Led Blink: quando il Transport Trolley si sta muovendo</li>
+            <br>
+        </ul>
+        Il cliente ci ha fornito in precedenza il software per il Led che potrebbe essere utilizzato: <a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarRystem23</a> <br>
+        Il comportamento del Led pu&oacute; essere espresso tremite un attore Qak:
+        <pre>
+Dispatch turnOn : turnOn(_)
+Dispatch turnOff : turnOff(_)
+Dispatch blink : blink(_)
+
+QActor led context ctxrasp {
+
+    State setup initial {
+        println("$name | setup")
+    }Goto off
+
+    State on {
+
+    }
+    Transition t0 whenMsg blink -> blink
+                    whenMsg turnOff -> off
+
+
+    State off{
+    }
+    Transition t0 whenMsg turnOn -> on
+                    whenMsg blink -> blink
+
+
+    State blink{
+    }
+    Transition t0 whenMsg turnOn -> on
+                    whenMsg turnOff -> off
+}
+            </pre>
+        </div>
+        <!--------------RD-------------------------->
+        <h4>RD</h4>
+        Dimensione relativa alla lunghezza del Transport Trolley.
+        <pre>
+val RD :  Int
+        </pre>
+            <!--------------MINT -------------------------->
+        <h4>MINT </h4>
+        Valore prefissato per il quale il trolley in movimento non pu&ograve; essere fermato nuovamento dopo uno stop antecedente.
+        <pre>
+val MINT : Float
+        </pre>
+
+            <!--------------DLIMIT-------------------------->
+        <h4>DLIMIT</h4>
+        Valore per cui il Transport Trolley deve fermarsi se la distanza rilevata dal Sonar &egrave; minore di DLIMIT. Il Transport Trolley verr&agrave; riattivato una
+        volta che il sonar rilevi una distanza maggiore di DLIMIT.
+        <pre>
+val DLIMIT : Float
+        </pre>
+
+            <!--------------FW-------------------------->
+        <h4>FW</h4>
+        Rappresenta il peso in chilogrammi, che si intende depositare nella ColdRoom.
+        <pre>
+var FW :  Float
+        </pre>
+
+
+        <!--------------ServiceAccessGUI-------------------------->
+        <h4>ServiceAccessGUI</h4>
+        La ServiceAccessGui &egrave; un' interfaccia grafica che consente a una persona di osservare il peso corrente del cibo immagazzinato all'interno
+        della <kc>ColdRoom</kc>, ma soprattuto consente ai driver che necessitano di depositare del cibo all'interno della <kc>ColdRoom</kc>, di inviare messaggi al <kc>ColdStorageService</kc> per immagazzinare un nuovo carico cibo.
+        Se la richiesta viene accettata viene restituito un <b>TICKET</b>.
+
+        <!--------------Ticket-------------------------->
+        <h4>Ticket</h4>
+        Il ticket &egrave; rappresenta l'oggetto restituito dalla <kc>ServiceAccessGUI</kc>, al momento di arrivo di un nuovo furgone.<br>
+        Possiede due campi:
+        <pre>
+<key>val</key> TICKETID : Int
+<key>val</key> TICKETTIME : UInt
+        </pre>
+        In cui <b>TICKETID</b> rappresenta l'dentificativo del ticket che dovr&agrave; essere presentato in seguito presso l'<kc>INDOOR</kc>, <b>TICKETTIME</b> rappresenta il tempo in secondi entro il quale il driver si deve presentare presso la <kc>INDOOR</kc>
+
+        <!--------------Stato corrente del Transport Trolley-------------------------->
+        <h4>Stato corrente del Transport Trolley</h4>
+        Indica lo stato del <a href="#Ttrolley"><kc>Transport Trolley</kc></a>, pu&oacute; essere formalizzato come un enumerativo <a href="">TransportTrolleyState.kt</a>
+        <pre>
+enum class CurrStateTrolley { IDLE, STOPPED, MOVING, PICKINGUP }
+        </pre>
+
+        <!--------------Posizione del Transport Trolley-------------------------->
+        <h4>Posizione del Transport Trolley</h4>
+        Indica le varie posizione possibili del <a href="#Ttrolley"><kc>Transport Trolley</kc></a>, pu&oacute; essere formalizzato come un enumerativo <a href="">TransportTrolleyPosition.kt</a>
+        <pre>
+enum class TTPosition { HOME, INDOOR, PORT }
+        </pre>
+
+        <!--------------Stato del Led-------------------------->
+        <h4>Stato del Led </h4>
+        Indica i vari stati che il <a href="#led"><kc>Led</kc></a> pu&ograve; assumere: On, Blinking, Off.
+        Pu&oacute; essere formalizzato come un enumerativo <a href="">LedState.kt</a>
+        <pre>
+enum class CurrStateLed { ON, OFF, BLINKING }
+        </pre>
+
+        <!--------------Richiesta di deposito-------------------------->
+        <h4>Richiesta di deposito</h4>
+        Rappresenta la richiesta che un driver pu&ograve; effettuare attraverso la <kc>ServiceAccessGUI</kc> che viene processata dallo <kc>ColdStorageService</kc>.
+        Per formalizzare la richiesta utilizziamo il linguaggio <kc>Qak</kc>:
+        <pre>
+Request storeFood : storeFood(FW)
+        </pre>
+        <!--------------Scarico consentito-------------------------->
+        <h4>Scarico consentito</h4>
+        Nel caso in cui <kc>ColdStorageService</kc>, a seguito di una <kc>Request storeFood</kc>, rispondesse in modo affermativo &egrave; possibile scaricare il cibo nella <kc>ColdRoom</kc>;in questo caso viene generato un <b>TICKET</b> che viene assegnato al driver.
+        La formalizzazione di questo concetto pu&ograve; essere espressa attraverso il linguaggio Qak.
+        <pre>
+Reply storeAccepted : storeAccepted(TICKET)
+        </pre>
+
+        <!--------------Scarico non consentito-------------------------->
+        <h4>Scarico non consentito</h4>
+        Nel caso in cui <kc>ColdStorageService</kc>, a seguito di una <kc>Request storeFood</kc>, rispondesse in modo negativo, non &egrave; possibile scaricare il cibo nella <kc>ColdRoom</kc>.
+        La formalizzazione di questo concetto pu&ograve; essere espressa attraverso il linguaggio Qak.
+        <pre>
+Reply storeRejected : storeRejected(_)
+        </pre>
+
+        <!--------------Cold Storage Service-------------------------->
+        <h4>Cold Storage Service</h4>
+       &Egrave; il servizio che coordina il deposito del cibo, interfacciandosi con il <kc>Transport Trolley</kc> per effettuare le azioni necessarie.<br>
+        Per questo &egrave; un entit&agrave; <b>attiva</b> che deve essere in grado di ricevere richiesta ( <kc>storeFood</kc>)  e mandare risposte (<kc>storeAccepted</kc>, <kc>storeRejected</kc>).<br>
+        Pu&ograve; essere formalizzato come un attore attraverso il linguaggio Qak:
+        <pre>
+QActor coldstorageservice context ctxstorageservice {
+
+[#
+    val maxw =  wasteservice.Constants.MAXW
+    var curretWeightStorage = 0.0
+    var requestWeightToStore = 0.0
+#]
+        State setup initial {
+            ...
+        }
+        Goto idle
+        
+        State idle {
+            ...
+        }
+        Transition t0 whenRequest storeFood -> requestEvaluation
+                      whenRequest deposit -> depositEvaluation
+
+        State requestEvaluation {
+        onMsg(storeFood : storeFood(FW)){
+            ...
+        }
+    }Goto acceptRequest if[# coldRoom.canStore(requestWeightToStore) #]
+                            else rejectRequest
+
+            State depositEvaluation{
+            onMsg(deposit : deposit(TICKET)){
+            }
+        } Goto charged
+
+        State charged{
+            replyTo deposit with chargeTaken : chargeTaken(_)
+        }Goto idle
+    State rejectRequest{
+        replyTo storeFood with storeRejected : storeRejected(_)
+    }Goto idle
+
+    State acceptRequest{
+        replyTo storeFood with storeAccepted : storeAccepted(_)
+    }Transition t0 whenReply chargeTaken -> idle
+
+}
+</pre>
+    <!----------User stories--------------------->
+    <div class="remark">
+        <h3> User Stories </h3>
+            Al fine di rendere le immagini relative alle User Stories di facile comprensione,
+            si introduce di seguito una legenda relativa ai simboli usati successivamente.
+                <br><br>
+                <img src="./resources/images/legenda.drawio.png" alt="legenda" style="width: 78%;>
+
+        <!-------------Store Food--------->
+        <div id="sf">
+        <h4>Store Food</h4>
+        Assumendo il punto di vista di un Fridge Truck driver:
+        <ul>
+            <li>Al momendo dell'arrivo interagisco con la <kc>ServiceAccessGUI</kc> <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">1</div> per mandare una richiesta di
+            deposito del carico di cibo. A questo punto attendo la risposta da parte del <kc>ColdStorageService</kc>.
+            La risposta pu&ograve; essere positiva ( <kc>loadaccepted</kc> ) e relativa emissione del Ticket<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2a</div>
+            o negativa ( <kc>loadrejected</kc> ) <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2b</div>
+            </li>
+            <li>
+                Se la risposta &egrave; positiva ( <kc>loadaccepted</kc> ) mi aspetto che il <kc>Transport Trolley</kc>
+                raggiunga l'INDOOR<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>, prenda il cibo per poi dirigersi verso la
+                <kc>Cold Room </kc> al fine di depositare il cibo.
+                Nel mentre il <kc>ColdStorageService</kc> manda il messaggio <b> chargeTaken</b> e il Ticket al driver. <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">4</div>
+                Una volta che il carico &egrave; stato depositato ed il messaggio <b> chargeTaken</b> ricevuto, il
+                furgone deve lasciare l'area <kc> INDOOR</kc>.<div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">5</div> <br/>
+                Nel caso in cui il Ticket scada ( ovvero sia passato un tempo maggiore o pari a TicketTime
+                prima di raggiungere <kc>INDOOR</kc>), l'autista esce dal sistema.
+            </li>
+            <li>
+                Se la risposta &egrave; negativa ( <kc> loadrejected </kc> ) me ne vado e libero l'area <kc>INDOOR</kc>
+                <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>.
+            </li>
+        </ul>
+        <!-- Double sided images      -->
+            <div style="display: flex; justify-content: space-around;">
+            <img src="./resources/images/requestAccepted.drawio.png" alt="" style="width: 48%;"><img src="./resources/images/requestRejected.drawio.png" alt="" style="width: 40%;">
+        </div>
+
+        <!-------------Service Status Area--------->
+        <div id="ssa">
+        <h4>Service Status GUI</h4>
+
+            Assumendo il punto di vista di un service-manager, uso la <kc>ServiceStatusGUI</kc> messa a disposizione
+            dal <kc>ColdStorageService </kc> per osservare:
+            <ul>
+                <li>
+                    Lo stato corrente del <kc>Transport Trolley</kc>
+                    (working <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">1</div>, stopped <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">2</div>, waiting <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">3</div>) e la sua posizione nella stanza.
+                  <br><br>
+                    <img src="./resources/images/firstGUI.drawio.png" alt="" style="width: 40%;">
+
+                </li>
+                <li>
+                    Il peso corrente del cibo deposistato nell <kc>Cold Room </kc>
+                    <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">4</div> .
+                                   <br><br>
+                     <img src="./resources/images/secondGUI.drawio.png" alt="" style="width: 40%;">
+                </li>
+                <li>
+                    Il numero di richieste di deposito rifiutate
+                    <div style="border: 2px solid #000000; display:inline-block; border-radius: 100%;height: 20px;width: 20px;text-align: center;">5</div>.
+                                   <br><br>
+                    <img src="./resources/images/thirdGUI.drawio.png" alt="" style="width: 40%;">
+                </li>
+            </ul>
+        </div>
+    </div>
+    <h2>Architettura Logica</h2>
+    <div class="remark">
+            <br>
+        Modello: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0Reviewed/src/sprint0reviewed.qak" target="_blank">sprint0reviewed.qak</a>
+        <br>
+            <img src="./resources/images/coldstorageservicearchreviewed.png" alt="architettura logica">
+
+    </div>
+
+
+        <h2>Piano di lavoro</h2>
+         <div class="remark">
+             Tutti gli sprint sotto intendono delle migliorie e delle eventuali modifiche del lavoro fatto negli sprint precedenti
+            <h3>Sprint 1 (Tempo stimato per lo sviluppo : 1 settimana circa)</h3>
+             Core business dell'applicazione:
+             <ul>
+                 <li>Transport trolley e interfacciamento con il basic robot</li>
+                 <li>Cold storage service</li>
+                 <li>Simulatore dei driver</li>
+             </ul>
+             <h3>Sprint 2</h3>
+             Aggiunta specifiche di movimento del transport trolley:
+             <ul>
+                 <li>Led</li>
+                 <li>Controller</li>
+                 <li>Sonar</li>
+             </ul>
+             <h3>Sprint 3</h3>
+             Sviluppo inteerfacce grafiche:
+             <ul>
+                 <li>ServiceStatusGui</li>
+                 <li>ServiceAccessGui</li>
+             <h3>Sprint 4</h3>
+                 Deploy sul raspberry:
+                 <ul>
+                     <li>Creazione del supporto per led fisico</li>
+                     <li>Deploy del sonar</li>
+                     <li>Deploy del basic robot</li>
+                 </ul>
+             </ul>
+        </div>
+
+    <h2>Testing</h2>
+    <div class="remark">
+        Per verificare il corretto funzionamento di tutte e componenti del software abbiamo implementato una prima versione dei test
+        <br>
+        <br>
+        <table style="width:50%; text-align: center" border="1">
+            <tr>
+                <td style="width: 50%">
+                    <b>Attori</b>
+                </td>
+                <td><b>Test</b></td>
+            </tr>
+            <tr>
+                <td style="width: 50%">
+                    Transport Trolley
+                </td>
+                <td>
+                    <a href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0Reviewed/src/test/it.unibo/testtransporttrolley/TestTransportTrolleyActor.kt">TestTrasportTrolley.kt</a>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 50%">
+                    Cold Storage Service
+                </td>
+                <td>
+                    <a href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0Reviewed/src/test/it.unibo/testcoldstorageservice/TestColdStorageServiceActor.kt">TestColdStorageService.kt</a>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 50%">
+                    Led
+                </td>
+                <td>
+                    <a href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0Reviewed/src/test/it.unibo/testsensors/TestLedActor.kt">TestLedActor.kt</a>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 50%">
+                    Sonar
+                </td>
+                <td>
+                    <a href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0Reviewed/src/test/it.unibo/testsensors/TestSonarActor.kt">TestSonarActor.kt</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+
+    <!-- <h2>Project</h2>
+     <div class="remark">
+ -->
+
+
+    </div>
+    <!--
+            <h2>Project</h2>
+             <div class="remark">
+
+
+
+            </div>
+
+        <h2>Testing</h2>
+        <div class="remark">
+
+        </div>
+
+
+        <h2>Deployment</h2>
+        <div class="remark">
+
+        </div>
+
+
+        <h2>Maintenance</h2>
+        -->
+<!-- USEFUL
+<table style="width:100%" border="1">
+<tr>
+<td style="width:40%">
+</td>
+<td></td>
+</tr>
+</table>
+-->
+
+<br/><br/>
+</div>
+
+<div class="stud">
+    By Students: <br>
+    <div class="studentCardRow">
+    <div class="studentCard">
+        <div class="studentName">Leonardo Focardi</div>
+        <div class="studentEmail"><a href= "mailto:leonardo.focardi@studio.unibo.it">leonardo.focardi@studio.unibo.it</a>
+            </div>
+        <div class="studentImg"><img class="studentAvatar" src="./resources/boys/leo.jpg"></div>
+    </div>
+        <div class="studentCard">
+            <div class="studentName">Christian Galeone</div>
+            <div class="studentEmail"><a href= "mailto:christian.galeone@studio.unibo.it">christian.galeone@studio.unibo.it</a></div>
+            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/christian.jpg"></div>
+        </div>
+        <div class="studentCard">
+            <div class="studentName">Gianmiriano Porrazzo</div>
+            <div class="studentEmail"><a href= "mailto:gianmiriano.porrazzo@studio.unibo.it">gianmiriano.porrazzo@studio.unibo.it</a></div>
+            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/gian.jpg"></div>
+        </div>
+    </div>
+
+    <div class="repo">
+        GIT repo: <a href="https://github.com/LEOB3TA/issProject2023">https://github.com/LEOB3TA/issProject2023</a>
+    </div>
+
+</div>
+</body>
+</html>
