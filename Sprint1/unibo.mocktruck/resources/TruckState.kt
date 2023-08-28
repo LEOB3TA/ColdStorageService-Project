@@ -11,11 +11,11 @@ data class TruckState(
     companion object {
         private val gson = Gson()
         fun fromJsonString(str : String) : TruckState {
-            return TruckState.gson.fromJson(str, TruckState::class.java)
+            return gson.fromJson(str, TruckState::class.java)
         }
     }
 
-    fun updateTruckState(newState : CurrStateTruck){
+    fun setState(newState : CurrStateTruck){
         currState = newState
     }
 

@@ -14,12 +14,13 @@ Context ctxtruck ip [host="localhost" port=8092] //porta a caso
 
 ExternalQActor coldstorageservice context ctxstorageservice
 
-QActor mocktruck context ctxtruck{
+QActor mocktruck context ctxtruck{ 
     [#
        	var FW = 0
         var DT = 1000L  //DT= driver time tempo che ci mette il driver dopo aver ricevuto la richiesta per arrivare alla INDOOR
         var TICKETID = 0
-
+        val truckstate = TruckState()
+        
         fun initDriver(){
         	FW =  Random.nextInt(1, 101)
         	DT = Random.nextLong(1, 2001)
@@ -28,61 +29,77 @@ QActor mocktruck context ctxtruck{
     State s0 initial{
 		println("$name |	started") color green
 		println("this is an infinite loop, you need to kill the program to stop this") color red
-
+		discardMsg Off
+		
     }Goto idle
 
     State idle {
+    	  State idle {
+    	[#truckstate.setState(CurrStateTruck.IDLE)#]
+    	updateResource[#truckstate.toJsonString()#]
         println("$name |	in idle") color green
         [#
         	initDriver()
-        	Thread.sleep(Random.nextLong(1, 2001))
+        	Thread.sleep(Random.nextLong(1, 2001))	
         #]
     }Goto sendStore
 
     State sendStore {
-    	 println("$name |	sendStore")
+    	[#truckstate.setState(CurrStateTruck.SENDSTORE)#]
+    	 updateResource[#truckstate.toJsonString()#]
+    	 println("$name |	sendStore") color green
         request coldstorageservice -m storeFood : storeFood($FW)
-
-    } Transition t0 whenReply storeAccepted -> accepted
+   
+    } Transition t0 whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
+    whenReply storeAccepted -> accepted
                     whenReply storeRejected -> rejected
-
+                    
    State rejected{
+   	[#truckstate.setState(CurrStateTruck.REJECTED)#]
+   	 updateResource[#truckstate.toJsonString()#]
    		printCurrentMessage
    		println("$name |	request rejected") color green
    }Goto idle
-
+   
     State accepted{
+    	[#truckstate.setState(CurrStateTruck.ACCEPTED)#]
+    	updateResource[#truckstate.toJsonString()#]
    		printCurrentMessage
    		onMsg (storeAccepted : storeAccepted(TICKETID)){
    		[#
    			TICKETID = payloadArg(0).toInt()
    		#]
    		}
-
+   	
    		println("$name |	request accepted") color green
    }Transition t0 whenTimeVar DT -> sendTicket
-
+   
    State sendTicket{
+   	[#truckstate.setState(CurrStateTruck.SENDTICKET)#]
    		 request coldstorageservice -m sendTicket : sendTicket($TICKETID)
-   		 println("$name |	send ticket") color green
-   } Transition t0 whenReply ticketValid -> sendDeposit
+   		 println("$name |	send ticket") color green   
+   } Transition t0 whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
+   					whenReply ticketValid -> sendDeposit
     				whenReply ticketExpired -> handleTicketExpired
+    					
 
     State sendDeposit{
-        request coldstorageservice -m deposit : deposit($TICKETID)
+    	[#truckstate.setState(CurrStateTruck.SENDDEPOSIT)#]
+        request coldstorageservice -m deposit : deposit(_)
         println("$name |	send deposit") color green
     } Transition t0  whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
     					whenReply chargeTaken -> idle
-
+   					
     State handleError{
+    	[#truckstate.setState(CurrStateTruck.HANDLEERROR)#]
     	println("$name |	COLD STORAGE SERVICE ERROR") color red
     } Goto idle
-
+    				
 	State handleTicketExpired{
+		[#truckstate.setState(CurrStateTruck.HANDLETICKETEXPIRED)#]
 		println("$name |	ticket expired") color green
 	} Goto idle
 
 }
-
 
 

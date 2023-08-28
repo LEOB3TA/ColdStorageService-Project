@@ -10,8 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.random.Random
-
+	
 class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
@@ -19,8 +18,6 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
-		
-		        		var RT = Random.nextInt(1,101) //numero di ticket casuale
 		return { //this:ActionBasciFsm
 				state("setup") { //this:State
 					action { //it:State
@@ -31,75 +28,6 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="idle", cond=doswitch() )
-				}	 
-				state("idle") { //this:State
-					action { //it:State
-						CommUtils.outblue("$name |	in idle")
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t00",targetState="requestEvaluation",cond=whenRequest("storeFood"))
-					transition(edgeName="t01",targetState="ticketEvaluation",cond=whenRequest("sendTicket"))
-				}	 
-				state("requestEvaluation") { //this:State
-					action { //it:State
-						if( checkMsgContent( Term.createTerm("storeFood(FW)"), Term.createTerm("storeFood(FW)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								CommUtils.outblue("${payloadArg(0)}")
-						}
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition( edgeName="goto",targetState="acceptRequest", cond=doswitch() )
-				}	 
-				state("ticketEvaluation") { //this:State
-					action { //it:State
-						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
-						 	   
-						answer("sendTicket", "ticketValid", "ticketValid(_)"   )  
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t02",targetState="charged",cond=whenRequest("deposit"))
-				}	 
-				state("charged") { //this:State
-					action { //it:State
-						answer("deposit", "chargeTaken", "chargeTaken(_)"   )  
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition( edgeName="goto",targetState="idle", cond=doswitch() )
-				}	 
-				state("rejectRequest") { //this:State
-					action { //it:State
-						answer("storeFood", "storeRejected", "storeRejected(_)"   )  
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition( edgeName="goto",targetState="idle", cond=doswitch() )
-				}	 
-				state("acceptRequest") { //this:State
-					action { //it:State
-						
-						        		 RT = Random.nextInt(1,101) //numero di ticket casuale
-						answer("storeFood", "storeAccepted", "storeAccepted($RT)"   )  
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t03",targetState="ticketEvaluation",cond=whenRequest("sendTicket"))
 				}	 
 			}
 		}

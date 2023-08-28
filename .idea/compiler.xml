@@ -5,6 +5,9 @@
       <module name="Sprint0Reviewed-unibo.coldstorageservice" target="11" />
       <module name="Sprint0Reviewed-unibo.coldstorageservice.main" target="11" />
       <module name="Sprint0Reviewed-unibo.coldstorageservice.test" target="11" />
+      <module name="Sprint0Reviewed.unibo.coldstorageservice" target="11" />
+      <module name="Sprint0Reviewed.unibo.coldstorageservice.main" target="11" />
+      <module name="Sprint0Reviewed.unibo.coldstorageservice.test" target="11" />
       <module name="Sprint1.unibo.coldstorageservice" target="11" />
       <module name="Sprint1.unibo.coldstorageservice.main" target="11" />
       <module name="Sprint1.unibo.coldstorageservice.test" target="11" />
@@ -17,6 +20,9 @@
       <module name="unibo.coldstorageservice" target="11" />
       <module name="unibo.coldstorageservice.main" target="11" />
       <module name="unibo.coldstorageservice.test" target="11" />
+      <module name="unibo.mocktruck.test" target="11" />
+      <module name="unibo.transporttrolley" target="11" />
+      <module name="unibo.transporttrolley.main" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

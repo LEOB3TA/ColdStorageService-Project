@@ -4,8 +4,11 @@ import it.unibo.kactor.QakContext.Companion.getActor
 import junit.framework.Assert
 import it.unibo.ctxtruck.main
 import it.unibo.mocktruck.Mocktruck
+import org.junit.After
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
+import org.junit.runners.Parameterized
 import resources.TruckState
 import test.it.unibo.coapobs.TypedCoapTestObserver
 import unibo.basicomm23.coap.CoapConnection
@@ -16,11 +19,12 @@ import java.util.concurrent.ArrayBlockingQueue
 import kotlin.system.exitProcess
 
 class TestMockTruckActor{
-    private lateinit var conn : Interaction2021
-    private lateinit var obs : TypedCoapTestObserver<TruckState>
-    private var setupOk = false
 
-    private val weight = 100.0
+    companion object{ private var setupOk = false
+        private lateinit var conn : Interaction2021
+        private lateinit var obs : TypedCoapTestObserver<TruckState>}
+
+
     @Before
     fun before() {
         if(!setupOk){
@@ -45,65 +49,138 @@ class TestMockTruckActor{
             }
             startObs("localhost:8092")
             println(obs.getNext().toString())
+            Thread.sleep(2000)
         }else{
-            println("TestMockTruckActor       | clearHistory")
+            println("TestMockTruckActor       | clearHistory and reset")
+            Thread.sleep(2000)
+            conn.forward("msg(reset, dispatch, testunit, mockTruck, reset(_), 1)")
             obs.clearHistory()
         }
     }
 
 
     fun startObs(addr: String?) {
-        val setupOk = ArrayBlockingQueue<Boolean>(1)
-
+        val setupOkA = ArrayBlockingQueue<Boolean>(1)
         object : Thread() {
             override fun run() {
+                val ctx = "ctxtruck"
+                val actor = "mocktruck"
+                val path = "$ctx/$actor"
+                val coapConn = CoapConnection(addr, path)
                 obs = TypedCoapTestObserver{
                     TruckState.fromJsonString(it)
                 }
-                val ctx = "ctxtransporttrolley"
-                val actor = "transporttrolleycore"
-                val path = "$ctx/$actor"
-                val coapConn = CoapConnection(addr, path)
                 coapConn.observeResource(obs)
                 try {
-                    setupOk.put(true)
+                    setupOkA.put(true)
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }
             }
         }.start()
-        setupOk.take()
+        setupOk=setupOkA.take()
     }
     @Test
     @Throws(InterruptedException::class)
-    fun testStoreFood(){
-      /*  var asw = ""
+    fun testStoreFoodAccepted(){
+        conn.forward("msg(testStore, dispatch, testunit, mockTruck, testStore(_), 1)")
+       var asw = ""
         val prevState = obs.currentTypedState!!
-        println("TestMockTruckActor  |   testStoreFood...")
+        println("TestMockTruckActor  |   testStoreFoodAccepted...")
         try {
-            conn.reply("msg(requestAccepted, request, testunit, mockTruck, requestAccepted(1), 1)")
-        }catch (e:Exception){
-            e.printStackTrace()
-        }*/
-        val newState = obs.getNext().toString()
-        Assert.assertTrue(newState.contains("storeaccepted"))
-    }
-
-    @Test
-    fun testDeposit(){
-        var asw = ""
-        val prevState = obs.currentTypedState!!
-        println("TestMockTruckActor  |   testDeposit...")
-        val Ticket = "test ticket"
-        val deposit = "msg(deposit, request, testunit, transporttrolley, deposit($Ticket), 1)"
-        try {
-            asw = conn.forward(deposit).toString()
+            conn.reply("msg(storeAccepted, reply, testunit, mockTruck, storeAccepted(1), 1)")
         }catch (e:Exception){
             e.printStackTrace()
         }
-        // TODO: chek on TICKETTIME
-        val newState = obs.getNext().toString()
-        Assert.assertTrue(newState.contains("chargeTaken"))
-
+        Thread.sleep(2000)
+        val newState = obs.currentTypedState!!.toString()
+        println(newState)
+        Assert.assertTrue(newState.contains("ACCEPTED"))
     }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testStoreFoodRejected(){
+        conn.forward("msg(testStore, dispatch, testunit, mockTruck, testStore(_), 1)")
+        var asw = ""
+        val prevState = obs.currentTypedState!!
+        println("TestMockTruckActor  |   testStoreFoodRejected...")
+        try {
+            conn.reply("msg(storeRejected, reply, testunit, mockTruck, storeRejected(_), 1)")
+        }catch (e:Exception){
+            e.printStackTrace()
+        }
+        Thread.sleep(2000)
+        val newState = obs.currentTypedState!!.toString()
+        println(newState)
+        Assert.assertTrue(newState.contains("REJECTED"))
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testSendTicketExpired(){
+        conn.forward("msg(testTicket, dispatch, testunit, mockTruck, testTicket(_), 1)")
+        var asw = ""
+        val prevState = obs.currentTypedState!!
+        println("TestMockTruckActor  |   testSendTicketExpired...")
+        try {
+            conn.reply("msg(ticketExpired, reply, testunit, mockTruck, ticketExpired(_), 1)")
+        }catch (e:Exception){
+            e.printStackTrace()
+        }
+        Thread.sleep(2000)
+        val newState = obs.currentTypedState!!.toString()
+        println(newState)
+        Assert.assertTrue(newState.contains("TICKETEXPIRED"))
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testSendTicketValid(){
+        conn.forward("msg(testTicket, dispatch, testunit, mockTruck, testTicket(_), 1)")
+        var asw = ""
+        val prevState = obs.currentTypedState!!
+        println("TestMockTruckActor  |   testSendTicketValid...")
+        try {
+            conn.reply("msg(ticketValid, reply, testunit, mockTruck, ticketValid(_), 1)")
+        }catch (e:Exception){
+            e.printStackTrace()
+        }
+        Thread.sleep(2000)
+        val newState = obs.currentTypedState!!.toString()
+        println(newState)
+        Assert.assertTrue(newState.contains("SENDDEPOSIT"))
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testDeposit(){
+        conn.forward("msg(testDeposit, dispatch, testunit, mockTruck, testDeposit(_), 1)")
+        var asw = ""
+        val prevState = obs.currentTypedState!!
+        println("TestMockTruckActor  |   testSendTicket...")
+        try {
+            conn.reply("msg(chargeTaken, reply, testunit, mockTruck, chargeTaken(_), 1)")
+        }catch (e:Exception){
+            e.printStackTrace()
+        }
+        Thread.sleep(3000)
+        val newState = obs.currentTypedState!!.toString()
+        println(newState)
+        Assert.assertTrue(newState.contains("IDLE"))
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testError(){
+        val prevState = obs.currentTypedState!!
+        println("waiting one minute to trigger truck error")
+        Thread.sleep(62000)
+        val newState = obs.currentTypedState!!.toString()
+        println(newState)
+        Assert.assertTrue(newState.contains("HANDLEERROR"))
+    }
+
+
+
 }
