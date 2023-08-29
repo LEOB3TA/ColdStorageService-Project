@@ -139,8 +139,174 @@ onMsg (storeAccepted : storeAccepted(TICKETID)){
 
          <h2>Testing</h2>
          <div class="remark">
+             <!-- TODO vedere se inserire le classi di utilità coapobs-->
              <h3>MockTruck</h3>
+                Per testare il <b>MockTruck</b> &egrave; stata creata la classe che rappresenta lo stato del truck <a href="">TruckState.kt</a> <!-- TODO inserire il link -->; all'interno del quale è presente anche un enumerativo che rappresenta i possibili stati che può assumere il mocktruck:
+             <pre>
+enum class CurrStateTruck { IDLE, SENDSTORE, REJECTED, ACCEPTED, SENDTICKET, HANDLETICKETEXPIRED, SENDDEPOSIT, HANDLEERROR}
+                 </pre>
+           All'interno dell'attore Qak è stata aggiunta la nuova variabile <b>truckstate</b>
+             <pre>
+val truckstate = TruckState()
+             </pre>
 
+             La suddetta variabile viene aggiornata ogni volta che il truck cambia lo stato:
+             <pre>
+[#truckstate.setState(CurrStateTruck.CURRENTSTATE)#]
+updateResource[#truckstate.toJsonString()#]
+             </pre>
+             In questo modo un <b>observer</b> può osservare lo stato del mock truck in modo da rendere più semplici i test.
+             <br>
+             L'attore è stato modificato ulteriormente aggiungendo dei nuovi <b>Dispatch</b> che consentono alla classe di test di cambiare stato, di seguito vengono riportati gli stati con le relative transizioni
+             <pre>
+Dispatch testStore : testStore(_)
+Dispatch testTicket : testTicket(_)
+Dispatch testDeposit : testDeposit(_)
+Dispatch reset : reset(_)
+
+whenMsg testStore -> sendStore
+whenMsg testTicket -> sendTicket
+whenMsg testDeposit -> sendDeposit
+whenMsg reset -> idle
+             </pre>
+             I test sono implementati all'interno di <a href="">TestMockTruckActor.kt</a> <!-- TODO inserire il link -->
+             <pre>
+@Before
+fun before() {
+    if(!setupOk){
+        println("TestMockTruckActor       | initTest")
+        object : Thread(){
+            override fun run(){
+                main()
+            }
+        }.start()
+        var mocktruckactor = getActor("mocktruck")
+        while (mocktruckactor == null){
+            println("TestMockTruck       | waiting application start")
+            CommUtils.delay(200)
+            mocktruckactor = getActor("mocktruck")
+        }
+        println("TestMockTruckActor       | application started")
+        try {
+            conn = TcpClientSupport.connect("localhost",8092,5)
+        }catch (e: Exception){
+            println("TestMockTruck       | connection failed")
+            exitProcess(1)
+        }
+        startObs("localhost:8092")
+        println(obs.getNext().toString())
+        Thread.sleep(2000)
+    }else{
+        println("TestMockTruckActor       | clearHistory and reset")
+        Thread.sleep(2000)
+        conn.forward("msg(reset, dispatch, testunit, mockTruck, reset(_), 1)")
+        obs.clearHistory()
+    }
+}
+
+@Test
+@Throws(InterruptedException::class)
+fun testStoreFoodAccepted(){
+    conn.forward("msg(testStore, dispatch, testunit, mockTruck, testStore(_), 1)")
+   var asw = ""
+    val prevState = obs.currentTypedState!!
+    println("TestMockTruckActor  |   testStoreFoodAccepted...")
+    try {
+        conn.reply("msg(storeAccepted, reply, testunit, mockTruck, storeAccepted(1), 1)")
+    }catch (e:Exception){
+        e.printStackTrace()
+    }
+    Thread.sleep(2000)
+    val newState = obs.currentTypedState!!.toString()
+    println(newState)
+    Assert.assertTrue(newState.contains("ACCEPTED"))
+}
+
+@Test
+@Throws(InterruptedException::class)
+fun testStoreFoodRejected(){
+    conn.forward("msg(testStore, dispatch, testunit, mockTruck, testStore(_), 1)")
+    var asw = ""
+    val prevState = obs.currentTypedState!!
+    println("TestMockTruckActor  |   testStoreFoodRejected...")
+    try {
+        conn.reply("msg(storeRejected, reply, testunit, mockTruck, storeRejected(_), 1)")
+    }catch (e:Exception){
+        e.printStackTrace()
+    }
+    Thread.sleep(2000)
+    val newState = obs.currentTypedState!!.toString()
+    println(newState)
+    Assert.assertTrue(newState.contains("REJECTED"))
+}
+
+@Test
+@Throws(InterruptedException::class)
+fun testSendTicketExpired(){
+    conn.forward("msg(testTicket, dispatch, testunit, mockTruck, testTicket(_), 1)")
+    var asw = ""
+    val prevState = obs.currentTypedState!!
+    println("TestMockTruckActor  |   testSendTicketExpired...")
+    try {
+        conn.reply("msg(ticketExpired, reply, testunit, mockTruck, ticketExpired(_), 1)")
+    }catch (e:Exception){
+        e.printStackTrace()
+    }
+    Thread.sleep(2000)
+    val newState = obs.currentTypedState!!.toString()
+    println(newState)
+    Assert.assertTrue(newState.contains("TICKETEXPIRED"))
+}
+
+@Test
+@Throws(InterruptedException::class)
+fun testSendTicketValid(){
+    conn.forward("msg(testTicket, dispatch, testunit, mockTruck, testTicket(_), 1)")
+    var asw = ""
+    val prevState = obs.currentTypedState!!
+    println("TestMockTruckActor  |   testSendTicketValid...")
+    try {
+        conn.reply("msg(ticketValid, reply, testunit, mockTruck, ticketValid(_), 1)")
+    }catch (e:Exception){
+        e.printStackTrace()
+    }
+    Thread.sleep(2000)
+    val newState = obs.currentTypedState!!.toString()
+    println(newState)
+    Assert.assertTrue(newState.contains("SENDDEPOSIT"))
+}
+
+@Test
+@Throws(InterruptedException::class)
+fun testDeposit(){
+    conn.forward("msg(testDeposit, dispatch, testunit, mockTruck, testDeposit(_), 1)")
+    var asw = ""
+    val prevState = obs.currentTypedState!!
+    println("TestMockTruckActor  |   testSendTicket...")
+    try {
+        conn.reply("msg(chargeTaken, reply, testunit, mockTruck, chargeTaken(_), 1)")
+    }catch (e:Exception){
+        e.printStackTrace()
+    }
+    Thread.sleep(3000)
+    val newState = obs.currentTypedState!!.toString()
+    println(newState)
+    Assert.assertTrue(newState.contains("IDLE"))
+}
+
+@Test
+@Throws(InterruptedException::class)
+fun testError(){
+    val prevState = obs.currentTypedState!!
+    println("waiting one minute to trigger truck error")
+    Thread.sleep(62000)
+    val newState = obs.currentTypedState!!.toString()
+    println(newState)
+    Assert.assertTrue(newState.contains("HANDLEERROR"))
+}
+             </pre>
+Il metodo con annotazione <b>@Before</b> inizializza la connessione oppure se è già stata inizializzata invia il messsaggio <b>reset</b> al mocktruck.
+             Ogni test prima di iniziare invia un <b>dispatch</b> che imposta il mocktruck allo stato voluto
          </div>
 
 <!--
