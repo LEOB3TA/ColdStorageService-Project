@@ -35,8 +35,6 @@ QActor mocktruck context ctxtruck{
 
     State idle {
     	  State idle {
-    	[#truckstate.setState(CurrStateTruck.IDLE)#]
-    	updateResource[#truckstate.toJsonString()#]
         println("$name |	in idle") color green
         [#
         	initDriver()
@@ -45,8 +43,6 @@ QActor mocktruck context ctxtruck{
     }Goto sendStore
 
     State sendStore {
-    	[#truckstate.setState(CurrStateTruck.SENDSTORE)#]
-    	 updateResource[#truckstate.toJsonString()#]
     	 println("$name |	sendStore") color green
         request coldstorageservice -m storeFood : storeFood($FW)
    
@@ -55,15 +51,11 @@ QActor mocktruck context ctxtruck{
                     whenReply storeRejected -> rejected
                     
    State rejected{
-   	[#truckstate.setState(CurrStateTruck.REJECTED)#]
-   	 updateResource[#truckstate.toJsonString()#]
    		printCurrentMessage
    		println("$name |	request rejected") color green
    }Goto idle
    
     State accepted{
-    	[#truckstate.setState(CurrStateTruck.ACCEPTED)#]
-    	updateResource[#truckstate.toJsonString()#]
    		printCurrentMessage
    		onMsg (storeAccepted : storeAccepted(TICKETID)){
    		[#
@@ -75,7 +67,6 @@ QActor mocktruck context ctxtruck{
    }Transition t0 whenTimeVar DT -> sendTicket
    
    State sendTicket{
-   	[#truckstate.setState(CurrStateTruck.SENDTICKET)#]
    		 request coldstorageservice -m sendTicket : sendTicket($TICKETID)
    		 println("$name |	send ticket") color green   
    } Transition t0 whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
@@ -84,19 +75,16 @@ QActor mocktruck context ctxtruck{
     					
 
     State sendDeposit{
-    	[#truckstate.setState(CurrStateTruck.SENDDEPOSIT)#]
         request coldstorageservice -m deposit : deposit(_)
         println("$name |	send deposit") color green
     } Transition t0  whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
     					whenReply chargeTaken -> idle
    					
     State handleError{
-    	[#truckstate.setState(CurrStateTruck.HANDLEERROR)#]
     	println("$name |	COLD STORAGE SERVICE ERROR") color red
     } Goto idle
     				
 	State handleTicketExpired{
-		[#truckstate.setState(CurrStateTruck.HANDLETICKETEXPIRED)#]
 		println("$name |	ticket expired") color green
 	} Goto idle
 

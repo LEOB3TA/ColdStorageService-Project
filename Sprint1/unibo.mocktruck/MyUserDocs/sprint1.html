@@ -7,7 +7,7 @@
 
 <head>
 
-    <title>Sprint0</title></head>
+    <title>Sprint1</title></head>
 
 <body>
 <!--
@@ -58,13 +58,13 @@
         <br>
         <ol>
             <li><b>La richiesta del ticket e la presentazione del ticket avvengono in istanti di tempo diversi</b></li>
-            Dai requisiti forniti dal committente si evince che la richiesta di immagazzinamento del cibo e l'effettivo arrivo alla <b>INDOOR</b>, se la richiesta viene accettata, avvengono in due momenti distinti.
+            Dall'esame dei requisiti forniti dal committente emerge che la richiesta di immagazzinamento del carico e la successiva presentazione del ticket all'<b>INDOOR</b> avvengono in momenti distinti.
             <li><b>Scadenza del ticket</b></li>
-            Nel caso di richiesta accettata al driver viene fornito un ticket a cui &egrave; associata una scadenza entro la quale il driver deve recarsi presso l'<b>INDOOR</b>; di conseguenza &egrave; emerso un dubbio sul fatto che il driver debba conoscere o meno tale scadenza.
+            Nel caso di accettazione della richiesta, viene fornito al conducente un ticket con un tempo limite entro il quale deve raggiungere l'<b>INDOOR</b>. Sorge quindi il dubbio se il conducente debba essere a conoscenza di tale scadenza.
             <li><b>Problema del load-time lungo</b></li>
             Quando il driver presenta il ticket &egrave; possibile che il <b>ColdStorageService</b> non riesca a fornire la risposta <b>chargeTaken</b> in tempi brevi, in quanto il <b>TrasportTrolley</b> potrebbe essere occupato, quindi il driver non saprebbe se la sua richiesta &egrave; in attesa di una risposta oppure se il ticket non &egrave; stato accettato.
             <li><b>Errore interno del ColdStorageService</b></li>
-            Se il <b>ColdStorageService</b> ha degli errori interni che implicano un down del servizio, come reagisce il driver.
+            Nel caso in cui il <b>ColdStorageService</b> incontri problemi interni che causano il malfunzionamento del servizio, &egrave importante stabilire come il conducente dovrebbe reagire.
             <li><b>Quando il driver deve liberare la indoor</b></li>
             Il driver deve liberare la <b>INDOOR</b> appena "as soon as possible" cio&egrave; appena preso il carico, oppure deve aspettare che il carico sia stato scaricato all'interno della <b>ColdRoom</b>
         </ol>
@@ -73,8 +73,8 @@
             <li><b>La richiesta del ticket e la presentazione del ticket avvengono in istanti di tempo diversi</b></li>
             Il tempo in cui il driver si reca alla <b>INDOOR</b> non &egrave; trascurabile, di conseguenza &egrave; necessario introdurre una variabile <b>DT</b> (driver time) che rappresenta il tempo di viaggio.
             <li><b>Scadenza del ticket</b></li>
-           Se al driver fosse fornita la scadenza del ticket e supponendo che il driver conosca una stima del tempo di viaggio fino alla <b>INDOOR</b>, gli consentirebbe di decidere se intraprendere il viaggio o meno. In caso contrario, al driver verrebbe fornito solamente il <b>TICKETID</b>, di conseguenza si recherebbe sempre alla <b>INDOOR</b> dove avverrebbe poi il controllo sulla validit&agrave; del ticket.
-            Durante questa fase di sviluppo &egrave; stata adottata la seconda scelta, comunque sono necessarie delle ulteriori informazioni da parte del committente.
+            Una possibile soluzione &egrave fornire al conducente la scadenza del ticket e, supponendo che egli abbia una stima del tempo di viaggio verso l'<b>INDOOR</b>, consentirgli di valutare se intraprendere il viaggio. In alternativa, il conducente potrebbe ricevere solo il <b>TICKETID</b> e recarsi comunque all'<b>INDOOR</b>, dove la validità del ticket verrà verificata.
+            Durante questa fase di sviluppo, &egrave stata adottata la seconda opzione, ma ulteriori dettagli dal committente sono necessari.
             <li><b>Problema del load-time lungo</b></li>
             Per sopperire a questo problema &egrave; necessario creare un interazione a due fasi: una in cui il driver presenta il proprio ticket (<b>sendTicket</b>) e riceve una risposta da parte del ColdStorageService (<b>ticketAccepted/ticketRejected</b>); e una in cui il driver invia la richiesta di deposito (<b>deposit</b>) e riceve poi <b>chargeTaken</b>
             <li><b>Errore interno del ColdStorageService</b></li>
@@ -100,41 +100,40 @@
 
              <h2>Project</h2>
               <div class="remark">
-                  <h3>MockTruck</h3>
-                  Il MockTruck &egrave; stato modellato come un <b>Attore Qak</b>, si compone di diversi stati che vengono ripetuti ciclicamente, in modo da rispettare l'obiettivo di simulare un driver che interagisce con la <b>ServiceAccessGUI</b><br>
-                  Il comportamento creato non implica pi&ugrave; driver contemporanei ma solo uno che tenta il deposito ciclicamente.<br>
-                  In seguito viene riportato il diagramma degli stati.<br>
-                  <img src="resources/images/MockTruckState.drawio.png" alt="MockTruckState">
-                  <br>
-                  Gli stati che rappresentato un rifiuto o un errore del sistema (Rejected, HandleError, handleTicketExpired), stampano degli errori e ripetono il ciclo.<br>
-                  La transizione tra lo stato <b>Accepted</b> e <b>SendTicket</b> rappresenta il viaggio che deve compiere il driver per arrivare alla <b>INDOOR</b>.<br>
-                  Lo stato <b>SendDeposit</b> implementa l'approccio "as soon as possible" descritto nell'analisi del problema, quindi al momento della ricezione del messaggio <b>chargeTaken</b> il driver abbandona l'indoor.
-                  Prima di ripere il ciclo, all'interno dello stato <b>IDLE</b> &egrave; presente una sleep.
-                  <pre>
+                      <h3>MockTruck</h3>
+                      Il MockTruck &egrave stato modellato come un <b>Attore Qak</b>. Esso &egrave composto da vari stati, i quali si ripetono ciclicamente per simulare l'interazione di un conducente con la <b>ServiceAccessGUI</b>.
+                      Questo comportamento non implica la presenza di conducenti multipli, ma piuttosto di uno che cerca ciclicamente di effettuare un deposito. Di seguito &egrave riportato il diagramma degli stati.
+                      <br>
+                      <img src="resources/images/MockTruckState.drawio.png" alt="MockTruckState">
+                      <br>
+                      Gli stati che rappresentano un rifiuto o un errore del sistema (Rejected, HandleError, handleTicketExpired) mostrano messaggi di errore e ritornano all'inizio ciclo. La transizione tra gli stati <b>Accepted</b> e <b>SendTicket</b> rappresenta il percorso che il conducente deve intraprendere per arrivare all'area <b>INDOOR</b>.
+                      Lo stato <b>SendDeposit</b> implementa l'approccio "as soon as possible" descritto nell'analisi del problema: appena il messaggio <b>chargeTaken</b> viene ricevuto, il conducente lascia l'area indoor. Prima di riprendere il ciclo, nello stato <b>IDLE</b> &egrave presente una pausa.
+                      <pre>
 Thread.sleep(Random.nextLong(1, 2001))
-                  </pre>
-                  <br>
-                  Sono presenti tre variabili che vengono modificate a ogni ciclo.
-                  <pre>
+   </pre>
+                      Sono presenti tre variabili che vengono modificate ad ogni ciclo.
+                      <pre>
 var FW = 0
 var DT = 1000L
 var TICKETID = 0
-                  </pre>
-                  In particolare, le variabili <b>FW</b> e <b>DT</b> vengono inizializzate a dei valori casuali attraverso una funzione all'interno dello stato <b>IDLE</b>:
-                  <pre>
+   </pre>
+                      In particolare, le variabili <b>FW</b> e <b>DT</b> vengono inizializzate con valori casuali attraverso una funzione all'interno dello stato <b>IDLE</b>:
+                      <pre>
 fun initDriver(){
-    FW =  Random.nextInt(1, 101)
+    FW = Random.nextInt(1, 101)
     DT = Random.nextLong(1, 2001)
 }
-                  </pre>
-                  Invece la variabile <b>TICKETID</b> viene assegnata all'interno dello stato <b>Accepted</b>, prendendo il valore dalla risposta <b>storeAccepted</b>
-                  <pre>
+   </pre>
+                      Invece la variabile <b>TICKETID</b> viene assegnata nello stato <b>Accepted</b>, prendendo il valore dalla risposta <b>storeAccepted</b>.
+                      <pre>
 onMsg (storeAccepted : storeAccepted(TICKETID)){
-   		[#
-   			TICKETID = payloadArg(0).toInt()
-   		#]
+    [#
+        TICKETID = payloadArg(0).toInt()
+    #]
 }
-                  </pre>
+   </pre>
+                  </div>
+
              </div>
 
          <h2>Testing</h2>
@@ -203,7 +202,7 @@ fun testStoreFoodAccepted(){
     Assert.assertTrue(newState.contains("ACCEPTED"))
 }
 </pre>
-             Questi metodi di test sono finalizzati a verificare diverse situazioni, ad esempio lo stato "ACCEPTED" dopo un tentativo di memorizzazione (<b>testStoreFoodAccepted</b>), lo stato "REJECTED" dopo un tentativo di memorizzazione non riuscito (<b>testStoreFoodRejected</b>), lo stato "TICKETEXPIRED" dopo l'invio di un biglietto scaduto (<b>testSendTicketExpired</b>), e così via. Ogni test invia i messaggi appropriati, aspetta un breve periodo di tempo per la risposta e quindi verifica lo stato attuale del mock truck.
+             Questi metodi di test sono finalizzati a verificare diverse situazioni, ad esempio lo stato "ACCEPTED" dopo un tentativo di memorizzazione (<b>testStoreFoodAccepted</b>), lo stato "REJECTED" dopo un tentativo di memorizzazione non riuscito (<b>testStoreFoodRejected</b>), lo stato "TICKETEXPIRED" dopo l'invio di un biglietto scaduto (<b>testSendTicketExpired</b>), e cos&igrave; via. Ogni test invia i messaggi appropriati, aspetta un breve periodo di tempo per la risposta e quindi verifica lo stato attuale del mock truck.
 
              In questo modo, si garantisce che il mock truck si comporti correttamente in diverse circostanze e che gli stati cambino secondo le aspettative.
          </div>
