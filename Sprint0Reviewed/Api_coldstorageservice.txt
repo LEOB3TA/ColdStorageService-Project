@@ -1,3 +1,4 @@
 {"actor":"coldstorageservice", "msgType":"request", "sender":"serviceaccesgui", "msgId":"storeFood"}
 {"actor":"coldstorageservice", "msgType":"request", "sender":"serviceaccesgui", "msgId":"deposit"}
-{"actor":"transporttrolley", "msgType":"request", "sender":"coldstorageservice", "msgId":"pickup"}
+{"actor":"coldstorageservice", "msgType":"request", "sender":"serviceaccesgui", "msgId":"storeFood"}
+{"actor":"coldstorageservice", "msgType":"request", "sender":"serviceaccesgui", "msgId":"deposit"}

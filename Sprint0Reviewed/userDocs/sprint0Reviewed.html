@@ -148,15 +148,6 @@ QActor transporttrolley context ctxstorageservice{
     }
 
 
-    State pickingup{
-    	...
-    }
-    Transition t0 whenMsg dropout -> droppingout
-
-    State droppingout{
-        ...
-    }Transition t0 whenMsg backhome -> backhome
-
     State backhome{
         ...
     }
@@ -300,7 +291,7 @@ var FW :  Float
         <h4>Stato corrente del Transport Trolley</h4>
         Indica lo stato del <a href="#Ttrolley"><kc>Transport Trolley</kc></a>, pu&oacute; essere formalizzato come un enumerativo <a href="">TransportTrolleyState.kt</a>
         <pre>
-enum class CurrStateTrolley { IDLE, STOPPED, MOVING, PICKINGUP }
+enum class CurrStateTrolley { IDLE, STOPPED, MOVING }
         </pre>
 
         <!--------------Posizione del Transport Trolley-------------------------->
