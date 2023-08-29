@@ -117,7 +117,7 @@
         modo da mappare opportunamente la <i>Service Area</i>. Per fare ci&ograve; si pu&ograve; usare
         il DDR robot come unit&agrave; e mappare la <i>Service Area</i> come una griglia composta da
         celle di dimensione <kc>RD</kc> (la dimensione del DDR robot).
-<!--        TODO: Inserire immagine-->
+        <img src="./resources/images/transportTrollery_coordinate.png" alt="" style="width:50% ; height:50% ;">
         <br/><br/>
         I luoghi di interesse verranno rappresentati da una coppia di valori <b>(X,Y)</b>
         <pre>
@@ -185,13 +185,14 @@
 
         <ks>Linea Retta</ks>
         Tale soluzione prevede di muovere il roboto lungo una linea retta che collega il punto di partenza
-        con quello di arrivo
-<!--        TODO: figura-->
-        <br/>
+        con quello di arrivo <br/> <br/>
+        <img src="./resources/images/transportTrollery_linearetta.png" alt="" style="width:50% ; height:50% ;">
+        <br/> <br/>
         Il problema relativo a tale soluzione &egrave; che il DDR robot si muove su se stesso di
         90&ordm;( <!-- TODO: link -->). Per tale motivo il roboto non riesce a muoversi su una linea
         a diversa angolazione (non linea retta). Un possibile percorso sarebbe il seguente.
-        <!--        TODO: figura-->
+        <img src="./resources/images/transportTrollery_spezzata.png" alt="" style="width:50% ; height:50% ;">
+        <br/> <br/>
         Per eseguire un percorso diretto si dovrebbe modificare il <kc>basicrobot23</kc> in modo da accettare
         angolature diverse.
         <br/><br/>
@@ -204,7 +205,8 @@
         <br/>
         <ks>Muoversi usando una sequenza di mosse</ks>
         Tale soluzione si basa su come il robot &egrave; in grado di muoversi e basa la soluzione su tale modalit&agrave;
-        <!--        TODO: figura-->
+        <br/> <br/>
+        <img src="./resources/images/transportTrollery_spezzata.png" alt="" style="width:50% ; height:50% ;">
         <br/><br/>
         <i>Vantaggi e svantaggi</i>
         <br/><br/>
@@ -473,12 +475,12 @@ Dispatch dropout : dropout(FW)
                  Questo componente &egrave; progettato sulle basi del pattern <ks>Mediator</ks>, si occupa di ricevere richieste e messaggi dal <kc>...</kc> e coordina gli altri
                  componenti (<kc>TransportTrolleyMover</kc>, <kc>TransportTrolleyExecutor</kc>) per soddisfare le richieste. <br/>
                  La figura seguente riporta lo schema di interazione dei componenti: <br/><br/>
-<!--                TODO: <img src="./resources/img/InteractionSchemaTTC.png" alt="" style="width:50% ; height:50% ;">-->
+                 <img src="./resources/images/transportTrollery_core_interazione.png" alt="" style="width:50% ; height:50% ;">
                  <br/><br/>
 
                  Anche questo componente verr&agrave; implementato come una <ks>coroutine Kotlin</ks> utilizzando il metalinguaggio QAk. Di seguito sono riportati il progetto della macchina
                  a stati finiti e la sua implementazione in QAk. <br/><br/>
-<!--                 TODO:<img src="./resources/img/FSMtransportTrolleyCore.png" alt="" style="width:50% ; height:50% ;"><br/><br/>-->
+                 <img src="./resources/images/transportTrollery_core_stati.png" alt="" style="width:50% ; height:50% ;"><br/><br/>
                  Nello stato <i><b>idle</b></i> il <i>TransportTrolleyCore</i> rimane in attesa di un comando (<kc>pickup</kc>/<kc>dropout</kc>/<kc>gotohome</kc>) da parte del <i>...</i>. <br/>
                  Nel caso in cui arrivi il messaggio <kc>gotohome</kc>, il <i>TransportTrolleyCore</i> transita allo stato <i><b>bakcHome</b></i>, in cui richiede al <i>TransportTrolleyMover</i> di muovere il robot
                  verso la posizione <kc>HOME</kc>, nel caso in cui la risposta del <i>TransportTrolleyMover</i> sia positiva transita allo stato <b>backHomeRes</b> e quindi allo stato <b>idle</b>. <br/>
@@ -556,9 +558,9 @@ Dispatch dropout : dropout(FW)
                  Questo componente &egrave; progettato come un <ks>attuatore</ks>, il suo unico compito &egrave; quello di muovere il robot. Per fare ciò, fa uso di un planner (<a href="./resources/kotlin/planner22Util2.kt">planner22Util.kt</a>),
                  che calcola il percorso verso una data destinazione, e di un executor  che esegue il percorso calcolato.
                  La seguente figura riporta lo schema d'interazione dei componenti: <br/><br/>
-<!--                 <img src="./resources/img/InteractionSchemaTTM.png" alt="" style="width:50% ; height:50% ;"> <br/><br/>-->
+                 <img src="./resources/images/transportTrollery_mover_interazioni.png" alt="" style="width:50% ; height:50% ;"> <br/><br/>
                  Anche questo componente viene implementato facendo uso del metalinguaggio QAk, di seguito sono riportati la sua <ks>FSM</ks> e il codice QAk che la implementa. <br/><br/>
-<!--                 <img src="./resources/img/FSMtransportTrolleyMover.png" alt="" style="width:50% ; height:50% ;"> <br/><br/>-->
+                 <img src="./resources/images/transportTrollery_mover_stati.png" alt="" style="width:50% ; height:50% ;"> <br/><br/>
                  Nello stato <b>idle</b> il componente resta in attesa di un messaggio <kc>moveto</kc>, all'arrivo di questo messaggio transita nello stato <b>destinationEval</b>,
                  in cui, in base al payload del messaggio, comprende la destinazione verso cui deve muoversi il robot e facendo uso di una utility anche le coordinate della destinazione.
                  L'utility in questione &egrave; consultabile in <a href="./resources/kotlin/ServiceAreaConfig.kt">ServiceAreaConfig.kt</a>.<br/>
@@ -636,7 +638,7 @@ planner.getDirection()</pre>
                  <pre>
 delay(kotlin.random.Random.nextLong(from : <key>Long</key>, until : <key>Long</key>))</pre>
                  La figura seguente riporta lo schema d'interazione dei componenti: <br/><br/>
-<!--        TODO:         <img src="./resources/img/InteractionSchemaTTE.png" alt="" style="width:50% ; height:50% ;"> <br/><br/>-->
+                <img src="./resources/images/transportTrollery_executor_interazione.png" alt="" style="width:50% ; height:50% ;"> <br/><br/>
 
                  Dal momento che questo componente esegue solo un <i>delay</i>, si potrebbe pensare di implementarlo come una utility che il <i>TransportTrolleyCore</i> richiama al momento del bisogno.
                  Tuttavia, questo tipo d'interazione bloccherebbe il flusso di esecuzione del <i>TransportTrolleyCore</i> fino alla fine del <i>delay</i>. Per tale motivo si sceglie di
@@ -644,7 +646,7 @@ delay(kotlin.random.Random.nextLong(from : <key>Long</key>, until : <key>Long</k
                  "strada" aperta, nel caso in cui in futuro il componente debba essere esteso con altre funzionalit&agrave;. <br/>
                  Di seguito vengono riportati il progetto della macchina a stati finiti e il codice QAk che la implementa:
 
-<!--           TODO:      <img src="./resources/img/FSMtransportTrolleyExe.png" alt="" style="width:50% ; height:50% ;"> <br/><br/>-->
+                 <img src="./resources/images/transportTrollery_executor_stati.png" alt="" style="width:50% ; height:50% ;"> <br/><br/>
                  Nello stato  <b>idle</b>  il componente resta in attesa di un messaggio <kc>execaction</kc>, all'arrivo di questo messaggio transita nello stato  <b>actionEval</b> ,
                  in cui, in base al payload del messaggio, comprende l'azione da eseguire. Transita quindi allo stato  <b>execPickup</b>  o <b>execDropout</b> e simula l'esecuzione tramite un <i>delay</i>. <br/>
                  Il componente quindi risponde al <i>TransportTrolleyCore</i> con un messaggio di conferma. Ritorna quindi allo stato  <b>idle</b> .
