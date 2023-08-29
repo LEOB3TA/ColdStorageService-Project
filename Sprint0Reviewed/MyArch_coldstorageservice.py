@@ -31,7 +31,6 @@ with Diagram('coldstorageserviceArch', show=False, outformat='png', graph_attr=g
           transporttrolley=Custom('transporttrolley','./qakicons/symActorSmall.png')
           servicestatusgui=Custom('servicestatusgui','./qakicons/symActorSmall.png')
      coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='chargetaken', fontcolor='forestgreen') >> serviceaccesgui
-     coldstorageservice >> Edge(color='magenta', style='solid', xlabel='pickup', fontcolor='magenta') >> transporttrolley
      serviceaccesgui >> Edge(color='magenta', style='solid', xlabel='storeFood', fontcolor='magenta') >> coldstorageservice
      serviceaccesgui >> Edge(color='magenta', style='solid', xlabel='deposit', fontcolor='magenta') >> coldstorageservice
      coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='\t store accepted(TICKET) \n store rejected', fontcolor='forestgreen') >> serviceaccesgui

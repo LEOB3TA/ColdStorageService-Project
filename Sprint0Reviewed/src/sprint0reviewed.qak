@@ -11,7 +11,6 @@ Reply storeAccepted : storeAccepted(TICKET)
 Reply storeRejected : storeRejected(_)
 Reply chargeTaken : chargeTaken(_)
 
-Request pickup : pickup(_)
 
 //Messaggi truck
 
@@ -109,16 +108,7 @@ QActor transporttrolley context ctxstorageservice{
     State idle{
     	updateResource[#tTstate.toJsonString()#]
     }
-    Transition t0 whenRequest pickup -> pickingup
 
-
-    State pickingup{
-    	[#
-			tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.PICKINGUP)
-		#]
-		updateResource[#tTstate.toJsonString()#]
-        replyTo pickup with chargeTaken : chargeTaken(_)
-    }
     // TODO: come arrivare a backhome
     State backhome{
         [#
@@ -173,6 +163,5 @@ QActor coldstorageservice context ctxstorageservice{
     	    TICKETID = TOKEN.TICKETID
     	    #]
             replyTo storeFood with storeAccepted : storeAccepted(TICKET)
-            request transporttrolley -m pickup : pickup(_)
         }
 }

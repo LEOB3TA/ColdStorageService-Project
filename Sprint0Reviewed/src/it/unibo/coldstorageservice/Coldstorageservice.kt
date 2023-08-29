@@ -43,8 +43,8 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t010",targetState="requestEvaluation",cond=whenRequest("storeFood"))
-					transition(edgeName="t011",targetState="depositEvaluation",cond=whenRequest("deposit"))
+					 transition(edgeName="t09",targetState="requestEvaluation",cond=whenRequest("storeFood"))
+					transition(edgeName="t010",targetState="depositEvaluation",cond=whenRequest("deposit"))
 				}	 
 				state("requestEvaluation") { //this:State
 					action { //it:State
@@ -99,7 +99,6 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						    	    TICKET = coldstorageservice.Generate.TOKEN
 						    	    TICKETID = TOKEN.TICKETID
 						answer("storeFood", "storeAccepted", "storeAccepted(TICKET)"   )  
-						request("pickup", "pickup(_)" ,"transporttrolley" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
