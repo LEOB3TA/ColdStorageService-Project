@@ -84,8 +84,6 @@ class TestMockTruckActor{
     @Throws(InterruptedException::class)
     fun testStoreFoodAccepted(){
         conn.forward("msg(testStore, dispatch, testunit, mockTruck, testStore(_), 1)")
-       var asw = ""
-        val prevState = obs.currentTypedState!!
         println("TestMockTruckActor  |   testStoreFoodAccepted...")
         try {
             conn.reply("msg(storeAccepted, reply, testunit, mockTruck, storeAccepted(1), 1)")
@@ -101,9 +99,6 @@ class TestMockTruckActor{
     @Test
     @Throws(InterruptedException::class)
     fun testStoreFoodRejected(){
-        conn.forward("msg(testStore, dispatch, testunit, mockTruck, testStore(_), 1)")
-        var asw = ""
-        val prevState = obs.currentTypedState!!
         println("TestMockTruckActor  |   testStoreFoodRejected...")
         try {
             conn.reply("msg(storeRejected, reply, testunit, mockTruck, storeRejected(_), 1)")
@@ -120,8 +115,6 @@ class TestMockTruckActor{
     @Throws(InterruptedException::class)
     fun testSendTicketExpired(){
         conn.forward("msg(testTicket, dispatch, testunit, mockTruck, testTicket(_), 1)")
-        var asw = ""
-        val prevState = obs.currentTypedState!!
         println("TestMockTruckActor  |   testSendTicketExpired...")
         try {
             conn.reply("msg(ticketExpired, reply, testunit, mockTruck, ticketExpired(_), 1)")
@@ -138,8 +131,6 @@ class TestMockTruckActor{
     @Throws(InterruptedException::class)
     fun testSendTicketValid(){
         conn.forward("msg(testTicket, dispatch, testunit, mockTruck, testTicket(_), 1)")
-        var asw = ""
-        val prevState = obs.currentTypedState!!
         println("TestMockTruckActor  |   testSendTicketValid...")
         try {
             conn.reply("msg(ticketValid, reply, testunit, mockTruck, ticketValid(_), 1)")
@@ -156,8 +147,6 @@ class TestMockTruckActor{
     @Throws(InterruptedException::class)
     fun testDeposit(){
         conn.forward("msg(testDeposit, dispatch, testunit, mockTruck, testDeposit(_), 1)")
-        var asw = ""
-        val prevState = obs.currentTypedState!!
         println("TestMockTruckActor  |   testSendTicket...")
         try {
             conn.reply("msg(chargeTaken, reply, testunit, mockTruck, chargeTaken(_), 1)")
@@ -173,7 +162,6 @@ class TestMockTruckActor{
     @Test
     @Throws(InterruptedException::class)
     fun testError(){
-        val prevState = obs.currentTypedState!!
         println("waiting one minute to trigger truck error")
         Thread.sleep(62000)
         val newState = obs.currentTypedState!!.toString()

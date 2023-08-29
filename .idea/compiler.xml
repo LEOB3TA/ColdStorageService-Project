@@ -18,6 +18,7 @@
       <module name="unibo.basicrobot23.main" target="1.8" />
       <module name="unibo.basicrobot23.test" target="1.8" />
       <module name="unibo.coldstorageservice.test" target="11" />
+      <module name="unibo.mocktruck.test" target="11" />
       <module name="unibo.transporttrolley" target="11" />
       <module name="unibo.transporttrolley.main" target="11" />
     </bytecodeTargetLevel>
