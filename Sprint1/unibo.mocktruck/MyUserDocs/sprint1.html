@@ -102,9 +102,12 @@
               <div class="remark">
                       <h3>MockTruck</h3>
                       Il MockTruck &egrave stato modellato come un <b>Attore Qak</b>. Esso &egrave composto da vari stati, i quali si ripetono ciclicamente per simulare l'interazione di un conducente con la <b>ServiceAccessGUI</b>.
-                      Questo comportamento non implica la presenza di conducenti multipli, ma piuttosto di uno che cerca ciclicamente di effettuare un deposito. Di seguito &egrave riportato il diagramma degli stati.
+                      Questo comportamento non implica la presenza di conducenti multipli, ma piuttosto di uno che cerca ciclicamente di effettuare un deposito. Di seguito &egrave riportato il diagramma degli stati e il diagramma delle interazioni con il ColdStorageService.
                       <br>
                       <img src="resources/images/MockTruckState.drawio.png" alt="MockTruckState">
+                      <br>
+                      <br>
+                      <img src="resources/images/interactionChartMockTruck.drawio.png" alt="MockTruckState">
                       <br>
                       Gli stati che rappresentano un rifiuto o un errore del sistema (Rejected, HandleError, handleTicketExpired) mostrano messaggi di errore e ritornano all'inizio ciclo. La transizione tra gli stati <b>Accepted</b> e <b>SendTicket</b> rappresenta il percorso che il conducente deve intraprendere per arrivare all'area <b>INDOOR</b>.
                       Lo stato <b>SendDeposit</b> implementa l'approccio "as soon as possible" descritto nell'analisi del problema: appena il messaggio <b>chargeTaken</b> viene ricevuto, il conducente lascia l'area indoor. Prima di riprendere il ciclo, nello stato <b>IDLE</b> &egrave presente una pausa.
