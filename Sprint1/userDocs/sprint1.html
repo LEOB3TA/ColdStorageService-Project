@@ -109,6 +109,8 @@
             Nel caso in cui il <b>ColdStorageService</b> incontri problemi interni che causano il malfunzionamento del servizio, &egrave importante stabilire come il conducente dovrebbe reagire.
             <li><b>Quando il driver deve liberare la indoor</b></li>
             Il driver deve liberare la <b>INDOOR</b> appena "as soon as possible" cio&egrave; appena preso il carico, oppure deve aspettare che il carico sia stato scaricato all'interno della <b>ColdRoom</b>
+            <li><b>Il truck inserisce il numero del ticket errato per più di 2 volte</b></li>
+            Il truck inserisce almeno tre volte il numero del ticket errato
         </ol>
         <h5>Possibili soluzioni</h5>
         <ol>
@@ -123,6 +125,8 @@
             &Egrave; possibile introdurre un timeout per ogni richiesta, in modo che il driver abbandoni alla scadenza del timer. Il timer &egrave; stato fissato a <b>60</b> secondi.
             <li><b>Quando il driver deve liberare la indoor</b></li>
             In questa fase di sviluppo &egrave; stato adottato l'approccio "as soon as possible"
+            <li><b>Il truck inserisce il numero del ticket errato per più di 2 volte</b></li>
+            Il truck inserisce almeno tre volte il numero del ticket errato, il ColdStorageService invia un messaggio di errore al truck e il truck torna allo stato di attesa del ticket. L'operazione si intende conclusa con esito negativo.
         </ol>
     </div>
 
