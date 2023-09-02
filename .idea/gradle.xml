@@ -14,7 +14,7 @@
       </GradleProjectSettings>
       <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint1/unibo.transportTrolley" />
-        <option name="gradleJvm" value="19" />
+        <option name="gradleJvm" value="11" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/Sprint1/unibo.transportTrolley" />
