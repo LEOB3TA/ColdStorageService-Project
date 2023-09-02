@@ -67,6 +67,15 @@
             <li>Sia in grado di mandare comandi al <b>BasicRobot</b> e gestire
             le eventuali risposte</li>
         </ul>
+        <h6>Connettere/Disconnettere il TransportTrolley ed il BasicRobot</h6>
+        Prima di iniziare le interazioni &egrave; presente una fase in cui il TransporTrolley cerca di iniziare la comunicazione
+        col BasicRobot: ci&ograve; viene gestito dall'<kc>Engager</kc>, mediante l'uso della richiesta di <ks>engage</ks>.
+        <br/>
+        Se tale richiesta va' a buon fine pu&ograve; iniziare la comunicazione, altrimenti si genera un messaggio di errore.
+        <br/><br/>
+        Specularmente quando si deve disconnettere il dispositivo l'<kc>Engager</kc> fornisce il messaggio <ks>disengage</ks>,
+        con la differenza che in questo caso si usa una dispatch, ovvero non si attende risposta.
+
         <h6>Muovere il robot verso una destinazione</h6>
 
         <h4>Orientamento nell'ambiente</h4>
@@ -127,7 +136,7 @@
         <i>Vantaggi e svantaggi</i>
         <br/><br/>
         <pro>+</pro> Possibilit&agrave; di riuso di software gi&agrave; sviluppato per mappare, identificare il
-        percorso ed eseguire il path trovato ( )
+        percorso ed eseguire il piano trovato ( )
 <!--        TODO: Inserire link a progetti-->
         <br/><br/>
         <cons>-</cons> Potrebbe essere necessario effettuare degli aggiustamenti in quanto le dimensioni della
@@ -173,7 +182,7 @@
     "MAXW":100,
     "DLIMIT":50
 }        </pre>
-        <h4>Path finding</h4>
+        <h4>Plan finding</h4>
         Avendo deciso come orientarsi nella stanza e come individuare i punti di interesse, ci possiamo occupare
         di come comprendere quale percorso si debba scegliere per arrivare in un dato punto di interesse.
         <br/>
@@ -222,16 +231,16 @@
         mediante una sequenza di mosse perch&egrave; consente di usare il software esistente per pianificare
         ed eseguire il percorso abbattendo i tempi di sviluppo.
         <br/><br/>
-        Per quanto riguarda il <kc>pathexecutor</kc> esso &egrave; modellato come un attore, utilizzando il linguaggio QAk,
+        Per quanto riguarda il <kc>planexecutor</kc> esso &egrave; modellato come un attore, utilizzando il linguaggio QAk,
         che riceve una richiesta di eseguire un percorso e risponde con un messaggio di conferma una volta completato
-        il percorso o con una risposta di fallimento in caso contrario, specificando la parte di percorso non eseguita. Il codice QAk del pathexecutor &egrave; consultabile qui
+        il percorso o con una risposta di fallimento in caso contrario, specificando la parte di percorso non eseguita. Il codice QAk del planexecutor &egrave; consultabile qui
 <!--        TODO: link-->
         <pre>
-Request dopath: dopath(PATH)
-Reply dopathdone: dopathdone(ARG)
-Reply dopathfail: dopathfail(PATHSTILLTODO)
+Request doplan: doplan(PATH)
+Reply doplandone: doplandone(ARG)
+Reply doplanfail: doplanfail(PATHSTILLTODO)
         </pre>
-        L'uso dell'attore pathexecutor modifica l'architettura logica, questo si trova nel contesto del
+        L'uso dell'attore planexecutor modifica l'architettura logica, questo si trova nel contesto del
         basicrobot:
 <!--        TODO: immagine-->
         <br/>
@@ -566,11 +575,11 @@ Dispatch dropout : dropout(FW)
                  L'utility in questione &egrave; consultabile in <a href="./resources/kotlin/ServiceAreaConfig.kt">ServiceAreaConfig.kt</a>.<br/>
                  Il componente transita quindi allo stato <b>plan</b>, in cui servendosi dell'utility  <a href="./resources/kotlin/planner22Util2.kt">planner23Util.kt</a>, calcola
                  il percorso verso la destinazione. <br/>
-                 Si transita quindi allo stato <b>moveExec</b> in cui il componente comunica al <kc>pathExec</kc> il path da eseguire. Successivamente attende una risposta positiva o negativa dal
-                 <i>pathExec</i>. <br/>
+                 Si transita quindi allo stato <b>moveExec</b> in cui il componente comunica al <kc>planExec</kc> il piano da eseguire. Successivamente attende una risposta positiva o negativa dal
+                 <i>planExec</i>. <br/>
                  In caso di esito positivo transita allo stato <i><b>lookForFix</b></i>, in cui controlla se la direzione del robot &egrave; quella attesa. Se il robot &egrave; orientato in maniera corretta
                  si transita allo stato <b><i>moveOk</i></b> in cui il <i>TransportTrolleyMover</i> risponde al <i>TransportTrolleyCore</i> con una <kc>moveok</kc>.
-                 Se il robot non &egrave; orientato in maniera giusta, si transita allo stato <b><i>fixDir</i></b> in cui servendosi di un utility (<a href="./resources/kotlin/DirectionFixer.kt">DirectionFixer.kt</a> ) calcola il path necessario a mettere il robot nella giusta direzione.
+                 Se il robot non &egrave; orientato in maniera giusta, si transita allo stato <b><i>fixDir</i></b> in cui servendosi di un utility (<a href="./resources/kotlin/DirectionFixer.kt">DirectionFixer.kt</a> ) calcola il piano necessario a mettere il robot nella giusta direzione.
                  Transita allo stato <i><b>moveExec</b></i> e riesegue lo stesso procedimento. <br/>
                  Nel caso in cui l'esito sia negativo il componente transita allo stato <i><b>moveko</b></i> in cui riprova per un massimo di tre volte ad eseguire il percorso, se per tre volte consecutive fallisce, invia un messaggio di errore che mette fine
                  all'esecuzione dell'intero sistema.
@@ -599,8 +608,8 @@ Dispatch dropout : dropout(FW)
     }<key2>Goto</key2> execMove
 
     <key2>State</key2> execMove{
-    }<key2>Transition</key2> t0 <key2>whenReply</key2> dopathdone -> lookForFix
-                    <key2>whenReply</key2> dopathfail -> moveKo
+    }<key2>Transition</key2> t0 <key2>whenReply</key2> doplandone -> lookForFix
+                    <key2>whenReply</key2> doplanfail -> moveKo
 
     <key2>State</key2> lookForFix{
     }<key2>Goto</key2> fixDir <key2>if</key2>[# someToFix #]
@@ -613,8 +622,8 @@ Dispatch dropout : dropout(FW)
     }<key2>Goto</key2> idle
 
     <key2>State</key2> moveKo{
-    }<key2>Transition</key2> t0 whenReply dopathdone -> lookForFix
-                    <key2>whenReply</key2> dopathfail -> moveKo
+    }<key2>Transition</key2> t0 whenReply doplandone -> lookForFix
+                    <key2>whenReply</key2> doplanfail -> moveKo
 
     <key2>State</key2> end{
         <key2>terminate</key2> 0
