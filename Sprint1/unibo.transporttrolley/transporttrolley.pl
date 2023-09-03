@@ -1,9 +1,8 @@
 %====================================================================================
 % transporttrolley description   
 %====================================================================================
+context(ctxbasicrobot, "127.0.0.1",  "TCP", "8020").
 context(ctxcoldstorageservice, "localhost",  "TCP", "8092").
-context(ctxbasicrobot, "localhost",  "TCP", "8020").
  qactor( basicrobot, ctxbasicrobot, "external").
-  qactor( transporttrolleycore, ctxcoldstorageservice, "it.unibo.transporttrolleycore.Transporttrolleycore").
-  qactor( transporttrolleymover, ctxcoldstorageservice, "it.unibo.transporttrolleymover.Transporttrolleymover").
-  qactor( transporttrolleyexecutor, ctxcoldstorageservice, "it.unibo.transporttrolleyexecutor.Transporttrolleyexecutor").
+  qactor( pathobs, ctxbasicrobot, "observers.planexecCoapObserver").
+  qactor( transporttrolley, ctxcoldstorageservice, "it.unibo.transporttrolley.Transporttrolley").

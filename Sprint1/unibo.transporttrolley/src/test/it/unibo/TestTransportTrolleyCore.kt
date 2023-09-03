@@ -1,6 +1,6 @@
 package test.it.unibo
 
-import it.unibo.ctxtransporttrolley.main
+import it.unibo.ctxcoldstorageservice.main
 import it.unibo.kactor.QakContext
 import mockCtx.mockCtx
 import coapobs.TypedCoapTestObserver
@@ -54,11 +54,11 @@ class TestTransportTrolleyCore {
             }.start()
             var actCore = getActor("basicrobot")
             var otCore = getActor("coldstorageservicecore")
-            var tTCore = getActor("transporttrolleycore")
+            var tTCore = getActor("transporttrolley")
             while (tTCore == null) {
                 CommUtils.outmagenta("TestTransportTrolleyCore	|	waiting for application starts...")
                 CommUtils.delay(200)
-                tTCore = getActor("transporttrolleycore")
+                tTCore = getActor("transporttrolley")
             }
             try {
                 conn = TcpClientSupport.connect("localhost", 8092, 5)
