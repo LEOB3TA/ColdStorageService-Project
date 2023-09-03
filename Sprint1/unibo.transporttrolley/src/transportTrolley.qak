@@ -1,0 +1,139 @@
+System transporttrolley
+
+Request engage        : engage(ARG)	
+Reply   engagedone    : engagedone(ARG)
+Reply   engagerefused : engagerefused(ARG)
+Dispatch disengage    : disengage(ARG)
+
+Request  doplan     : doplan( PATH, OWNER, STEPTIME )
+Reply doplandone    : doplandone( ARG ) 
+Reply doplanfailed  : doplanfailed( ARG )
+
+Request moverobot    :  moverobot(TARGETX, TARGETY)
+Reply moverobotdone  :  moverobotok(ARG)
+Reply moverobotfailed:  moverobotfailed(PLANDONE, PLANTODO)
+
+Request dodepositaction:dodepositaction(TICKETID)//sender:coldstorageservice receiver:transporttrolley
+Reply depositactionended:depositactionended(ARG) //sender:transporttrolley  receiver:coldstorageservice
+Dispatch pickupindoordone : pickupindoordone(_) //emitter:transporttrolley
+
+Dispatch setrobotstate: setpos(X,Y,D)
+
+//Dropout
+Dispatch dropout	 : dropout(FW)
+Event	local_dropoutdone: local_dropoutdone(_)
+
+Context ctxbasicrobot ip [host="127.0.0.1" port=8020] 
+Context ctxcoldstorageservice   ip [host="localhost" port=8092] 
+  
+ExternalQActor basicrobot context ctxbasicrobot
+
+CodedQActor pathobs context ctxbasicrobot className "observers.planexecCoapObserver"
+
+
+QActor transporttrolley context ctxcoldstorageservice{
+	[#
+		var CRX = 4;
+		var CRY = 3;
+		var INDOORX=0;
+		var INDOORY=4;
+		var HOMEX=0;
+		var HOMEY=0;
+		var TICKETID = 0;
+		val tTState = transporttrolley.state.TransportTrolleyState()
+	#]
+	State init initial{
+		discardMsg Off
+		
+		// engage
+		println("$name | request engage") color red
+		request basicrobot -m engage : engage(transporttrolley, 330)
+		updateResource[#tTState.toJsonString()#]
+	}Transition t0 whenReply engagedone -> idle
+				   whenReply engagerefused -> waitforfree
+
+	State waitforfree{
+		println("$name | already engaged") color red
+	}
+	
+	State idle {
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.IDLE)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.HOME)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		println("$name | waiting for commands.") color red
+  	}
+ 	Transition t0 whenRequest dodepositaction -> moverobottoindoor
+ 	
+ 	State moverobottoindoor {
+ 		//move robot to indoor
+ 		onMsg(dodepositaction :dodepositaction(TICKETID)){
+ 			[#
+ 				TICKETID=payloadArg(0).toInt();
+ 			#]
+ 		}
+ 		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.PICKINGUP)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.INDOOR)
+		#]
+		updateResource[#tTState.toJsonString()#]
+ 		println("$name | moving robot to indoor.") color red
+ 		request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)
+ 		
+ 	}
+ 	Transition t2 whenReply moverobotdone -> movetoport
+ 				  whenReply moverobotfailed -> robotmovefailed 
+
+
+	//when robot has taken kg from camion -> move robot to coldroom
+	State movetoport{
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.ONTHEROAD)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		//send event "robot is in indoor"
+		println("$name | robot is in indoor") color red
+		println("$name | moving robot to coldroom") color red
+		// da usare col css
+		//forward coldstorageservice -m pickupindoordone:pickupindoordone
+		request basicrobot -m moverobot:moverobot($CRX,$CRY)
+	}
+	Transition t3 whenReply moverobotdone -> depositactionended
+ 				  whenReply moverobotfailed -> robotmovefailed
+	
+	State depositactionended{
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.DROPPINGOUT)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.PORT)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		replyTo dodepositaction with depositactionended:depositactionended($TICKETID)
+		println("$name | robot is in coldroom") color red
+		println("$name | depositaction ended") color red
+		println("$name | waiting for next move" ) color red
+		emitlocal local_dropoutdone: local_dropoutdone
+	} 
+	Transition t4 whenTime 100    -> robottohome
+	whenRequest dodepositaction -> moverobottoindoor
+	 	
+	State robottohome{
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.ONTHEROAD)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		//send event "robot is in home"
+		request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
+	}
+	Transition t5 whenReply moverobotdone -> idle
+ 				  whenReply moverobotfailed -> robotmovefailed
+ 
+
+ 	//control failed robot moves
+ 	State robotmovefailed{
+ 		println("$name | robot failed to move") color red
+ 	}
+ 		
+}
