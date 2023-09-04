@@ -97,36 +97,27 @@
         </ol>
         <h5>Problemi</h5>
         Analizzando il testo dei requisiti possiamo dedurre i seguenti problemi:
-        <br>
+        <br><br>
         <ol>
-            <li><b>La richiesta del ticket e la presentazione del ticket avvengono in istanti di tempo diversi</b></li>
-            Dall'esame dei requisiti forniti dal committente, emerge che la richiesta di immagazzinamento del carico e la successiva presentazione del ticket all'<b>INDOOR</b> avvengono in momenti distinti.
             <li><b>Scadenza del ticket</b></li>
             Nel caso di accettazione della richiesta, viene fornito al conducente un ticket con un tempo limite entro il quale deve raggiungere l'<b>INDOOR</b>. Sorge quindi il dubbio se il conducente debba essere a conoscenza di tale scadenza.
             <li><b>Problema del load-time lungo</b></li>
             Quando il driver presenta il ticket &egrave; possibile che il <b>ColdStorageService</b> non riesca a fornire la risposta <b>chargeTaken</b> in tempi brevi, in quanto il <b>TrasportTrolley</b> potrebbe essere occupato, quindi il driver non saprebbe se la sua richiesta &egrave; in attesa di una risposta oppure se il ticket non &egrave; stato accettato.
-            <li><b>Errore interno del ColdStorageService</b></li>
-            Nel caso in cui il <b>ColdStorageService</b> incontri problemi interni che causano il malfunzionamento del servizio, &egrave importante stabilire come il conducente dovrebbe reagire.
-            <li><b>Quando il driver deve liberare la indoor</b></li>
-            Il driver deve liberare la <b>INDOOR</b> appena "as soon as possible" cio&egrave; appena preso il carico, oppure deve aspettare che il carico sia stato scaricato all'interno della <b>ColdRoom</b>
-            <li><b>Il truck inserisce il numero del ticket errato per più di 2 volte</b></li>
-            Il truck inserisce almeno tre volte il numero del ticket errato
+            <li><b>Errore interno della ServiceAccessGUI</b></li>
+            Nel caso in cui il <b>ServiceAccessGUI</b> incontri problemi interni che causano il malfunzionamento del servizio, &egrave importante stabilire come il conducente dovrebbe reagire.
+            <li><b>Il driver potrebbe inserire il numero del ticket errato</b></li>
         </ol>
         <h5>Possibili soluzioni</h5>
         <ol>
-            <li><b>La richiesta del ticket e la presentazione del ticket avvengono in istanti di tempo diversi</b></li>
-            Il tempo in cui il driver si reca alla <b>INDOOR</b> non &egrave; trascurabile, di conseguenza &egrave; necessario introdurre una variabile <b>DT</b> (driver time) che rappresenta il tempo di viaggio.
             <li><b>Scadenza del ticket</b></li>
-            Una possibile soluzione &egrave fornire al conducente la scadenza del ticket e, supponendo che egli abbia una stima del tempo di viaggio verso l'<b>INDOOR</b>, consentirgli di valutare se intraprendere il viaggio. In alternativa, il conducente potrebbe ricevere solo il <b>TICKETID</b> e recarsi comunque all'<b>INDOOR</b>, dove la validità del ticket verrà verificata.
+            Una possibile soluzione &egrave; fornire al conducente la scadenza del ticket e, supponendo che egli abbia una stima del tempo di viaggio verso l'<b>INDOOR</b>, consentirgli di valutare se intraprendere il viaggio. In alternativa, il conducente potrebbe ricevere solo il <b>TICKETID</b> e recarsi comunque all'<b>INDOOR</b>, dove la validità del ticket verrà verificata.
             Durante questa fase di sviluppo, &egrave stata adottata la seconda opzione, ma ulteriori dettagli dal committente sono necessari.
             <li><b>Problema del load-time lungo</b></li>
             Per sopperire a questo problema &egrave; necessario creare un interazione a due fasi: una in cui il driver presenta il proprio ticket (<b>sendTicket</b>) e riceve una risposta da parte del ColdStorageService (<b>ticketAccepted/ticketRejected</b>); e una in cui il driver invia la richiesta di deposito (<b>deposit</b>) e riceve poi <b>chargeTaken</b>
-            <li><b>Errore interno del ColdStorageService</b></li>
+            <li><b>Errore interno della ServiceAccessGUI</b></li>
             &Egrave; possibile introdurre un timeout per ogni richiesta, in modo che il driver abbandoni alla scadenza del timer. Il timer &egrave; stato fissato a <b>60</b> secondi.
-            <li><b>Quando il driver deve liberare la indoor</b></li>
-            In questa fase di sviluppo &egrave; stato adottato l'approccio "as soon as possible"
-            <li><b>Il truck inserisce il numero del ticket errato per più di 2 volte</b></li>
-            Il truck inserisce almeno tre volte il numero del ticket errato, il ColdStorageService invia un messaggio di errore al truck e il truck torna allo stato di attesa del ticket. L'operazione si intende conclusa con esito negativo.
+            <li><b>Il driver potrebbe inserire il numero del ticket errato</b></li>
+            Il <b>ColdStorageService</b> deve essere in grado di riconoscere un ticket non valido e di rispondere con un messaggio di errore.
         </ol>
     </div>
 
