@@ -10,7 +10,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/Sprint1/unibo.coldstorageservice" />
-            <option value="$PROJECT_DIR$/Sprint1/unibo.coldstorageservice/resources" />
           </set>
         </option>
       </GradleProjectSettings>
