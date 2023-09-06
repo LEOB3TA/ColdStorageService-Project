@@ -1,14 +1,17 @@
 package resources
 
+import cli.System.TimeSpan
+import com.google.gson.Gson
 import it.unibo.coldstorageservice.model.Ticket
 
 class ColdStorageService private constructor(){
 
     private val MAXW : Double = 100.0
-    private val TICKETTIME: Int = 10000
+    private val TICKETTIME: TimeSpan = TimeSpan(1000)
     private var currentWeightStorage : Double = 0.0
-    private val ticketList : ArrayList<Ticket> = arrayListOf<Ticket>()
-    private var ticketNumber = 0;
+    private val ticketList : ArrayList<Ticket> = arrayListOf()
+    private var ticketNumber: Int = 0;
+    private var rejectedRequestCounter: Int = 0;
 
     companion object {
 
@@ -20,12 +23,14 @@ class ColdStorageService private constructor(){
                     instance ?: ColdStorageService().also { instance = it }
                 }
 
+        val gson = Gson()
+
         fun getMAXW(): Double {
-            return MAXW
+            return getInstance().MAXW
         }
 
-        fun getTICKETTIME(): Int {
-            return TICKETTIME
+        fun getTICKETTIME(): TimeSpan {
+            return getInstance().TICKETTIME
         }
 
         fun getCurrentWeightStorage(): Double {
@@ -88,6 +93,26 @@ class ColdStorageService private constructor(){
 
         private fun removeTicket(ticket: Ticket) {
             getTicketList().remove(ticket)
+        }
+
+        fun getRejectedRequestCounter(): Int {
+            return getInstance().rejectedRequestCounter
+        }
+
+        fun incrementRejectedRequestCounter() {
+            getInstance().rejectedRequestCounter++
+        }
+
+        fun toJsonString() : String{
+            return ColdStorageServiceState.gson.toJson(this)
+        }
+
+        fun fromJson(json: String): ColdStorageService {
+            return ColdStorageServiceState.gson.fromJson(json, ColdStorageService::class.java)
+        }
+
+        override fun toString(): String {
+            return "ColdStorageService [MAXW=${getMAXW()}, TICKETTIME=${getTICKETTIME()}, currentWeightStorage=${getCurrentWeightStorage()}, ticketList=${getTicketList()}, ticketNumber=${getTicketNumber()}, rejectedRequestCounter=${getRejectedRequestCounter()}]"
         }
 
     }

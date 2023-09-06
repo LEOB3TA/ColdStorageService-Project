@@ -10,8 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import resources.ColdStorageServiceState
-
+	
 class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
@@ -42,7 +41,8 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				state("idle") { //this:State
 					action { //it:State
 						CommUtils.outblack("$name |	in idle")
-						updateResourceRep(maxw.toJsonString())
+						updateResourceRep(maxw.toJsonString() 
+						)
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -70,7 +70,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				state("acceptRequest") { //this:State
 					action { //it:State
 						
-						    		var TICKET : Ticket = Ticket(RT, TICKETTIME) 		
+						    		var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME) 		
 						    		ColdStorageService.getTicketList().add(TICKET)
 						answer("storeFood", "storeAccepted", "storeAccepted(TICKETID)"   )  
 						request("pickup", "pickup(TICKETID)" ,"transporttrolley" )  
@@ -103,7 +103,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				}	 
 				state("dropout") { //this:State
 					action { //it:State
-						forward("dropout", "dropout(_)" ,"transporttrolley" ) 
+						forward("dropout", "dropout(FW)" ,"transporttrolley" ) 
 						forward("gotohome", "gotohome(_)" ,"transporttrolley" ) 
 						//genTimer( actor, state )
 					}
@@ -125,12 +125,14 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				state("ticketEvaluation") { //this:State
 					action { //it:State
 						CommUtils.outblue("Ticket evaluation of ticket id ${payloadArg(0)}")
+						
+						    	        		 val TICKETID = payloadArg(0).toInt()
 						if( checkMsgContent( Term.createTerm("sendTicket(TICKETID)"), Term.createTerm("sendTicket($TICKETID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								if(  ColdStorageService.evaluateTicket($TICKETID) == TicketEvaluationResponse.VALID  
+								if(  ColdStorageService.evaluateTicket(TICKETID) == TicketEvaluationResponse.VALID  
 								 ){answer("sendTicket", "ticketValid", "ticketValid(_)"   )  
 								}
-								if(  ColdStorageService.evaluateTicket($TICKETID) == TicketEvaluationResponse.INVALID  
+								if(  ColdStorageService.evaluateTicket(TICKETID) == TicketEvaluationResponse.INVALID  
 								 ){answer("sendTicket", "ticketNotValid", "ticketNotValid(_)"   )  
 								}
 								answer("sendTicket", "ticketExpired", "ticketExpired(_)"   )  

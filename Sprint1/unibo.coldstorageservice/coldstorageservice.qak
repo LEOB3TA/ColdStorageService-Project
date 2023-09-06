@@ -78,7 +78,7 @@ QActor coldstorageservice context ctxcoldstorageservice {
       */               
      State acceptRequest{
     	[#
-    		var TICKET : Ticket = Ticket(RT, TICKETTIME) 		
+    		var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME) 		
     		ColdStorageService.getTicketList().add(TICKET)
     	#]
         replyTo storeFood with storeAccepted : storeAccepted(TICKETID)
@@ -99,7 +99,7 @@ QActor coldstorageservice context ctxcoldstorageservice {
     }Goto idle   
     
     State dropout{
-    	forward transporttrolley -m dropout : dropout(_)
+    	forward transporttrolley -m dropout : dropout(FW)
     	forward transporttrolley -m gotohome : gotohome(_)
 	}Goto idle
 
@@ -117,10 +117,14 @@ QActor coldstorageservice context ctxcoldstorageservice {
 	 */
     State ticketEvaluation {
     	println("Ticket evaluation of ticket id ${payloadArg(0)}") color blue
+    					[#
+    	        		 val TICKETID = payloadArg(0).toInt()
+    	        		#]
     	        onMsg(sendTicket : sendTicket($TICKETID)){
-    	        	 if[# ColdStorageService.evaluateTicket($TICKETID) == TicketEvaluationResponse.VALID #] {
+    	        		
+    	        	 if[# ColdStorageService.evaluateTicket(TICKETID) == TicketEvaluationResponse.VALID #] {
     	        	 	replyTo sendTicket with ticketValid : ticketValid(_)
-    	        	 } if [# ColdStorageService.evaluateTicket($TICKETID) == TicketEvaluationResponse.INVALID #]{
+    	        	 } if [# ColdStorageService.evaluateTicket(TICKETID) == TicketEvaluationResponse.INVALID #]{
     	        	 	replyTo sendTicket with ticketNotValid : ticketNotValid(_)
     	        	 }  replyTo sendTicket with ticketExpired : ticketExpired(_)     														
        }
