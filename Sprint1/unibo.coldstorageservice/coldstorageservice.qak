@@ -1,0 +1,132 @@
+System coldstorageservice
+
+// Messaggi scambiati con mocktruck
+Request deposit : deposit(_)
+Request sendTicket : sendTicket(TICKETID)
+Request storeFood : storeFood(FW)
+Reply storeAccepted : storeAccepted(TICKETID)
+Reply storeRejected : storeRejected(_)
+Reply chargeTaken : chargeTaken(_)
+Reply ticketValid : ticketValid(_)
+Reply ticketNotValid : ticketNotValid(_)
+Reply ticketExpired : ticketExpired(_)
+
+// Messaggi scambiati con transporttrolley
+Request pickup:    pickup(_)
+Reply  pickupdone:  pickupdone(_)
+Dispatch dropout  : dropout(FW) //peso
+Event  dropoutdone: dropoutdone(_)
+
+Dispatch gotohome: gotohome(_)
+
+// Contesti
+Context ctxcoldstorageservice ip[host='localhost' port=8080]
+Context ctxtruck ip[host='localhost' port=8092]
+
+// Attori
+ExternalQActor mocktruck context ctxtruck
+
+QActor transporttrolley context ctxcoldstorageservice {
+	State setup initial {
+		println("$name |	setup")
+	}
+}
+
+// TODO: ANALISI DEL PROBLEMA prima di scrivere del codice
+QActor coldstorageservice context ctxcoldstorageservice {
+	
+	[#
+			val MAXW = ColdStorageService.getMAXW()
+			val TICKETTIME = ColdStorageService.getTICKETTIME()
+		   	var currentWeightStorage = ColdStorageService.getCurrentWeightStorage()
+		   	var requestWeightToStore = 0.0
+		   	var TICKETNUMBER = ColdStorageService.getTicketNumber()
+		   	val coldStorageServiceState = ColdStorageServiceState()
+    	  	
+	#]
+	
+    State setup initial {
+        	println("$name |	setup") color blue
+        	discardMsg Off
+    }
+
+    Goto idle
+        
+    State idle {
+        println("$name |	in idle")
+        updateResource[#maxw.toJsonString()#]
+    }  
+    Transition t0 whenRequest storeFood -> requestEvaluation
+    			  whenRequest sendTicket -> ticketEvaluation
+    
+    /*
+     *  REQUEST EVALUATION
+     *  1. Funzione canStore gestisce la logica
+     * 	2a. Se esito positivo, va in stato acceptRequest
+     * 	2b. Altrimenti va in stato rejectRequest
+     */
+    State requestEvaluation {
+    	        onMsg(storeFood : storeFood(FW)){
+           println("Request evaluation to store ${payloadArg(0)} kg") color blue
+       }
+    } Goto acceptRequest if[# ColdStorageService.canStore(requestWeightToStore) #] 
+                            else rejectRequest
+             
+     /*
+      *  ACCEPT REQUEST
+      *  Generazione TICKET +
+      */               
+     State acceptRequest{
+    	[#
+    		var TICKET : Ticket = Ticket(RT, TICKETTIME) 		
+    		ColdStorageService.getTicketList().add(TICKET)
+    	#]
+        replyTo storeFood with storeAccepted : storeAccepted(TICKETID)
+        request transporttrolley -m pickup : pickup(TICKETID)
+    }Goto idle
+    	
+    	
+    State handleTicketExpired{
+		println("$name |	ticket expired") color red
+	} Goto idle
+    
+    
+	/*
+	 *  REJECT REQUEST
+	 */
+    State rejectRequest{
+        replyTo storeFood with storeRejected : storeRejected(_)
+    }Goto idle   
+    
+    State dropout{
+    	forward transporttrolley -m dropout : dropout(_)
+    	forward transporttrolley -m gotohome : gotohome(_)
+	}Goto idle
+
+
+    State charged{
+         replyTo deposit with chargeTaken : chargeTaken(_)
+    }Goto idle
+    
+ 
+    /*
+	 *  TICKET EVALUATION
+	 *  Il coldStorageService controlla se il ticket ricevuto in input è uguale a quello che si aspetta.
+	 * 	In caso di errore, il truck può riprovare ad inserire il numero del ticket fin quando non scade il TICKETTIME.
+	 * 
+	 */
+    State ticketEvaluation {
+    	println("Ticket evaluation of ticket id ${payloadArg(0)}") color blue
+    	        onMsg(sendTicket : sendTicket($TICKETID)){
+    	        	 if[# ColdStorageService.evaluateTicket($TICKETID) == TicketEvaluationResponse.VALID #] {
+    	        	 	replyTo sendTicket with ticketValid : ticketValid(_)
+    	        	 } if [# ColdStorageService.evaluateTicket($TICKETID) == TicketEvaluationResponse.INVALID #]{
+    	        	 	replyTo sendTicket with ticketNotValid : ticketNotValid(_)
+    	        	 }  replyTo sendTicket with ticketExpired : ticketExpired(_)     														
+       }
+    } 
+    
+   
+   
+}
+
