@@ -8,6 +8,7 @@ Reply storeRejected : storeRejected(_)
 Reply chargeTaken : chargeTaken(_)
 Reply ticketValid : ticketValid(_)
 Reply ticketExpired : ticketExpired(_)
+Reply ticketNotValid : ticketNotValid(_)
 
 Dispatch testStore : testStore(_)
 Dispatch testTicket : testTicket(_)
@@ -135,6 +136,7 @@ QActor mocktruck context ctxtruck{
    } Transition t0 whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
    					whenReply ticketValid -> sendDeposit
     				whenReply ticketExpired -> handleTicketExpired
+    				whenReply ticketNotValid -> handleTicketNotValid
     					
 
     State sendDeposit{
@@ -155,8 +157,15 @@ QActor mocktruck context ctxtruck{
 	State handleTicketExpired{
 		[#truckstate.setState(CurrStateTruck.HANDLETICKETEXPIRED)#]
 		updateResource[#truckstate.toJsonString()#]
-		println("$name |	ticket expired") color green
+		println("$name |	ticket expired") color red
 	} Transition t0 whenMsg reset -> idle
+	
+	State handleTicketNotValid{
+		[#truckstate.setState(CurrStateTruck.HANDLETICKETNOTVALID)#]
+		updateResource[#truckstate.toJsonString()#]
+		println("$name |	ticket not valid you must retry") color red
+		[#Thread.sleep(3000)#]
+	} Goto sendTicket // prova di nuovo
 
 }
 

@@ -8,6 +8,7 @@ Reply storeRejected : storeRejected(_)
 Reply chargeTaken : chargeTaken(_)
 Reply ticketValid : ticketValid(_)
 Reply ticketExpired : ticketExpired(_)
+Reply ticketNotValid : ticketNotValid(_)
 
 Context ctxstorageservice ip [host="localhost" port=8093] //porta a caso
 Context ctxtruck ip [host="localhost" port=8092] //porta a caso
@@ -87,6 +88,10 @@ QActor mocktruck context ctxtruck{
 	State handleTicketExpired{
 		println("$name |	ticket expired") color green
 	} Goto idle
+	
+	State handleTicketNotValid{
+		println("$name |	ticket Not valid retry") color green
+	} Goto sendTicket
 
 }
 

@@ -145,6 +145,26 @@ class TestMockTruckActor{
 
     @Test
     @Throws(InterruptedException::class)
+    fun testSendTicketNotValid(){
+        conn.forward("msg(testTicket, dispatch, testunit, mockTruck, testTicket(_), 1)")
+        println("TestMockTruckActor  |   testSendTicketNotValid...")
+        try {
+            conn.reply("msg(ticketNotValid, reply, testunit, mockTruck, ticketNotValid(_), 1)")
+        }catch (e:Exception){
+            e.printStackTrace()
+        }
+        Thread.sleep(2000)
+        val newState = obs.currentTypedState!!.toString()
+        println(newState)
+        Assert.assertTrue(newState.contains("TICKETNOTVALID"))
+        Thread.sleep(2000)
+        val newState1 = obs.currentTypedState!!.toString()
+        println(newState1)
+        Assert.assertTrue(newState1.contains("SENDTICKET"))
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
     fun testDeposit(){
         conn.forward("msg(testDeposit, dispatch, testunit, mockTruck, testDeposit(_), 1)")
         println("TestMockTruckActor  |   testSendTicket...")

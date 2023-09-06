@@ -2,7 +2,7 @@ package resources
 
 import com.google.gson.Gson
 
-enum class CurrStateTruck { IDLE, SENDSTORE, REJECTED, ACCEPTED, SENDTICKET, HANDLETICKETEXPIRED, SENDDEPOSIT, HANDLEERROR}
+enum class CurrStateTruck { IDLE, SENDSTORE, REJECTED, ACCEPTED, SENDTICKET, HANDLETICKETEXPIRED,HANDLETICKETNOTVALID, SENDDEPOSIT, HANDLEERROR}
 
 data class TruckState(
         private var currState : CurrStateTruck = CurrStateTruck.IDLE
