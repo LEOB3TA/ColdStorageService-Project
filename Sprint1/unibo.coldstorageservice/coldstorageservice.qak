@@ -32,7 +32,6 @@ QActor transporttrolley context ctxcoldstorageservice {
 	}
 }
 
-// TODO: ANALISI DEL PROBLEMA prima di scrivere del codice
 QActor coldstorageservice context ctxcoldstorageservice {
 	
 	[#
@@ -41,7 +40,6 @@ QActor coldstorageservice context ctxcoldstorageservice {
 		   	var currentWeightStorage = ColdStorageService.getCurrentWeightStorage()
 		   	var requestWeightToStore = 0.0
 		   	var TICKETNUMBER = ColdStorageService.getTicketNumber()
-		   	val coldStorageServiceState = ColdStorageServiceState()
     	  	
 	#]
 	
@@ -54,10 +52,11 @@ QActor coldstorageservice context ctxcoldstorageservice {
         
     State idle {
         println("$name |	in idle")
-        updateResource[#maxw.toJsonString()#]
+        // updateResource[#maxw.toJsonString()#] // TODO: fai check se serve o meno
     }  
     Transition t0 whenRequest storeFood -> requestEvaluation
     			  whenRequest sendTicket -> ticketEvaluation
+    			  whenRequest deposit -> charged
     
     /*
      *  REQUEST EVALUATION
@@ -78,23 +77,20 @@ QActor coldstorageservice context ctxcoldstorageservice {
       */               
      State acceptRequest{
     	[#
-    		var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME) 		
+    		var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME) 	
+    		ColdStorageService.incrementTicketNumber()	
     		ColdStorageService.getTicketList().add(TICKET)
     	#]
-        replyTo storeFood with storeAccepted : storeAccepted(TICKETID)
-        request transporttrolley -m pickup : pickup(TICKETID)
+        replyTo storeFood with storeAccepted : storeAccepted(TICKETNUMBER) // TODO: check se tornare tutto il ticket o solo numero
     }Goto idle
-    	
-    	
-    State handleTicketExpired{
-		println("$name |	ticket expired") color red
-	} Goto idle
-    
     
 	/*
 	 *  REJECT REQUEST
 	 */
     State rejectRequest{
+    	   	[#
+			 ColdStorageService.incrementRejectedRequestCounter()
+       		#]  	
         replyTo storeFood with storeRejected : storeRejected(_)
     }Goto idle   
     
@@ -105,9 +101,25 @@ QActor coldstorageservice context ctxcoldstorageservice {
 
 
     State charged{
-         replyTo deposit with chargeTaken : chargeTaken(_)
+    	replyTo deposit with chargeTaken : chargeTaken(_)
+    	request transporttrolley -m pickup : pickup(_)
     }Goto idle
     
+    
+    State removeExpiredTicket {
+    	println("Ticket of id ${payloadArg(0)} is expired - Reject Request") color blue
+   			[#
+   	  		 val TICKETID = payloadArg(0).toInt()
+   	  		 val TICKET = ColdStorageService.getTicketById(TICKETID)
+			 ColdStorageService.incrementRejectedRequestCounter()
+			 ColdStorageService.getTicketList().remove(TICKET)
+       		#]
+    } Goto idle
+    
+    State sendInvalidTicket {
+    	println("Inserted ticket id is not valid") color red
+    } Goto idle
+
  
     /*
 	 *  TICKET EVALUATION
@@ -121,16 +133,18 @@ QActor coldstorageservice context ctxcoldstorageservice {
     	        		 val TICKETID = payloadArg(0).toInt()
     	        		#]
     	        onMsg(sendTicket : sendTicket($TICKETID)){
-    	        		
-    	        	 if[# ColdStorageService.evaluateTicket(TICKETID) == TicketEvaluationResponse.VALID #] {
-    	        	 	replyTo sendTicket with ticketValid : ticketValid(_)
-    	        	 } if [# ColdStorageService.evaluateTicket(TICKETID) == TicketEvaluationResponse.INVALID #]{
-    	        	 	replyTo sendTicket with ticketNotValid : ticketNotValid(_)
-    	        	 }  replyTo sendTicket with ticketExpired : ticketExpired(_)     														
-       }
-    } 
-    
-   
+    	        	[# val TICKETEVALUATION = ColdStorageService.evaluateTicket(TICKETID) #]
+    	        	if [#TICKETEVALUATION == TicketEvaluationResponse.VALID #] {
+    	        		[#
+    	        			val TICKET = ColdStorageService.getTicketById(TICKETID)
+							ColdStorageService.getTicketList().remove(TICKET)
+    	        		#]
+    	        		replyTo sendTicket with ticketValid : ticketValid(_)	
+    	        	}
+    	        												
+       				}
+    }Goto removeExpiredTicket if [# ColdStorageService.evaluateTicket(payloadArg(0).toInt()) == TicketEvaluationResponse.EXPIRED #]
+    								else sendInvalidTicket
    
 }
 

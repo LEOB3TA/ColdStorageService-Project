@@ -17,7 +17,7 @@ class Ticket(id: Int, ticketTime: TimeSpan) {
     }
 
     // Getters and setters
-    fun getId(): Int {
+    fun getTicketId(): Int {
         return id
     }
     fun getTicketTime(): DateTime {

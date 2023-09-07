@@ -45,7 +45,7 @@ class ColdStorageService private constructor(){
             return getInstance().ticketList
         }
 
-        fun updateTicketNumber() {
+        fun incrementTicketNumber() {
             getInstance().ticketNumber++
         }
 
@@ -75,7 +75,7 @@ class ColdStorageService private constructor(){
             return (requestWeightToStore + getCurrentWeightStorage() <= getMAXW())
         }
 
-        private fun getTicketById(id: Int): Ticket? {
+        fun getTicketById(id: Int): Ticket? {
             return getTicketList().find { it.id == id }
         }
 
@@ -104,11 +104,11 @@ class ColdStorageService private constructor(){
         }
 
         fun toJsonString() : String{
-            return ColdStorageServiceState.gson.toJson(this)
+            return ColdStorageService.gson.toJson(this)
         }
 
         fun fromJson(json: String): ColdStorageService {
-            return ColdStorageServiceState.gson.fromJson(json, ColdStorageService::class.java)
+            return ColdStorageService.gson.fromJson(json, ColdStorageService::class.java)
         }
 
         override fun toString(): String {

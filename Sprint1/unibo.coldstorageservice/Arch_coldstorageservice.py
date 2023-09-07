@@ -24,7 +24,7 @@ with Diagram('coldstorageserviceArch', show=False, outformat='png', graph_attr=g
           coldstorageservice=Custom('coldstorageservice','./qakicons/symActorSmall.png')
      with Cluster('ctxtruck', graph_attr=nodeattr):
           mocktruck=Custom('mocktruck(ext)','./qakicons/externalQActor.png')
-     coldstorageservice >> Edge(color='magenta', style='solid', xlabel='pickup', fontcolor='magenta') >> transporttrolley
      coldstorageservice >> Edge(color='blue', style='solid', xlabel='dropout', fontcolor='blue') >> transporttrolley
      coldstorageservice >> Edge(color='blue', style='solid', xlabel='gotohome', fontcolor='blue') >> transporttrolley
+     coldstorageservice >> Edge(color='magenta', style='solid', xlabel='pickup', fontcolor='magenta') >> transporttrolley
 diag
