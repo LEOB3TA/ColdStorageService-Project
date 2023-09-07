@@ -13,18 +13,23 @@ Request moverobot    :  moverobot(TARGETX, TARGETY)
 Reply moverobotdone  :  moverobotok(ARG)
 Reply moverobotfailed:  moverobotfailed(PLANDONE, PLANTODO)
 
-Request dodepositaction:dodepositaction(TICKETID)//sender:coldstorageservice receiver:transporttrolley
-Reply depositactionended:depositactionended(ARG) //sender:transporttrolley  receiver:coldstorageservice
-Dispatch pickupindoordone : pickupindoordone(_) //emitter:transporttrolley
+//Request dodepositaction:dodepositaction(TICKETID)//sender:coldstorageservice receiver:transporttrolley
+//Reply depositactionended:depositactionended(ARG) //sender:transporttrolley  receiver:coldstorageservice
+//Dispatch pickupindoordone : pickupindoordone(_) //emitter:transporttrolley
+
+Request pickup : pickup(_) //sender:coldstorageservice receiver:transporttrolley
+Reply pickupdone : pickupdone(_) //sender:transporttrolley  receiver:coldstorageservice
+//Event pickupindoordone : pickupindoordone(_) //emitter:transporttrolley
 
 Dispatch setrobotstate: setpos(X,Y,D)
+//Dispatch  gotohome: gotohome(_)
 
 //Dropout
-Dispatch dropout	 : dropout(FW)
-Event	local_dropoutdone: local_dropoutdone(_)
+
+//Event local_dropoutdone: local_dropoutdone(_)
 
 Context ctxbasicrobot ip [host="127.0.0.1" port=8020] 
-Context ctxcoldstorageservice   ip [host="localhost" port=8092] 
+Context ctxcoldstorageservice ip [host="localhost" port=8092] 
   
 ExternalQActor basicrobot context ctxbasicrobot
 
@@ -46,14 +51,14 @@ QActor transporttrolley context ctxcoldstorageservice{
 		discardMsg Off
 		
 		// engage
-		println("$name | request engage") color red
+		println("$name | request engage") color green
 		request basicrobot -m engage : engage(transporttrolley, 330)
 		updateResource[#tTState.toJsonString()#]
 	}Transition t0 whenReply engagedone -> idle
 				   whenReply engagerefused -> waitforfree
 
 	State waitforfree{
-		println("$name | already engaged") color red
+		println("$name | already engaged") color green
 	}
 	
 	State idle {
@@ -62,23 +67,20 @@ QActor transporttrolley context ctxcoldstorageservice{
 			tTState.setCurrPosition(transporttrolley.state.TTPosition.HOME)
 		#]
 		updateResource[#tTState.toJsonString()#]
-		println("$name | waiting for commands.") color red
+		println("$name | waiting for commands.") color green
   	}
- 	Transition t0 whenRequest dodepositaction -> moverobottoindoor
+ 	Transition t0 whenRequest pickup -> moverobottoindoor
  	
  	State moverobottoindoor {
  		//move robot to indoor
- 		onMsg(dodepositaction :dodepositaction(TICKETID)){
+ 		onMsg(pickup :pickup(_)){
  			[#
- 				TICKETID=payloadArg(0).toInt();
- 			#]
- 		}
- 		[#
 			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.PICKINGUP)
 			tTState.setCurrPosition(transporttrolley.state.TTPosition.INDOOR)
-		#]
+			#]
+ 		} 		
 		updateResource[#tTState.toJsonString()#]
- 		println("$name | moving robot to indoor.") color red
+ 		println("$name | moving robot to indoor.") color green
  		request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)
  		
  	}
@@ -94,8 +96,8 @@ QActor transporttrolley context ctxcoldstorageservice{
 		#]
 		updateResource[#tTState.toJsonString()#]
 		//send event "robot is in indoor"
-		println("$name | robot is in indoor") color red
-		println("$name | moving robot to coldroom") color red
+		println("$name | robot is in indoor") color green
+		println("$name | moving robot to coldroom") color green
 		// da usare col css
 		//forward coldstorageservice -m pickupindoordone:pickupindoordone
 		request basicrobot -m moverobot:moverobot($CRX,$CRY)
@@ -109,14 +111,15 @@ QActor transporttrolley context ctxcoldstorageservice{
 			tTState.setCurrPosition(transporttrolley.state.TTPosition.PORT)
 		#]
 		updateResource[#tTState.toJsonString()#]
-		replyTo dodepositaction with depositactionended:depositactionended($TICKETID)
-		println("$name | robot is in coldroom") color red
-		println("$name | depositaction ended") color red
-		println("$name | waiting for next move" ) color red
-		emitlocal local_dropoutdone: local_dropoutdone
+		replyTo pickup with pickupdone:pickupdone(_)
+		println("$name | robot is in coldroom") color green
+		//emitlocal local_dropoutdone: local_dropoutdone
+		println("$name | depositaction ended") color green
+		println("$name | waiting for next move" ) color green
 	} 
-	Transition t4 whenTime 100    -> robottohome
-	whenRequest dodepositaction -> moverobottoindoor
+	Transition t4 whenTime 3000 -> robottohome
+	whenRequest pickup -> moverobottoindoor
+	//se arriva un messagio prima di 3s moverobottoindoor altrimenti torno in home
 	 	
 	State robottohome{
 		[#

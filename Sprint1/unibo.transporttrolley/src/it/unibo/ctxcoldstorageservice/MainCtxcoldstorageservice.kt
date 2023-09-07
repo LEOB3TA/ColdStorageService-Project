@@ -7,7 +7,7 @@ import kotlinx.coroutines.runBlocking
 fun main() = runBlocking {
 	//System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "ERROR");
 	QakContext.createContexts(
-	        "localhost", this, "transporttrolley.pl", "sysRules.pl","ctxcoldstorageservice"
+	        "localhost", this, "old_css.pl", "sysRules.pl","ctxcoldstorageservice"
 	)
 }
 

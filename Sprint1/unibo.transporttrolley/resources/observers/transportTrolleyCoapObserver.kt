@@ -1,16 +1,15 @@
 package observers
 
 import org.eclipse.californium.core.CoapClient
-import org.eclipse.californium.core.CoapResponse
 import org.eclipse.californium.core.CoapHandler
+import org.eclipse.californium.core.CoapResponse
 
-object  basicrobotCoapObserver {
-
+object transportTrolleyCoapObserver {
     private val client = CoapClient()
 
-    private val ipaddr      = "localhost:8020"		//5683 default
-    private val context     = "ctxbasicrobot"
-    private val destactor   = "basicrobot"
+    private val ipaddr      = "localhost:8099"		//5683 default
+    private val context     = "ctxcoldstorageserviee"
+    private val destactor   = "transporttrolley"
 
 
     fun activate(  ){
@@ -33,6 +32,6 @@ object  basicrobotCoapObserver {
 
 
 fun main( ) {
-    basicrobotCoapObserver.activate()
+    transportTrolleyCoapObserver.activate()
     System.`in`.read()   //to avoid exit
 }

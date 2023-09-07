@@ -403,55 +403,60 @@
         al soddisfacimento di un requisito (assenza di ulteriori richieste nel sistema) pu&ograve; essere considerata
         un'attivit&agrave; che il robot deve svolgere quando si verificano determinate condizioni.
         <br/>
-        La condizione da verificare &egrave; l'assenza di ulteriori richieste nel sistema e visto che tali
-        richieste sono gestite dal <kc>ColdStorageService</kc> &egrave; opportuno che sia questo componente a
-        coordinare l'esecuzione di tale compito.
+        La condizione da verificare &egrave; l'assenza di ulteriori richieste nel sistema.
+<!--        e visto che tali-->
+<!--        richieste sono gestite dal <kc>ColdStorageService</kc> &egrave; opportuno che sia questo componente a-->
+<!--        coordinare l'esecuzione di tale compito.-->
         <br/><br/>
-        <h3>Interazione tra componenti</h3>
-        <div id="inter">
-            Compreso chi si debba occupare della gestione di <i>back to Home</i>, si pu&ograve; iniziare ad
-            analizzare il tipo di interazione che si presenta tra il <kc>ColdStorageService</kc> ed il
-            <kc>TransportTrolley</kc> per farlo tornare in <i>HOME</i>.
-            <br/>
-            La scelta ricade sull'effettuare:
-            <ul>
-                <li>Dispatch</li>
-                <li>Request</li>
-            </ul>
-            In virt&ugrave; del fatto che il <kc>ColdStorageService</kc> non &egrave; interessato a conoscere
-            l'esito del rientro in <i>HOME</i>, si potrebbe optare per l'uso di un <i>Dispatch</i>. In questo modo
-            il <kc>ColdStorageService</kc> non gestisce la risposta:
-            <pre>
-<key2>Dispatch</key2> gotohome: gotohome(_)</pre>
-            Il <i>ColdStorageService</i> deve quindi ordinare al <i>transportTrolley</i> di rientrare in <i>Home</i> se quest'ultimo ha concluso
-            l'operazione di deposito e se nel sistema non ci sono altre richieste da servire. <br/>
-            Tuttavia, l'analisi del problema <kc>deposit action</kc> ha evidenziato il fatto che il messaggio <kc>dropout</kc>
-            sia di tipo <i>Dispatch</i>, ci&ograve; implica che il <i>ColdStorageService</i> non si aspetta nessuna risposta a tale messaggio. <br/>
-            Bisogna quindi comprendere come possa fare il <i>ColdStorageService</i> a sapere quando il <i>transportTrolley</i> ha terminato l'esecuzione
-            del dropout. Le alternative possibili sono due:
-            <ul>
-                <li>Modificare il tipo del messaggio dropout in request</li>
-                <li>Fare in modo che il <i>transportTrolley</i> invii in maniera autonoma un messaggio di "notifica" quando termina l'esecuzione
-                    dell'operazione dropout</li>
-            </ul>
-            La prima soluzione &egrave; da evitare, in quanto come analizzato precedentemente l'uso di un messaggio di tipo request per il dropout &egrave; inopportuno.
-            La seconda soluzione &egrave; quella consigliata, in quanto permette al <i>ColdStorageService</i> di sapere quando il <i>transportTrolley</i> ha terminato
-            l'operazione di scarico senza la necessit&agrave; di attendere una risposta. <br/>
-            Per tale motivo si decide di utilizzare il seguente messaggio per la notifica di fine operazione dropout:
-            <pre>
-<key2>Event</key2> local_dropoutdone : local_dropoutdone(_)</pre>
+        Per tale motivo &egrave; stato deciso di sfruttare la capacit&agrave; di avere una propria coda
+        delle richieste: nel caso in cui non siano pi&ugrave; presenti richieste in coda nel <kc>transportTrolley</kc>, questo
+        pu&ograve; tornare in <i>HOME</i>, in caso contrario torna in <i>INDOOR</i>. Tale attivit&egrave; viene duque gestita
+        internamente al <kc>transportTrolley</kc>
+<!--        <h3>Interazione tra componenti</h3>-->
+<!--        <div id="inter">-->
+<!--            Compreso chi si debba occupare della gestione di <i>back to Home</i>, si pu&ograve; iniziare ad-->
+<!--            analizzare il tipo di interazione che si presenta tra il <kc>ColdStorageService</kc> ed il-->
+<!--            <kc>TransportTrolley</kc> per farlo tornare in <i>HOME</i>.-->
+<!--            <br/>-->
+<!--            La scelta ricade sull'effettuare:-->
+<!--            <ul>-->
+<!--                <li>Dispatch</li>-->
+<!--                <li>Request</li>-->
+<!--            </ul>-->
+<!--            In virt&ugrave; del fatto che il <kc>ColdStorageService</kc> non &egrave; interessato a conoscere-->
+<!--            l'esito del rientro in <i>HOME</i>, si potrebbe optare per l'uso di un <i>Dispatch</i>. In questo modo-->
+<!--            il <kc>ColdStorageService</kc> non gestisce la risposta:-->
+<!--            <pre>-->
+<!--<key2>Dispatch</key2> gotohome: gotohome(_)</pre>-->
+<!--            Il <i>ColdStorageService</i> deve quindi ordinare al <i>transportTrolley</i> di rientrare in <i>Home</i> se quest'ultimo ha concluso-->
+<!--            l'operazione di deposito e se nel sistema non ci sono altre richieste da servire. <br/>-->
+<!--            Tuttavia, l'analisi del problema <kc>deposit action</kc> ha evidenziato il fatto che il messaggio <kc>dropout</kc>-->
+<!--            sia di tipo <i>Dispatch</i>, ci&ograve; implica che il <i>ColdStorageService</i> non si aspetta nessuna risposta a tale messaggio. <br/>-->
+<!--            Bisogna quindi comprendere come possa fare il <i>ColdStorageService</i> a sapere quando il <i>transportTrolley</i> ha terminato l'esecuzione-->
+<!--            del dropout. Le alternative possibili sono due:-->
+<!--            <ul>-->
+<!--                <li>Modificare il tipo del messaggio dropout in request</li>-->
+<!--                <li>Fare in modo che il <i>transportTrolley</i> invii in maniera autonoma un messaggio di "notifica" quando termina l'esecuzione-->
+<!--                    dell'operazione dropout</li>-->
+<!--            </ul>-->
+<!--            La prima soluzione &egrave; da evitare, in quanto come analizzato precedentemente l'uso di un messaggio di tipo request per il dropout &egrave; inopportuno.-->
+<!--            La seconda soluzione &egrave; quella consigliata, in quanto permette al <i>ColdStorageService</i> di sapere quando il <i>transportTrolley</i> ha terminato-->
+<!--            l'operazione di scarico senza la necessit&agrave; di attendere una risposta. <br/>-->
+<!--            Per tale motivo si decide di utilizzare il seguente messaggio per la notifica di fine operazione dropout:-->
+<!--            <pre>-->
+<!--<key2>Event</key2> local_dropoutdone : local_dropoutdone(_)</pre>-->
 
-            I messaggi di tipo <ks>Event</ks> non vengono inseriti nella coda di messaggi dei componenti, questo ci permette di gestire il messaggio solo quando il <i>ColdStorageService</i>
-            non sta svolgendo altre attivit&agrave; e scartarlo in tutti gli altri casi. <br/><br/>
+<!--            I messaggi di tipo <ks>Event</ks> non vengono inseriti nella coda di messaggi dei componenti, questo ci permette di gestire il messaggio solo quando il <i>ColdStorageService</i>-->
+<!--            non sta svolgendo altre attivit&agrave; e scartarlo in tutti gli altri casi. <br/><br/>-->
 
-            Se al momento della ricezione di tale evento il <i>ColdStorageService</i> non sta valutando nessuna nuova richiesta, raccoglier&agrave; l'evento e invier&agrave; al <i>transportTrolley</i>
-            il messagio <kc>gotohome</kc>, altrimenti l'evento ver&agrave; perso. <br/><br/>
+<!--            Se al momento della ricezione di tale evento il <i>ColdStorageService</i> non sta valutando nessuna nuova richiesta, raccoglier&agrave; l'evento e invier&agrave; al <i>transportTrolley</i>-->
+<!--            il messagio <kc>gotohome</kc>, altrimenti l'evento ver&agrave; perso. <br/><br/>-->
 
-            &Egrave; utile notare come si tratti di un <ks>Local Event</ks>. Si &egrave; optato per tale
-            tipologia per limitare l'overhead di rete, visto che tali eventi non sono propagati al di
-            fuori del contesto in cui sono generati.
+<!--            &Egrave; utile notare come si tratti di un <ks>Local Event</ks>. Si &egrave; optato per tale-->
+<!--            tipologia per limitare l'overhead di rete, visto che tali eventi non sono propagati al di-->
+<!--            fuori del contesto in cui sono generati.-->
 
-        </div>
+<!--        </div>-->
     </div>
 
 
@@ -505,56 +510,51 @@
                  simulate con dei <ks>delay</ks>, pertanto risultano infallibili. <br/>
 
                  <pre>
-<key2>QActor</key2> transporttrolleycore <key2>context</key2> ctxtransporttrolley{
-    <key2>State</key2> init initial{
-    }<key2>Goto</key2> idle
+<key2>QActor</key2> transporttrolley <key2>context</key2> ctxcoldstorageservice{
+	<key2>State</key2> init initial{
+		...
+	}<key2>Transition</key2> t0 <key2>whenReply</key2> engagedone -> idle
+				   <key2>whenReply</key2> engagerefused -> waitforfree
 
-    <key2>State</key2> idle{
-    }<key2>Transition</key2> t0 <key2>whenRequest</key2> pickup -> pickupMove
-                    <key2>whenMsg</key2> dropout -> dropoutMove
-                    <key2>whenMsg</key2> gotohome -> backHome
-                    <key2>whenMsg</key2> exit -> end
+	<key2>State</key2> waitforfree{
+		println("$name | already engaged") color green
+	}
 
-    <key2>State</key2> pickupMove{
-    }<key2>Transition</key2> t0 <key2>whenReply</key2> moveok -> pickupExec
-                    <key2>whenReply</key2> moveko -> moveErr
+	<key2>State</key2> idle {
+		...
+  	}
+ 	<key2>Transition</key2> t0 <key2>whenRequest</key2> pickup -> moverobottoindoor
 
-    <key2>State</key2> pickupExec{
-    }<key2>Transition</key2> t0 <key2>whenReply</key2> execok -> pickupRes
-                    <key2>whenReply</key2> execko -> execErr
+ 	<key2>State</key2> moverobottoindoor {
+ 		...
+ 	}
+ 	<key2>Transition</key2> t2 <key2>whenReply</key2> moverobotdone -> movetoport
+ 				  <key2>whenReply</key2> moverobotfailed -> robotmovefailed
+	<key2>State</key2> movetoport{
+		...
+	}
+	<key2>Transition</key2> t3 <key2>whenReply</key2> moverobotdone -> depositactionended
+ 				  <key2>whenReply</key2> moverobotfailed -> robotmovefailed
+	<key2>State</key2> depositactionended{
+		...
+	}
+	<key2>Transition</key2> t4 <key2>whenTime</key2> 3000 -> robottohome
+	<key2>whenRequest</key2> pickup -> moverobottoindoor
+	//se arriva un messagio prima di 3s moverobottoindoor altrimenti torno in home
 
-    <key2>State</key2> pickupRes{
-    }<key2>Goto</key2> idle
+	<key2>State</key2> robottohome{
+		...
+	}
+	<key2>Transition</key2> t5 <key2>whenReply</key2> moverobotdone -> idle
+ 				  <key2>whenReply</key2> moverobotfailed -> robotmovefailed
 
-    <key2>State</key2> dropoutMove{
-    }<key2>Transition</key2> t0 <key2>whenReply</key2> moveok -> dropoutExec
-                    <key2>whenReply</key2> moveko -> moveErr
+ 	//control failed robot moves
+ 	<key2>State</key2> robotmovefailed{
+ 		println("$name | robot failed to move") color red
+ 	}
 
-    <key2>State</key2> dropoutExec{
-    }<key2>Transition</key2> t0 <key2>whenReply</key2> execok -> dropoutRes
-                    <key2>whenReply</key2> execko -> execErr
-
-    <key2>State</key2> dropoutRes{
-    }<key2>Goto</key2> idle
-
-    <key2>State</key2> backHome{
-    }<key2>Transition</key2> t0 <key2>whenReply</key2> moveok -> backHomeRes
-                    <key2>whenReply</key2> moveko -> moveErr
-
-    <key2>State</key2> backHomeRes {
-    }<key2>Goto</key2> idle
-
-    <key2>State</key2> moveErr{
-    }<key2>Goto</key2> idle
-
-    <key2>State</key2> execErr{
-        ...
-    }
-
-    <key2>State</key2> end{
-        terminate 0
-    }
-}</pre>
+}
+</pre>
 
 <!--          TODO:       Il codice completo &egrave; consultabile in <a href="./resources/qak/transportTrolley.qak">transportTrolley.qak</a>-->
 

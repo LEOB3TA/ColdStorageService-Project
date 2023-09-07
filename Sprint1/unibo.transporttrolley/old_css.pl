@@ -1,5 +1,5 @@
 %====================================================================================
-% coldstorageservice description   
+% old_css description   
 %====================================================================================
 context(ctxbasicrobot, "127.0.0.1",  "TCP", "8020").
 context(ctxcoldstorageservice, "localhost",  "TCP", "8099").

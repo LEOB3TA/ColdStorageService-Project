@@ -1,0 +1,3 @@
+{"actor":"transporttrolley", "msgType":"request", "sender":"coldstorageservice", "msgId":"pickup"}
+{"actor":"basicrobot", "msgType":"request", "sender":"transporttrolley", "msgId":"engage"}
+{"actor":"basicrobot", "msgType":"request", "sender":"transporttrolley", "msgId":"moverobot"}
