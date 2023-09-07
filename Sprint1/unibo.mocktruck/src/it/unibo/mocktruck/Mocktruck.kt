@@ -3,15 +3,10 @@ package it.unibo.mocktruck
 
 import it.unibo.kactor.*
 import alice.tuprolog.*
-import unibo.basicomm23.*
-import unibo.basicomm23.interfaces.*
 import unibo.basicomm23.utils.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import resources.CurrStateTruck
-import resources.TruckState
+import resources.truckstate.CurrStateTruck
+import resources.truckstate.TruckState
 import kotlin.random.Random
 
 class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
@@ -68,7 +63,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("sendStore") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.SENDSTORE) 
+						truckstate.setState(CurrStateTruck.SENDSTORE)
 						updateResourceRep(truckstate.toJsonString() 
 						)
 						CommUtils.outgreen("$name |	sendStore")
@@ -86,7 +81,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("rejected") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.REJECTED) 
+						truckstate.setState(CurrStateTruck.REJECTED)
 						updateResourceRep(truckstate.toJsonString() 
 						)
 						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
@@ -101,7 +96,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("accepted") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.ACCEPTED) 
+						truckstate.setState(CurrStateTruck.ACCEPTED)
 						updateResourceRep(truckstate.toJsonString() 
 						)
 						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
@@ -121,7 +116,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("sendTicket") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.SENDTICKET) 
+						truckstate.setState(CurrStateTruck.SENDTICKET)
 						updateResourceRep(truckstate.toJsonString() 
 						)
 						request("sendTicket", "sendTicket($TICKETID)" ,"coldstorageservice" )  
@@ -140,7 +135,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("sendDeposit") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.SENDDEPOSIT) 
+						truckstate.setState(CurrStateTruck.SENDDEPOSIT)
 						updateResourceRep(truckstate.toJsonString() 
 						)
 						request("deposit", "deposit(_)" ,"coldstorageservice" )  
@@ -158,7 +153,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("handleError") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.HANDLEERROR) 
+						truckstate.setState(CurrStateTruck.HANDLEERROR)
 						updateResourceRep(truckstate.toJsonString() 
 						)
 						CommUtils.outred("$name |	COLD STORAGE SERVICE ERROR")
@@ -171,7 +166,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("handleTicketExpired") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.HANDLETICKETEXPIRED) 
+						truckstate.setState(CurrStateTruck.HANDLETICKETEXPIRED)
 						updateResourceRep(truckstate.toJsonString() 
 						)
 						CommUtils.outred("$name |	ticket expired")
@@ -184,7 +179,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("handleTicketNotValid") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.HANDLETICKETNOTVALID) 
+						truckstate.setState(CurrStateTruck.HANDLETICKETNOTVALID)
 						updateResourceRep(truckstate.toJsonString() 
 						)
 						CommUtils.outred("$name |	ticket not valid you must retry")

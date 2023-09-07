@@ -3,14 +3,10 @@ package test.it.unibo.testtruck
 import it.unibo.kactor.QakContext.Companion.getActor
 import junit.framework.Assert
 import it.unibo.ctxtruck.main
-import it.unibo.mocktruck.Mocktruck
-import org.junit.After
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
-import org.junit.runners.Parameterized
-import resources.TruckState
-import test.it.unibo.coapobs.TypedCoapTestObserver
+import resources.truckstate.TruckState
+import observers.coapobs.TypedCoapTestObserver
 import unibo.basicomm23.coap.CoapConnection
 import unibo.basicomm23.interfaces.Interaction2021
 import unibo.basicomm23.tcp.TcpClientSupport
@@ -22,7 +18,8 @@ class TestMockTruckActor{
 
     companion object{ private var setupOk = false
         private lateinit var conn : Interaction2021
-        private lateinit var obs : TypedCoapTestObserver<TruckState>}
+        private lateinit var obs : TypedCoapTestObserver<TruckState>
+    }
 
 
     @Before

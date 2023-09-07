@@ -1,4 +1,4 @@
-package resources
+package resources.truckstate
 
 import com.google.gson.Gson
 
@@ -24,7 +24,7 @@ data class TruckState(
     }
 
     fun toJsonString() : String{
-        return TruckState.gson.toJson(this)
+        return gson.toJson(this)
     }
 
 }
