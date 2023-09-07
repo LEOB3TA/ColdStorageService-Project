@@ -7,3 +7,4 @@
 {"actor":"mocktruck", "msgType":"dispatch", "curstate":"sendDeposit", "nextstate":"idle", "msgId":"reset"}
 {"actor":"mocktruck", "msgType":"dispatch", "curstate":"handleError", "nextstate":"idle", "msgId":"reset"}
 {"actor":"mocktruck", "msgType":"dispatch", "curstate":"handleTicketExpired", "nextstate":"idle", "msgId":"reset"}
+{"actor":"mocktruck", "msgType":"dispatch", "curstate":"handleTicketNotValid", "nextstate":"idle", "msgId":"reset"}

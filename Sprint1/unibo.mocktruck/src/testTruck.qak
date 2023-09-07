@@ -164,8 +164,7 @@ QActor mocktruck context ctxtruck{
 		[#truckstate.setState(CurrStateTruck.HANDLETICKETNOTVALID)#]
 		updateResource[#truckstate.toJsonString()#]
 		println("$name |	ticket not valid you must retry") color red
-		[#Thread.sleep(3000)#]
-	} Goto sendTicket // prova di nuovo
+	}Transition t0 whenMsg reset -> idle
 
 }
 

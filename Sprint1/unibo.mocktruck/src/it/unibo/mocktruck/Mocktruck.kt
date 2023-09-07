@@ -46,7 +46,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("idle") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.IDLE) 
+						truckstate.setState(CurrStateTruck.IDLE)
 						updateResourceRep(truckstate.toJsonString() 
 						)
 						CommUtils.outgreen("$name |	in idle")
@@ -68,7 +68,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("sendStore") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.SENDSTORE)
+						truckstate.setState(CurrStateTruck.SENDSTORE) 
 						updateResourceRep(truckstate.toJsonString() 
 						)
 						CommUtils.outgreen("$name |	sendStore")
@@ -188,13 +188,12 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						updateResourceRep(truckstate.toJsonString() 
 						)
 						CommUtils.outred("$name |	ticket not valid you must retry")
-						Thread.sleep(3000) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="sendTicket", cond=doswitch() )
+					 transition(edgeName="t019",targetState="idle",cond=whenDispatch("reset"))
 				}	 
 			}
 		}

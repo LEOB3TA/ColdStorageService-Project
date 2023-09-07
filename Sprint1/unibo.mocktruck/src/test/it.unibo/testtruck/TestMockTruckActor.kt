@@ -99,6 +99,7 @@ class TestMockTruckActor{
     @Test
     @Throws(InterruptedException::class)
     fun testStoreFoodRejected(){
+        conn.forward("msg(testStore, dispatch, testunit, mockTruck, testStore(_), 1)")
         println("TestMockTruckActor  |   testStoreFoodRejected...")
         try {
             conn.reply("msg(storeRejected, reply, testunit, mockTruck, storeRejected(_), 1)")
@@ -157,17 +158,13 @@ class TestMockTruckActor{
         val newState = obs.currentTypedState!!.toString()
         println(newState)
         Assert.assertTrue(newState.contains("TICKETNOTVALID"))
-        Thread.sleep(2000)
-        val newState1 = obs.currentTypedState!!.toString()
-        println(newState1)
-        Assert.assertTrue(newState1.contains("SENDTICKET"))
     }
 
     @Test
     @Throws(InterruptedException::class)
     fun testDeposit(){
         conn.forward("msg(testDeposit, dispatch, testunit, mockTruck, testDeposit(_), 1)")
-        println("TestMockTruckActor  |   testSendTicket...")
+        println("TestMockTruckActor  |   testDeposit...")
         try {
             conn.reply("msg(chargeTaken, reply, testunit, mockTruck, chargeTaken(_), 1)")
         }catch (e:Exception){
