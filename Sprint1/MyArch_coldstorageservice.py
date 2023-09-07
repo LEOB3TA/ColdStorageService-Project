@@ -17,7 +17,7 @@ eventedgeattr = {
     'style': 'dotted'
 }
 with Diagram('coldstorageserviceArch', show=False, outformat='png', graph_attr=graphattr) as diag:
-  with Cluster('ctxtruck', graph_attr=nodeattr):
+  with Cluster('ctxtruck                            ', graph_attr=nodeattr):
      mockTruck=Custom('mockTruck', './qakicons/symActorSmall.png')
   with Cluster('env'):
      sys = Custom('','./qakicons/system.png')
@@ -30,11 +30,14 @@ with Diagram('coldstorageserviceArch', show=False, outformat='png', graph_attr=g
      mockTruck >> Edge(color='magenta', style='solid', xlabel='storeFood', fontcolor='magenta') >> coldstorageservice
      mockTruck >> Edge(color='magenta', style='solid', xlabel='sendTicket', fontcolor='magenta') >> coldstorageservice
      mockTruck >> Edge(color='magenta', style='solid', xlabel='deposit', fontcolor='magenta') >> coldstorageservice
+     coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='store accepted(TICKET)\nstore rejected', fontcolor='forestgreen') >> mockTruck
+     coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='ticketValid/ticketNotValid/ticketExpired', fontcolor='forestgreen') >> mockTruck
      coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='chargeTaken', fontcolor='forestgreen') >> mockTruck
-     coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='ticketValid', fontcolor='forestgreen') >> mockTruck
-     coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='ticketNotValid', fontcolor='forestgreen') >> mockTruck
-     coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='ticketExpired', fontcolor='forestgreen') >> mockTruck
-     coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='store rejected', fontcolor='forestgreen') >> mockTruck
-     coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='store accepted(TICKET)', fontcolor='forestgreen') >> mockTruck
-    # coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='', fontcolor='forestgreen') >> mockTruck
+     coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='pickupdone', fontcolor='forestgreen') >> transporttrolley
+     transporttrolley >> Edge(color='magenta', style='solid', xlabel='pickup', fontcolor='magenta') >> coldstorageservice
+     transporttrolley >> Edge(color='magenta', style='solid', xlabel='pickup', fontcolor='magenta') >> coldstorageservice
+     transporttrolley >> Edge(color='magenta', style='solid', xlabel='engage', fontcolor='magenta') >> basicrobot
+     transporttrolley >> Edge(color='magenta', style='solid', xlabel='doplan', fontcolor='magenta') >> basicrobot
+     transporttrolley >> Edge(color='magenta', style='solid', xlabel='moverobot', fontcolor='magenta') >> basicrobot
 diag
+#engagedone/refuse, doplan
