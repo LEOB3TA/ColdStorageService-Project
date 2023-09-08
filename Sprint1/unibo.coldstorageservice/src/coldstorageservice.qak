@@ -182,7 +182,10 @@ QActor transporttrolley context ctxcoldstorageservice{
 
 	State waitforfree{
 		println("$name | already engaged") color green
-	}
+		request basicrobot -m engage : engage(transporttrolley, 330)
+	}Transition t0 whenReply engagedone -> idle
+					whenReply engagerefused -> exit
+	
 	
 	State idle {
 		[#
@@ -260,6 +263,12 @@ QActor transporttrolley context ctxcoldstorageservice{
  	//control failed robot moves
  	State robotmovefailed{
  		println("$name | robot failed to move") color red
+ 		request basicrobot -m moverobot: moverobot($HOMEX, HOMEY)
+ 	}Transition t5 whenReply moverobotdone -> idle
+ 				  whenReply moverobotfailed -> exit
+ 	
+ 	State exit{
+ 		forward basicrobot -m disengage: disengage(_)
  	}
  		
 }

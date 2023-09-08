@@ -46,11 +46,14 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("waitforfree") { //this:State
 					action { //it:State
 						CommUtils.outgreen("$name | already engaged")
+						request("engage", "engage(transporttrolley,330)" ,"basicrobot" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
+					 transition(edgeName="t05",targetState="idle",cond=whenReply("engagedone"))
+					transition(edgeName="t06",targetState="exit",cond=whenReply("engagerefused"))
 				}	 
 				state("idle") { //this:State
 					action { //it:State
@@ -65,7 +68,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t05",targetState="moverobottoindoor",cond=whenRequest("pickup"))
+					 transition(edgeName="t07",targetState="moverobottoindoor",cond=whenRequest("pickup"))
 				}	 
 				state("moverobottoindoor") { //this:State
 					action { //it:State
@@ -84,8 +87,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t26",targetState="movetoport",cond=whenReply("moverobotdone"))
-					transition(edgeName="t27",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
+					 transition(edgeName="t28",targetState="movetoport",cond=whenReply("moverobotdone"))
+					transition(edgeName="t29",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
 				}	 
 				state("movetoport") { //this:State
 					action { //it:State
@@ -102,8 +105,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t38",targetState="depositactionended",cond=whenReply("moverobotdone"))
-					transition(edgeName="t39",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
+					 transition(edgeName="t310",targetState="depositactionended",cond=whenReply("moverobotdone"))
+					transition(edgeName="t311",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
 				}	 
 				state("depositactionended") { //this:State
 					action { //it:State
@@ -123,8 +126,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				 	 		stateTimer = TimerActor("timer_depositactionended", 
 				 	 					  scope, context!!, "local_tout_transporttrolley_depositactionended", 3000.toLong() )
 					}	 	 
-					 transition(edgeName="t410",targetState="robottohome",cond=whenTimeout("local_tout_transporttrolley_depositactionended"))   
-					transition(edgeName="t411",targetState="moverobottoindoor",cond=whenRequest("pickup"))
+					 transition(edgeName="t412",targetState="robottohome",cond=whenTimeout("local_tout_transporttrolley_depositactionended"))   
+					transition(edgeName="t413",targetState="moverobottoindoor",cond=whenRequest("pickup"))
 				}	 
 				state("robottohome") { //this:State
 					action { //it:State
@@ -139,12 +142,24 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t512",targetState="idle",cond=whenReply("moverobotdone"))
-					transition(edgeName="t513",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
+					 transition(edgeName="t514",targetState="idle",cond=whenReply("moverobotdone"))
+					transition(edgeName="t515",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
 				}	 
 				state("robotmovefailed") { //this:State
 					action { //it:State
 						CommUtils.outred("$name | robot failed to move")
+						request("moverobot", "moverobot($HOMEX,HOMEY)" ,"basicrobot" )  
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t516",targetState="idle",cond=whenReply("moverobotdone"))
+					transition(edgeName="t517",targetState="exit",cond=whenReply("moverobotfailed"))
+				}	 
+				state("exit") { //this:State
+					action { //it:State
+						forward("disengage", "disengage(_)" ,"basicrobot" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
