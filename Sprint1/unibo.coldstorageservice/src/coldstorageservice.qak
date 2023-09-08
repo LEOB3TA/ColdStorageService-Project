@@ -168,7 +168,7 @@ QActor transporttrolley context ctxcoldstorageservice{
 		var HOMEX=0;
 		var HOMEY=0;
 		var TICKETID = 0;
-		val tTState = transporttrolley.state.TransportTrolleyState()
+		val tTState = state.TransportTrolleyState()
 	#]
 	State init initial{
 		discardMsg Off
@@ -186,8 +186,8 @@ QActor transporttrolley context ctxcoldstorageservice{
 	
 	State idle {
 		[#
-			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.IDLE)
-			tTState.setCurrPosition(transporttrolley.state.TTPosition.HOME)
+			tTState.setCurrState(state.CurrStateTrolley.IDLE)
+			tTState.setCurrPosition(state.TTPosition.HOME)
 		#]
 		updateResource[#tTState.toJsonString()#]
 		println("$name | waiting for commands.") color green
@@ -198,8 +198,8 @@ QActor transporttrolley context ctxcoldstorageservice{
  		//move robot to indoor
  		onMsg(pickup :pickup(_)){
  			[#
-			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.PICKINGUP)
-			tTState.setCurrPosition(transporttrolley.state.TTPosition.INDOOR)
+			tTState.setCurrState(state.CurrStateTrolley.PICKINGUP)
+			tTState.setCurrPosition(state.TTPosition.INDOOR)
 			#]
  		} 		
 		updateResource[#tTState.toJsonString()#]
@@ -214,8 +214,8 @@ QActor transporttrolley context ctxcoldstorageservice{
 	//when robot has taken kg from camion -> move robot to coldroom
 	State movetoport{
 		[#
-			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.MOVING)
-			tTState.setCurrPosition(transporttrolley.state.TTPosition.ONTHEROAD)
+			tTState.setCurrState(state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
 		#]
 		updateResource[#tTState.toJsonString()#]
 		//send event "robot is in indoor"
@@ -230,8 +230,8 @@ QActor transporttrolley context ctxcoldstorageservice{
 	
 	State depositactionended{
 		[#
-			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.DROPPINGOUT)
-			tTState.setCurrPosition(transporttrolley.state.TTPosition.PORT)
+			tTState.setCurrState(state.CurrStateTrolley.DROPPINGOUT)
+			tTState.setCurrPosition(state.TTPosition.PORT)
 		#]
 		updateResource[#tTState.toJsonString()#]
 		replyTo pickup with pickupdone:pickupdone(_)
@@ -246,8 +246,8 @@ QActor transporttrolley context ctxcoldstorageservice{
 	 	
 	State robottohome{
 		[#
-			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.MOVING)
-			tTState.setCurrPosition(transporttrolley.state.TTPosition.ONTHEROAD)
+			tTState.setCurrState(state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
 		#]
 		updateResource[#tTState.toJsonString()#]
 		//send event "robot is in home"

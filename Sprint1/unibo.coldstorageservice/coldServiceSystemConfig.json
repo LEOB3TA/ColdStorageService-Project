@@ -1,0 +1,9 @@
+{
+  "LOCATION": {
+    "HOME": [0,0, 90],
+    "INDOOR": [0,8, 90],
+    "COLDROOM": [10, 8, 0]
+  },
+  "MAXW": 500,
+  "DLIMIT": 40
+}

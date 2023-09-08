@@ -5,6 +5,7 @@
     <file type="web" url="file://$PROJECT_DIR$/Sprint0" />
     <file type="web" url="file://$PROJECT_DIR$/Sprint0Reviewed" />
     <file type="web" url="file://$PROJECT_DIR$/Sprint1/unibo.basicrobot23" />
+    <file type="web" url="file://$PROJECT_DIR$/Sprint1/unibo.coldstorageservice" />
     <file type="web" url="file://$PROJECT_DIR$/Sprint1/unibo.transporttrolley" />
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_9" project-jdk-name="Kotlin SDK" project-jdk-type="KotlinSDK">

@@ -26,7 +26,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				var HOMEX=0;
 				var HOMEY=0;
 				var TICKETID = 0;
-				val tTState = transporttrolley.state.TransportTrolleyState()
+				val tTState = state.TransportTrolleyState()
 		return { //this:ActionBasciFsm
 				state("init") { //this:State
 					action { //it:State
@@ -55,8 +55,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("idle") { //this:State
 					action { //it:State
 						
-									tTState.setCurrState(transporttrolley.state.CurrStateTrolley.IDLE)
-									tTState.setCurrPosition(transporttrolley.state.TTPosition.HOME)
+									tTState.setCurrState(state.CurrStateTrolley.IDLE)
+									tTState.setCurrPosition(state.TTPosition.HOME)
 						updateResourceRep(tTState.toJsonString() 
 						)
 						CommUtils.outgreen("$name | waiting for commands.")
@@ -72,8 +72,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						if( checkMsgContent( Term.createTerm("pickup(_)"), Term.createTerm("pickup(_)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
-											tTState.setCurrState(transporttrolley.state.CurrStateTrolley.PICKINGUP)
-											tTState.setCurrPosition(transporttrolley.state.TTPosition.INDOOR)
+											tTState.setCurrState(state.CurrStateTrolley.PICKINGUP)
+											tTState.setCurrPosition(state.TTPosition.INDOOR)
 						}
 						updateResourceRep(tTState.toJsonString() 
 						)
@@ -90,8 +90,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("movetoport") { //this:State
 					action { //it:State
 						
-									tTState.setCurrState(transporttrolley.state.CurrStateTrolley.MOVING)
-									tTState.setCurrPosition(transporttrolley.state.TTPosition.ONTHEROAD)
+									tTState.setCurrState(state.CurrStateTrolley.MOVING)
+									tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
 						updateResourceRep(tTState.toJsonString() 
 						)
 						CommUtils.outgreen("$name | robot is in indoor")
@@ -108,8 +108,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("depositactionended") { //this:State
 					action { //it:State
 						
-									tTState.setCurrState(transporttrolley.state.CurrStateTrolley.DROPPINGOUT)
-									tTState.setCurrPosition(transporttrolley.state.TTPosition.PORT)
+									tTState.setCurrState(state.CurrStateTrolley.DROPPINGOUT)
+									tTState.setCurrPosition(state.TTPosition.PORT)
 						updateResourceRep(tTState.toJsonString() 
 						)
 						answer("pickup", "pickupdone", "pickupdone(_)"   )  
@@ -129,8 +129,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("robottohome") { //this:State
 					action { //it:State
 						
-									tTState.setCurrState(transporttrolley.state.CurrStateTrolley.MOVING)
-									tTState.setCurrPosition(transporttrolley.state.TTPosition.ONTHEROAD)
+									tTState.setCurrState(state.CurrStateTrolley.MOVING)
+									tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
 						updateResourceRep(tTState.toJsonString() 
 						)
 						request("moverobot", "moverobot($HOMEX,$HOMEY)" ,"basicrobot" )  
