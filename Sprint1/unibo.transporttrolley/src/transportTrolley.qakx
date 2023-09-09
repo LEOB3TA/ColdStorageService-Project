@@ -1,4 +1,4 @@
-System transporttrolley
+SystemC transporttrolley
 
 Request engage        : engage(ARG)	
 Reply   engagedone    : engagedone(ARG)

@@ -4,6 +4,7 @@ import cli.System.DateTime
 import cli.System.TimeSpan
 
 class Ticket(id: Int, ticketTime: TimeSpan) {
+    // TODO: mettere anche il peso?
     val id: Int
     private val ticketTime: DateTime
     private var isExpired: Boolean = false

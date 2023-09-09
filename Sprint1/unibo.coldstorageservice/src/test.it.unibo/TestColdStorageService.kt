@@ -1,7 +1,8 @@
 package test.it.unibo
 
-import test.it.unibo.coapobs.TypedCoapTestObserver
 import it.unibo.ctxcoldstorageservice.main
+import resources.ColdStorageService
+import test.it.unibo.coapobs.TypedCoapTestObserver
 import it.unibo.kactor.QakContext
 import it.unibo.kactor.sysUtil.getActor
 import org.junit.Assert.assertEquals
@@ -20,8 +21,8 @@ class TestColdStorageService {
         private var setup = false
         private lateinit var conn: Interaction2021
         //TODO: creare nuovo obs per CSS
-        private lateinit var obs: TypedCoapTestObserver<TransportTrolleyState>
-
+        private lateinit var tobs: TypedCoapTestObserver<TransportTrolleyState>
+        private lateinit var cobs: TypedCoapTestObserver<ColdStorageService>
     }
 
     @Before
@@ -45,6 +46,7 @@ class TestColdStorageService {
             } catch (e: Exception) {
                 CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
             }
+
             var tT = getActor("transporttrolley")
             while (tT == null) {
                 CommUtils.outmagenta("TestColdStorageService	|	waiting for transporttrolley...")
@@ -56,6 +58,7 @@ class TestColdStorageService {
             } catch (e: Exception) {
                 CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
             }
+
             var bR = getActor("basicrobot")
             while (bR == null) {
                 CommUtils.outmagenta("TestColdStorageService	|	waiting for basicrobot...")
@@ -68,10 +71,12 @@ class TestColdStorageService {
                 CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
             }
             startObs("localhost:8099")
-            obs.getNext()
+            cobs.getNext()
+            tobs.getNext()
             setup= true
         }else{
-            obs.clearHistory()
+            cobs.clearHistory()
+            tobs.clearHistory()
         }
     }
 
@@ -80,14 +85,14 @@ class TestColdStorageService {
 
         object : Thread() {
             override fun run() {
-                obs = TypedCoapTestObserver{
+                tobs = TypedCoapTestObserver{
                     TransportTrolleyState.fromJsonString(it)
                 }
                 val ctx = "ctxcoldstorageservice"
-                val actor = "coldstorageservice"
+                val actor = "transporttrolley"
                 val path = "$ctx/$actor"
                 val coapConn = CoapConnection(addr, path)
-                coapConn.observeResource(obs)
+                coapConn.observeResource(tobs)
                 try {
                     setupOk.put(true)
                 } catch (e: InterruptedException) {
@@ -229,18 +234,18 @@ class TestColdStorageService {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
 
-        var newState = obs.getNext()
+        var newState = tobs.getNext()
 
         assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
         assertEquals("MOVING", newState.getCurrState().toString())
 
-        newState = obs.getNext()
+        newState = tobs.getNext()
 
         assertEquals("INDOOR", newState.getCurrPosition().toString())
         assertEquals("PICKINGUP", newState.getCurrState().toString())
         assertTrue(rep.contains("pickupdone"))
 
-        newState = obs.getNext()
+        newState = tobs.getNext()
 
     }
 

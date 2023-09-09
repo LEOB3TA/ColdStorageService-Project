@@ -10,7 +10,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-	
+import resources.ColdStorageService
+import resources.TicketEvaluationResponse
+import resources.model.Ticket
+
 class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
@@ -54,6 +57,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						if( checkMsgContent( Term.createTerm("storeFood(FW)"), Term.createTerm("storeFood(FW)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								CommUtils.outblue("Request evaluation to store ${payloadArg(0)} kg")
+								requestWeightToStore=payloadArg(0).toDouble() 
 						}
 						//genTimer( actor, state )
 					}
@@ -68,7 +72,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				state("acceptRequest") { //this:State
 					action { //it:State
 						
-						    		var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME) 	
+						    		var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME)
 						    		ColdStorageService.incrementTicketNumber()	
 						    		ColdStorageService.getTicketList().add(TICKET)
 						answer("storeFood", "storeAccepted", "storeAccepted(TICKETNUMBER)"   )  
@@ -135,7 +139,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						if( checkMsgContent( Term.createTerm("sendTicket(TICKETID)"), Term.createTerm("sendTicket($TICKETID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val TICKETEVALUATION = ColdStorageService.evaluateTicket(TICKETID)  
-								if( TICKETEVALUATION == TicketEvaluationResponse.VALID  
+								if( TICKETEVALUATION == TicketEvaluationResponse.VALID
 								 ){
 								    	        			val TICKET = ColdStorageService.getTicketById(TICKETID)
 															ColdStorageService.getTicketList().remove(TICKET)

@@ -21,7 +21,6 @@ with Diagram('coldstorageserviceArch', show=False, outformat='png', graph_attr=g
      sys = Custom('','./qakicons/system.png')
      with Cluster('ctxbasicrobot', graph_attr=nodeattr):
           basicrobot=Custom('basicrobot(ext)','./qakicons/externalQActor.png')
-          pathobs=Custom('pathobs(coded)','./qakicons/codedQActor.png')
      with Cluster('ctxcoldstorageservice', graph_attr=nodeattr):
           coldstorageservice=Custom('coldstorageservice','./qakicons/symActorSmall.png')
           transporttrolley=Custom('transporttrolley','./qakicons/symActorSmall.png')

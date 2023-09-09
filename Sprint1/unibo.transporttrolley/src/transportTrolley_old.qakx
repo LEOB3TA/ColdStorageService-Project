@@ -1,4 +1,4 @@
-System transporttrolley
+SystemC transporttrolley
 
 /*Messaggio di uscita*/
 Dispatch exit:		exit(_)

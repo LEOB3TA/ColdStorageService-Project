@@ -40,7 +40,7 @@ Context ctxtruck ip[host='localhost' port=8092]
 ExternalQActor mocktruck context ctxtruck
 ExternalQActor basicrobot context ctxbasicrobot
 
-CodedQActor pathobs context ctxbasicrobot className "observers.planexecCoapObserver"
+//CodedQActor pathobs context ctxbasicrobot className "observers.planexecCoapObserver"
 
 QActor coldstorageservice context ctxcoldstorageservice {
 	
@@ -56,9 +56,7 @@ QActor coldstorageservice context ctxcoldstorageservice {
     State setup initial {
         	println("$name |	setup") color blue
         	discardMsg Off
-    }
-
-    Goto idle
+    }Goto idle
         
     State idle {
         println("$name |	in idle")
@@ -77,6 +75,7 @@ QActor coldstorageservice context ctxcoldstorageservice {
     State requestEvaluation {
     	        onMsg(storeFood : storeFood(FW)){
            println("Request evaluation to store ${payloadArg(0)} kg") color blue
+           [#requestWeightToStore=payloadArg(0).toDouble()#]
        }
     } Goto acceptRequest if[# ColdStorageService.canStore(requestWeightToStore) #] 
                             else rejectRequest
@@ -134,8 +133,8 @@ QActor coldstorageservice context ctxcoldstorageservice {
  
     /*
 	 *  TICKET EVALUATION
-	 *  Il coldStorageService controlla se il ticket ricevuto in input è uguale a quello che si aspetta.
-	 * 	In caso di errore, il truck può riprovare ad inserire il numero del ticket fin quando non scade il TICKETTIME.
+	 *  Il coldStorageService controlla se il ticket ricevuto in input ï¿½ uguale a quello che si aspetta.
+	 * 	In caso di errore, il truck puï¿½ riprovare ad inserire il numero del ticket fin quando non scade il TICKETTIME.
 	 * 
 	 */
     State ticketEvaluation {
@@ -269,6 +268,5 @@ QActor transporttrolley context ctxcoldstorageservice{
  	
  	State exit{
  		forward basicrobot -m disengage: disengage(_)
- 	}
- 		
+ 	} 		
 }

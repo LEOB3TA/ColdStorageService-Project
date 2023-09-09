@@ -1,4 +1,4 @@
-System/* -trace*/old_css
+SystemC/* -trace*/old_css
 
 // Messaggi scambiati con mocktruck
 Request deposit : deposit(_)
@@ -134,8 +134,8 @@ QActor coldstorageservice context ctxcoldstorageservice {
  
     /*
 	 *  TICKET EVALUATION
-	 *  Il coldStorageService controlla se il ticket ricevuto in input è uguale a quello che si aspetta.
-	 * 	In caso di errore, il truck può riprovare ad inserire il numero del ticket fin quando non scade il TICKETTIME.
+	 *  Il coldStorageService controlla se il ticket ricevuto in input ï¿½ uguale a quello che si aspetta.
+	 * 	In caso di errore, il truck puï¿½ riprovare ad inserire il numero del ticket fin quando non scade il TICKETTIME.
 	 * 
 	 */
     State ticketEvaluation {
