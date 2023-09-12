@@ -8,6 +8,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import resources.state.ColdStorageServiceState
 import state.TransportTrolleyState
 import unibo.basicomm23.coap.CoapConnection
 import unibo.basicomm23.interfaces.Interaction2021
@@ -19,8 +20,8 @@ class TestColdStorageService {
     companion object {
         private var setup = false
         private lateinit var conn: Interaction2021
-        //TODO: creare nuovo obs per CSS
-        private lateinit var obs: TypedCoapTestObserver<TransportTrolleyState>
+        private lateinit var obsCSS: TypedCoapTestObserver<ColdStorageServiceState>
+        private lateinit var obsTT: TypedCoapTestObserver<TransportTrolleyState>
 
     }
 
@@ -68,10 +69,10 @@ class TestColdStorageService {
                 CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
             } */
             startObs("localhost:8099")
-            obs.getNext()
+            obsCSS.getNext()
             setup= true
         }else{
-            obs.clearHistory()
+            obsCSS.clearHistory()
         }
     }
 
@@ -80,14 +81,14 @@ class TestColdStorageService {
 
         object : Thread() {
             override fun run() {
-                obs = TypedCoapTestObserver{
-                    TransportTrolleyState.fromJsonString(it)
+                obsCSS = TypedCoapTestObserver{
+                    ColdStorageServiceState.fromJsonString(it)
                 }
                 val ctx = "ctxcoldstorageservice"
                 val actor = "coldstorageservice"
                 val path = "$ctx/$actor"
                 val coapConn = CoapConnection(addr, path)
-                coapConn.observeResource(obs)
+                coapConn.observeResource(obsCSS)
                 try {
                     setupOk.put(true)
                 } catch (e: InterruptedException) {
@@ -227,18 +228,18 @@ class TestColdStorageService {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
 
-        var newState = obs.getNext()
+        var newState = obsTT.getNext()
 
         assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
         assertEquals("MOVING", newState.getCurrState().toString())
 
-        newState = obs.getNext()
+        newState = obsTT.getNext()
 
         assertEquals("INDOOR", newState.getCurrPosition().toString())
         assertEquals("PICKINGUP", newState.getCurrState().toString())
         assertTrue(rep.contains("pickupdone"))
 
-        newState = obs.getNext()
+        newState = obsTT.getNext()
 
     }
 

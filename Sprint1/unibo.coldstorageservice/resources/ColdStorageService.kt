@@ -10,7 +10,7 @@ import java.time.Duration
 // TODO: Read config
 class ColdStorageService {
     private val MAXW : Double = 100.0
-    private val TICKETTIME: Int = 1
+    private val TICKETTIME: Long = 1
     private var currentWeightStorage : Double = 0.0
     private val ticketList : ArrayList<Ticket> = arrayListOf()
     private var ticketNumber: Int = 0;
@@ -33,7 +33,7 @@ class ColdStorageService {
             return getInstance().MAXW
         }
 
-        fun getTICKETTIME(): Int {
+        fun getTICKETTIME(): Long {
             return getInstance().TICKETTIME
         }
 

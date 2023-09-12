@@ -1,27 +1,28 @@
 package resources.model
 
-import cli.System.DateTime
-import cli.System.TimeSpan
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
-class Ticket(id: Int, ticketTime: Int) {
+
+class Ticket(id: Int, ticketTime: Long) {
     val id: Int
-    private val ticketTime: DateTime
+    private val ticketTime: LocalDateTime
     private var isExpired: Boolean = false
 
     init {
         this.id = id
-        this.ticketTime = DateTime.op_Addition(DateTime.get_Now(), TimeSpan(ticketTime.toLong()))
+        this.ticketTime = LocalDateTime.now().plus(ticketTime,ChronoUnit.SECONDS)
     }
 
     // Getters and setters
     fun getTicketId(): Int {
         return id
     }
-    fun getTicketTime(): DateTime {
+    fun getTicketTime(): LocalDateTime {
         return ticketTime
     }
     fun isExpired(): Boolean {
-        isExpired = DateTime.get_Now() > ticketTime
+        isExpired = LocalDateTime.now() > ticketTime
         return isExpired
     }
     override fun toString(): String {

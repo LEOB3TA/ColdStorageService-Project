@@ -10,7 +10,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-	
+import state.CurrStateTrolley
+import state.TTPosition
+import state.TransportTrolleyState
+
 class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
@@ -26,7 +29,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				var HOMEX=0;
 				var HOMEY=0;
 				var TICKETID = 0;
-				val tTState = state.TransportTrolleyState()
+				val tTState = TransportTrolleyState()
 		return { //this:ActionBasciFsm
 				state("init") { //this:State
 					action { //it:State
@@ -55,8 +58,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("idle") { //this:State
 					action { //it:State
 						
-									tTState.setCurrState(state.CurrStateTrolley.IDLE)
-									tTState.setCurrPosition(state.TTPosition.HOME)
+									tTState.setCurrState(CurrStateTrolley.IDLE)
+									tTState.setCurrPosition(TTPosition.HOME)
 						updateResourceRep(tTState.toJsonString() 
 						)
 						CommUtils.outgreen("$name | waiting for commands.")
@@ -72,8 +75,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						if( checkMsgContent( Term.createTerm("pickup(_)"), Term.createTerm("pickup(_)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								
-											tTState.setCurrState(state.CurrStateTrolley.PICKINGUP)
-											tTState.setCurrPosition(state.TTPosition.INDOOR)
+											tTState.setCurrState(CurrStateTrolley.PICKINGUP)
+											tTState.setCurrPosition(TTPosition.INDOOR)
 						}
 						updateResourceRep(tTState.toJsonString() 
 						)
@@ -90,8 +93,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("movetoport") { //this:State
 					action { //it:State
 						
-									tTState.setCurrState(state.CurrStateTrolley.MOVING)
-									tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
+									tTState.setCurrState(CurrStateTrolley.MOVING)
+									tTState.setCurrPosition(TTPosition.ONTHEROAD)
 						updateResourceRep(tTState.toJsonString() 
 						)
 						CommUtils.outgreen("$name | robot is in indoor")
@@ -108,8 +111,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("depositactionended") { //this:State
 					action { //it:State
 						
-									tTState.setCurrState(state.CurrStateTrolley.DROPPINGOUT)
-									tTState.setCurrPosition(state.TTPosition.PORT)
+									tTState.setCurrState(CurrStateTrolley.DROPPINGOUT)
+									tTState.setCurrPosition(TTPosition.PORT)
 						updateResourceRep(tTState.toJsonString() 
 						)
 						answer("pickup", "pickupdone", "pickupdone(_)"   )  
@@ -129,8 +132,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("robottohome") { //this:State
 					action { //it:State
 						
-									tTState.setCurrState(state.CurrStateTrolley.MOVING)
-									tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
+									tTState.setCurrState(CurrStateTrolley.MOVING)
+									tTState.setCurrPosition(TTPosition.ONTHEROAD)
 						updateResourceRep(tTState.toJsonString() 
 						)
 						request("moverobot", "moverobot($HOMEX,$HOMEY)" ,"basicrobot" )  
