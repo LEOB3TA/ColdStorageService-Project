@@ -45,11 +45,11 @@ CodedQActor pathobs context ctxbasicrobot className "observers.planexecCoapObser
 QActor coldstorageservice context ctxcoldstorageservice {
 	
  	[#
-        	val MAXW = ColdStorageService.getMAXW()
-			val TICKETTIME = ColdStorageService.getTICKETTIME()
-		   	var currentWeightStorage = ColdStorageService.getCurrentWeightStorage()
+        	val MAXW = resources.ColdStorageService.getMAXW()
+			val TICKETTIME = resources.ColdStorageService.getTICKETTIME()
+		   	var currentWeightStorage = resources.ColdStorageService.getCurrentWeightStorage()
 		   	var requestWeightToStore = 0.0
-		   	var TICKETNUMBER = ColdStorageService.getTicketNumber()
+		   	var TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
 		   	#]
 	
     State setup initial {
@@ -77,9 +77,10 @@ QActor coldstorageservice context ctxcoldstorageservice {
     State requestEvaluation {
     	        onMsg(storeFood : storeFood(FW)){
            println("Request evaluation to store ${payloadArg(0)} kg") color blue
+           [#requestWeightToStore=payloadArg(0).toDouble()#]
            
        }
-    } Goto acceptRequest if[# ColdStorageService.canStore(requestWeightToStore) #] 
+    } Goto acceptRequest if[# resources.ColdStorageService.canStore(requestWeightToStore) #] 
                             else rejectRequest
              
      /*
@@ -88,9 +89,9 @@ QActor coldstorageservice context ctxcoldstorageservice {
       */     
      State acceptRequest{
     	[#
-    		var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME) 	
-    		ColdStorageService.incrementTicketNumber()	
-    		ColdStorageService.getTicketList().add(TICKET)
+    		var TICKET : resources.model.Ticket = resources.model.Ticket(TICKETNUMBER, TICKETTIME) 	
+    		resources.ColdStorageService.incrementTicketNumber()	
+    		resources.ColdStorageService.getTicketList().add(TICKET)
     	#]
         replyTo storeFood with storeAccepted : storeAccepted($TICKETNUMBER) // TODO: check se tornare tutto il ticket o solo numero
     }Goto idle
@@ -112,7 +113,6 @@ QActor coldstorageservice context ctxcoldstorageservice {
     State charged{
     	replyTo deposit with chargeTaken : chargeTaken(_)
     	request transporttrolley -m pickup : pickup(_)
-		updateResource[#cSSState.toJsonString()#]
     }Goto idle
     
     
@@ -120,14 +120,16 @@ QActor coldstorageservice context ctxcoldstorageservice {
     	println("Ticket of id ${payloadArg(0)} is expired - Reject Request") color blue
    			[#
    	  		 val TICKETID = payloadArg(0).toInt()
-   	  		 val TICKET = ColdStorageService.getTicketById(TICKETID)
-			 ColdStorageService.incrementRejectedRequestCounter()
-			 ColdStorageService.getTicketList().remove(TICKET)
+   	  		 val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
+			 resources.ColdStorageService.incrementRejectedRequestCounter()
+			 resources.ColdStorageService.getTicketList().remove(TICKET)
        		#]
+       		replyTo sendTicket with ticketExpired : ticketExpired(_)
     } Goto idle
     
     State sendInvalidTicket {
     	println("Inserted ticket id is not valid") color red
+    	replyTo sendTicket with ticketNotValid : ticketNotValid(_)
     } Goto idle
 
  
@@ -138,22 +140,21 @@ QActor coldstorageservice context ctxcoldstorageservice {
 	 * 
 	 */
     State ticketEvaluation {
-    	println("Ticket evaluation of ticket id ${payloadArg(0)}") color blue
-    					[#
+		 onMsg(sendTicket : sendTicket(TICKETID)){
+		 	println("Ticket evaluation of ticket id ${payloadArg(0)}") color blue
+    	        	[#
     	        		 val TICKETID = payloadArg(0).toInt()
-    	        		#]
-    	        onMsg(sendTicket : sendTicket($TICKETID)){
-    	        	[# val TICKETEVALUATION = ColdStorageService.evaluateTicket(TICKETID) #]
-    	        	if [#TICKETEVALUATION == TicketEvaluationResponse.VALID #] {
+    	         		val TICKETEVALUATION = resources.ColdStorageService.evaluateTicket(TICKETID) #]
+    	        	if [#TICKETEVALUATION == resources.TicketEvaluationResponse.VALID #] {
     	        		[#
-    	        			val TICKET = ColdStorageService.getTicketById(TICKETID)
-							ColdStorageService.getTicketList().remove(TICKET)
+    	        			val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
+							resources.ColdStorageService.getTicketList().remove(TICKET)
     	        		#]
     	        		replyTo sendTicket with ticketValid : ticketValid(_)	
     	        	}
     	        												
        				}
-    }Goto removeExpiredTicket if [# ColdStorageService.evaluateTicket(payloadArg(0).toInt()) == TicketEvaluationResponse.EXPIRED #]
+    }Goto removeExpiredTicket if [# resources.ColdStorageService.evaluateTicket(payloadArg(0).toInt()) == resources.TicketEvaluationResponse.EXPIRED #]
     								else sendInvalidTicket
    
 }
@@ -167,7 +168,7 @@ QActor transporttrolley context ctxcoldstorageservice{
 		var HOMEX=0;
 		var HOMEY=0;
 		var TICKETID = 0;
-		val tTState = TransportTrolleyState()
+		val tTState = state.TransportTrolleyState()
 	#]
 	State init initial{
 		discardMsg Off
@@ -185,8 +186,8 @@ QActor transporttrolley context ctxcoldstorageservice{
 	
 	State idle {
 		[#
-			tTState.setCurrState(CurrStateTrolley.IDLE)
-			tTState.setCurrPosition(TTPosition.HOME)
+			tTState.setCurrState(state.CurrStateTrolley.IDLE)
+			tTState.setCurrPosition(state.TTPosition.HOME)
 		#]
 		updateResource[#tTState.toJsonString()#]
 		println("$name | waiting for commands.") color green
@@ -197,8 +198,8 @@ QActor transporttrolley context ctxcoldstorageservice{
  		//move robot to indoor
  		onMsg(pickup :pickup(_)){
  			[#
-			tTState.setCurrState(CurrStateTrolley.PICKINGUP)
-			tTState.setCurrPosition(TTPosition.INDOOR)
+			tTState.setCurrState(state.CurrStateTrolley.PICKINGUP)
+			tTState.setCurrPosition(state.TTPosition.INDOOR)
 			#]
  		} 		
 		updateResource[#tTState.toJsonString()#]
@@ -213,8 +214,8 @@ QActor transporttrolley context ctxcoldstorageservice{
 	//when robot has taken kg from camion -> move robot to coldroom
 	State movetoport{
 		[#
-			tTState.setCurrState(CurrStateTrolley.MOVING)
-			tTState.setCurrPosition(TTPosition.ONTHEROAD)
+			tTState.setCurrState(state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
 		#]
 		updateResource[#tTState.toJsonString()#]
 		//send event "robot is in indoor"
@@ -229,8 +230,8 @@ QActor transporttrolley context ctxcoldstorageservice{
 	
 	State depositactionended{
 		[#
-			tTState.setCurrState(CurrStateTrolley.DROPPINGOUT)
-			tTState.setCurrPosition(TTPosition.PORT)
+			tTState.setCurrState(state.CurrStateTrolley.DROPPINGOUT)
+			tTState.setCurrPosition(state.TTPosition.PORT)
 		#]
 		updateResource[#tTState.toJsonString()#]
 		replyTo pickup with pickupdone:pickupdone(_)
@@ -245,8 +246,8 @@ QActor transporttrolley context ctxcoldstorageservice{
 	 	
 	State robottohome{
 		[#
-			tTState.setCurrState(CurrStateTrolley.MOVING)
-			tTState.setCurrPosition(TTPosition.ONTHEROAD)
+			tTState.setCurrState(state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
 		#]
 		updateResource[#tTState.toJsonString()#]
 		//send event "robot is in home"

@@ -10,10 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import resources.ColdStorageService
-import resources.TicketEvaluationResponse
-import resources.model.Ticket
-
+	
 class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
@@ -22,11 +19,11 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		
-		        	val MAXW = ColdStorageService.getMAXW()
-					val TICKETTIME = ColdStorageService.getTICKETTIME()
-				   	var currentWeightStorage = ColdStorageService.getCurrentWeightStorage()
+		        	val MAXW = resources.ColdStorageService.getMAXW()
+					val TICKETTIME = resources.ColdStorageService.getTICKETTIME()
+				   	var currentWeightStorage = resources.ColdStorageService.getCurrentWeightStorage()
 				   	var requestWeightToStore = 0.0
-				   	var TICKETNUMBER = ColdStorageService.getTicketNumber()
+				   	var TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
 		return { //this:ActionBasciFsm
 				state("setup") { //this:State
 					action { //it:State
@@ -56,23 +53,24 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						if( checkMsgContent( Term.createTerm("storeFood(FW)"), Term.createTerm("storeFood(FW)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								CommUtils.outblue("Request evaluation to store ${payloadArg(0)} kg")
+								requestWeightToStore=payloadArg(0).toDouble() 
 						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="acceptRequest", cond=doswitchGuarded({ ColdStorageService.canStore(requestWeightToStore)  
+					 transition( edgeName="goto",targetState="acceptRequest", cond=doswitchGuarded({ resources.ColdStorageService.canStore(requestWeightToStore)  
 					}) )
-					transition( edgeName="goto",targetState="rejectRequest", cond=doswitchGuarded({! ( ColdStorageService.canStore(requestWeightToStore)  
+					transition( edgeName="goto",targetState="rejectRequest", cond=doswitchGuarded({! ( resources.ColdStorageService.canStore(requestWeightToStore)  
 					) }) )
 				}	 
 				state("acceptRequest") { //this:State
 					action { //it:State
 						
-						    		var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME)
-						    		ColdStorageService.incrementTicketNumber()
-						    		ColdStorageService.getTicketList().add(TICKET)
+						    		var TICKET : resources.model.Ticket = resources.model.Ticket(TICKETNUMBER, TICKETTIME) 	
+						    		resources.ColdStorageService.incrementTicketNumber()	
+						    		resources.ColdStorageService.getTicketList().add(TICKET)
 						answer("storeFood", "storeAccepted", "storeAccepted($TICKETNUMBER)"   )  
 						//genTimer( actor, state )
 					}
@@ -94,7 +92,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				state("charged") { //this:State
 					action { //it:State
 						answer("deposit", "chargeTaken", "chargeTaken(_)"   )  
-						request("pickup", "pickup(_)" ,"transporttrolley" )
+						request("pickup", "pickup(_)" ,"transporttrolley" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -107,9 +105,10 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 						CommUtils.outblue("Ticket of id ${payloadArg(0)} is expired - Reject Request")
 						
 						   	  		 val TICKETID = payloadArg(0).toInt()
-						   	  		 val TICKET = ColdStorageService.getTicketById(TICKETID)
-									 ColdStorageService.incrementRejectedRequestCounter()
-									 ColdStorageService.getTicketList().remove(TICKET)
+						   	  		 val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
+									 resources.ColdStorageService.incrementRejectedRequestCounter()
+									 resources.ColdStorageService.getTicketList().remove(TICKET)
+						answer("sendTicket", "ticketExpired", "ticketExpired(_)"   )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -120,6 +119,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				state("sendInvalidTicket") { //this:State
 					action { //it:State
 						CommUtils.outred("Inserted ticket id is not valid")
+						answer("sendTicket", "ticketNotValid", "ticketNotValid(_)"   )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -129,16 +129,16 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				}	 
 				state("ticketEvaluation") { //this:State
 					action { //it:State
-						CommUtils.outblue("Ticket evaluation of ticket id ${payloadArg(0)}")
-						
-						    	        		 val TICKETID = payloadArg(0).toInt()
-						if( checkMsgContent( Term.createTerm("sendTicket(TICKETID)"), Term.createTerm("sendTicket($TICKETID)"), 
+						if( checkMsgContent( Term.createTerm("sendTicket(TICKETID)"), Term.createTerm("sendTicket(TICKETID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 val TICKETEVALUATION = ColdStorageService.evaluateTicket(TICKETID)  
-								if( TICKETEVALUATION == TicketEvaluationResponse.VALID
+								CommUtils.outblue("Ticket evaluation of ticket id ${payloadArg(0)}")
+								
+								    	        		 val TICKETID = payloadArg(0).toInt()
+								    	         		val TICKETEVALUATION = resources.ColdStorageService.evaluateTicket(TICKETID)  
+								if( TICKETEVALUATION == resources.TicketEvaluationResponse.VALID  
 								 ){
-								    	        			val TICKET = ColdStorageService.getTicketById(TICKETID)
-															ColdStorageService.getTicketList().remove(TICKET)
+								    	        			val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
+															resources.ColdStorageService.getTicketList().remove(TICKET)
 								answer("sendTicket", "ticketValid", "ticketValid(_)"   )  
 								}
 						}
@@ -147,9 +147,9 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="removeExpiredTicket", cond=doswitchGuarded({ ColdStorageService.evaluateTicket(payloadArg(0).toInt()) == TicketEvaluationResponse.EXPIRED  
+					 transition( edgeName="goto",targetState="removeExpiredTicket", cond=doswitchGuarded({ resources.ColdStorageService.evaluateTicket(payloadArg(0).toInt()) == resources.TicketEvaluationResponse.EXPIRED  
 					}) )
-					transition( edgeName="goto",targetState="sendInvalidTicket", cond=doswitchGuarded({! ( ColdStorageService.evaluateTicket(payloadArg(0).toInt()) == TicketEvaluationResponse.EXPIRED  
+					transition( edgeName="goto",targetState="sendInvalidTicket", cond=doswitchGuarded({! ( resources.ColdStorageService.evaluateTicket(payloadArg(0).toInt()) == resources.TicketEvaluationResponse.EXPIRED  
 					) }) )
 				}	 
 			}

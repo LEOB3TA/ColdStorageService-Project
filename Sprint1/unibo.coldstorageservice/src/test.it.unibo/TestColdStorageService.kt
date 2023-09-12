@@ -20,14 +20,15 @@ class TestColdStorageService {
     companion object {
         private var setup = false
         private lateinit var conn: Interaction2021
-        private lateinit var obsCSS: TypedCoapTestObserver<ColdStorageServiceState>
+       /// private lateinit var obsCSS: TypedCoapTestObserver<ColdStorageServiceState>
         private lateinit var obsTT: TypedCoapTestObserver<TransportTrolleyState>
 
     }
 
+    //TODO rivedere tutte le stampe prima di ogni test
     @Before
-    fun setUp(){ //TODO rivedere tutte le varie connessioni, non possiamo avere la stessa connessione per tutti gli attori
-        if(!setup){
+    fun setUp() { //TODO rivedere tutte le varie connessioni, non possiamo avere la stessa connessione per tutti gli attori
+        if (!setup) {
             CommUtils.outmagenta("TestColdStorageService	|	setup...")
 
             object : Thread() {
@@ -57,6 +58,8 @@ class TestColdStorageService {
             } catch (e: Exception) {
                 CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
             }
+        }
+    }
            /* var bR = getActor("basicrobot")
             while (bR == null) {
                 CommUtils.outmagenta("TestColdStorageService	|	waiting for basicrobot...")
@@ -68,7 +71,7 @@ class TestColdStorageService {
             } catch (e: Exception) {
                 CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
             } */
-            startObs("localhost:8099")
+          /*  startObs("localhost:8099")
             obsCSS.getNext()
             setup= true
         }else{
@@ -97,7 +100,7 @@ class TestColdStorageService {
             }
         }.start()
         setupOk.take()
-    }
+    }*/
 
     // Interaction CSS -> Truck
     @Test
@@ -119,34 +122,55 @@ class TestColdStorageService {
     @Throws(InterruptedException::class)
     fun testStoreFoodFail(){
         CommUtils.outmagenta("TestStoreFood   |  testStoreFood")
-
         var asw=""
-        var storeFood = "msg(storeFood, request, testunit, coldstorageservice, storeFood(10) ,1)"
-
-
+        var storeFood = "msg(storeFood, request, testunit, coldstorageservice, storeFood(100000) ,1)"
         try {
             asw =conn.request(storeFood)
         }catch (e: Exception) {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
-
-        assertTrue(asw.contains("storeRejected"))
+        println(asw)
+        assertTrue(asw.contains("storeReject"))
     }
 
     @Test
     @Throws(InterruptedException::class)
     fun testSendTicket(){
+        val TICKET : resources.model.Ticket = resources.model.Ticket(1, 1)
+        resources.ColdStorageService.getTicketList().add(TICKET)
         CommUtils.outmagenta("TestSendTicket")
-        var sendT = "msg(sendTicket, request, testunit, coldstorageservice, sendTicket(1) ,1)"
+        var sendT = "msg(sendTicket, request, testunit, coldstorageservice, sendTicket(1) ,1)" //numero ticket=1
         conn.forward(sendT)
-        var rep =""
+        var rep=""
         try {
-            rep = conn.reply("msg(ticketValid, reply, testunit, truck, testStore(_), 1)").toString()
+            rep = conn.request(sendT)
+            //var rep = conn.request("msg(ticketInvalid, reply, testunit, truck, testStore(_), 1)").toString()
         }catch (e: Exception) {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
 
         assertTrue(rep.contains("ticketValid"))
+
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testSendTicketExpired(){
+        CommUtils.outmagenta("TestSendTicket")
+        val TICKET : resources.model.Ticket = resources.model.Ticket(1, 2)
+        resources.ColdStorageService.getTicketList().add(TICKET)
+       Thread.sleep(5000)
+        var sendT = "msg(sendTicket, request, testunit, coldstorageservice, sendTicket(1) ,1)" //numero ticket=1
+        conn.forward(sendT)
+        var rep=""
+        try {
+            rep = conn.request(sendT)
+            //var rep = conn.request("msg(ticketInvalid, reply, testunit, truck, testStore(_), 1)").toString()
+        }catch (e: Exception) {
+            CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
+        }
+
+        assertTrue(rep.contains("ticketExpired"))
 
     }
 
@@ -164,7 +188,7 @@ class TestColdStorageService {
         }
 
 
-        assertTrue(rep.contains("ticketInvalid"))
+        assertTrue(rep.contains("ticketNotValid"))
     }
 
     @Test
