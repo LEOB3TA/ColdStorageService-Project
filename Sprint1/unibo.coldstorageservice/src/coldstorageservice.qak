@@ -50,7 +50,6 @@ QActor coldstorageservice context ctxcoldstorageservice {
 		   	var currentWeightStorage = ColdStorageService.getCurrentWeightStorage()
 		   	var requestWeightToStore = 0.0
 		   	var TICKETNUMBER = ColdStorageService.getTicketNumber()
-		   	val cSSState = ColdStorageServiceState()
 		   	#]
 	
     State setup initial {
@@ -63,10 +62,6 @@ QActor coldstorageservice context ctxcoldstorageservice {
         
     State idle {
         println("$name |	in idle")
-        [#
-			cSSState.setCurrState(CurrStateCSS.IDLE)
-		#]
-		updateResource[#cSSState.toJsonString()#]
         // updateResource[#maxw.toJsonString()#] // TODO: fai check se serve o meno
     }  
     Transition t0 whenRequest storeFood -> requestEvaluation
@@ -80,12 +75,9 @@ QActor coldstorageservice context ctxcoldstorageservice {
      * 	2b. Altrimenti va in stato rejectRequest
      */
     State requestEvaluation {
-    	     [#
-			cSSState.setCurrState(CurrStateCSS.REQUESTEVAL)
-		#]
-		updateResource[#cSSState.toJsonString()#]
     	        onMsg(storeFood : storeFood(FW)){
            println("Request evaluation to store ${payloadArg(0)} kg") color blue
+           
        }
     } Goto acceptRequest if[# ColdStorageService.canStore(requestWeightToStore) #] 
                             else rejectRequest
@@ -100,24 +92,13 @@ QActor coldstorageservice context ctxcoldstorageservice {
     		ColdStorageService.incrementTicketNumber()	
     		ColdStorageService.getTicketList().add(TICKET)
     	#]
-    	[#
-			cSSState.setCurrState(CurrStateCSS.ACCEPTREQ)
-		#]
-		updateResource[#cSSState.toJsonString()#]
-        replyTo storeFood with storeAccepted : storeAccepted(TICKETNUMBER) // TODO: check se tornare tutto il ticket o solo numero
+        replyTo storeFood with storeAccepted : storeAccepted($TICKETNUMBER) // TODO: check se tornare tutto il ticket o solo numero
     }Goto idle
     
 	/*
 	 *  REJECT REQUEST
 	 */
     State rejectRequest{
-    	   	[#
-			 ColdStorageService.incrementRejectedRequestCounter()
-       		#]  	
-       		[#
-			cSSState.setCurrState(CurrStateCSS.REJECTREQ)
-			#]
-		updateResource[#cSSState.toJsonString()#]
         replyTo storeFood with storeRejected : storeRejected(_)
     }Goto idle   
     
@@ -131,9 +112,6 @@ QActor coldstorageservice context ctxcoldstorageservice {
     State charged{
     	replyTo deposit with chargeTaken : chargeTaken(_)
     	request transporttrolley -m pickup : pickup(_)
-    		[#
-			cSSState.setCurrState(CurrStateCSS.CHARGED)
-			#]
 		updateResource[#cSSState.toJsonString()#]
     }Goto idle
     
@@ -146,17 +124,9 @@ QActor coldstorageservice context ctxcoldstorageservice {
 			 ColdStorageService.incrementRejectedRequestCounter()
 			 ColdStorageService.getTicketList().remove(TICKET)
        		#]
-       			[#
-			cSSState.setCurrState(CurrStateCSS.REMOVEEXPIREDTICKET)
-			#]
-		updateResource[#cSSState.toJsonString()#]
     } Goto idle
     
     State sendInvalidTicket {
-    		[#
-			cSSState.setCurrState(CurrStateCSS.SENDINVALIDTICKET)
-			#]
-		updateResource[#cSSState.toJsonString()#]
     	println("Inserted ticket id is not valid") color red
     } Goto idle
 
@@ -169,10 +139,6 @@ QActor coldstorageservice context ctxcoldstorageservice {
 	 */
     State ticketEvaluation {
     	println("Ticket evaluation of ticket id ${payloadArg(0)}") color blue
-    		[#
-			cSSState.setCurrState(CurrStateCSS.TICKETEVAL)
-			#]
-		updateResource[#cSSState.toJsonString()#]
     					[#
     	        		 val TICKETID = payloadArg(0).toInt()
     	        		#]
