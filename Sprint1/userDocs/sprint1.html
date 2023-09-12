@@ -484,12 +484,12 @@
 
                  <h4>TransportTrolley</h4>
                  La figura seguente riporta lo schema di interazione dei componenti: <br/><br/>
-                 <img src="./resources/images/transportTrollery_core_interazione.png" alt="" style="width:50% ; height:50% ;">
+                 <img src="./resources/images/transportTrollery_interazione.png" alt="" style="width:50% ; height:50% ;">
                  <br/><br/>
 
                  Anche questo componente verr&agrave; implementato come una <ks>coroutine Kotlin</ks> utilizzando il metalinguaggio QAk. Di seguito sono riportati il progetto della macchina
                  a stati finiti e la sua implementazione in QAk. <br/><br/>
-                 <img src="./resources/images/transportTrollery_core_stati.png" alt="" style="width:50% ; height:50% ;"><br/><br/>
+                 <img src="./resources/images/transportTrollery_stati.png" alt="" style="width:50% ; height:50% ;"><br/><br/>
                  Nello stato <i><b>idle</b></i> il <i>TransportTrolleyCore</i> rimane in attesa di un comando (<kc>pickup</kc>/<kc>dropout</kc>/<kc>gotohome</kc>) da parte del <i>...</i>. <br/>
                  Nel caso in cui arrivi il messaggio <kc>gotohome</kc>, il <i>TransportTrolleyCore</i> transita allo stato <i><b>bakcHome</b></i>, in cui richiede al <i>TransportTrolleyMover</i> di muovere il robot
                  verso la posizione <kc>HOME</kc>, nel caso in cui la risposta del <i>TransportTrolleyMover</i> sia positiva transita allo stato <b>backHomeRes</b> e quindi allo stato <b>idle</b>. <br/>
