@@ -3,14 +3,14 @@ package resources.model
 import cli.System.DateTime
 import cli.System.TimeSpan
 
-class Ticket(id: Int, ticketTime: TimeSpan) {
+class Ticket(id: Int, ticketTime: Int) {
     val id: Int
     private val ticketTime: DateTime
     private var isExpired: Boolean = false
 
     init {
         this.id = id
-        this.ticketTime = DateTime.op_Addition(DateTime.get_Now(), ticketTime)
+        this.ticketTime = DateTime.op_Addition(DateTime.get_Now(), TimeSpan(ticketTime.toLong()))
     }
 
     // Getters and setters

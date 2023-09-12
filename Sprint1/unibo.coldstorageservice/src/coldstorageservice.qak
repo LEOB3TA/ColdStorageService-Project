@@ -44,21 +44,21 @@ CodedQActor pathobs context ctxbasicrobot className "observers.planexecCoapObser
 
 QActor coldstorageservice context ctxcoldstorageservice {
 	
-	[#
-			val MAXW = ColdStorageService.getMAXW()
+ 	[#
+        	val MAXW = ColdStorageService.getMAXW()
 			val TICKETTIME = ColdStorageService.getTICKETTIME()
 		   	var currentWeightStorage = ColdStorageService.getCurrentWeightStorage()
 		   	var requestWeightToStore = 0.0
 		   	var TICKETNUMBER = ColdStorageService.getTicketNumber()
-    	  	
-	#]
+		   	#]
 	
     State setup initial {
         	println("$name |	setup") color blue
         	discardMsg Off
+       
     }
 
-    Goto idle
+  Goto idle
         
     State idle {
         println("$name |	in idle")
@@ -84,7 +84,7 @@ QActor coldstorageservice context ctxcoldstorageservice {
      /*
       *  ACCEPT REQUEST
       *  Generazione TICKET +
-      */               
+      */     
      State acceptRequest{
     	[#
     		var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME) 	
@@ -134,8 +134,8 @@ QActor coldstorageservice context ctxcoldstorageservice {
  
     /*
 	 *  TICKET EVALUATION
-	 *  Il coldStorageService controlla se il ticket ricevuto in input è uguale a quello che si aspetta.
-	 * 	In caso di errore, il truck può riprovare ad inserire il numero del ticket fin quando non scade il TICKETTIME.
+	 *  Il coldStorageService controlla se il ticket ricevuto in input ï¿½ uguale a quello che si aspetta.
+	 * 	In caso di errore, il truck puï¿½ riprovare ad inserire il numero del ticket fin quando non scade il TICKETTIME.
 	 * 
 	 */
     State ticketEvaluation {

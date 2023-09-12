@@ -25,7 +25,7 @@ class TestColdStorageService {
     }
 
     @Before
-    fun setUp(){
+    fun setUp(){ //TODO rivedere tutte le varie connessioni, non possiamo avere la stessa connessione per tutti gli attori
         if(!setup){
             CommUtils.outmagenta("TestColdStorageService	|	setup...")
 
@@ -56,7 +56,7 @@ class TestColdStorageService {
             } catch (e: Exception) {
                 CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
             }
-            var bR = getActor("basicrobot")
+           /* var bR = getActor("basicrobot")
             while (bR == null) {
                 CommUtils.outmagenta("TestColdStorageService	|	waiting for basicrobot...")
                 CommUtils.delay(200)
@@ -66,7 +66,7 @@ class TestColdStorageService {
                 conn = TcpClientSupport.connect("127.0.0.1", 8020, 5)
             } catch (e: Exception) {
                 CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
-            }
+            } */
             startObs("localhost:8099")
             obs.getNext()
             setup= true
@@ -106,8 +106,6 @@ class TestColdStorageService {
 
         var asw=""
         var storeFood = "msg(storeFood, request, testunit, coldstorageservice, storeFood(10) ,1)"
-
-
         try {
             asw =conn.request(storeFood)
         }catch (e: Exception) {

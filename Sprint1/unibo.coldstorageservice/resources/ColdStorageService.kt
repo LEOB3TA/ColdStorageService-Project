@@ -2,79 +2,71 @@ package resources
 
 import cli.System.TimeSpan
 import com.google.gson.Gson
-import org.json.JSONObject
 import resources.model.Ticket
-import state.TransportTrolleyState
-import java.io.File
+import java.sql.Time
+import java.time.Duration
 
+
+// TODO: Read config
 class ColdStorageService {
-    data class ColdStorageService(
-        private var MAXW:Double = 0.0,
-        private val TICKETTIME: TimeSpan = TimeSpan(1000),
-        private var currentWeightStorage : Double = 0.0,
-        private val ticketList : ArrayList<Ticket> = arrayListOf(),
-        private var ticketNumber: Int = 0,
-        private var rejectedRequestCounter: Int = 0
-    ){
-//        private var instance: resources.ColdStorageService? = null
-//
-//        private fun getInstance() =
-//            instance ?: synchronized(this) {
-//                instance ?: ColdStorageService_old().also { instance = it }
-//            }
+    private val MAXW : Double = 100.0
+    private val TICKETTIME: Int = 1
+    private var currentWeightStorage : Double = 0.0
+    private val ticketList : ArrayList<Ticket> = arrayListOf()
+    private var ticketNumber: Int = 0;
+    private var rejectedRequestCounter: Int = 0;
 
-        //val gson = Gson()
-        // read from config
-        init{
-            val config = File("coldServiceSystemConfig.json")
-            val jsonObject = JSONObject(config)
-            MAXW = jsonObject.getDouble("MAXW")
-        }
-        companion object{
-            private val gson = Gson()
-            fun fromJsonString(str : String) : resources.ColdStorageService {
-                return gson.fromJson(str, resources.ColdStorageService::class.java)
+    companion object {
+
+
+
+        private var instance: ColdStorageService? = null
+
+        private fun getInstance() =
+            instance ?: synchronized(this) {
+                instance ?: ColdStorageService().also { instance = it }
             }
-        }
+
+        val gson = Gson()
 
         fun getMAXW(): Double {
-            return MAXW
+            return getInstance().MAXW
         }
 
-        fun getTICKETTIME(): TimeSpan {
-            return TICKETTIME
+        fun getTICKETTIME(): Int {
+            return getInstance().TICKETTIME
         }
 
         fun getCurrentWeightStorage(): Double {
-            return currentWeightStorage
+            return getInstance().currentWeightStorage
         }
 
         fun setCurrentWeightStorage(currentWeightStorage: Double) {
-            this.currentWeightStorage = currentWeightStorage
+            getInstance().currentWeightStorage = currentWeightStorage
         }
 
         fun getTicketList(): ArrayList<Ticket> {
-            return ticketList
+            return getInstance().ticketList
         }
 
         fun incrementTicketNumber() {
-            ticketNumber++
+            getInstance().ticketNumber++
         }
 
         fun getTicketNumber(): Int {
-            return ticketNumber
+            return getInstance().ticketNumber
         }
 
         private fun resetTicketNumber() {
-            ticketNumber = 0
+            getInstance().ticketNumber = 0
         }
 
         private fun resetTicketList() {
-           ticketList.clear()
+            getInstance().ticketList.clear()
         }
 
         private fun resetCurrentWeightStorage() {
-            currentWeightStorage = 0.0
+            getInstance().currentWeightStorage = 0.0
         }
 
         fun resetAll() {
@@ -108,19 +100,19 @@ class ColdStorageService {
         }
 
         fun getRejectedRequestCounter(): Int {
-            return rejectedRequestCounter
+            return getInstance().rejectedRequestCounter
         }
 
         fun incrementRejectedRequestCounter() {
-            rejectedRequestCounter++
+            getInstance().rejectedRequestCounter++
         }
 
         fun toJsonString() : String{
-            return gson.toJson(this)
+            return ColdStorageService.gson.toJson(this)
         }
 
-        fun fromJson(json: String): ColdStorageService_old {
-            return ColdStorageService_old.gson.fromJson(json, ColdStorageService_old::class.java)
+        fun fromJson(json: String): ColdStorageService {
+            return ColdStorageService.gson.fromJson(json, ColdStorageService::class.java)
         }
 
         override fun toString(): String {
@@ -129,3 +121,7 @@ class ColdStorageService {
 
     }
 }
+
+/*fun main(){
+    println(ColdStorageService.getTICKETTIME())
+}*/
