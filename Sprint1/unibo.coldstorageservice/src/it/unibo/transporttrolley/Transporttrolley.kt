@@ -39,9 +39,21 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
+				 	 		stateTimer = TimerActor("timer_init", 
+				 	 					  scope, context!!, "local_tout_transporttrolley_init", 10000.toLong() )
 					}	 	 
-					 transition(edgeName="t03",targetState="idle",cond=whenReply("engagedone"))
-					transition(edgeName="t04",targetState="waitforfree",cond=whenReply("engagerefused"))
+					 transition(edgeName="t04",targetState="error",cond=whenTimeout("local_tout_transporttrolley_init"))   
+					transition(edgeName="t05",targetState="idle",cond=whenReply("engagedone"))
+					transition(edgeName="t06",targetState="waitforfree",cond=whenReply("engagerefused"))
+				}	 
+				state("error") { //this:State
+					action { //it:State
+						CommUtils.outred("$name | basic robot error")
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
 				}	 
 				state("waitforfree") { //this:State
 					action { //it:State
@@ -50,7 +62,10 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
+				 	 		stateTimer = TimerActor("timer_waitforfree", 
+				 	 					  scope, context!!, "local_tout_transporttrolley_waitforfree", 10000.toLong() )
 					}	 	 
+					 transition(edgeName="t07",targetState="idle",cond=whenTimeout("local_tout_transporttrolley_waitforfree"))   
 				}	 
 				state("idle") { //this:State
 					action { //it:State
@@ -65,7 +80,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t05",targetState="moverobottoindoor",cond=whenRequest("pickup"))
+					 transition(edgeName="t08",targetState="moverobottoindoor",cond=whenRequest("pickup"))
 				}	 
 				state("moverobottoindoor") { //this:State
 					action { //it:State
@@ -84,8 +99,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t26",targetState="movetoport",cond=whenReply("moverobotdone"))
-					transition(edgeName="t27",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
+					 transition(edgeName="t29",targetState="movetoport",cond=whenReply("moverobotdone"))
+					transition(edgeName="t210",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
 				}	 
 				state("movetoport") { //this:State
 					action { //it:State
@@ -102,8 +117,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t38",targetState="depositactionended",cond=whenReply("moverobotdone"))
-					transition(edgeName="t39",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
+					 transition(edgeName="t311",targetState="depositactionended",cond=whenReply("moverobotdone"))
+					transition(edgeName="t312",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
 				}	 
 				state("depositactionended") { //this:State
 					action { //it:State
@@ -123,8 +138,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				 	 		stateTimer = TimerActor("timer_depositactionended", 
 				 	 					  scope, context!!, "local_tout_transporttrolley_depositactionended", 3000.toLong() )
 					}	 	 
-					 transition(edgeName="t410",targetState="robottohome",cond=whenTimeout("local_tout_transporttrolley_depositactionended"))   
-					transition(edgeName="t411",targetState="moverobottoindoor",cond=whenRequest("pickup"))
+					 transition(edgeName="t413",targetState="robottohome",cond=whenTimeout("local_tout_transporttrolley_depositactionended"))   
+					transition(edgeName="t414",targetState="moverobottoindoor",cond=whenRequest("pickup"))
 				}	 
 				state("robottohome") { //this:State
 					action { //it:State
@@ -139,8 +154,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t512",targetState="idle",cond=whenReply("moverobotdone"))
-					transition(edgeName="t513",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
+					 transition(edgeName="t515",targetState="idle",cond=whenReply("moverobotdone"))
+					transition(edgeName="t516",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
 				}	 
 				state("robotmovefailed") { //this:State
 					action { //it:State

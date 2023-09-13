@@ -67,6 +67,7 @@ QActor coldstorageservice context ctxcoldstorageservice {
     Transition t0 whenRequest storeFood -> requestEvaluation
     			  whenRequest sendTicket -> ticketEvaluation
     			  whenRequest deposit -> charged
+    			  whenReply pickupdone -> taken
     
     /*
      *  REQUEST EVALUATION
@@ -111,20 +112,24 @@ QActor coldstorageservice context ctxcoldstorageservice {
 */
 
     State charged{
-    	replyTo deposit with chargeTaken : chargeTaken(_)
     	request transporttrolley -m pickup : pickup(_)
+    }Goto idle
+    
+    State taken{
+    	replyTo deposit with chargeTaken : chargeTaken(_)
     }Goto idle
     
     
     State removeExpiredTicket {
     	println("Ticket of id ${payloadArg(0)} is expired - Reject Request") color blue
+    	replyTo sendTicket with ticketExpired : ticketExpired(_)
    			[#
    	  		 val TICKETID = payloadArg(0).toInt()
    	  		 val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
 			 resources.ColdStorageService.incrementRejectedRequestCounter()
 			 resources.ColdStorageService.getTicketList().remove(TICKET)
        		#]
-       		replyTo sendTicket with ticketExpired : ticketExpired(_)
+       		
     } Goto idle
     
     State sendInvalidTicket {
@@ -177,12 +182,17 @@ QActor transporttrolley context ctxcoldstorageservice{
 		println("$name | request engage") color green
 		request basicrobot -m engage : engage(transporttrolley, 330)
 		updateResource[#tTState.toJsonString()#]
-	}Transition t0 whenReply engagedone -> idle
+	}Transition t0 whenTime 10000 -> error
+				   whenReply engagedone -> idle
 				   whenReply engagerefused -> waitforfree
+				   
+   State error{ //DEBUG
+   		println("$name | basic robot error") color red
+   }
 
 	State waitforfree{
 		println("$name | already engaged") color green
-	}
+	} Transition t0 whenTime 10000 -> idle
 	
 	State idle {
 		[#

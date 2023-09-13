@@ -92,7 +92,7 @@ class TestColdStorageService {
         }catch (e: Exception) {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
-
+        println(rep)
         assertTrue(rep.contains("ticketValid"))
 
     }
@@ -136,16 +136,21 @@ class TestColdStorageService {
 
     @Test
     @Throws(InterruptedException::class)
-    fun testDeposit(){
+    fun testDeposit(){ //TODO rivedere
         CommUtils.outmagenta("TestColdStorageService   |   TestDeposit")
-        var deposit = "msg(deposit, request, testunit, coldstorageservice, deposit(_),1)"
+        val deposit = "msg(deposit, request, testunit, coldstorageservice, deposit(_),1)"
         var rep=""
         try {
             rep = conn.request(deposit)
         }catch (e: Exception) {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
-
+        val pickupDone = "msg(pickupdone, reply, testunit, coldstorageservice, pickupdone(_),1)"
+        try {
+            conn.reply(pickupDone)
+        }catch (e: Exception) {
+            CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
+        }
         assertTrue(rep.contains("chargeTaken"))
     }
 

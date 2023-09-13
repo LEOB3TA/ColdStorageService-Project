@@ -31,6 +31,7 @@ class TestTrasportTrolley {
             object : Thread() {
                 override fun run() {
                     main()
+                    it.unibo.ctxbasicrobot.main()
                 }
             }.start()
             /*         var cSS = sysUtil.getActor("coldstorageservice")
@@ -58,7 +59,7 @@ class TestTrasportTrolley {
                 CommUtils.outmagenta("TestTraposrtTrolley	|	TCP connection failed...")
             }
             try {
-                connRobot = TcpClientSupport.connect("localhost", 8020, 5)
+                connRobot = TcpClientSupport.connect("127.0.0.1", 8020, 5)
             } catch (e: Exception) {
                 CommUtils.outmagenta("TestTraposrtTrolley	|	TCP connection failed...")
             }
@@ -75,34 +76,32 @@ class TestTrasportTrolley {
              } */
 
             startObs("localhost:8099")
-            obsTT.getNext()
-            setup = true
+            println(obsTT.getNext().toString())
         } else {
             obsTT.clearHistory()
         }
     }
 
     fun startObs(addr: String?) {
-        val setupOk = ArrayBlockingQueue<Boolean>(1)
-
+        val setupOkA = ArrayBlockingQueue<Boolean>(1)
         object : Thread() {
             override fun run() {
-                obsTT = TypedCoapTestObserver {
-                    TransportTrolleyState.fromJsonString(it)
-                }
                 val ctx = "ctxcoldstorageservice"
                 val actor = "trasporttrolley"
                 val path = "$ctx/$actor"
                 val coapConn = CoapConnection(addr, path)
+                obsTT = TypedCoapTestObserver {
+                    TransportTrolleyState.fromJsonString(it)
+                }
                 coapConn.observeResource(obsTT)
                 try {
-                    setupOk.put(true)
+                    setupOkA.put(true)
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }
             }
         }.start()
-        setupOk.take()
+        setup=setupOkA.take()
     }
 
     @Test
