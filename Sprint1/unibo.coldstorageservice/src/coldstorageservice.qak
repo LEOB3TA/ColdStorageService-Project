@@ -61,7 +61,7 @@ QActor coldstorageservice context ctxcoldstorageservice {
   Goto idle
         
     State idle {
-        println("$name |	in idle")
+        println("$name |	in idle") color green
         // updateResource[#maxw.toJsonString()#] // TODO: fai check se serve o meno
     }  
     Transition t0 whenRequest storeFood -> requestEvaluation
@@ -112,10 +112,12 @@ QActor coldstorageservice context ctxcoldstorageservice {
 */
 
     State charged{
+    	println("$name |	in charged") color green
     	request transporttrolley -m pickup : pickup(_)
     }Goto idle
     
     State taken{
+    	println("$name |	in taken") color green
     	replyTo deposit with chargeTaken : chargeTaken(_)
     }Goto idle
     
@@ -182,7 +184,7 @@ QActor transporttrolley context ctxcoldstorageservice{
 		println("$name | request engage") color green
 		request basicrobot -m engage : engage(transporttrolley, 330)
 		updateResource[#tTState.toJsonString()#]
-	}Transition t0 whenTime 10000 -> error
+	}Transition t0 //whenTime 10000 -> error
 				   whenReply engagedone -> idle
 				   whenReply engagerefused -> waitforfree
 				   

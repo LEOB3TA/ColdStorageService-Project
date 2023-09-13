@@ -38,7 +38,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				}	 
 				state("idle") { //this:State
 					action { //it:State
-						CommUtils.outblack("$name |	in idle")
+						CommUtils.outgreen("$name |	in idle")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -92,6 +92,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				}	 
 				state("charged") { //this:State
 					action { //it:State
+						CommUtils.outgreen("$name |	in charged")
 						request("pickup", "pickup(_)" ,"transporttrolley" )  
 						//genTimer( actor, state )
 					}
@@ -102,6 +103,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				}	 
 				state("taken") { //this:State
 					action { //it:State
+						CommUtils.outgreen("$name |	in taken")
 						answer("deposit", "chargeTaken", "chargeTaken(_)"   )  
 						//genTimer( actor, state )
 					}
