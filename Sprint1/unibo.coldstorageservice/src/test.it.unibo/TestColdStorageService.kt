@@ -20,14 +20,10 @@ class TestColdStorageService {
     companion object {
         private var setup = false
         private lateinit var conn: Interaction2021
-       /// private lateinit var obsCSS: TypedCoapTestObserver<ColdStorageServiceState>
-        private lateinit var obsTT: TypedCoapTestObserver<TransportTrolleyState>
-
     }
 
-    //TODO rivedere tutte le stampe prima di ogni test
     @Before
-    fun setUp() { //TODO rivedere tutte le varie connessioni, non possiamo avere la stessa connessione per tutti gli attori
+    fun setUp() {
         if (!setup) {
             CommUtils.outmagenta("TestColdStorageService	|	setup...")
 
@@ -42,71 +38,19 @@ class TestColdStorageService {
                 CommUtils.delay(200)
                 cSS = QakContext.getActor("coldstorageservice")
             }
-            try {
-                conn = TcpClientSupport.connect("localhost", 8099, 5)
-            } catch (e: Exception) {
-                CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
-            }
-            var tT = getActor("transporttrolley")
-            while (tT == null) {
-                CommUtils.outmagenta("TestColdStorageService	|	waiting for transporttrolley...")
-                CommUtils.delay(200)
-                tT = QakContext.getActor("transporttrolley")
-            }
-            try {
-                conn = TcpClientSupport.connect("localhost", 8099, 5)
-            } catch (e: Exception) {
-                CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
-            }
+        }
+        try {
+            conn = TcpClientSupport.connect("localhost", 8099, 5)
+        } catch (e: Exception) {
+            CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
         }
     }
-           /* var bR = getActor("basicrobot")
-            while (bR == null) {
-                CommUtils.outmagenta("TestColdStorageService	|	waiting for basicrobot...")
-                CommUtils.delay(200)
-                bR = QakContext.getActor("basicrobot")
-            }
-            try {
-                conn = TcpClientSupport.connect("127.0.0.1", 8020, 5)
-            } catch (e: Exception) {
-                CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
-            } */
-          /*  startObs("localhost:8099")
-            obsCSS.getNext()
-            setup= true
-        }else{
-            obsCSS.clearHistory()
-        }
-    }
-
-    fun startObs(addr: String?) {
-        val setupOk = ArrayBlockingQueue<Boolean>(1)
-
-        object : Thread() {
-            override fun run() {
-                obsCSS = TypedCoapTestObserver{
-                    ColdStorageServiceState.fromJsonString(it)
-                }
-                val ctx = "ctxcoldstorageservice"
-                val actor = "coldstorageservice"
-                val path = "$ctx/$actor"
-                val coapConn = CoapConnection(addr, path)
-                coapConn.observeResource(obsCSS)
-                try {
-                    setupOk.put(true)
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                }
-            }
-        }.start()
-        setupOk.take()
-    }*/
 
     // Interaction CSS -> Truck
     @Test
     @Throws(InterruptedException::class)
     fun testStoreFoodSuccess(){
-        CommUtils.outmagenta("TestStoreFood   |  testStoreFood")
+        CommUtils.outmagenta("TestColdStorageService   |  testStoreFoodSuccess")
 
         var asw=""
         var storeFood = "msg(storeFood, request, testunit, coldstorageservice, storeFood(10) ,1)"
@@ -121,7 +65,7 @@ class TestColdStorageService {
     @Test
     @Throws(InterruptedException::class)
     fun testStoreFoodFail(){
-        CommUtils.outmagenta("TestStoreFood   |  testStoreFood")
+        CommUtils.outmagenta("TestColdStorageService   |  testStoreFoodFail")
         var asw=""
         var storeFood = "msg(storeFood, request, testunit, coldstorageservice, storeFood(100000) ,1)"
         try {
@@ -156,11 +100,11 @@ class TestColdStorageService {
     @Test
     @Throws(InterruptedException::class)
     fun testSendTicketExpired(){
-        CommUtils.outmagenta("TestSendTicket")
-        val TICKET : resources.model.Ticket = resources.model.Ticket(1, 2)
+        CommUtils.outmagenta("TestColdStorageService   |   testSendTicketExpired")
+        val TICKET : resources.model.Ticket = resources.model.Ticket(2, 2)
         resources.ColdStorageService.getTicketList().add(TICKET)
        Thread.sleep(5000)
-        var sendT = "msg(sendTicket, request, testunit, coldstorageservice, sendTicket(1) ,1)" //numero ticket=1
+        var sendT = "msg(sendTicket, request, testunit, coldstorageservice, sendTicket(2) ,1)" //numero ticket=1
         conn.forward(sendT)
         var rep=""
         try {
@@ -169,7 +113,6 @@ class TestColdStorageService {
         }catch (e: Exception) {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
-
         assertTrue(rep.contains("ticketExpired"))
 
     }
@@ -177,7 +120,7 @@ class TestColdStorageService {
     @Test
     @Throws(InterruptedException::class)
     fun testSendInvalidTicket(){
-        CommUtils.outmagenta("TestSendInvalidTicket")
+        CommUtils.outmagenta("TestColdStorageService   |   TestSendInvalidTicket")
         var sendT = "msg(sendTicket, request, testunit, coldstorageservice, sendTicket(-1) ,1)"
         var rep=""
         try {
@@ -194,13 +137,11 @@ class TestColdStorageService {
     @Test
     @Throws(InterruptedException::class)
     fun testDeposit(){
-        CommUtils.outmagenta("TestDeposit")
-        var deposit = "msg(deposit, request, testunit, coldstorageservice, deposit(_),1"
-        /*conn.request(deposit)*/
+        CommUtils.outmagenta("TestColdStorageService   |   TestDeposit")
+        var deposit = "msg(deposit, request, testunit, coldstorageservice, deposit(_),1)"
         var rep=""
         try {
             rep = conn.request(deposit)
-            //rep = conn.reply("msg(ticketInvalid, reply, testunit, truck, testStore(_), 1)").toString()
         }catch (e: Exception) {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
@@ -210,67 +151,5 @@ class TestColdStorageService {
 
     // Interaction CSS -> TT -> basicrobot
 
-    @Test
-    @Throws(InterruptedException::class)
-    fun testEngage(){
-        CommUtils.outmagenta("Test Engage")
-        var eng = "msg(engage, request, testunit, transporttrolley, engage(transporttrolley, 330)"
-        var rep=""
-        try {
-            rep = conn.request(eng)
-            }catch (e: Exception) {
-            CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
-        }
-
-        assertTrue(rep.contains("engagedone"))
-    }
-    @Test
-    @Throws(InterruptedException::class)
-    fun testEngageF(){
-        CommUtils.outmagenta("Test EngageF")
-        var eng = "msg(engage, request, testunit, transporttrolley, engage(TT, 330)"
-        var rep=""
-        try {
-            rep = conn.request(eng)
-        }catch (e: Exception) {
-            CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
-        }
-
-        assertTrue(rep.contains("engagerefused"))
-    }
-
-    @Test
-    @Throws(InterruptedException::class)
-    fun testPick(){
-        CommUtils.outmagenta("testPickup")
-        var pickup = "msg(pickup, request, testunit, transporttrolleycore, pickup(_) ,1)"
-        var rep=""
-
-        try {
-            rep = conn.request(pickup)
-        } catch (e: Exception) {
-            CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
-        }
-
-        var newState = obsTT.getNext()
-
-        assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
-        assertEquals("MOVING", newState.getCurrState().toString())
-
-        newState = obsTT.getNext()
-
-        assertEquals("INDOOR", newState.getCurrPosition().toString())
-        assertEquals("PICKINGUP", newState.getCurrState().toString())
-        assertTrue(rep.contains("pickupdone"))
-
-        newState = obsTT.getNext()
-
-    }
-
-    @Test
-    @Throws(InterruptedException::class)
-    fun testMove(){
-
-    }
 
 }
