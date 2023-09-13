@@ -1,26 +1,16 @@
 package test.it.unibo
 
-import test.it.unibo.coapobs.TypedCoapTestObserver
 import it.unibo.ctxcoldstorageservice.main
-import it.unibo.kactor.GlobalClock
 import it.unibo.kactor.QakContext
 import it.unibo.kactor.sysUtil.getActor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
+import kotlinx.coroutines.*
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import resources.ColdStorageService
-import resources.state.ColdStorageServiceState
-import state.TransportTrolleyState
-import unibo.basicomm23.coap.CoapConnection
 import unibo.basicomm23.interfaces.Interaction2021
 import unibo.basicomm23.tcp.TcpClientSupport
 import unibo.basicomm23.utils.CommUtils
-import java.util.concurrent.ArrayBlockingQueue
 
 class TestColdStorageService {
     companion object {
@@ -52,7 +42,6 @@ class TestColdStorageService {
             setup=true
         }
         else{
-            Thread.sleep(5000)
             ColdStorageService.resetAll()
         }
     }
@@ -61,26 +50,22 @@ class TestColdStorageService {
     @Test
     @Throws(InterruptedException::class)
     fun testStoreFoodSuccess(){
-
         CommUtils.outmagenta("TestColdStorageService   |  testStoreFoodSuccess")
-
         var asw=""
-        var storeFood = "msg(storeFood, request, testunit, coldstorageservice, storeFood(10) ,1)"
+        val storeFood = "msg(storeFood, request, testunit, coldstorageservice, storeFood(10) ,1)"
         try {
             asw =conn.request(storeFood)
         }catch (e: Exception) {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
-
         assertTrue(asw.contains("storeAccepted"))
     }
     @Test
     @Throws(InterruptedException::class)
     fun testStoreFoodFail(){
-
         CommUtils.outmagenta("TestColdStorageService   |  testStoreFoodFail")
         var asw=""
-        var storeFood = "msg(storeFood, request, testunit, coldstorageservice, storeFood(100000) ,1)"
+        val storeFood = "msg(storeFood, request, testunit, coldstorageservice, storeFood(100000) ,1)"
         try {
             asw =conn.request(storeFood)
         }catch (e: Exception) {
@@ -93,12 +78,10 @@ class TestColdStorageService {
     @Test
     @Throws(InterruptedException::class)
     fun testSendTicket(){
-
-        val TICKET : resources.model.Ticket = resources.model.Ticket(1, 1)
-        resources.ColdStorageService.getTicketList().add(TICKET)
+        val ticket : resources.model.Ticket = resources.model.Ticket(1, 1)
+        ColdStorageService.getTicketList().add(ticket)
         CommUtils.outmagenta("TestSendTicket")
-        var sendT = "msg(sendTicket, request, testunit, coldstorageservice, sendTicket(1) ,1)" //numero ticket=1
-        conn.forward(sendT)
+        val sendT = "msg(sendTicket, request, testunit, coldstorageservice, sendTicket(1) ,1)" //numero ticket=1
         var rep=""
         try {
             rep = conn.request(sendT)
@@ -114,30 +97,25 @@ class TestColdStorageService {
     @Test
     @Throws(InterruptedException::class)
     fun testSendTicketExpired(){
-
         CommUtils.outmagenta("TestColdStorageService   |   testSendTicketExpired")
-        val TICKET : resources.model.Ticket = resources.model.Ticket(2, 2)
-        resources.ColdStorageService.getTicketList().add(TICKET)
+        val ticket : resources.model.Ticket = resources.model.Ticket(2, 2)
+        ColdStorageService.getTicketList().add(ticket)
        Thread.sleep(5000)
-        var sendT = "msg(sendTicket, request, testunit, coldstorageservice, sendTicket(2) ,1)" //numero ticket=1
-        conn.forward(sendT)
+        val sendT = "msg(sendTicket, request, testunit, coldstorageservice, sendTicket(2) ,1)" //numero ticket=1
         var rep=""
         try {
             rep = conn.request(sendT)
-            //var rep = conn.request("msg(ticketInvalid, reply, testunit, truck, testStore(_), 1)").toString()
         }catch (e: Exception) {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
         assertTrue(rep.contains("ticketExpired"))
-
     }
 
     @Test
     @Throws(InterruptedException::class)
     fun testSendInvalidTicket(){
-
         CommUtils.outmagenta("TestColdStorageService   |   TestSendInvalidTicket")
-        var sendT = "msg(sendTicket, request, testunit, coldstorageservice, sendTicket(-1) ,1)"
+        val sendT = "msg(sendTicket, request, testunit, coldstorageservice, sendTicket(-1) ,1)"
         var rep=""
         try {
             rep = conn.request(sendT)
@@ -145,19 +123,18 @@ class TestColdStorageService {
         }catch (e: Exception) {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
-
-
         assertTrue(rep.contains("ticketNotValid"))
     }
 
+
     @Test
     @Throws(InterruptedException::class)
-    fun testDeposit(){ //TODO rivedere
+    fun testDeposit(){
 
         CommUtils.outmagenta("TestColdStorageService   |   TestDeposit")
         val deposit = "msg(deposit, request, testunit, coldstorageservice, deposit(_),1)"
         var rep=""
-        val job = GlobalScope.launch {
+        GlobalScope.launch {
             try {
                 rep = conn.request(deposit)
             }catch (e: Exception) {
@@ -165,19 +142,16 @@ class TestColdStorageService {
             }
         }
         Thread.sleep(1000)
-        val pickupDone = "msg(pickupdone, reply, trasporttrolley, coldstorageservice, pickupdone(_),1)" //da mnotare il mittente trasporttrolley
+        val pickupDone = "msg(pickupdone, reply, trasporttrolley, coldstorageservice, pickupdone(_),1)" //da notare il mittente trasporttrolley
         try {
             conn.reply(pickupDone)
         }catch (e: Exception) {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
         Thread.sleep(1000)
-        println("this is rep:")
-        println(rep)
         assertTrue(rep.contains("chargeTaken"))
     }
 
-    // Interaction CSS -> TT -> basicrobot
 
 
 }
