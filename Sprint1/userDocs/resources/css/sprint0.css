@@ -55,6 +55,15 @@ i {
     color: #ff1010;
 }
 
+pro{
+    font-weight: bold;
+    color:blue;
+}
+cons{
+    font-weight: bold;
+    color: red;
+}
+
 tt {
     font-family: "Arial";
     font-size: 90%;
@@ -98,6 +107,29 @@ pre {
     background-color: #f5f5f5;
     border: 1.5px solid silver;
     padding: 5px;
+}
+key{
+    font-family:monospace;
+    font-weight: 500;
+    color: #304ceb;
+}
+key2{
+    font-family:monospace;
+    font-weight: 500;
+    color: #ad0d0f;
+}
+
+key3{
+    font-family:monospace;
+    font-weight: 500;
+    color: #01b948;
+}
+
+key4{
+    font-family:monospace;
+    font-weight: 500;
+
+    color: #008232;
 }
 
 m {
@@ -144,6 +176,14 @@ h4 {
 h5 {
     background-color: #d5ffb0;
     font-size: 100%;
+
+}
+h6 {
+    background-color: #e38484;
+    font-size: 100%;
+    width: 95%;
+    border-radius: 5px;
+    padding: 2px;
 
 }
 
