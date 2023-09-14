@@ -272,7 +272,7 @@ QActor transporttrolley context ctxcoldstorageservice{
 	} 
 	Transition t0 whenTime 3000 -> robottohome
 	whenRequest pickup -> moverobottoindoor
-	//se arriva un messagio prima di 3s moverobottoindoor altrimenti torno in home
+	//se arriva un messagio prima di 3s moverobottoindoor altrimenti torno in home opppure se c'è già una pickup in coda
 	 	
 	State robottohome{
 		[#

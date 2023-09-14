@@ -26,6 +26,7 @@ class TestTrasportTrolley {
     }
 
     //TODO rivedere tutte le stampe prima di ogni test
+    //TODO capire come gestire la risposta in caso il robot non riuscisse a muoversi
     @Before
     fun setUp() { //TODO vedere se aggiungere test e inserire restart o mandarlo in home
         if (!setup) {
@@ -79,6 +80,14 @@ class TestTrasportTrolley {
             startObs("localhost:8099")
             println(obsTT.getNext().toString())
         } else {
+            val goHome = "msg(moverobot, request, testunit, basicrobot, moverobot(0,0) ,1)"
+            var rep=""
+            try {
+                rep = connRobot.request(goHome)
+            }catch (e: Exception) {
+                CommUtils.outmagenta("TestTrasportTrolley	|	 some err in request: $e")
+            }
+            Thread.sleep(7000)
             obsTT.clearHistory()
 
         }
@@ -127,13 +136,49 @@ class TestTrasportTrolley {
         println(newState.toString())
         Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
         Assert.assertEquals("MOVING", newState.getCurrState().toString())
-        Thread.sleep(5000)
+        Thread.sleep(7000)
         Assert.assertTrue(rep.contains("pickupdone"))
     }
 
     @Test
     @Throws(InterruptedException::class)
-    fun testMoveToIndoor() {
+    fun testPickQueue() {
+        CommUtils.outmagenta("TestTrasportTrolley  |  testPickupQueue...")
+        val pickup = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,1)"
+        var rep = ""
+        GlobalScope.launch {
+            try {
+                rep = connTT.request(pickup)
+            } catch (e: Exception) {
+                CommUtils.outmagenta("TestColdStorageService  |   some err in request: $e")
+            }
+        }
+        val pickupQue = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,2)"
+        var rep1 = ""
+        GlobalScope.launch {
+            try {
+                rep1 = connTT.request(pickupQue)
+            } catch (e: Exception) {
+                CommUtils.outmagenta("TestColdStorageService  |   some err in request: $e")
+            }
+        }
+        var newState = obsTT.getNext()
+        println(newState.toString())
+        Assert.assertEquals("INDOOR", newState.getCurrPosition().toString())
+        Assert.assertEquals("PICKINGUP", newState.getCurrState().toString())
+        newState = obsTT.getNext()
+        println(newState.toString())
+        Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
+        Assert.assertEquals("MOVING", newState.getCurrState().toString())
+        Thread.sleep(7000)
+        Assert.assertTrue(rep.contains("pickupdone"))
+        Thread.sleep(7000)
+        Assert.assertTrue(rep1.contains("pickupdone"))
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testMoveToHome() {
         CommUtils.outmagenta("TestTrasportTrolley  |  testMoveToIndoor...")
         var pickup = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,1)"
         var repp = ""
@@ -155,7 +200,7 @@ class TestTrasportTrolley {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
         newState = obsTT.currentTypedState!!
-        Thread.sleep(2000)
+        Thread.sleep(5000)
         Assert.assertEquals("IDLE",obsTT.currentTypedState!!.getCurrState().toString())
         Assert.assertEquals("HOME", obsTT.currentTypedState!!.getCurrPosition().toString())
     }
