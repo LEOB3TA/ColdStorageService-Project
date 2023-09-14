@@ -71,7 +71,7 @@
         Prima di iniziare le interazioni &egrave; presente una fase in cui il TransporTrolley cerca di iniziare la comunicazione
         col BasicRobot: ci&ograve; viene gestito dall'<kc>Engager</kc>, mediante l'uso della richiesta di <ks>engage</ks>.
         <br/>
-        Se tale richiesta va' a buon fine pu&ograve; iniziare la comunicazione, altrimenti si genera un messaggio di errore.
+        Se tale richiesta va a buon fine pu&ograve; iniziare la comunicazione, altrimenti si genera un messaggio di errore.
         <br/><br/>
         Specularmente quando si deve disconnettere il dispositivo l'<kc>Engager</kc> fornisce il messaggio <ks>disengage</ks>,
         con la differenza che in questo caso si usa una dispatch, ovvero non si attende risposta.
@@ -378,6 +378,33 @@
 <!--TODO: revisionare link -->
         Il codice completo di questa classe &egrave; consultabile in <a href="./resources/kotlin/TransportTrolleyState.kt">TransportTrolleyState.kt</a>
 
+        <h3>ColdStorageService</h3>
+        <h6>Obiettivo</h6>
+        Sviluppare un attore che implementi il ColdStorageService e le sue interazioni col TransportTrolley e BasicRobot, in modo che: <br/> <br/>
+        <ul>
+            <li>Valuti le richieste di deposito provenienti dal truck</li>
+            <li>Coordini le operazioni di carico e scarico del trolley</li>
+            <li>Sia in grado di mandare e ricevere comandi al Truck e al TransportTrolley e gestire eventuali risposte</li>
+        </ul>
+
+        <h3>Gestione dei ticket</h3>
+        Dall'analisi del problema si evince la necessit&agrave; di gestire le varie casistiche che si possono presentare quando il BasicRobot presenta il ticket per il carico. <br/> <br/>
+        <ul>
+            <li>Il ticket &egrave; <b>valido</b> non scaduto -> ColdStorageService restituisce messaggio <b>charge taken</b></li>
+            <li>Il ticket non &egrave; valido -> ColdStorageService restituisce messaggio di ticket non valido, e il robot pu&ograve; riprovare ad inserire il ticket giusto fin quando non scade il ticket</li>
+            <li>Il ticket &egrave; valido ma <b>scaduto</b> -> ColdStorageService restituisce messaggio di ticket scaduto e l'operazione si intende rifiutata</li>
+        </ul>
+
+        <h3>Singleton</h3>
+        Per quanto riguarda la gestione del ColdStorageService &egrave; stato deciso di utilizzare il pattern <i>Singleton</i> in modo da avere un unico attore che gestisce le richieste di deposito e che aggiorna gli attributi interni.
+        Creando un’istanza da una classe con il singleton design pattern ci si assicura che non ne vengano create delle altre. Il singleton rende questa classe accessibile globalmente all’interno del software, tramite uno dei vari metodi disponibili nei linguaggi di programmazione.
+        Per assicurarsi che l’istanza creata rimanga l’unica, bisogna impedire che l’utente possa crearne di nuove. Il costruttore deve quindi dichiarare il modello “private”. In questo modo solamente il codice contenuto nel singleton può istanziare lo stesso singleton.
+        Questo garantisce che l’utente ottenga un solo e unico oggetto, sempre lo stesso. Quando questa istanza viene resa disponibile, non ne vengono create di nuove.
+
+        <pre><key>enum</key> <key>class</key> CurrStateTrolley { IDLE, STOPPED, MOVING, PICKINGUP, DROPPINGOUT }</pre>
+        <h6>Interazioni</h6>
+        Per quanto riguarda l'interazione tra i componenti possiamo, in prima battuta, affermare che essi interagiscono a scambio di messaggi. L'utilizzo del linguagguio QAk ci permette di tipizzare i messaggi in modo tale da avere un controllo maggiore sulle interazioni tra i componenti. Nasce quindi il problema di individuare il tipo di messaggio per ogni interazione:
+        <h6>Gestione stati</h6>
 
     </div>
 
