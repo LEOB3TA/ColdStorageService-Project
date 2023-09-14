@@ -387,7 +387,44 @@
             <li>Sia in grado di mandare e ricevere comandi al Truck e al TransportTrolley e gestire eventuali risposte</li>
         </ul>
 
-        <h3>Gestione dei ticket</h3>
+        <h3>Ticket</h3>
+        Dal tema finale si evince la necessit&agrave; di gestire i ticket utili per la corretta esecuzione del sistema.<br/> <br/>
+        Si &egrave; quindi pensato di creare una classe che soddisfi il problema. <br/> <br/>
+        La classe Ticket &egrave; composta da due attributi: <br/> <br/>
+        <ul>
+            <li>id: Int</li>
+            <li>ticketTime: LocalDateTime</li>
+        </ul>
+        L'id &egrave; univoco e viene generato dal ColdStorageService, mentre il ticketTime &egrave; il tempo di validit&agrave; del ticket espresso in secondi.
+
+        <pre>
+            <br/>
+            <code>// Ticket Model</code>
+            <key>class</key> Ticket(id: Int, ticketTime: Long) {
+            <key>val id</key>: Int
+            <key>private val</key> ticketTime: LocalDateTime
+            <key>private var</key> isExpired: Boolean = false
+
+                <code>// Costruttore</code>
+                <key>init</key> {
+                    this.id = id
+                    this.ticketTime = LocalDateTime.now().plus(ticketTime,ChronoUnit.SECONDS)
+                }
+        </pre>
+
+        Per verificare se il ticket &egrave; valido, viene utilizzato il metodo isExpired() che restituisce un booleano.<br/>
+        <pre>
+            <br/>
+            <key>fun</key> isExpired(): Boolean {
+                isExpired = LocalDateTime.now() > ticketTime
+                return isExpired
+            }
+        </pre>
+
+        Il codice completo di questa classe &egrave; consultabile in <a href="../unibo.coldstorageservice/resources/model/Ticket.kt">Ticket.kt</a>
+
+
+        <h5>Gestione dei ticket</h5>
         Dall'analisi del problema si evince la necessit&agrave; di gestire le varie casistiche che si possono presentare quando il BasicRobot presenta il ticket per il carico. <br/> <br/>
         <ul>
             <li>Il ticket &egrave; <b>valido</b> non scaduto -> ColdStorageService restituisce messaggio <b>charge taken</b></li>
@@ -396,12 +433,31 @@
         </ul>
 
         <h3>Singleton</h3>
-        Per quanto riguarda la gestione del ColdStorageService &egrave; stato deciso di utilizzare il pattern <i>Singleton</i> in modo da avere un unico attore che gestisce le richieste di deposito e che aggiorna gli attributi interni.
-        Creando un’istanza da una classe con il singleton design pattern ci si assicura che non ne vengano create delle altre. Il singleton rende questa classe accessibile globalmente all’interno del software, tramite uno dei vari metodi disponibili nei linguaggi di programmazione.
-        Per assicurarsi che l’istanza creata rimanga l’unica, bisogna impedire che l’utente possa crearne di nuove. Il costruttore deve quindi dichiarare il modello “private”. In questo modo solamente il codice contenuto nel singleton può istanziare lo stesso singleton.
+        Per quanto riguarda la gestione del ColdStorageService &egrave; stato deciso di utilizzare il pattern <i>Singleton</i> in modo da avere un unico attore che gestisce le richieste di deposito e che aggiorna gli attributi interni. <br/>
+        Creando un'istanza da una classe con il singleton design pattern ci si assicura che non ne vengano create delle altre. Il singleton rende questa classe <b>accessibile globalmente</b> all'interno del software.
+        Per assicurarsi che l'istanza creata rimanga l'unica, bisogna impedire che l'utente possa crearne di nuove. Il costruttore deve quindi dichiarare il modello "<b>private</b>". In questo modo solamente il codice contenuto nel singleton può istanziare lo stesso singleton.
         Questo garantisce che l’utente ottenga un solo e unico oggetto, sempre lo stesso. Quando questa istanza viene resa disponibile, non ne vengono create di nuove.
 
-        <pre><key>enum</key> <key>class</key> CurrStateTrolley { IDLE, STOPPED, MOVING, PICKINGUP, DROPPINGOUT }</pre>
+        <pre><br/>
+            <code>// ColdStorageService.kt</code>
+            <key>class</key> ColdStorageService {
+            <key>private val</key> MAXW : Double = 100.0
+            <key>private val</key> TICKETTIME: Long = 1
+            <key>private var</key> currentWeightStorage : Double = 0.0
+            <key>private val</key> ticketList : ArrayList<Ticket> = arrayListOf()
+            <key>private var</key> ticketNumber: Int = 0;
+            <key>private var</key> rejectedRequestCounter: Int = 0;
+
+            <key>companion object</key> {
+                <key>private var</key> instance: ColdStorageService? = null
+                <key>private fun</key> getInstance() =
+                    instance ?: synchronized(this) {
+                    instance ?: ColdStorageService().also { instance = it }
+                }
+            }
+        </pre>
+        Il codice completo di questa classe &egrave; consultabile in <a href="../unibo.coldstorageservice/resources/ColdStorageService.kt">TransportTrolleyState.kt</a>
+
         <h6>Interazioni</h6>
         Per quanto riguarda l'interazione tra i componenti possiamo, in prima battuta, affermare che essi interagiscono a scambio di messaggi. L'utilizzo del linguagguio QAk ci permette di tipizzare i messaggi in modo tale da avere un controllo maggiore sulle interazioni tra i componenti. Nasce quindi il problema di individuare il tipo di messaggio per ogni interazione:
         <h6>Gestione stati</h6>

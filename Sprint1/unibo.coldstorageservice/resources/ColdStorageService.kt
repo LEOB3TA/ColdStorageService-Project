@@ -18,8 +18,6 @@ class ColdStorageService {
 
     companion object {
 
-
-
         private var instance: ColdStorageService? = null
 
         private fun getInstance() =
@@ -99,7 +97,7 @@ class ColdStorageService {
             getTicketList().remove(ticket)
         }
 
-        fun getRejectedRequestCounter(): Int {
+        private fun getRejectedRequestCounter(): Int {
             return getInstance().rejectedRequestCounter
         }
 
