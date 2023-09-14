@@ -7,6 +7,7 @@ services:
       - 8091:8091/tcp
       - 8091:8091/udp
   basicrobot23:
+    #image: imgbasicrobot23:1.0
     image: docker.io/natbodocker/basicrobot23:2.0
     ports:
       - 8020:8020/tcp
@@ -14,8 +15,16 @@ services:
     depends_on:
       - wenv
   webrobot23:
+    #image: imgwebrobot23:1.0
     image: docker.io/natbodocker/webrobot23:1.0
     ports:
       - 8085:8085
     depends_on:
       - basicrobot23
+
+## -------------------------------------------------------------
+## TODO See https://docs.docker.com/compose/startup-order/
+## -------------------------------------------------------------
+## docker-compose -f webbasicrobot23.yaml  up
+## docker-compose run --service-ports wenv
+## docker-compose run --service-ports vrobotclient  ATTIVA ANCHE wenv

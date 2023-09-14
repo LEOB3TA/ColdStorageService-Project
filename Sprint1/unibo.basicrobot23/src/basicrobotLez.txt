@@ -4,7 +4,7 @@
  * ================================================================================
  */  
    
-SystemC /* -trace -msglog  */ basicrobot23
+System /* -trace -msglog  */ basicrobot23    
   
 Dispatch cmd       	: cmd(MOVE)      
 Dispatch end       	: end(ARG)   
@@ -522,9 +522,9 @@ QActor robotposendosimbiotico context ctxbasicrobot{
     Goto waitclientrequest
     
     
-	//Se setrobotstate ï¿½ inviato da un attore diverso da Owner, non si fa nulla
-	//Il caller perï¿½ potrebbe non capire perchï¿½ il comando non ï¿½ stato fatti
-	//MA: setTheRobotState ï¿½ una utility per allineare lo stato del robot
+	//Se setrobotstate è inviato da un attore diverso da Owner, non si fa nulla
+	//Il caller però potrebbe non capire perchè il comando non è stato fatti
+	//MA: setTheRobotState è una utility per allineare lo stato del robot
 	//con lo stato che posizioniamo 'a mano'			  
 	
     State checkTheOwnerForSet	{

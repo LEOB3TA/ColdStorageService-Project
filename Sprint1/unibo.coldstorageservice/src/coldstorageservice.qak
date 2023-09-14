@@ -31,16 +31,18 @@ Reply moverobotdone  :  moverobotok(ARG)
 Reply moverobotfailed:  moverobotfailed(PLANDONE, PLANTODO)
 
 Dispatch setrobotstate: setpos(X,Y,D)
+Dispatch setdirection : dir( D )  //D =up|down!left|right
+Dispatch cmd       	: cmd(MOVE) 
 
 Context ctxbasicrobot ip [host="127.0.0.1" port=8020] 
 Context ctxcoldstorageservice ip [host="localhost" port=8099] 
-Context ctxtruck ip[host='localhost' port=8092]
+//Context ctxtruck ip[host="127.0.0.1" port=8092] //indirizzo interno alla rete
 
 // Attori Esterni
-ExternalQActor mocktruck context ctxtruck
 ExternalQActor basicrobot context ctxbasicrobot
+//ExternalQActor mocktruck context ctxtruck
 
-CodedQActor pathobs context ctxbasicrobot className "observers.planexecCoapObserver"
+//CodedQActor pathobs context ctxbasicrobot className "resources.observers.planexecCoapObserver"
 
 QActor coldstorageservice context ctxcoldstorageservice {
 	
@@ -176,20 +178,24 @@ QActor transporttrolley context ctxcoldstorageservice{
 		var HOMEY=0;
 		var TICKETID = 0;
 		val tTState = state.TransportTrolleyState()
+		val MyName = name
 	#]
 	State init initial{
 		discardMsg Off
-		
 		// engage
 		println("$name | request engage") color green
-		request basicrobot -m engage : engage(transporttrolley, 330)
+		request basicrobot -m engage : engage ($MyName, 330)
 		updateResource[#tTState.toJsonString()#]
+		//printCurrentMessage color black
 	}Transition t0 //whenTime 10000 -> error
 				   whenReply engagedone -> idle
 				   whenReply engagerefused -> waitforfree
 				   
    State error{ //DEBUG
    		println("$name | basic robot error") color red
+   		println("$name | disengaging....") color red
+   		forward basicrobot -m disengage : disengage( $MyName )
+   		println("$name | disengaged....") color red
    }
 
 	State waitforfree{
@@ -197,11 +203,18 @@ QActor transporttrolley context ctxcoldstorageservice{
 	} Transition t0 whenTime 10000 -> idle
 	
 	State idle {
+		println("$name | engaged") color green
 		[#
 			tTState.setCurrState(state.CurrStateTrolley.IDLE)
 			tTState.setCurrPosition(state.TTPosition.HOME)
 		#]
 		updateResource[#tTState.toJsonString()#]
+		// State print for debug
+		//[#
+		//	println(tTState.getCurrState())
+		//	println(tTState.getCurrPosition())	
+		//#]
+		forward basicrobot -m setrobotstate : setpos (0,0,d) // d= down		
 		println("$name | waiting for commands.") color green
   	}
  	Transition t0 whenRequest pickup -> moverobottoindoor
@@ -219,7 +232,7 @@ QActor transporttrolley context ctxcoldstorageservice{
  		request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)
  		
  	}
- 	Transition t2 whenReply moverobotdone -> movetoport
+ 	Transition t0 whenReply moverobotdone -> movetoport
  				  whenReply moverobotfailed -> robotmovefailed 
 
 
@@ -234,10 +247,10 @@ QActor transporttrolley context ctxcoldstorageservice{
 		println("$name | robot is in indoor") color green
 		println("$name | moving robot to coldroom") color green
 		// da usare col css
-		//forward coldstorageservice -m pickupindoordone:pickupindoordone
+		replyTo pickup with pickupdone:pickupdone(_)
 		request basicrobot -m moverobot:moverobot($CRX,$CRY)
 	}
-	Transition t3 whenReply moverobotdone -> depositactionended
+	Transition t0 whenReply moverobotdone -> depositactionended
  				  whenReply moverobotfailed -> robotmovefailed
 	
 	State depositactionended{
@@ -246,13 +259,18 @@ QActor transporttrolley context ctxcoldstorageservice{
 			tTState.setCurrPosition(state.TTPosition.PORT)
 		#]
 		updateResource[#tTState.toJsonString()#]
-		replyTo pickup with pickupdone:pickupdone(_)
+		
 		println("$name | robot is in coldroom") color green
 		//emitlocal local_dropoutdone: local_dropoutdone
 		println("$name | depositaction ended") color green
 		println("$name | waiting for next move" ) color green
+		[#
+			tTState.setCurrState(state.CurrStateTrolley.IDLE)
+			tTState.setCurrPosition(state.TTPosition.PORT)
+		#]
+		updateResource[#tTState.toJsonString()#]
 	} 
-	Transition t4 whenTime 3000 -> robottohome
+	Transition t0 whenTime 3000 -> robottohome
 	whenRequest pickup -> moverobottoindoor
 	//se arriva un messagio prima di 3s moverobottoindoor altrimenti torno in home
 	 	
@@ -264,8 +282,10 @@ QActor transporttrolley context ctxcoldstorageservice{
 		updateResource[#tTState.toJsonString()#]
 		//send event "robot is in home"
 		request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
+		delay 6500
+		forward basicrobot -m cmd : cmd ( l ) 
 	}
-	Transition t5 whenReply moverobotdone -> idle
+	Transition t0 whenReply moverobotdone -> idle
  				  whenReply moverobotfailed -> robotmovefailed
  
 

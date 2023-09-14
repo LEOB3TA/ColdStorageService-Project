@@ -3,6 +3,8 @@ package test.it.unibo
 import it.unibo.ctxcoldstorageservice.main
 import it.unibo.kactor.QakContext
 import it.unibo.kactor.sysUtil
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -12,6 +14,7 @@ import unibo.basicomm23.coap.CoapConnection
 import unibo.basicomm23.interfaces.Interaction2021
 import unibo.basicomm23.tcp.TcpClientSupport
 import unibo.basicomm23.utils.CommUtils
+import java.lang.Thread.sleep
 import java.util.concurrent.ArrayBlockingQueue
 
 class TestTrasportTrolley {
@@ -24,61 +27,60 @@ class TestTrasportTrolley {
 
     //TODO rivedere tutte le stampe prima di ogni test
     @Before
-    fun setUp() { //TODO rivedere tutte le varie connessioni, non possiamo avere la stessa connessione per tutti gli attori
+    fun setUp() { //TODO vedere se aggiungere test e inserire restart o mandarlo in home
         if (!setup) {
-            CommUtils.outmagenta("TestTrasportTrolley	|	setup...")
-
+            CommUtils.outmagenta("TestTrasportTrolley  |  setup...")
             object : Thread() {
                 override fun run() {
                     main()
-                    it.unibo.ctxbasicrobot.main()
                 }
             }.start()
-            /*         var cSS = sysUtil.getActor("coldstorageservice")
-                     while (cSS == null) {
-                         CommUtils.outmagenta("TestColdStorageService	|	waiting for coldstorageservice...")
-                         CommUtils.delay(200)
-                         cSS = QakContext.getActor("coldstorageservice")
-                     }
-                 }
-                 try {
-                     conn = TcpClientSupport.connect("localhost", 8099, 5)
-                 } catch (e: Exception) {
-                     CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
-                 }
-             }*/
+            var cSS = sysUtil.getActor("coldstorageservice")
+            while (cSS == null) {
+                CommUtils.outmagenta("TestColdStorageService  |  waiting for coldstorageservice...")
+                CommUtils.delay(200)
+                cSS = QakContext.getActor("coldstorageservice")
+            }
+            /*
+            try {
+                conn = TcpClientSupport.connect("localhost", 8099, 5)
+            } catch (e: Exception) {
+                CommUtils.outmagenta("TestColdStorageService  |  TCP connection failed...")
+            }
+        }*/
             var tT = sysUtil.getActor("transporttrolley")
             while (tT == null) {
-                CommUtils.outmagenta("TestColdStorageService	|	waiting for transporttrolley...")
+                CommUtils.outmagenta("TestColdStorageService  |  waiting for transporttrolley...")
                 CommUtils.delay(200)
                 tT = QakContext.getActor("transporttrolley")
             }
             try {
                 connTT = TcpClientSupport.connect("localhost", 8099, 5)
             } catch (e: Exception) {
-                CommUtils.outmagenta("TestTraposrtTrolley	|	TCP connection failed...")
+                CommUtils.outmagenta("TestTraposrtTrolley  |  TCP connection failed...")
             }
             try {
                 connRobot = TcpClientSupport.connect("127.0.0.1", 8020, 5)
             } catch (e: Exception) {
-                CommUtils.outmagenta("TestTraposrtTrolley	|	TCP connection failed...")
+                CommUtils.outmagenta("TestTraposrtTrolley  |  TCP connection failed...")
             }
-           /*  var bR = sysUtil.getActor("basicrobot")
-             while (bR == null) {
-                 CommUtils.outmagenta("TestColdStorageService	|	waiting for basicrobot...")
-                 CommUtils.delay(200)
-                 bR = QakContext.getActor("basicrobot")
-             }*/
+            /*var bR = sysUtil.getActor("basicrobot")
+            while (bR == null) {
+                CommUtils.outmagenta("TestColdStorageService  |  waiting for basicrobot...")
+                CommUtils.delay(200)
+                bR = QakContext.getActor("basicrobot")
+            }*/
             /* try {
                  conn = TcpClientSupport.connect("127.0.0.1", 8020, 5)
              } catch (e: Exception) {
-                 CommUtils.outmagenta("TestColdStorageService	|	TCP connection failed...")
+                 CommUtils.outmagenta("TestColdStorageService  |  TCP connection failed...")
              } */
 
             startObs("localhost:8099")
             println(obsTT.getNext().toString())
         } else {
             obsTT.clearHistory()
+
         }
     }
 
@@ -87,7 +89,7 @@ class TestTrasportTrolley {
         object : Thread() {
             override fun run() {
                 val ctx = "ctxcoldstorageservice"
-                val actor = "trasporttrolley"
+                val actor = "transporttrolley"
                 val path = "$ctx/$actor"
                 val coapConn = CoapConnection(addr, path)
                 obsTT = TypedCoapTestObserver {
@@ -107,60 +109,55 @@ class TestTrasportTrolley {
     @Test
     @Throws(InterruptedException::class)
     fun testPick() {
-        CommUtils.outmagenta("testPickup")
+        CommUtils.outmagenta("TestTrasportTrolley  |  testPickup...")
         var pickup = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,1)"
         var rep = ""
-        try {
-            rep = connTT.request(pickup)
-        } catch (e: Exception) {
-            CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
+        GlobalScope.launch {
+            try {
+                rep = connTT.request(pickup)
+            } catch (e: Exception) {
+                CommUtils.outmagenta("TestColdStorageService  |   some err in request: $e")
+            }
         }
         var newState = obsTT.getNext()
-        Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
-        Assert.assertEquals("MOVING", newState.getCurrState().toString())
-        newState = obsTT.getNext()
+        println(newState.toString())
         Assert.assertEquals("INDOOR", newState.getCurrPosition().toString())
         Assert.assertEquals("PICKINGUP", newState.getCurrState().toString())
-        Assert.assertTrue(rep.contains("pickupdone"))
         newState = obsTT.getNext()
+        println(newState.toString())
+        Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
+        Assert.assertEquals("MOVING", newState.getCurrState().toString())
+        Thread.sleep(5000)
+        Assert.assertTrue(rep.contains("pickupdone"))
     }
 
     @Test
     @Throws(InterruptedException::class)
-    fun testEngage() {
-        CommUtils.outmagenta("Test Engage")
-        var eng = "msg(engage, request, testunit, transporttrolley, engage(transporttrolley, 330),1)"
+    fun testMoveToIndoor() {
+        CommUtils.outmagenta("TestTrasportTrolley  |  testMoveToIndoor...")
+        var pickup = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,1)"
+        var repp = ""
+        GlobalScope.launch {
+            try {
+                repp = connTT.request(pickup)
+            } catch (e: Exception) {
+                CommUtils.outmagenta("TestColdStorageService  |   some err in request: $e")
+            }
+        }
+        Thread.sleep(12000)
+        var newState = obsTT.getNext()
+        println(newState.toString())
+        var move = "msg(moverobot, request, testunit, basicrobot, moverobot(4, 3),1)"
         var rep = ""
         try {
-            rep = connRobot.request(eng)
+            rep = connRobot.request(move)
         } catch (e: Exception) {
             CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
         }
-
-        Assert.assertTrue(rep.contains("engagedone"))
-    }
-
-    @Test
-    @Throws(InterruptedException::class)
-    fun testEngageF() {
-        CommUtils.outmagenta("Test EngageF")
-        var eng = "msg(engage, request, testunit, transporttrolley, engage(TT, 330),1)"
-        var rep = ""
-        try {
-            rep = connRobot.request(eng)
-        } catch (e: Exception) {
-            CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
-        }
-
-        Assert.assertTrue(rep.contains("engagerefused"))
-    }
-
-
-
-    @Test
-    @Throws(InterruptedException::class)
-    fun testMove() {
-
+        newState = obsTT.currentTypedState!!
+        Thread.sleep(2000)
+        Assert.assertEquals("IDLE",obsTT.currentTypedState!!.getCurrState().toString())
+        Assert.assertEquals("HOME", obsTT.currentTypedState!!.getCurrPosition().toString())
     }
 
 }
