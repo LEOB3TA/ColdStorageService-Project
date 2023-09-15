@@ -461,6 +461,90 @@
         <h6>Interazioni</h6>
         Per quanto riguarda l'interazione tra i componenti possiamo, in prima battuta, affermare che essi interagiscono a scambio di messaggi. L'utilizzo del linguagguio QAk ci permette di tipizzare i messaggi in modo tale da avere un controllo maggiore sulle interazioni tra i componenti. Nasce quindi il problema di individuare il tipo di messaggio per ogni interazione:
         <h6>Gestione stati</h6>
+        Nell'analisi dei requisiti &egrave; emersa la necessit&agrave; di mantenere lo stato del <i>ColdStorageService</i>. In particolare occorre tenere traccia del <b>peso attuale del carico</b> e del <b>numero di richieste rifiutate</b>. <br/>
+        Nella seguente immagine vengono mostrati gli stati in cui il <i>ColdStorageService</i> pu&ograve; trovarsi. <br><br>
+        <img src="resources/images/CSS_DiagramState.png" alt=""> <br><br>
+        <ul>
+            <li> Nello stato <b>setup</b> il <i>ColdStorageService</i> esegue tutte le operazioni di inizializzazione, stampa un messaggio e si dirige nello stato <b>idle</b></li>
+            <li> Nello stato <b>idle</b> il <i>ColdStorageService</i> &egrave; in attesa di un comando tra <kc>storeFood</kc>/<kc>sendTicket</kc>/<kc>pickupdone</kc>/<kc>deposit dagli altri attori</kc></li>
+            <li> All'arrivo della richiesta di <kc>storeFood</kc>, il <i>ColdStorageService</i> riceve la richiesta di deposito dal <i>truck</i> e valuta se accettarla o rifiutarla secondo la funzione <i>canStore</i>
+                <ul>
+                    <li>
+                        Se la richiesta viene accettata, il <i>ColdStorageService</i> si dirige nello stato <b>AcceptRequest</b>
+                    </li>
+                    <li>
+                        Se la richiesta viene rifiutata, il <i>ColdStorageService</i> si dirige nello stato <b>RejectRequest</b>
+                    </li>
+                </ul>
+                <pre> <br>
+                    <code>// canStore Function</code>
+                    <key>fun</key> canStore(requestWeightToStore: Double): Boolean{
+                    return (requestWeightToStore + getCurrentWeightStorage() <= getMAXW())
+                    }
+                </pre>
+            </li>
+            <li>Nello stato <b>AcceptRequest</b> il ColdStorageService genera il ticket per il truck, incrementa lo stato del ticket number, aggiunge il ticket nella lista dei validi, risponde con <kc>storeAccepted</kc> e torna in <b>idle</b>
+            <pre>
+                <br>
+                <code>// AcceptRequest State</code>
+                <key>State</key> acceptRequest{
+    	            [#
+    		            var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME)
+    		            ColdStorageService.incrementTicketNumber()
+    		            ColdStorageService.getTicketList().add(TICKET)
+    	            #]
+                    replyTo storeFood with storeAccepted : storeAccepted(TICKETNUMBER)
+                    } Goto idle
+            </pre>
+            </li>
+            <li>Nello stato <b>RejectRequest</b> il ColdStorageService incrementa il numero di richieste rifiutate, restituisce la risposta <kc>storeRejected</kc> e torna in <b>idle</b>
+            <pre><br>
+                <code>// RejectRequest State</code>
+                <key>State</key> rejectRequest{
+    	   	        [#
+			            ColdStorageService.incrementRejectedRequestCounter()
+       		        #]
+                    replyTo storeFood with storeRejected : storeRejected(_)
+                    } Goto idle
+            </pre>
+            </li>
+            <li>
+                All'arrivo della richiesta di <kc>sendTicket</kc>, il <i>ColdStorageService</i> riceve la richiesta di ticket dal <i>BasicRobot</i> e valuta se accettarla o rifiutarla secondo la funzione <i>ticketEvaluation</i>, che richiama la funzione <i>isExpired</i> vista sopra. <br>
+                La funzione prende in ingresso l'id del ticket e restituisce un booleano che indica se il ticket &egrave; valido o meno.
+                <ul>
+                    <li>
+                        Se il ticket &egrave; presente nella lista dei ticket attivi e non &egrave; scaduto, il <i>ColdStorageService</i> rimuove il ticket da quelli validi, risponde con <kc>ticketValid</kc> e torna in <b>idle</b>
+                    </li>
+                    <li>
+                        Se il ticket non &egrave; presente nella lista dei validi, il <i>ColdStorageService</i> si dirige verso lo stato <b>sendInvalidTicket</b>
+                    </li>
+                    <li>
+                        Se il ticket &egrave; presente nella lista dei validi ma &egrave; scaduto, il <i>ColdStorageService</i> si dirige verso lo stato <b>sendExpiredTicket</b>
+                    </li>
+                </ul>
+            </li>
+            <li>Nello stato <b>sendInvalidTicket</b>, il <i>ColdStorageService</i> stampa il messaggio di errore, risponde con <kc>ticketNotValid</kc> e torna in <b>idle</b></li>
+            <li>Nello stato <b>removeEpiredTicket</b>, il <i>ColdStorageService</i> aumenta il numero di richieste rifiutate, rimuove il ticket dalla lista degli attivi, risponde con <kc>ticketExpired</kc> e torna in <b>idle</b>
+                <pre><br>
+                        <code>// removeExpiredTicket State</code>
+                        <key>State</key> removeExpiredTicket {
+    	                println("Ticket of id ${payloadArg(0)} is expired - Reject Request") color red
+    	                replyTo sendTicket with ticketExpired : ticketExpired(_)
+   			            [#
+                            val TICKETID = payloadArg(0).toInt()
+   	  		                val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
+			                resources.ColdStorageService.incrementRejectedRequestCounter()
+			                resources.ColdStorageService.getTicketList().remove(TICKET)
+       		            #]
+                        } Goto idle
+                </pre>
+            </li>
+            <li>All'arrivo della richiesta di <kc>deposit</kc>, il <i>ColdStorageService</i> si dirige nello stato <b>charged</b></li>
+            <li>Nello stato <b>charged</b>, il <i>ColdStorageService</i> invia una richiesta di <kc>pickup</kc> al BasicRobot e torna in <b>idle</b></li>
+            <li>All'arrivo della richiesta di <kc>pickupdone</kc>, il <i>ColdStorageService</i> si dirige nello stato <b>taken</b></li>
+            <li>Nello stato <b>taken</b>, il <i>ColdStorageService</i> risponde con <kc>chargeTaken</kc> e torna in <b>idle</b></li>
+        </ul>
+
 
     </div>
 
