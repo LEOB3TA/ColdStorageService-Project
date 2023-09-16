@@ -32,5 +32,4 @@ with Diagram('coldstorageserviceArch', show=False, outformat='png', graph_attr=g
           sonar23=Custom('sonar23(coded)','./qakicons/codedQActor.png')
      serviceaccesgui >> Edge(color='magenta', style='solid', xlabel='storeFood', fontcolor='magenta') >> coldstorageservice
      serviceaccesgui >> Edge(color='magenta', style='solid', xlabel='deposit', fontcolor='magenta') >> coldstorageservice
-     coldstorageservice >> Edge(color='magenta', style='solid', xlabel='pickup', fontcolor='magenta') >> transporttrolley
 diag
