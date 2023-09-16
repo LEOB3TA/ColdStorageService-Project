@@ -5,16 +5,14 @@
  Reads data from the InputStream of p and, for each value,
  emits the event   sonar : distance( V ).
  */
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import it.unibo.kactor.ActorBasic		 
-import kotlinx.coroutines.delay
+import it.unibo.kactor.ActorBasic
 import it.unibo.kactor.MsgUtil
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import unibo.basicomm23.interfaces.IApplMessage
 import unibo.basicomm23.utils.CommUtils
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 
 class sonarHCSR04Support23 ( name : String ) : ActorBasic( name ) {
@@ -31,7 +29,7 @@ class sonarHCSR04Support23 ( name : String ) : ActorBasic( name ) {
 			try{
 				//val p  = Runtime.getRuntime().exec("sudo ./SonarAlone")
 				val p  = Runtime.getRuntime().exec("sudo python3 sonar.py")
-				reader = BufferedReader(  InputStreamReader(p.getInputStream() ))
+				reader = BufferedReader(  InputStreamReader(p.inputStream))
 				doRead(   )
 			}catch( e : Exception){
 				println("WARNING: $name does not find low-level code")

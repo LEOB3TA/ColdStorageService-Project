@@ -35,7 +35,6 @@ QActor mocktruck context ctxtruck{
     }Goto idle
 
     State idle {
-    	  State idle {
         println("$name |	in idle") color green
         [#
         	initDriver()

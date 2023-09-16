@@ -1,4 +1,4 @@
-package robotMbot;
+package robotMbot
 
 object globalTimer{
     private var timeAtStart: Long = 0

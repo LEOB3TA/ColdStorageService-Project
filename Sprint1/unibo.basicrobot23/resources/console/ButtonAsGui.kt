@@ -1,17 +1,14 @@
 package consolegui
 
-import consolegui.Utils.showSystemInfo
 import consolegui.Utils.initFrame
-import java.awt.event.ActionListener
-import java.awt.event.ActionEvent
-import consolegui.ButtonAsGui
+import consolegui.Utils.showSystemInfo
 import java.awt.BorderLayout
-import java.awt.Panel
 import java.awt.GridLayout
-import consolegui.ButtonBasic
 import java.awt.Label
+import java.awt.Panel
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
 import java.util.*
-import kotlin.jvm.JvmStatic
 
 class ButtonAsGui : Observable(), ActionListener {
     //from ActionListener

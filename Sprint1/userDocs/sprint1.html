@@ -513,11 +513,6 @@
             <li>All'arrivo della richiesta di <kc>pickupdone</kc>, il <i>ColdStorageService</i> si dirige nello stato <b>taken</b></li>
             <li>Nello stato <b>taken</b>, il <i>ColdStorageService</i> risponde con <kc>chargeTaken</kc> e torna in <b>idle</b></li>
         </ul>
-
-
-    </div>
-
-    <div class="remark">
         <h3>Back to Home</h3>
         <div id= "bh">
             Dalle Users story si evince che appena la deposit action termina se non ci sono altre richieste
@@ -546,7 +541,7 @@
         delle richieste: nel caso in cui non siano pi&ugrave; presenti richieste in coda nel <kc>transportTrolley</kc>, questo
         pu&ograve; tornare in <i>HOME</i>, in caso contrario torna in <i>INDOOR</i>. Tale attivit&egrave; viene duque gestita
         internamente al <kc>transportTrolley</kc>
-
+    </div>
         <h2>Architettura Logica</h2>
         <div class="remark">
             <br>
@@ -556,6 +551,7 @@
             <img src="./resources/images/coldstorageservicearch.png" alt="architettura logica"> <br>
             Le risposte <b>ticket Reply</b> e <b>store Reply</b> sono state scritte in quel modo per motivii grafici in realtà rappresentano rispettivamente: <b>ticketAccepted/ticketRejected/ticketNotValid</b> e <b>storeAccepted/storeRejected</b>
         </div>
+
 
             <h2>Project</h2>
              <div class="remark">
@@ -569,7 +565,7 @@
                  <br>
                  <img src="resources/images/interactionChartMockTruck.drawio.png" alt="MockTruckState">
                  <br>
-                 Gli stati che rappresentano un rifiuto o un errore del sistema (Rejected, HandleError, handleTicketExpired) mostrano messaggi di errore e ritornano all'inizio ciclo.<br> Lo stato handleTicketNotValid stampa un messaggio di errore e riprova ad inserire di nuovo il ticket.<br></bRE> La transizione tra gli stati <b>Accepted</b> e <b>SendTicket</b> rappresenta il percorso che il conducente deve intraprendere per arrivare all'area <b>INDOOR</b>.
+                 Gli stati che rappresentano un rifiuto o un errore del sistema (Rejected, HandleError, handleTicketExpired) mostrano messaggi di errore e ritornano all'inizio ciclo.<br> Lo stato handleTicketNotValid stampa un messaggio di errore e riprova ad inserire di nuovo il ticket.<br> La transizione tra gli stati <b>Accepted</b> e <b>SendTicket</b> rappresenta il percorso che il conducente deve intraprendere per arrivare all'area <b>INDOOR</b>.
                  Lo stato <b>SendDeposit</b> implementa l'approccio "as soon as possible" descritto nell'analisi del problema: appena il messaggio <b>chargeTaken</b> viene ricevuto, il conducente lascia l'area indoor. Prima di riprendere il ciclo, nello stato <b>IDLE</b> &egrave presente una pausa.
                  <pre>
 Thread.sleep(Random.nextLong(1, 2001))
@@ -940,5 +936,6 @@ updateResource[#truckstate.toJsonString()#]
     <div class="repo">
         GIT repo: <a href="https://github.com/LEOB3TA/issProject2023">https://github.com/LEOB3TA/issProject2023</a>
     </div>
+</div>
 </body>
 </html>

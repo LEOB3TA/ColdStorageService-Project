@@ -1,7 +1,5 @@
 package supports
 
-import unibo.basicomm23.utils.CommUtils
-
 object OwnerManager {
     var owner = "unknown"
     val consoleName = "gui23xyz9526"

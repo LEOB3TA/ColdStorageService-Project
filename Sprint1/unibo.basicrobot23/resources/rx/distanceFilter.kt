@@ -1,8 +1,9 @@
 package rx
  
-import it.unibo.kactor.*
-import alice.tuprolog.Term
 import alice.tuprolog.Struct
+import alice.tuprolog.Term
+import it.unibo.kactor.ActorBasic
+import it.unibo.kactor.MsgUtil
 import unibo.basicomm23.interfaces.IApplMessage
 
 

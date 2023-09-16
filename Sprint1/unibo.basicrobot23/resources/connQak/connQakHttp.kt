@@ -1,13 +1,9 @@
 package connQak
 
-import java.net.URL
- 
-import org.apache.http.client.HttpClient
-import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.client.methods.HttpPost
-import java.io.InputStream
 import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.HttpClientBuilder
 import unibo.basicomm23.interfaces.IApplMessage
+import java.io.InputStream
 
 
 //See https://www.codejava.net/java-se/networking/how-to-use-java-urlconnection-and-httpurlconnection
@@ -16,7 +12,7 @@ import unibo.basicomm23.interfaces.IApplMessage
  * The interaction is with an instance of httpserver/server.kt
  */
 
-class connQakHttp( ) : connQakBase( ){
+class connQakHttp : connQakBase( ){
 lateinit var client   : CloseableHttpClient  
 lateinit var hostAddr : String 
 	 

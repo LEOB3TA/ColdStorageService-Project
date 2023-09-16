@@ -19,8 +19,9 @@ eventedgeattr = {
 with Diagram('mocktruckArch', show=False, outformat='png', graph_attr=graphattr) as diag:
   with Cluster('env'):
      sys = Custom('','./qakicons/system.png')
+     with Cluster('ctxstorageservice', graph_attr=nodeattr):
+          coldstorageservice=Custom('coldstorageservice(ext)','./qakicons/externalQActor.png')
      with Cluster('ctxtruck', graph_attr=nodeattr):
-          coldstorageservice=Custom('coldstorageservice','./qakicons/symActorSmall.png')
           mocktruck=Custom('mocktruck','./qakicons/symActorSmall.png')
      mocktruck >> Edge(color='magenta', style='solid', xlabel='storeFood', fontcolor='magenta') >> coldstorageservice
      mocktruck >> Edge(color='magenta', style='solid', xlabel='sendTicket', fontcolor='magenta') >> coldstorageservice

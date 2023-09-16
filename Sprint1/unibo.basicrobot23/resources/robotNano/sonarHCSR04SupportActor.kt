@@ -1,14 +1,14 @@
 package robotNano
 
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import it.unibo.kactor.ActorBasic
-import kotlinx.coroutines.delay
 import it.unibo.kactor.MsgUtil
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import unibo.basicomm23.interfaces.IApplMessage
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import kotlin.math.roundToInt
 
 
@@ -31,7 +31,7 @@ class sonarHCSR04SupportActor ( name : String ) : ActorBasic( name ) {
 			try{
 				//val p = Runtime.getRuntime().exec("sudo ./SonarAlone")
 				val p  = Runtime.getRuntime().exec("sudo python3 sonar.py")
-				reader = BufferedReader(  InputStreamReader(p.getInputStream() ))
+				reader = BufferedReader(  InputStreamReader(p.inputStream))
 				startRead(   )
 			}catch( e : Exception){
 				println("WARNING: sonarHCSR04SupportActor does not find SonarAlone")

@@ -1,13 +1,15 @@
 package robotMbot;
+
+import jssc.SerialPort;
+import jssc.SerialPortEvent;
+import jssc.SerialPortException;
+import jssc.SerialPortList;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import jssc.SerialPort;
-import jssc.SerialPortEvent;
-import jssc.SerialPortException;
-import jssc.SerialPortList;
 
 public class JSSCSerialComm {  
 
@@ -29,8 +31,7 @@ public class JSSCSerialComm {
         
 		if (portNames.length == 0) {
 		    System.out.println("JSSCSerialComm: There are no serial-ports");
-		    return;
-		}else{
+        }else{
 			System.out.println("FOUND " + portNames.length + " serial-ports");
 			for( int i=0; i<portNames.length;i++){
 				System.out.println("JSSCSerialComm: FOUND " + portNames[i] + " PORT");

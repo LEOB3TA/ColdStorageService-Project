@@ -35,7 +35,7 @@ object wsSupport23 : ApplAbstractObserver() {
 
 //MOVES
 	@Throws(java.lang.Exception::class)
-	fun request(msg: String?): String? {
+	fun request(msg: String?): String {
 		moveResult = ""
 		//Invio fire-and.forget e attendo modifica di  moveResult da update
 		startTimer()
@@ -56,8 +56,8 @@ object wsSupport23 : ApplAbstractObserver() {
 	fun stepsynch(time: Int): Boolean {
 		val cmd: String = forwardStepMsg.replace("TIME", "" + time)
 		val result      = request(cmd)   //Asynch
-		CommUtils.outgreen("wsSupport23 | step result="+result);
-		return result!!.contains("true")
+		CommUtils.outgreen("wsSupport23 | step result="+result)
+        return result!!.contains("true")
 	}
 
 	fun create( owner: ActorBasic, hostNameStr: String, portStr: String, trace : Boolean = false  ){

@@ -1,6 +1,7 @@
 %====================================================================================
 % mocktruck description   
 %====================================================================================
+context(ctxstorageservice, "localhost",  "TCP", "8093").
 context(ctxtruck, "localhost",  "TCP", "8092").
- qactor( coldstorageservice, ctxtruck, "it.unibo.coldstorageservice.Coldstorageservice").
+ qactor( coldstorageservice, ctxstorageservice, "external").
   qactor( mocktruck, ctxtruck, "it.unibo.mocktruck.Mocktruck").

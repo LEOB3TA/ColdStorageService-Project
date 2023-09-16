@@ -2,7 +2,6 @@ package robotVirtual;
 
 
 import it.unibo.kactor.ActorBasic;
-import it.unibo.kactor.ActorBasicFsm;
 import it.unibo.kactor.MsgUtil;
 import org.json.simple.JSONObject;
 import unibo.basicomm23.interfaces.IApplMessage;
@@ -189,7 +188,6 @@ public class VrobotHLMovesActors23 extends ApplAbstractObserver implements IVrob
                     activateWaiting("false"  );
                     //CommUtils.outred("     VrobotHLMovesActors23 | update END move=" + move);
                 }
-                return;
             }
         } catch (Exception e) {
             CommUtils.outred("     VrobotHLMovesActors23 | update ERROR:" + e.getMessage());

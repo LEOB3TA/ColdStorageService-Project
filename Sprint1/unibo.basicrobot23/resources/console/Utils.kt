@@ -17,15 +17,15 @@ object Utils {
 	}
 
 	@JvmOverloads
-	fun initFrame(dx: Int = 400, dy: Int = 200): Frame? {
+	fun initFrame(dx: Int = 400, dy: Int = 200): Frame {
 		val frame = Frame()
 		val img = ImageIcon("./resources/consolegui/mbot-S.jpg")
-		frame!!.setIconImage(img!!.getImage())
+        frame.iconImage = img.image
 		val layout = BorderLayout()
-		frame!!.setSize(Dimension(dx, dy))
-		frame!!.setLayout(layout)
+        frame.size = Dimension(dx, dy)
+        frame.layout = layout
 
-		frame!!.addWindowListener(
+		frame.addWindowListener(
 			object : WindowListener{
 				override fun windowOpened(e: WindowEvent?) {}
 				override fun windowIconified(e: WindowEvent?) {}
@@ -38,7 +38,7 @@ object Utils {
 				override fun windowActivated(e: WindowEvent?) {}
 			}
 		)
-		frame!!.setVisible(true)
+        frame.isVisible = true
 		return frame
 	}
 
@@ -46,7 +46,7 @@ object Utils {
 		try {
 			Thread.sleep(n)
 		} catch (e: InterruptedException) {
-			e!!.printStackTrace()
+			e.printStackTrace()
 		}
 	}
 }

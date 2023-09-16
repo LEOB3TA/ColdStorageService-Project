@@ -9,7 +9,7 @@ RUN git clone https://github.com/jacksonliam/mjpg-streamer.git
 
 WORKDIR /mjpg-streamer/mjpg-streamer-experimental
 
-RUN make \ 
+RUN make \ \
     && make install \
     && chmod +x docker-start.sh
 

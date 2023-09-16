@@ -8,7 +8,7 @@ enum class ConnectionType {
     TCP, MQTT, COAP, HTTP
 }
 
-abstract class connQakBase() {
+abstract class connQakBase {
 lateinit var currQakConn  : connQakBase
 	
 	companion object{
@@ -25,11 +25,11 @@ lateinit var currQakConn  : connQakBase
 	fun showSystemInfo(){
 		println(
 			"connQakBase  | COMPUTER memory="+ Runtime.getRuntime().totalMemory() +
-					" num of processors=" +  Runtime.getRuntime().availableProcessors());
-		println(
+					" num of processors=" +  Runtime.getRuntime().availableProcessors())
+        println(
 			"connQakBase  | NUM of threads="+ Thread.activeCount() +
-					" currentThread=" + Thread.currentThread() );
-	}
+					" currentThread=" + Thread.currentThread() )
+    }
 	}//object
 
 	

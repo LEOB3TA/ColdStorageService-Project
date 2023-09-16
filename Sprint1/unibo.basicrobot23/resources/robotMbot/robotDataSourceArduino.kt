@@ -5,14 +5,7 @@ package robotMbot
  For each data value V, it emitLocalStreamEvent sonarRobot:sonar(V)
  -------------------------------------------------------------------------------------------------
  */
-import it.unibo.kactor.*
-import kotlinx.coroutines.launch
-import java.io.BufferedReader
-import alice.tuprolog.Term
-import alice.tuprolog.Struct
-import it.unibo.`is`.interfaces.protocols.IConnInteraction
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.GlobalScope
+import it.unibo.kactor.ActorBasic
 import unibo.basicomm23.interfaces.IApplMessage
 import unibo.basicomm23.interfaces.Interaction
 import unibo.basicomm23.utils.CommUtils
@@ -46,8 +39,8 @@ companion object {
 				//println("   	%%% $name | elabData: $curDataFromArduino  }")
 				if( curDataFromArduino != null ) {
 					var v = curDataFromArduino.toDouble()
-					var dataSonar = v.toInt();
-					println("   	%%% $name | elabData: $dataSonar | ${counter++}")
+					var dataSonar = v.toInt()
+                    println("   	%%% $name | elabData: $dataSonar | ${counter++}")
 
 					var event = CommUtils.buildEvent(name, "sonarRobot", "sonar( $dataSonar )")
 					//println("   	%%% $name | robotDataSourceArduino event: ${ event } owner=${owner.name}"   );

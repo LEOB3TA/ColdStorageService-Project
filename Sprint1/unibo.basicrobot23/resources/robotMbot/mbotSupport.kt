@@ -6,25 +6,21 @@ package robotMbot
  -------------------------------------------------------------------------------------------------
  */
 
-import it.unibo.kactor.*
-import kotlinx.coroutines.GlobalScope
+import it.unibo.kactor.ActorBasic
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import jssc.*
-import jssc.SerialPort.*
 import unibo.basicomm23.interfaces.Interaction
-import unibo.basicomm23.serial.SerialConnection
 
 
 object mbotSupport{
 
-val rotLeftTime : Long   = 610;
-val rotRightTime : Long  = 610;
-val rotZStepTime  = 58;
+val rotLeftTime : Long   = 610
+    val rotRightTime : Long  = 610
+    val rotZStepTime  = 58
 
-	lateinit var owner   : ActorBasic
+    lateinit var owner   : ActorBasic
  	lateinit var conn    : Interaction //SerialConnection
-	var dataSonar        : Int = 0 ; //Double = 0.0
+	var dataSonar        : Int = 0  //Double = 0.0
  			
 	fun create( owner: ActorBasic, port : String ="/dev/ttyUSB0"  )  { //See robotSupport
 		this.owner = owner	//
@@ -44,8 +40,8 @@ val rotZStepTime  = 58;
 			runBlocking{realsonar.autoMsg("start", "start(ok)")}
 			println("   	%%% mbotSupport | has created the realsonar owner=${owner.name}")
 		}catch(  e : Exception) {
-			println("   	%%% mbotSupport |  ERROR ${e }"   );
-		}		
+			println("   	%%% mbotSupport |  ERROR ${e }"   )
+        }
 	}
 	
 	/*
@@ -58,10 +54,10 @@ val rotZStepTime  = 58;
 		when( cmd ){
 			"msg(w)", "w" -> conn.forward("w")
 			"msg(s)", "s" -> conn.forward("s")
-			"msg(a)", "a" -> { kotlinx.coroutines.runBlocking{ conn.forward("a") ;  kotlinx.coroutines.delay(rotLeftTime);   conn.forward("h") } }
-			"msg(d)", "d" -> { kotlinx.coroutines.runBlocking{ conn.forward("r") ;  kotlinx.coroutines.delay(rotLeftTime);   conn.forward("h") } }
-			"msg(l)", "l" -> { kotlinx.coroutines.runBlocking{ conn.forward("l") ;  kotlinx.coroutines.delay(rotLeftTime);   conn.forward("h") } }
-			"msg(r)", "r" -> { kotlinx.coroutines.runBlocking{ conn.forward("r") ;  kotlinx.coroutines.delay(rotRightTime);  conn.forward("h") } }
+			"msg(a)", "a" -> { runBlocking{ conn.forward("a") ;  kotlinx.coroutines.delay(rotLeftTime);   conn.forward("h") } }
+			"msg(d)", "d" -> { runBlocking{ conn.forward("r") ;  kotlinx.coroutines.delay(rotLeftTime);   conn.forward("h") } }
+			"msg(l)", "l" -> { runBlocking{ conn.forward("l") ;  kotlinx.coroutines.delay(rotLeftTime);   conn.forward("h") } }
+			"msg(r)", "r" -> { runBlocking{ conn.forward("r") ;  kotlinx.coroutines.delay(rotRightTime);  conn.forward("h") } }
 			"msg(z)", "z" -> conn.forward("z")
 			"msg(x)", "x" -> conn.forward("x")
 			"msg(h)", "h" -> conn.forward("h")

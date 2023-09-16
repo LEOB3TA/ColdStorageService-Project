@@ -1,12 +1,13 @@
 package robotMbot;
 
-import java.util.ArrayList;
-import java.util.List;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import unibo.basicomm23.serial.SerialConnection;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SerialPortConnSupport extends SerialConnection implements SerialPortEventListener{
@@ -15,7 +16,7 @@ final static int DASH_ASCII = 45;
 final static int NEW_LINE_ASCII = 10;
 final static int CR_ASCII = 13;
 	
-private SerialPort serialPort;
+private final SerialPort serialPort;
 private List<String> list;
 private String curString = "";
 

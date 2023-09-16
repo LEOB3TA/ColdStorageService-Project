@@ -7,11 +7,11 @@ import java.awt.event.ActionListener
 class ButtonBasic(p: Panel?, label: String?, listener: ActionListener?) : java.awt.Button(label) {
 	init {
 		val myFont = Font("Arial", Font.PLAIN, 24)
-		setFont(myFont)
+        font = myFont
 		this.addActionListener(listener)
 		p!!.add(this)
-		p!!.validate()
-		p!!.isVisible()
+		p.validate()
+		p.isVisible
 //println("BUTTON BASIC CREATED");
 	}
 

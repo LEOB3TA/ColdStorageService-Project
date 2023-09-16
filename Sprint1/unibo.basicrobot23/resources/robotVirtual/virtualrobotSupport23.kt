@@ -49,7 +49,7 @@ object virtualrobotSupport23 : ApplAbstractObserver() {
 
 //MOVES
 	@Throws(java.lang.Exception::class)
-	fun request(msg: String?): String? {
+	fun request(msg: String?): String {
 		moveResult = ""
 		//Invio fire-and.forget e attendo modifica di  moveResult da update
 		startTimer()
@@ -79,8 +79,8 @@ object virtualrobotSupport23 : ApplAbstractObserver() {
 	fun stepsynch(time: Int): Boolean {
 		val cmd: String = forwardStepMsg.replace("TIME", "" + time)
 		val result      = request(cmd)   //Asynch
-		CommUtils.outgreen("virtualrobotSupport23 | step result="+result);
-		return result!!.contains("true")
+		CommUtils.outgreen("virtualrobotSupport23 | step result="+result)
+    return result!!.contains("true")
 	}
 
 	fun create( owner: ActorBasic, hostNameStr: String, portStr: String, trace : Boolean = false  ){
@@ -169,11 +169,11 @@ object virtualrobotSupport23 : ApplAbstractObserver() {
 			if (jsonObj["collision"] != null) {
 				//Alla collision non faccio nulla: attendo moveForward-collision
 				var move = jsonObj.get("collision")
-				CommUtils.outmagenta("WsSupportObserver move=$move" );
-				runBlocking {
-					var target = "unknown";
-					CommUtils.outgreen("WsSupportObserver emits:obstacle($target)}" );
-					owner!!.emit("obstacle","obstacle($target)")
+				CommUtils.outmagenta("WsSupportObserver move=$move" )
+                runBlocking {
+					var target = "unknown"
+                    CommUtils.outgreen("WsSupportObserver emits:obstacle($target)}" )
+                    owner.emit("obstacle","obstacle($target)")
 				}
 				return
 			}
@@ -182,8 +182,8 @@ object virtualrobotSupport23 : ApplAbstractObserver() {
 				val endmove = jsonObj["endmove"].toString().contains("true")
 				val move    = jsonObj["move"].toString()
 				if( move != "turnLeft" && move != "turnRight") {
-					CommUtils.outred("virtualrobotSupport23 | update move=" + move);
-					lock.withLock {
+					CommUtils.outred("virtualrobotSupport23 | update move=" + move)
+                    lock.withLock {
 						moveResult = "" + endmove
 						//notifyAll()
 						condition.signalAll()

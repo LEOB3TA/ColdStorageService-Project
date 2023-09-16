@@ -4,10 +4,10 @@ package rx
 
 import alice.tuprolog.Struct
 import alice.tuprolog.Term
-import java.io.PrintWriter
-import java.io.FileWriter
 import it.unibo.kactor.ActorBasic
 import unibo.basicomm23.interfaces.IApplMessage
+import java.io.FileWriter
+import java.io.PrintWriter
 
 
 class dataLogger(name : String) : ActorBasic(name){

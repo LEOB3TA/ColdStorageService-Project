@@ -1,17 +1,17 @@
 package consoles
 
 import connQak.ConnectionType
-import it.unibo.`is`.interfaces.IObserver
-import java.util.Observable
 import connQak.connQakBase
 import consolegui.ButtonAsGui
-import it.unibo.kactor.MsgUtil
 import consolegui.Utils
+import it.unibo.`is`.interfaces.IObserver
+import it.unibo.kactor.MsgUtil
 import unibo.basicomm23.msg.ApplMessage
 import unibo.basicomm23.utils.CommUtils
+import java.util.*
 
 
-class consoleGuiSimple( ) : IObserver {
+class consoleGuiSimple : IObserver {
 val stepTime = 350
 lateinit var connQakSupport : connQakBase
 //val buttonLabels = arrayOf("e","w", "s", "l", "r", "z", "x", "b", "p", "h")
@@ -45,20 +45,20 @@ val myname = "gui23xyz9526"
 		val msg = MsgUtil.buildRequest(myname, "engage", "engage($myname,330)", connQak.qakdestination )
 	    val answer = connQakSupport.request( msg )
 	    val m = ApplMessage(answer)
-		CommUtils.outred("console answer :  $m");
-		if( m.msgId() == "engagerefused") {
-			CommUtils.outred("WARNING: console not able to work");
-		}
+		CommUtils.outred("console answer :  $m")
+        if( m.msgId() == "engagerefused") {
+			CommUtils.outred("WARNING: console not able to work")
+        }
 	}
 	override fun update(o: Observable, arg: Any) {
-		CommUtils.outblue("update :  $arg");
+		CommUtils.outblue("update :  $arg")
 
-		var move = arg as String
+        var move = arg as String
  		  if( move == "p" ){
 			  val msg = MsgUtil.buildRequest(myname, "step", "step(345)", connQak.qakdestination )
 			  val answer = connQakSupport.request( msg )
-			  CommUtils.outblue("step answer :  $answer");
- 		  }
+			  CommUtils.outblue("step answer :  $answer")
+          }
 		  /* else if( move == "e" ){
 			  val msg = MsgUtil.buildEvent(myname,"alarm","alarm(fire)" )
 			  connQakSupport.emit( msg )

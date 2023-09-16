@@ -1,20 +1,17 @@
 package robotVirtual
 
-import java.io.PrintWriter
-import java.net.Socket
-import java.io.BufferedReader
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import java.io.InputStreamReader
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.Job
 import it.unibo.kactor.ActorBasic
 import it.unibo.kactor.MsgUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.json.simple.JSONObject
 import org.json.simple.parser.JSONParser
 import unibo.basicomm23.interfaces.IApplMessage
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.Socket
 
 
 class virtualrobotSonarSupportActor( name : String, val clientSocket : Socket? ) : ActorBasic( name ) {
@@ -49,9 +46,9 @@ companion object {
                     try {
                         val inpuStr = inFromServer.readLine()
 						println("sensorObserver inpuStr= $inpuStr")
-						if( inpuStr == null ) break;		//JUNE2020
+						if( inpuStr == null ) break        //JUNE2020
                         val jsonMsgStr =
-                            inpuStr!!.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
+                            inpuStr.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
                         //println("inpuStr= $jsonMsgStr")
 						var jsonObject = jsonparser.parse(jsonMsgStr) as JSONObject
 

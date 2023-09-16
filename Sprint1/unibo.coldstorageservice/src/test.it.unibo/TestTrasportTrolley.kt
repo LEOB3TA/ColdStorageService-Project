@@ -14,7 +14,6 @@ import unibo.basicomm23.coap.CoapConnection
 import unibo.basicomm23.interfaces.Interaction2021
 import unibo.basicomm23.tcp.TcpClientSupport
 import unibo.basicomm23.utils.CommUtils
-import java.lang.Thread.sleep
 import java.util.concurrent.ArrayBlockingQueue
 
 class TestTrasportTrolley {

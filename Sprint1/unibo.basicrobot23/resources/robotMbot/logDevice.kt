@@ -1,6 +1,6 @@
-package robotMbot;
+package robotMbot
 
-import it.unibo.kactor.*
+import it.unibo.kactor.ActorBasic
 import kotlinx.coroutines.CoroutineScope
 import unibo.basicomm23.interfaces.IApplMessage
 

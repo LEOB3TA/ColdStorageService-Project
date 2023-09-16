@@ -10,8 +10,8 @@ class ColdStorageService {
     private val TICKETTIME: Long = 1
     private var currentWeightStorage : Double = 0.0
     private val ticketList : ArrayList<Ticket> = arrayListOf()
-    private var ticketNumber: Int = 0;
-    private var rejectedRequestCounter: Int = 0;
+    private var ticketNumber: Int = 0
+    private var rejectedRequestCounter: Int = 0
 
 
     companion object {
@@ -110,11 +110,11 @@ class ColdStorageService {
         }
 
         fun toJsonString() : String{
-            return ColdStorageService.gson.toJson(this)
+            return gson.toJson(this)
         }
 
         fun fromJson(json: String): ColdStorageService {
-            return ColdStorageService.gson.fromJson(json, ColdStorageService::class.java)
+            return gson.fromJson(json, ColdStorageService::class.java)
         }
 
 

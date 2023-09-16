@@ -1,4 +1,6 @@
-import urllib.request,json
+import json
+import urllib.request
+
 req = urllib.request.Request(url="https://api.ipify.org/?format=json")
 response = urllib.request.urlopen(req)
 data = response.read()

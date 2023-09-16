@@ -5,7 +5,7 @@ import org.eclipse.californium.core.coap.MediaTypeRegistry
 import unibo.basicomm23.interfaces.IApplMessage
 
 
-class connQakCoap() : connQakBase() {
+class connQakCoap : connQakBase() {
 
 lateinit var client   : CoapClient
 	
@@ -31,7 +31,7 @@ lateinit var client   : CoapClient
 	override fun request( msg: IApplMessage ) : String {
  		val respPut = client.put(msg.toString(), MediaTypeRegistry.TEXT_PLAIN)
 		if( respPut != null )
-  		println("connQakCoap | answer= ${respPut.getResponseText()}")
+  		println("connQakCoap | answer= ${respPut.responseText}")
 		return 	respPut.toString()
 	}
 	

@@ -3,12 +3,14 @@ package it.unibo.mocktruck
 
 import it.unibo.kactor.*
 import alice.tuprolog.*
+import unibo.basicomm23.*
+import unibo.basicomm23.interfaces.*
 import unibo.basicomm23.utils.*
 import kotlinx.coroutines.CoroutineScope
-import resources.truckstate.CurrStateTruck
-import resources.truckstate.TruckState
-import kotlin.random.Random
-
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+	
 class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
@@ -41,9 +43,6 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("idle") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.IDLE)
-						updateResourceRep(truckstate.toJsonString() 
-						)
 						CommUtils.outgreen("$name |	in idle")
 						
 						        	initDriver()
@@ -52,20 +51,11 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
-				 	 		stateTimer = TimerActor("timer_idle", 
-				 	 					  scope, context!!, "local_tout_mocktruck_idle", 60000.toLong() )
 					}	 	 
-					 transition(edgeName="t00",targetState="handleError",cond=whenTimeout("local_tout_mocktruck_idle"))   
-					transition(edgeName="t01",targetState="sendStore",cond=whenDispatch("testStore"))
-					transition(edgeName="t02",targetState="sendTicket",cond=whenDispatch("testTicket"))
-					transition(edgeName="t03",targetState="sendDeposit",cond=whenDispatch("testDeposit"))
-					transition(edgeName="t04",targetState="idle",cond=whenDispatch("reset"))
+					 transition( edgeName="goto",targetState="sendStore", cond=doswitch() )
 				}	 
 				state("sendStore") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.SENDSTORE)
-						updateResourceRep(truckstate.toJsonString() 
-						)
 						CommUtils.outgreen("$name |	sendStore")
 						request("storeFood", "storeFood($FW)" ,"coldstorageservice" )  
 						//genTimer( actor, state )
@@ -75,15 +65,12 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				 	 		stateTimer = TimerActor("timer_sendStore", 
 				 	 					  scope, context!!, "local_tout_mocktruck_sendStore", 60000.toLong() )
 					}	 	 
-					 transition(edgeName="t05",targetState="handleError",cond=whenTimeout("local_tout_mocktruck_sendStore"))   
-					transition(edgeName="t06",targetState="accepted",cond=whenReply("storeAccepted"))
-					transition(edgeName="t07",targetState="rejected",cond=whenReply("storeRejected"))
+					 transition(edgeName="t00",targetState="handleError",cond=whenTimeout("local_tout_mocktruck_sendStore"))   
+					transition(edgeName="t01",targetState="accepted",cond=whenReply("storeAccepted"))
+					transition(edgeName="t02",targetState="rejected",cond=whenReply("storeRejected"))
 				}	 
 				state("rejected") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.REJECTED)
-						updateResourceRep(truckstate.toJsonString() 
-						)
 						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
 						 	   
 						CommUtils.outgreen("$name |	request rejected")
@@ -92,13 +79,10 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t08",targetState="idle",cond=whenDispatch("reset"))
+					 transition( edgeName="goto",targetState="idle", cond=doswitch() )
 				}	 
 				state("accepted") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.ACCEPTED)
-						updateResourceRep(truckstate.toJsonString() 
-						)
 						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
 						 	   
 						if( checkMsgContent( Term.createTerm("storeAccepted(TICKETID)"), Term.createTerm("storeAccepted(TICKETID)"), 
@@ -111,14 +95,13 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
+				 	 		stateTimer = TimerActor("timer_accepted", 
+				 	 					  scope, context!!, "local_tout_mocktruck_accepted", DT )
 					}	 	 
-					 transition(edgeName="t09",targetState="idle",cond=whenDispatch("reset"))
+					 transition(edgeName="t03",targetState="sendTicket",cond=whenTimeout("local_tout_mocktruck_accepted"))   
 				}	 
 				state("sendTicket") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.SENDTICKET)
-						updateResourceRep(truckstate.toJsonString() 
-						)
 						request("sendTicket", "sendTicket($TICKETID)" ,"coldstorageservice" )  
 						CommUtils.outgreen("$name |	send ticket")
 						//genTimer( actor, state )
@@ -128,16 +111,12 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				 	 		stateTimer = TimerActor("timer_sendTicket", 
 				 	 					  scope, context!!, "local_tout_mocktruck_sendTicket", 60000.toLong() )
 					}	 	 
-					 transition(edgeName="t010",targetState="handleError",cond=whenTimeout("local_tout_mocktruck_sendTicket"))   
-					transition(edgeName="t011",targetState="sendDeposit",cond=whenReply("ticketValid"))
-					transition(edgeName="t012",targetState="handleTicketExpired",cond=whenReply("ticketExpired"))
-					transition(edgeName="t013",targetState="handleTicketNotValid",cond=whenReply("ticketNotValid"))
+					 transition(edgeName="t04",targetState="handleError",cond=whenTimeout("local_tout_mocktruck_sendTicket"))   
+					transition(edgeName="t05",targetState="sendDeposit",cond=whenReply("ticketValid"))
+					transition(edgeName="t06",targetState="handleTicketExpired",cond=whenReply("ticketExpired"))
 				}	 
 				state("sendDeposit") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.SENDDEPOSIT)
-						updateResourceRep(truckstate.toJsonString() 
-						)
 						request("deposit", "deposit(_)" ,"coldstorageservice" )  
 						CommUtils.outgreen("$name |	send deposit")
 						//genTimer( actor, state )
@@ -147,48 +126,38 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				 	 		stateTimer = TimerActor("timer_sendDeposit", 
 				 	 					  scope, context!!, "local_tout_mocktruck_sendDeposit", 60000.toLong() )
 					}	 	 
-					 transition(edgeName="t014",targetState="handleError",cond=whenTimeout("local_tout_mocktruck_sendDeposit"))   
-					transition(edgeName="t015",targetState="idle",cond=whenReply("chargeTaken"))
-					transition(edgeName="t016",targetState="idle",cond=whenDispatch("reset"))
+					 transition(edgeName="t07",targetState="handleError",cond=whenTimeout("local_tout_mocktruck_sendDeposit"))   
+					transition(edgeName="t08",targetState="idle",cond=whenReply("chargeTaken"))
 				}	 
 				state("handleError") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.HANDLEERROR)
-						updateResourceRep(truckstate.toJsonString() 
-						)
 						CommUtils.outred("$name |	COLD STORAGE SERVICE ERROR")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t017",targetState="idle",cond=whenDispatch("reset"))
+					 transition( edgeName="goto",targetState="idle", cond=doswitch() )
 				}	 
 				state("handleTicketExpired") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.HANDLETICKETEXPIRED)
-						updateResourceRep(truckstate.toJsonString() 
-						)
-						CommUtils.outred("$name |	ticket expired")
+						CommUtils.outgreen("$name |	ticket expired")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t018",targetState="idle",cond=whenDispatch("reset"))
+					 transition( edgeName="goto",targetState="idle", cond=doswitch() )
 				}	 
 				state("handleTicketNotValid") { //this:State
 					action { //it:State
-						truckstate.setState(CurrStateTruck.HANDLETICKETNOTVALID)
-						updateResourceRep(truckstate.toJsonString() 
-						)
-						CommUtils.outred("$name |	ticket not valid you must retry")
+						CommUtils.outgreen("$name |	ticket Not valid retry")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t019",targetState="idle",cond=whenDispatch("reset"))
+					 transition( edgeName="goto",targetState="sendTicket", cond=doswitch() )
 				}	 
 			}
 		}

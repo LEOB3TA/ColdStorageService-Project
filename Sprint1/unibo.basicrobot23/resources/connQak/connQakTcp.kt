@@ -7,7 +7,7 @@ import unibo.basicomm23.utils.CommUtils
 
 
 
-class connQakTcp(  ) : connQakBase( ){
+class connQakTcp : connQakBase( ){
 	lateinit var conn   : Interaction //IConnInteraction
 	
 	override fun createConnection( ){ //hostIP: String, port: String
@@ -16,14 +16,14 @@ class connQakTcp(  ) : connQakBase( ){
 	}
 	
 	override fun forward( msg: IApplMessage){
-		CommUtils.outblue("connQakTcp forward :  $msg");
-		conn.forward( msg.toString()  )
+		CommUtils.outblue("connQakTcp forward :  $msg")
+        conn.forward( msg.toString()  )
 	}
 	
 	override fun request( msg: IApplMessage ) : String {
-		CommUtils.outblue("connQakTcp request :  $msg");
+		CommUtils.outblue("connQakTcp request :  $msg")
 
-		conn.forward( msg.toString()  )
+        conn.forward( msg.toString()  )
 		//Acquire the answer	
 		val answer = conn.receiveMsg()
 		CommUtils.outmagenta("connQakTcp | answer= $answer")

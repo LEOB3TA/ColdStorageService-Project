@@ -1,7 +1,5 @@
 package connQak
 
-import connQak.ConnectionType
-
 val mqtthostAddr    = "broker.hivemq.com"	//broker.hivemq.com
 val mqttport		= "1883" 
 val mqtttopic       = "unibo/basicrobot"

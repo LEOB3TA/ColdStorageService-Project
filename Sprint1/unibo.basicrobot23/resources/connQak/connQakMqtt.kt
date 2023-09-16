@@ -1,14 +1,10 @@
 package connQak
 
-import org.eclipse.paho.client.mqttv3.MqttClient
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions
-import org.eclipse.paho.client.mqttv3.MqttMessage
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.*
 import unibo.basicomm23.interfaces.IApplMessage
 import unibo.basicomm23.msg.ApplMessage
 
-class connQakMqtt( ) : connQakBase( ), MqttCallback{
+class connQakMqtt : connQakBase( ), MqttCallback{
  	lateinit var client  : MqttClient
  	val clientid         = "clientmqtt"
 	val answerTopic      = mqtttopic //"unibo/qak/$clientid" // NON RICEVE perch� usa solo dispatch

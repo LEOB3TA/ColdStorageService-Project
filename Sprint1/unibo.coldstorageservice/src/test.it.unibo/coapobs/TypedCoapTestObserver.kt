@@ -1,8 +1,8 @@
 package test.it.unibo.coapobs
 
 import org.eclipse.californium.core.CoapResponse
-import state.TransportTrolleyState
 import java.util.concurrent.ArrayBlockingQueue
+
 class TypedCoapTestObserver<T> (private val mapper : (String) -> T
 ): CoapTestObserver(){
 

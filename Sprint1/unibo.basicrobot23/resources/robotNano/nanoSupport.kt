@@ -1,12 +1,6 @@
 package robotNano
 
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import it.unibo.kactor.ActorBasic
-import kotlinx.coroutines.delay
-import java.io.BufferedOutputStream
 import java.io.OutputStreamWriter
 
 object nanoSupport {
@@ -15,7 +9,7 @@ object nanoSupport {
 	fun create( owner : ActorBasic ){		
 		//val p = Runtime.getRuntime().exec("sudo ./Motors")
 		val p = Runtime.getRuntime().exec("sudo python3 Motors.py")
-		writer = OutputStreamWriter(  p.getOutputStream()  )
+		writer = OutputStreamWriter(  p.outputStream)
 		println("nanoSupport  | CREATED with writer=$writer")
  	}
 
