@@ -1,20 +1,18 @@
 package resources
 
-import cli.System.TimeSpan
 import com.google.gson.Gson
 import resources.model.Ticket
-import java.sql.Time
-import java.time.Duration
 
 
-// TODO: Read config
 class ColdStorageService {
-    private val MAXW : Double = 100.0
+    private var MAXW : Double = 0.0
+    private var DLIMIT : Int =0
     private val TICKETTIME: Long = 1
     private var currentWeightStorage : Double = 0.0
     private val ticketList : ArrayList<Ticket> = arrayListOf()
     private var ticketNumber: Int = 0;
     private var rejectedRequestCounter: Int = 0;
+
 
     companion object {
 
@@ -28,7 +26,13 @@ class ColdStorageService {
         val gson = Gson()
 
         fun getMAXW(): Double {
+            //println(getInstance().json)
             return getInstance().MAXW
+        }
+
+        fun getDLIMIT(): Int {
+            //getInstance().DLIMIT = json.getInt("DLIMIT")
+            return getInstance().DLIMIT
         }
 
         fun getTICKETTIME(): Long {
@@ -112,6 +116,8 @@ class ColdStorageService {
         fun fromJson(json: String): ColdStorageService {
             return ColdStorageService.gson.fromJson(json, ColdStorageService::class.java)
         }
+
+
 
         override fun toString(): String {
             return "ColdStorageService [MAXW=${getMAXW()}, TICKETTIME=${getTICKETTIME()}, currentWeightStorage=${getCurrentWeightStorage()}, ticketList=${getTicketList()}, ticketNumber=${getTicketNumber()}, rejectedRequestCounter=${getRejectedRequestCounter()}]"

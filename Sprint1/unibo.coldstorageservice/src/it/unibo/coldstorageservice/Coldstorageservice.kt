@@ -48,6 +48,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					transition(edgeName="t01",targetState="ticketEvaluation",cond=whenRequest("sendTicket"))
 					transition(edgeName="t02",targetState="charged",cond=whenRequest("deposit"))
 					transition(edgeName="t03",targetState="taken",cond=whenReply("pickupdone"))
+					transition(edgeName="t04",targetState="error",cond=whenEvent("local_movef"))
 				}	 
 				state("requestEvaluation") { //this:State
 					action { //it:State
@@ -163,6 +164,18 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					}) )
 					transition( edgeName="goto",targetState="sendInvalidTicket", cond=doswitchGuarded({! ( resources.ColdStorageService.evaluateTicket(payloadArg(0).toInt()) == resources.TicketEvaluationResponse.EXPIRED  
 					) }) )
+				}	 
+				state("error") { //this:State
+					action { //it:State
+						CommUtils.outred("$name | robot failed to move")
+						emit("local_movef", "local_movef(_)" ) 
+						CommUtils.outred("$name | close")
+						 System.exit(0)  
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
 				}	 
 			}
 		}

@@ -28,7 +28,7 @@ class TestTrasportTrolley {
     //TODO rivedere tutte le stampe prima di ogni test
     //TODO capire come gestire la risposta in caso il robot non riuscisse a muoversi
     @Before
-    fun setUp() { //TODO vedere se aggiungere test e inserire restart o mandarlo in home
+    fun setUp() {
         if (!setup) {
             CommUtils.outmagenta("TestTrasportTrolley  |  setup...")
             object : Thread() {
@@ -153,6 +153,7 @@ class TestTrasportTrolley {
                 CommUtils.outmagenta("TestColdStorageService  |   some err in request: $e")
             }
         }
+        Thread.sleep(7000)
         val pickupQue = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,2)"
         var rep1 = ""
         GlobalScope.launch {

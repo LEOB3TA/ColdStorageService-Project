@@ -34,6 +34,8 @@ Dispatch setrobotstate: setpos(X,Y,D)
 Dispatch setdirection : dir( D )  //D =up|down!left|right
 Dispatch cmd       	: cmd(MOVE) 
 
+Event local_movef : movef(_)
+
 Context ctxbasicrobot ip [host="127.0.0.1" port=8020] 
 Context ctxcoldstorageservice ip [host="localhost" port=8099] 
 //Context ctxtruck ip[host="127.0.0.1" port=8092] //indirizzo interno alla rete
@@ -70,6 +72,7 @@ QActor coldstorageservice context ctxcoldstorageservice {
     			  whenRequest sendTicket -> ticketEvaluation
     			  whenRequest deposit -> charged
     			  whenReply pickupdone -> taken
+    			  whenEvent local_movef -> error
     
     /*
      *  REQUEST EVALUATION
@@ -165,17 +168,23 @@ QActor coldstorageservice context ctxcoldstorageservice {
        				}
     }Goto removeExpiredTicket if [# resources.ColdStorageService.evaluateTicket(payloadArg(0).toInt()) == resources.TicketEvaluationResponse.EXPIRED #]
     								else sendInvalidTicket
-   
+   State error{
+   	println("$name | robot failed to move") color red
+ 		emit local_movef : local_movef(_)
+ 		println("$name | close") color red
+ 		[# System.exit(0) #]
+   }
 }
 
 QActor transporttrolley context ctxcoldstorageservice{
 	[#
 		var CRX = 4;
 		var CRY = 3;
-		var INDOORX=0;
-		var INDOORY=4;
-		var HOMEX=0;
-		var HOMEY=0;
+		var INDOORX= 0;
+		var INDOORY= 4;
+		var HOMEX= 0;
+		var HOMEY= 0;
+		//println("$HOMEX,$HOMEY");
 		var TICKETID = 0;
 		val tTState = state.TransportTrolleyState()
 		val MyName = name
@@ -282,8 +291,12 @@ QActor transporttrolley context ctxcoldstorageservice{
 		updateResource[#tTState.toJsonString()#]
 		//send event "robot is in home"
 		request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
-		delay 6500
+		delay 6300
 		forward basicrobot -m cmd : cmd ( l ) 
+		/*delay 6500
+		forward basicrobot -m setdirection : dir( DOWN )
+		forward basicrobot -m setrobotstate : setpos (0,0,d) // d= down	*/	
+		println ("dir correction") color red
 	}
 	Transition t0 whenReply moverobotdone -> idle
  				  whenReply moverobotfailed -> robotmovefailed
@@ -292,6 +305,9 @@ QActor transporttrolley context ctxcoldstorageservice{
  	//control failed robot moves
  	State robotmovefailed{
  		println("$name | robot failed to move") color red
+ 		emit local_movef : local_movef(_)
+ 		println("$name | close") color red
+ 		[# System.exit(0) #]
  	}
  		
 }

@@ -24,10 +24,13 @@ with Diagram('coldstorageserviceArch', show=False, outformat='png', graph_attr=g
      with Cluster('ctxcoldstorageservice', graph_attr=nodeattr):
           coldstorageservice=Custom('coldstorageservice','./qakicons/symActorSmall.png')
           transporttrolley=Custom('transporttrolley','./qakicons/symActorSmall.png')
+     sys >> Edge(color='red', style='dashed', xlabel='local_movef', fontcolor='red') >> coldstorageservice
      coldstorageservice >> Edge(color='magenta', style='solid', xlabel='pickup', fontcolor='magenta') >> transporttrolley
+     coldstorageservice >> Edge( xlabel='local_movef', **eventedgeattr, fontcolor='red') >> sys
      transporttrolley >> Edge(color='magenta', style='solid', xlabel='engage', fontcolor='magenta') >> basicrobot
      transporttrolley >> Edge(color='blue', style='solid', xlabel='disengage', fontcolor='blue') >> basicrobot
      transporttrolley >> Edge(color='blue', style='solid', xlabel='setrobotstate', fontcolor='blue') >> basicrobot
      transporttrolley >> Edge(color='magenta', style='solid', xlabel='moverobot', fontcolor='magenta') >> basicrobot
      transporttrolley >> Edge(color='blue', style='solid', xlabel='cmd', fontcolor='blue') >> basicrobot
+     transporttrolley >> Edge( xlabel='local_movef', **eventedgeattr, fontcolor='red') >> sys
 diag
