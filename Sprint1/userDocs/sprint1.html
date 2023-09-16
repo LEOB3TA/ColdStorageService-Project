@@ -7,7 +7,7 @@
 
 <head>
 
-    <title>Sprint0</title></head>
+    <title>Sprint1</title></head>
 
 <body>
 <!--
@@ -29,38 +29,228 @@
         <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/TemaFinale23.html">Tema Finale </a>
     </div>
 
-  <!--  <h2>Requirement analysis</h2>
+    <h3>Work plan</h3>
+    <div class="remark">
+        <ul>
+            <li>A partire dallo sprint0 analizzare il core business dell'applicazione</li>
+            <li>Trovare ad analizzare eventuali criticit&agrave; dei requisiti</li>
+            <li>Implementare un <b>MockTruck</b> in modo da simulare un interazione del driver con la <b>ServiceAccessGui</b>, che interagisca con il <b>ColdStorageService</b></li>
+            <li>Implementare il <b>ColdStorageService</b></li>
+            <li>Implementare il <b>TrasportTrolley</b> e interfacciarlo con il <b>BasicRobot</b></li>
+            <li>Testing del sistema</li>
+            <li>Aggregare le varie componenti in modo da creare un primo prototipo del sistema</li>
+        </ul>
+    </div>
 
-    </div> -->
+    <h2>Problem analysis</h2>
+    <div class="remark">
+        <h3>MockTruck</h3>
+        <h5>Obiettivo</h5>
+        Sviluppare un attore che simuli un driver che:
+        <br>
+        <ol>
+            <li>Richieda un <b>Ticket</b></li>
+            <li>Si rechi alla <b>INDOOR</b></li>
+            <li>Presenti il ticket al <b>ColdStorageService</b> e attenda la risposta</li>
+        </ol>
+        <h5>Problemi</h5>
+        Analizzando il testo dei requisiti possiamo dedurre i seguenti problemi:
+        <br>
+        <ol>
+            <li><b>La richiesta del ticket e la presentazione del ticket avvengono in istanti di tempo diversi</b></li>
+            Dall'esame dei requisiti forniti dal committente emerge che la richiesta di immagazzinamento del carico e la successiva presentazione del ticket all'<b>INDOOR</b> avvengono in momenti distinti.
+            <li><b>Scadenza del ticket</b></li>
+            Nel caso di accettazione della richiesta, viene fornito al conducente un ticket con un tempo limite entro il quale deve raggiungere l'<b>INDOOR</b>. Sorge quindi il dubbio se il conducente debba essere a conoscenza di tale scadenza.
+            <li><b>Problema del load-time lungo</b></li>
+            Quando il driver presenta il ticket &egrave; possibile che il <b>ColdStorageService</b> non riesca a fornire la risposta <b>chargeTaken</b> in tempi brevi, in quanto il <b>TrasportTrolley</b> potrebbe essere occupato, quindi il driver non saprebbe se la sua richiesta &egrave; in attesa di una risposta oppure se il ticket non &egrave; stato accettato.
+            <li><b>Errore interno del ColdStorageService</b></li>
+            Nel caso in cui il <b>ColdStorageService</b> incontri problemi interni che causano il malfunzionamento del servizio, &egrave importante stabilire come il conducente dovrebbe reagire.
+            <li><b>Quando il driver deve liberare la indoor</b></li>
+            Il driver deve liberare la <b>INDOOR</b> appena "as soon as possible" cio&egrave; appena preso il carico, oppure deve aspettare che il carico sia stato scaricato all'interno della <b>ColdRoom</b>
+        </ol>
+        <h5>Possibili soluzioni</h5>
+        <ol>
+            <li><b>La richiesta del ticket e la presentazione del ticket avvengono in istanti di tempo diversi</b></li>
+            Il tempo in cui il driver si reca alla <b>INDOOR</b> non &egrave; trascurabile, di conseguenza &egrave; necessario introdurre una variabile <b>DT</b> (driver time) che rappresenta il tempo di viaggio.
+            <li><b>Scadenza del ticket</b></li>
+            Una possibile soluzione &egrave fornire al conducente la scadenza del ticket e, supponendo che egli abbia una stima del tempo di viaggio verso l'<b>INDOOR</b>, consentirgli di valutare se intraprendere il viaggio. In alternativa, il conducente potrebbe ricevere solo il <b>TICKETID</b> e recarsi comunque all'<b>INDOOR</b>, dove la validit&agrave del ticket verr&agrave verificata.
+            Durante questa fase di sviluppo, &egrave stata adottata la seconda opzione, ma ulteriori dettagli dal committente sono necessari.
+            <li><b>Problema del load-time lungo</b></li>
+            Per sopperire a questo problema &egrave; necessario creare un interazione a due fasi: una in cui il driver presenta il proprio ticket (<b>sendTicket</b>) e riceve una risposta da parte del ColdStorageService (<b>ticketAccepted/ticketRejected</b>); e una in cui il driver invia la richiesta di deposito (<b>deposit</b>) e riceve poi <b>chargeTaken</b>
+            <li><b>Errore interno del ColdStorageService</b></li>
+            &Egrave; possibile introdurre un timeout per ogni richiesta, in modo che il driver abbandoni alla scadenza del timer. Il timer &egrave; stato fissato a <b>60</b> secondi.
+            <li><b>Quando il driver deve liberare la indoor</b></li>
+            In questa fase di sviluppo &egrave; stato adottato l'approccio "as soon as possible"
+        </ol>
+    </div>
 
-    <!--  <h2>Architettura Logica</h2>
+    <h2>Architettura Logica</h2>
      <div class="remark">
              <br>
-         Modello: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint0/src/sprint0.qak" target="_blank">sprint0.qak</a>
+         Modello ctxcoldstorageservice: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint1/src/sprint1.qak" target="_blank">sprint1.qak</a> <!-- TODO controllare modello e aggiunger elink giusto -->
+         Modello ctxmocktruck: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint1/src/sprint1.qak" target="_blank">mocktruck.qak</a>
          <br>
-             <img src="./resources/images/coldstorageservicearch.png" alt="architettura logica">
-
-     </div> -->
+             <img src="./resources/images/coldstorageservicearch.png" alt="architettura logica"> <br>
+         Le risposte <b>ticket Reply</b> e <b>store Reply</b> sono state scritte in quel modo per motivii grafici in realtà rappresentano rispettivamente: <b>ticketAccepted/ticketRejected/ticketNotValid</b> e <b>storeAccepted/storeRejected</b>
+     </div>
 
 
        <!--  <h2>Piano di lavoro</h2>
 
          </div> -->
 
-     <!--
              <h2>Project</h2>
               <div class="remark">
-
-
+                      <h3>MockTruck</h3>
+                      Il MockTruck &egrave stato modellato come un <b>Attore Qak</b>. Esso &egrave composto da vari stati, i quali si ripetono ciclicamente per simulare l'interazione di un conducente con la <b>ServiceAccessGUI</b>.<br>
+                      I messaggi di risposta del ticket sono stati modificati in <b>ticketValid</b>/<b>ticketNotValid</b>/<b>ticketExpired</b>.<br>
+                      Questo comportamento non implica la presenza di conducenti multipli, ma piuttosto di uno che cerca ciclicamente di effettuare un deposito. Di seguito &egrave riportato il diagramma degli stati e il diagramma delle interazioni con il ColdStorageService.
+                      <br>
+                      <img src="resources/images/MockTruckState.drawio.png" alt="MockTruckState">
+                      <br>
+                      <br>
+                      <img src="resources/images/interactionChartMockTruck.drawio.png" alt="MockTruckState">
+                      <br>
+                      Gli stati che rappresentano un rifiuto o un errore del sistema (Rejected, HandleError, handleTicketExpired) mostrano messaggi di errore e ritornano all'inizio ciclo.<br> Lo stato handleTicketNotValid stampa un messaggio di errore e riprova ad inserire di nuovo il ticket.<br></bRE> La transizione tra gli stati <b>Accepted</b> e <b>SendTicket</b> rappresenta il percorso che il conducente deve intraprendere per arrivare all'area <b>INDOOR</b>.
+                      Lo stato <b>SendDeposit</b> implementa l'approccio "as soon as possible" descritto nell'analisi del problema: appena il messaggio <b>chargeTaken</b> viene ricevuto, il conducente lascia l'area indoor. Prima di riprendere il ciclo, nello stato <b>IDLE</b> &egrave presente una pausa.
+                      <pre>
+Thread.sleep(Random.nextLong(1, 2001))
+   </pre>
+                      Sono presenti tre variabili che vengono modificate ad ogni ciclo.
+                      <pre>
+<key>var</key> FW = 0
+<key>var</key> DT = 1000L
+<key>var</key> TICKETID = 0
+   </pre>
+                      In particolare, le variabili <b>FW</b> e <b>DT</b> vengono inizializzate con valori casuali attraverso una funzione all'interno dello stato <b>IDLE</b>:
+                      <pre>
+<key>fun</key> initDriver(){
+    FW = Random.nextInt(1, 101)
+    DT = Random.nextLong(1, 2001)
+}
+   </pre>
+                      Invece la variabile <b>TICKETID</b> viene assegnata nello stato <b>Accepted</b>, prendendo il valore dalla risposta <b>storeAccepted</b>.
+                      <pre>
+<key2>onMsg</key2> (storeAccepted : storeAccepted(TICKETID)){
+    [#
+        TICKETID = payloadArg(0).toInt()
+    #]
+}
+   </pre>
+                  </div>
 
              </div>
 
          <h2>Testing</h2>
          <div class="remark">
+             <!-- TODO vedere se inserire le classi di utilit&agrave coapobs-->
+             <h3>MockTruck</h3>
+                Per testare il <b>MockTruck</b> &egrave; stata creata la classe che rappresenta lo stato del truck <a href="">TruckState.kt</a> <!-- TODO inserire il link -->; all'interno del quale &egrave presente anche un enumerativo che rappresenta i possibili stati che pu&ograve assumere il mocktruck:
+             <pre>
+<key>enum</key> class CurrStateTruck { IDLE, SENDSTORE, REJECTED, ACCEPTED, SENDTICKET, HANDLETICKETEXPIRED, SENDDEPOSIT, HANDLEERROR}
+                 </pre>
+             Nell'ambito dell'attore Qak, &egrave stata introdotta una nuova variabile denominata <b>truckstate</b>:
 
+             <pre>
+<key>val</key> truckstate = TruckState()
+</pre>
+             Questa variabile viene aggiornata ogni volta che lo stato del truck cambia, mediante le seguenti operazioni:
+
+             <pre>
+[#truckstate.setState(CurrStateTruck.CURRENTSTATE)#]
+updateResource[#truckstate.toJsonString()#]
+</pre>
+             In questo modo un <b>observer</b> pu&ograve osservare lo stato del mock truck in modo da rendere pi&ugrave; semplici i test.
+             <br>
+             L'attore &egrave stato ulteriormente modificato con l'aggiunta di nuovi <b>Dispatch</b> che consentono alla classe di test di modificare lo stato. Di seguito sono elencati gli stati con le relative transizioni:
+             <pre>
+<key2>Dispatch</key2> testStore : testStore(_)
+<key2>Dispatch</key2> testTicket : testTicket(_)
+<key2>Dispatch</key2> testDeposit : testDeposit(_)
+<key2>Dispatch</key2> reset : reset(_)
+
+<key2>whenMsg</key2> testStore -> sendStore
+<key2>whenMsg</key2> testTicket -> sendTicket
+<key2>whenMsg</key2> testDeposit -> sendDeposit
+<key2>whenMsg</key2> reset -> idle
+             </pre>
+             Le procedure di test sono implementate all'interno del file <a href="">TestMockTruckActor.kt</a> <!-- TODO inserire il link -->. Il metodo <b>@Before</b> si occupa dell'inizializzazione della connessione o, se gi&agrave inizializzata, invia il messaggio <b>reset</b> al mocktruck.
+
+             Ciascun test inizia inviando un <b>dispatch</b> che imposta lo stato desiderato del mocktruck, seguito dall'esecuzione delle operazioni di test e dalla verifica dei risultati. Ecco un esempio:
+             <pre>
+@Before
+<key>fun</key> before() {
+    if(!setupOk){
+        //setup
+    }else{
+        <key>println</key>("TestMockTruckActor       | clearHistory and reset")
+        Thread.sleep(2000)
+        conn.forward("msg(reset, dispatch, testunit, mockTruck, reset(_), 1)")
+        obs.clearHistory()
+    }
+}
+
+
+@Test
+@Throws(InterruptedException::class)
+<key>fun</key> testStoreFoodAccepted(){
+    conn.forward("msg(testStore, dispatch, testunit, mockTruck, testStore(_), 1)")
+    <key>println</key>("TestMockTruckActor  |   testStoreFoodAccepted...")
+    try {
+        conn.reply("msg(storeAccepted, reply, testunit, mockTruck, storeAccepted(1), 1)")
+    }catch (e:Exception){
+        e.printStackTrace()
+    }
+    Thread.sleep(2000)
+    <key>val</key> newState = obs.currentTypedState!!.toString()
+    <key>println</key>(newState)
+    Assert.assertTrue(newState.contains("ACCEPTED"))
+}
+</pre>
+             Questi metodi di test sono finalizzati a verificare diverse situazioni, ad esempio lo stato "ACCEPTED" dopo un tentativo di memorizzazione (<b>testStoreFoodAccepted</b>), lo stato "REJECTED" dopo un tentativo di memorizzazione non riuscito (<b>testStoreFoodRejected</b>), lo stato "TICKETEXPIRED" dopo l'invio di un biglietto scaduto (<b>testSendTicketExpired</b>), e cos&igrave; via. Ogni test invia i messaggi appropriati, aspetta un breve periodo di tempo per la risposta e quindi verifica lo stato attuale del mock truck.
+
+             In questo modo, si garantisce che il mock truck si comporti correttamente in diverse circostanze e che gli stati cambino secondo le aspettative.
+             <h3>ColdStorageService</h3>
+             Le procedure di test sono implementate all'interno del file <a href="">TestColdStorageService.kt</a> <!-- TODO inserire il link -->. <br>
+             Il metodo <b>setUp</b> si occupa dell'inizializzazione della connessione o, se gi&agrave inizializzata, resetta tutti gli attributi della classe <b>ColdStorageService</b>.
+             Ciascun test inizia inviando una richiesta relativo alla parte da testare e poi analizza la risposta alla richiesta.<br>
+             In particolare i test che sfruttano i ticket modificano gli attributi della classe <b>ColdStorageService</b> utilizzando i metodi forniti; inoltre il <b>testDeposit</b> simula la risposta del <b>TrasportTrolley</b>.
+             Di seguito &egrave; riportato un esempio:
+             <pre>
+@Before
+<key>fun</key> setUp() {
+    if(!setupOk){
+        //setup
+    }else{
+         ColdStorageService.resetAll()
+    }
+}
+<key>fun</key> testDeposit(){
+    CommUtils.outmagenta("TestColdStorageService   |   TestDeposit")
+    <key>val</key> deposit = "msg(deposit, request, testunit, coldstorageservice, deposit(_),1)"
+    <key>var</key> rep=""
+    GlobalScope.launch {
+        try {
+            rep = conn.request(deposit)
+        }catch (e: Exception) {
+            CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
+        }
+    }
+    Thread.sleep(1000)
+    <key>val</key> pickupDone = "msg(pickupdone, reply, trasporttrolley, coldstorageservice, pickupdone(_),1)" //da notare il mittente trasporttrolley
+    try {
+        conn.reply(pickupDone)
+    }catch (e: Exception) {
+        CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
+    }
+    Thread.sleep(1000)
+    assertTrue(rep.contains("chargeTaken"))
+}
+             </pre>
          </div>
 
 
+<!--
          <h2>Deployment</h2>
          <div class="remark">
 
@@ -89,17 +279,17 @@
         <div class="studentName">Leonardo Focardi</div>
         <div class="studentEmail"><a href= "mailto:leonardo.focardi@studio.unibo.it">leonardo.focardi@studio.unibo.it</a>
             </div>
-        <div class="studentImg"><img class="studentAvatar" src="./resources/boys/leo.jpg"></div>
+        <div class="studentImg"><img class="studentAvatar" src="resources/boys/leo.jpg"></div>
     </div>
         <div class="studentCard">
             <div class="studentName">Christian Galeone</div>
             <div class="studentEmail"><a href= "mailto:christian.galeone@studio.unibo.it">christian.galeone@studio.unibo.it</a></div>
-            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/christian.jpg"></div>
+            <div class="studentImg"><img class="studentAvatar" src="resources/boys/christian.jpg"></div>
         </div>
         <div class="studentCard">
             <div class="studentName">Gianmiriano Porrazzo</div>
             <div class="studentEmail"><a href= "mailto:gianmiriano.porrazzo@studio.unibo.it">gianmiriano.porrazzo@studio.unibo.it</a></div>
-            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/gian.jpg"></div>
+            <div class="studentImg"><img class="studentAvatar" src="resources/boys/gian.jpg"></div>
         </div>
     </div>
 

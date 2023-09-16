@@ -40,20 +40,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t09",targetState="pickingup",cond=whenRequest("pickup"))
-				}	 
-				state("pickingup") { //this:State
-					action { //it:State
-						
-									tTstate.updateTTState(transporttrolley.state.CurrStateTrolley.PICKINGUP)
-						updateResourceRep(tTstate.toJsonString() 
-						)
-						answer("pickup", "chargeTaken", "chargeTaken(_)"   )  
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
 				}	 
 				state("backhome") { //this:State
 					action { //it:State
