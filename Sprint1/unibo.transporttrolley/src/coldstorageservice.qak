@@ -1,0 +1,265 @@
+SystemC/* -trace*/old_css
+
+// Messaggi scambiati con mocktruck
+Request deposit : deposit(_)
+Request sendTicket : sendTicket(TICKETID)
+Request storeFood : storeFood(FW)
+Reply storeAccepted : storeAccepted(TICKETID)
+Reply storeRejected : storeRejected(_)
+Reply chargeTaken : chargeTaken(_)
+Reply ticketValid : ticketValid(_)
+Reply ticketNotValid : ticketNotValid(_)
+Reply ticketExpired : ticketExpired(_)
+
+// Messaggi scambiati con transporttrolley
+Request pickup:    pickup(_)
+Reply  pickupdone:  pickupdone(_)
+
+// Messaggi scambiati col basicrobot23
+
+Request engage        : engage(ARG)	
+Reply   engagedone    : engagedone(ARG)
+Reply   engagerefused : engagerefused(ARG)
+Dispatch disengage    : disengage(ARG)
+
+Request  doplan     : doplan( PATH, OWNER, STEPTIME )
+Reply doplandone    : doplandone( ARG ) 
+Reply doplanfailed  : doplanfailed( ARG )
+
+Request moverobot    :  moverobot(TARGETX, TARGETY)
+Reply moverobotdone  :  moverobotok(ARG)
+Reply moverobotfailed:  moverobotfailed(PLANDONE, PLANTODO)
+
+Dispatch setrobotstate: setpos(X,Y,D)
+
+Context ctxbasicrobot ip [host="127.0.0.1" port=8020] 
+Context ctxcoldstorageservice ip [host="localhost" port=8099] 
+Context ctxtruck ip[host='localhost' port=8092]
+
+// Attori Esterni
+ExternalQActor mocktruck context ctxtruck
+ExternalQActor basicrobot context ctxbasicrobot
+
+CodedQActor pathobs context ctxbasicrobot className "observers.planexecCoapObserver"
+
+QActor coldstorageservice context ctxcoldstorageservice {
+	
+	[#
+			val MAXW = ColdStorageService.getMAXW()
+			val TICKETTIME = ColdStorageService.getTICKETTIME()
+		   	var currentWeightStorage = ColdStorageService.getCurrentWeightStorage()
+		   	var requestWeightToStore = 0.0
+		   	var TICKETNUMBER = ColdStorageService.getTicketNumber()
+    	  	
+	#]
+	
+    State setup initial {
+        	println("$name |	setup") color blue
+        	discardMsg Off
+    }
+
+    Goto idle
+        
+    State idle {
+        println("$name |	in idle")
+        // updateResource[#maxw.toJsonString()#] // TODO: fai check se serve o meno
+    }  
+    Transition t0 whenRequest storeFood -> requestEvaluation
+    			  whenRequest sendTicket -> ticketEvaluation
+    			  whenRequest deposit -> charged
+    
+    /*
+     *  REQUEST EVALUATION
+     *  1. Funzione canStore gestisce la logica
+     * 	2a. Se esito positivo, va in stato acceptRequest
+     * 	2b. Altrimenti va in stato rejectRequest
+     */
+    State requestEvaluation {
+    	        onMsg(storeFood : storeFood(FW)){
+           println("Request evaluation to store ${payloadArg(0)} kg") color blue
+       }
+    } Goto acceptRequest if[# ColdStorageService.canStore(requestWeightToStore) #] 
+                            else rejectRequest
+             
+     /*
+      *  ACCEPT REQUEST
+      *  Generazione TICKET +
+      */               
+     State acceptRequest{
+    	[#
+    		var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME) 	
+    		ColdStorageService.incrementTicketNumber()	
+    		ColdStorageService.getTicketList().add(TICKET)
+    	#]
+        replyTo storeFood with storeAccepted : storeAccepted(TICKETNUMBER) // TODO: check se tornare tutto il ticket o solo numero
+    }Goto idle
+    
+	/*
+	 *  REJECT REQUEST
+	 */
+    State rejectRequest{
+    	   	[#
+			 ColdStorageService.incrementRejectedRequestCounter()
+       		#]  	
+        replyTo storeFood with storeRejected : storeRejected(_)
+    }Goto idle   
+    
+    /* Non usato
+     State dropout{
+    	forward transporttrolley -m dropout : dropout(FW)
+    	forward transporttrolley -m gotohome : gotohome(_)
+	}Goto idle
+*/
+
+    State charged{
+    	replyTo deposit with chargeTaken : chargeTaken(_)
+    	request transporttrolley -m pickup : pickup(_)
+    }Goto idle
+    
+    
+    State removeExpiredTicket {
+    	println("Ticket of id ${payloadArg(0)} is expired - Reject Request") color blue
+   			[#
+   	  		 val TICKETID = payloadArg(0).toInt()
+   	  		 val TICKET = ColdStorageService.getTicketById(TICKETID)
+			 ColdStorageService.incrementRejectedRequestCounter()
+			 ColdStorageService.getTicketList().remove(TICKET)
+       		#]
+    } Goto idle
+    
+    State sendInvalidTicket {
+    	println("Inserted ticket id is not valid") color red
+    } Goto idle
+
+ 
+    /*
+	 *  TICKET EVALUATION
+	 *  Il coldStorageService controlla se il ticket ricevuto in input � uguale a quello che si aspetta.
+	 * 	In caso di errore, il truck pu� riprovare ad inserire il numero del ticket fin quando non scade il TICKETTIME.
+	 * 
+	 */
+    State ticketEvaluation {
+    	println("Ticket evaluation of ticket id ${payloadArg(0)}") color blue
+    					[#
+    	        		 val TICKETID = payloadArg(0).toInt()
+    	        		#]
+    	        onMsg(sendTicket : sendTicket($TICKETID)){
+    	        	[# val TICKETEVALUATION = ColdStorageService.evaluateTicket(TICKETID) #]
+    	        	if [#TICKETEVALUATION == TicketEvaluationResponse.VALID #] {
+    	        		[#
+    	        			val TICKET = ColdStorageService.getTicketById(TICKETID)
+							ColdStorageService.getTicketList().remove(TICKET)
+    	        		#]
+    	        		replyTo sendTicket with ticketValid : ticketValid(_)	
+    	        	}
+    	        												
+       				}
+    }Goto removeExpiredTicket if [# ColdStorageService.evaluateTicket(payloadArg(0).toInt()) == TicketEvaluationResponse.EXPIRED #]
+    								else sendInvalidTicket
+   
+}
+
+QActor transporttrolley context ctxcoldstorageservice{
+	[#
+		var CRX = 4;
+		var CRY = 3;
+		var INDOORX=0;
+		var INDOORY=4;
+		var HOMEX=0;
+		var HOMEY=0;
+		var TICKETID = 0;
+		val tTState = transporttrolley.state.TransportTrolleyState()
+	#]
+	State init initial{
+		discardMsg Off
+		
+		// engage
+		println("$name | request engage") color green
+		request basicrobot -m engage : engage(transporttrolley, 330)
+		updateResource[#tTState.toJsonString()#]
+	}Transition t0 whenReply engagedone -> idle
+				   whenReply engagerefused -> waitforfree
+
+	State waitforfree{
+		println("$name | already engaged") color green
+	}
+	
+	State idle {
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.IDLE)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.HOME)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		println("$name | waiting for commands.") color green
+  	}
+ 	Transition t0 whenRequest pickup -> moverobottoindoor
+ 	
+ 	State moverobottoindoor {
+ 		//move robot to indoor
+ 		onMsg(pickup :pickup(_)){
+ 			[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.PICKINGUP)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.INDOOR)
+			#]
+ 		} 		
+		updateResource[#tTState.toJsonString()#]
+ 		println("$name | moving robot to indoor.") color green
+ 		request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)
+ 		
+ 	}
+ 	Transition t2 whenReply moverobotdone -> movetoport
+ 				  whenReply moverobotfailed -> robotmovefailed 
+
+
+	//when robot has taken kg from camion -> move robot to coldroom
+	State movetoport{
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.ONTHEROAD)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		//send event "robot is in indoor"
+		println("$name | robot is in indoor") color green
+		println("$name | moving robot to coldroom") color green
+		// da usare col css
+		//forward coldstorageservice -m pickupindoordone:pickupindoordone
+		request basicrobot -m moverobot:moverobot($CRX,$CRY)
+	}
+	Transition t3 whenReply moverobotdone -> depositactionended
+ 				  whenReply moverobotfailed -> robotmovefailed
+	
+	State depositactionended{
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.DROPPINGOUT)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.PORT)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		replyTo pickup with pickupdone:pickupdone(_)
+		println("$name | robot is in coldroom") color green
+		//emitlocal local_dropoutdone: local_dropoutdone
+		println("$name | depositaction ended") color green
+		println("$name | waiting for next move" ) color green
+	} 
+	Transition t4 whenTime 3000 -> robottohome
+	whenRequest pickup -> moverobottoindoor
+	//se arriva un messagio prima di 3s moverobottoindoor altrimenti torno in home
+	 	
+	State robottohome{
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.ONTHEROAD)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		//send event "robot is in home"
+		request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
+	}
+	Transition t5 whenReply moverobotdone -> idle
+ 				  whenReply moverobotfailed -> robotmovefailed
+ 
+
+ 	//control failed robot moves
+ 	State robotmovefailed{
+ 		println("$name | robot failed to move") color red
+ 	}
+ 		
+}

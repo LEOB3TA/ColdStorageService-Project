@@ -56,7 +56,8 @@ dependencies {
     /*  MQTT *************************************************************************************************************** */
     // https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.client.mqttv3
     implementation group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.2.5'
-
+    /* GSON */
+    implementation 'com.google.code.gson:gson:2.9.0'
     /* JSON **************************************************************************************************************** */
     // https://mvnrepository.com/artifact/org.json/json
     //implementation group: 'org.json', name: 'json', version: '20220320'

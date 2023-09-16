@@ -1,0 +1,313 @@
+System/* -trace*/coldstorageservice
+
+// Messaggi scambiati con mocktruck
+Request deposit : deposit(_)
+Request sendTicket : sendTicket(TICKETID)
+Request storeFood : storeFood(FW)
+Reply storeAccepted : storeAccepted(TICKETID)
+Reply storeRejected : storeRejected(_)
+Reply chargeTaken : chargeTaken(_)
+Reply ticketValid : ticketValid(_)
+Reply ticketNotValid : ticketNotValid(_)
+Reply ticketExpired : ticketExpired(_)
+
+// Messaggi scambiati con transporttrolley
+Request pickup:    pickup(_)
+Reply  pickupdone:  pickupdone(_)
+
+// Messaggi scambiati col basicrobot23
+
+Request engage        : engage(ARG)	
+Reply   engagedone    : engagedone(ARG)
+Reply   engagerefused : engagerefused(ARG)
+Dispatch disengage    : disengage(ARG)
+
+Request  doplan     : doplan( PATH, OWNER, STEPTIME )
+Reply doplandone    : doplandone( ARG ) 
+Reply doplanfailed  : doplanfailed( ARG )
+
+Request moverobot    :  moverobot(TARGETX, TARGETY)
+Reply moverobotdone  :  moverobotok(ARG)
+Reply moverobotfailed:  moverobotfailed(PLANDONE, PLANTODO)
+
+Dispatch setrobotstate: setpos(X,Y,D)
+Dispatch setdirection : dir( D )  //D =up|down!left|right
+Dispatch cmd       	: cmd(MOVE) 
+
+Event local_movef : movef(_)
+
+Context ctxbasicrobot ip [host="127.0.0.1" port=8020] 
+Context ctxcoldstorageservice ip [host="localhost" port=8099] 
+//Context ctxtruck ip[host="127.0.0.1" port=8092] //indirizzo interno alla rete
+
+// Attori Esterni
+ExternalQActor basicrobot context ctxbasicrobot
+//ExternalQActor mocktruck context ctxtruck
+
+//CodedQActor pathobs context ctxbasicrobot className "resources.observers.planexecCoapObserver"
+
+QActor coldstorageservice context ctxcoldstorageservice {
+	
+ 	[#
+        	val MAXW = resources.ColdStorageService.getMAXW()
+			val TICKETTIME = resources.ColdStorageService.getTICKETTIME()
+		   	var currentWeightStorage = resources.ColdStorageService.getCurrentWeightStorage()
+		   	var requestWeightToStore = 0.0
+		   	var TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
+		   	#]
+	
+    State setup initial {
+        	println("$name |	setup") color blue
+        	discardMsg Off
+       
+    }
+
+  Goto idle
+        
+    State idle {
+        println("$name |	in idle") color green
+        // updateResource[#maxw.toJsonString()#] // TODO: fai check se serve o meno
+    }  
+    Transition t0 whenRequest storeFood -> requestEvaluation
+    			  whenRequest sendTicket -> ticketEvaluation
+    			  whenRequest deposit -> charged
+    			  whenReply pickupdone -> taken
+    			  whenEvent local_movef -> error
+    
+    /*
+     *  REQUEST EVALUATION
+     *  1. Funzione canStore gestisce la logica
+     * 	2a. Se esito positivo, va in stato acceptRequest
+     * 	2b. Altrimenti va in stato rejectRequest
+     */
+    State requestEvaluation {
+    	        onMsg(storeFood : storeFood(FW)){
+           println("Request evaluation to store ${payloadArg(0)} kg") color blue
+           [#requestWeightToStore=payloadArg(0).toDouble()#]
+           
+       }
+    } Goto acceptRequest if[# resources.ColdStorageService.canStore(requestWeightToStore) #] 
+                            else rejectRequest
+             
+     /*
+      *  ACCEPT REQUEST
+      *  Generazione TICKET +
+      */     
+     State acceptRequest{
+    	[#
+    		var TICKET : resources.model.Ticket = resources.model.Ticket(TICKETNUMBER, TICKETTIME) 	
+    		resources.ColdStorageService.incrementTicketNumber()	
+    		resources.ColdStorageService.getTicketList().add(TICKET)
+    	#]
+        replyTo storeFood with storeAccepted : storeAccepted($TICKETNUMBER) // TODO: check se tornare tutto il ticket o solo numero
+    }Goto idle
+    
+	/*
+	 *  REJECT REQUEST
+	 */
+    State rejectRequest{
+        replyTo storeFood with storeRejected : storeRejected(_)
+    }Goto idle   
+    
+    /* Non usato
+     State dropout{
+    	forward transporttrolley -m dropout : dropout(FW)
+    	forward transporttrolley -m gotohome : gotohome(_)
+	}Goto idle
+*/
+
+    State charged{
+    	println("$name |	in charged") color green
+    	request transporttrolley -m pickup : pickup(_)
+    }Goto idle
+    
+    State taken{
+    	println("$name |	in taken") color green
+    	replyTo deposit with chargeTaken : chargeTaken(_)
+    }Goto idle
+    
+    
+    State removeExpiredTicket {
+    	println("Ticket of id ${payloadArg(0)} is expired - Reject Request") color blue
+    	replyTo sendTicket with ticketExpired : ticketExpired(_)
+   			[#
+   	  		 val TICKETID = payloadArg(0).toInt()
+   	  		 val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
+			 resources.ColdStorageService.incrementRejectedRequestCounter()
+			 resources.ColdStorageService.getTicketList().remove(TICKET)
+       		#]
+       		
+    } Goto idle
+    
+    State sendInvalidTicket {
+    	println("Inserted ticket id is not valid") color red
+    	replyTo sendTicket with ticketNotValid : ticketNotValid(_)
+    } Goto idle
+
+ 
+    /*
+	 *  TICKET EVALUATION
+	 *  Il coldStorageService controlla se il ticket ricevuto in input � uguale a quello che si aspetta.
+	 * 	In caso di errore, il truck pu� riprovare ad inserire il numero del ticket fin quando non scade il TICKETTIME.
+	 * 
+	 */
+    State ticketEvaluation {
+		 onMsg(sendTicket : sendTicket(TICKETID)){
+		 	println("Ticket evaluation of ticket id ${payloadArg(0)}") color blue
+    	        	[#
+    	        		 val TICKETID = payloadArg(0).toInt()
+    	         		val TICKETEVALUATION = resources.ColdStorageService.evaluateTicket(TICKETID) #]
+    	        	if [#TICKETEVALUATION == resources.TicketEvaluationResponse.VALID #] {
+    	        		[#
+    	        			val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
+							resources.ColdStorageService.getTicketList().remove(TICKET)
+    	        		#]
+    	        		replyTo sendTicket with ticketValid : ticketValid(_)	
+    	        	}
+    	        												
+       				}
+    }Goto removeExpiredTicket if [# resources.ColdStorageService.evaluateTicket(payloadArg(0).toInt()) == resources.TicketEvaluationResponse.EXPIRED #]
+    								else sendInvalidTicket
+   State error{
+   	println("$name | robot failed to move") color red
+ 		emit local_movef : local_movef(_)
+ 		println("$name | close") color red
+ 		[# System.exit(0) #]
+   }
+}
+
+QActor transporttrolley context ctxcoldstorageservice{
+	[#
+		var CRX = 4;
+		var CRY = 3;
+		var INDOORX= 0;
+		var INDOORY= 4;
+		var HOMEX= 0;
+		var HOMEY= 0;
+		//println("$HOMEX,$HOMEY");
+		var TICKETID = 0;
+		val tTState = state.TransportTrolleyState()
+		val MyName = name
+	#]
+	State init initial{
+		discardMsg Off
+		// engage
+		println("$name | request engage") color green
+		request basicrobot -m engage : engage ($MyName, 330)
+		updateResource[#tTState.toJsonString()#]
+		//printCurrentMessage color black
+	}Transition t0 //whenTime 10000 -> error
+				   whenReply engagedone -> idle
+				   whenReply engagerefused -> waitforfree
+				   
+   State error{ //DEBUG
+   		println("$name | basic robot error") color red
+   		println("$name | disengaging....") color red
+   		forward basicrobot -m disengage : disengage( $MyName )
+   		println("$name | disengaged....") color red
+   }
+
+	State waitforfree{
+		println("$name | already engaged") color green
+	} Transition t0 whenTime 10000 -> idle
+	
+	State idle {
+		println("$name | engaged") color green
+		[#
+			tTState.setCurrState(state.CurrStateTrolley.IDLE)
+			tTState.setCurrPosition(state.TTPosition.HOME)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		// State print for debug
+		//[#
+		//	println(tTState.getCurrState())
+		//	println(tTState.getCurrPosition())	
+		//#]
+		forward basicrobot -m setrobotstate : setpos (0,0,d) // d= down		
+		println("$name | waiting for commands.") color green
+  	}
+ 	Transition t0 whenRequest pickup -> moverobottoindoor
+ 	
+ 	State moverobottoindoor {
+ 		//move robot to indoor
+ 		onMsg(pickup :pickup(_)){
+ 			[#
+			tTState.setCurrState(state.CurrStateTrolley.PICKINGUP)
+			tTState.setCurrPosition(state.TTPosition.INDOOR)
+			#]
+ 		} 		
+		updateResource[#tTState.toJsonString()#]
+ 		println("$name | moving robot to indoor.") color green
+ 		request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)
+ 		
+ 	}
+ 	Transition t0 whenReply moverobotdone -> movetoport
+ 				  whenReply moverobotfailed -> robotmovefailed 
+
+
+	//when robot has taken kg from camion -> move robot to coldroom
+	State movetoport{
+		[#
+			tTState.setCurrState(state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		//send event "robot is in indoor"
+		println("$name | robot is in indoor") color green
+		println("$name | moving robot to coldroom") color green
+		// da usare col css
+		replyTo pickup with pickupdone:pickupdone(_)
+		request basicrobot -m moverobot:moverobot($CRX,$CRY)
+	}
+	Transition t0 whenReply moverobotdone -> depositactionended
+ 				  whenReply moverobotfailed -> robotmovefailed
+	
+	State depositactionended{
+		[#
+			tTState.setCurrState(state.CurrStateTrolley.DROPPINGOUT)
+			tTState.setCurrPosition(state.TTPosition.PORT)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		
+		println("$name | robot is in coldroom") color green
+		//emitlocal local_dropoutdone: local_dropoutdone
+		println("$name | depositaction ended") color green
+		println("$name | waiting for next move" ) color green
+		[#
+			tTState.setCurrState(state.CurrStateTrolley.IDLE)
+			tTState.setCurrPosition(state.TTPosition.PORT)
+		#]
+		updateResource[#tTState.toJsonString()#]
+	} 
+	Transition t0 whenTime 3000 -> robottohome
+	whenRequest pickup -> moverobottoindoor
+	//se arriva un messagio prima di 3s moverobottoindoor altrimenti torno in home opppure se c'è già una pickup in coda
+	 	
+	State robottohome{
+		[#
+			tTState.setCurrState(state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		//send event "robot is in home"
+		request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
+		delay 6300
+		forward basicrobot -m cmd : cmd ( l ) 
+		/*delay 6500
+		forward basicrobot -m setdirection : dir( DOWN )
+		forward basicrobot -m setrobotstate : setpos (0,0,d) // d= down	*/	
+		println ("dir correction") color red
+	}
+	Transition t0 whenReply moverobotdone -> idle
+ 				  whenReply moverobotfailed -> robotmovefailed
+ 
+
+ 	//control failed robot moves
+ 	State robotmovefailed{
+ 		println("$name | robot failed to move") color red
+ 		emit local_movef : local_movef(_)
+ 		println("$name | close") color red
+ 		[# System.exit(0) #]
+ 	}
+ 		
+}

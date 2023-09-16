@@ -34,7 +34,7 @@
         <ul>
             <li>A partire dallo sprint0 analizzare il core business dell'applicazione</li>
             <li>Trovare ad analizzare eventuali criticit&agrave; dei requisiti</li>
-            <li>Implementare un <b>MockTruck</b> in modo da simulare un interazione del driver con la <b>ServiceAccessGui</b>, che interagisca con il <b>ColdStorageService</b></li>
+            <li>Implementare un simulatore del truck, in modo da simulare un interazione del driver con la <b>ServiceAccessGui</b>, che interagisca con il <b>ColdStorageService</b></li>
             <li>Implementare il <b>ColdStorageService</b></li>
             <li>Implementare il <b>TrasportTrolley</b> e interfacciarlo con il <b>BasicRobot</b></li>
             <li>Testing del sistema</li>
@@ -82,88 +82,620 @@
             <li><b>Quando il driver deve liberare la indoor</b></li>
             In questa fase di sviluppo &egrave; stato adottato l'approccio "as soon as possible"
         </ol>
+        <h3>TransportTrolley e BasicRobot</h3>
+        <h6>Obiettivo</h6>
+        Sviluppare un attore che implementi il TransportTrolley e le sue interazioni col BasicRobot, in modo che:
+        <br/>
+        <ul>
+            <li>Esegua delle <ks>Azioni di deposito</ks>, consistente nel:</li>
+             <ol>
+                 <li>
+                    Prelevare (<k>PICKUP</k>) il carico di cibo dal <ks>Food truck</ks> arrivato
+                    nella posizione <k>INDOOR</k>
+                 </li>
+                 <li>
+                     Andare dalla posizione <k>INDOOR</k> alla porta della
+                     <ks>COLDROOM</ks>
+                 </li>
+                 <li>
+                     Depositare il carico nella <ks>COLDROOM</ks>
+                 </li>
+
+             </ol>
+            <li>Sia in grado di mandare comandi al <b>BasicRobot</b> e gestire
+            le eventuali risposte</li>
+        </ul>
+        <h6>Connettere/Disconnettere il TransportTrolley ed il BasicRobot</h6>
+        Prima di iniziare le interazioni &egrave; presente una fase in cui il TransporTrolley cerca di iniziare la comunicazione
+        col BasicRobot: ci&ograve; viene gestito dall'<kc>Engager</kc>, mediante l'uso della richiesta di <ks>engage</ks>.
+        <br/>
+        Se tale richiesta va a buon fine pu&ograve; iniziare la comunicazione, altrimenti si genera un messaggio di errore.
+        <br/><br/>
+        Specularmente quando si deve disconnettere il dispositivo l'<kc>Engager</kc> fornisce il messaggio <ks>disengage</ks>,
+        con la differenza che in questo caso si usa una dispatch, ovvero non si attende risposta.
+
+        <h6>Muovere il robot verso una destinazione</h6>
+
+        <h4>Orientamento nell'ambiente</h4>
+        Dai requisiti si evince che le dimensioni della stanza siano
+        note, cos&igrave; come le posizioni dei punti di interesse
+        ( <k>HOME</k>, <k>INDOOR</k> e <k>PORT</k>) e altri valori costanti.
+        Per far s&igrave; che il sistema sia a conoscenza di tali informazioni,
+        sarebbe utile avere un modo per configurarlo.
+        Al momento i valori sono cablati nel codice
+<!--        <br/><br/>-->
+<!--        Sono possibili due approcci:-->
+<!--        <ul>-->
+<!--            <li>Cablare i valori nel codice </li>-->
+<!--            <li>Usare un file di configurazione</li>-->
+<!--        </ul>-->
+<!--        Visto che il software deve poter essere usato correttamente indipendentemente-->
+<!--        dalle dimensioni e locazioni dei suddetti punti di interesse, si scarta la prima-->
+<!--        soluzione poich&eacute; dal momento in cui uno di tali valori dovesse cambiare,-->
+<!--        si dovrebbe cambiare il codice ed effettuare un <i>rebuild</i> dell'applicazione.-->
+<!--        Dunque l'uso di un <ks>file di configurazione</ks>, che pu&ograve; essere facilmente-->
+<!--        modificato senza richiedere cambiamenti di codice, risulta pi&ugrave; adatto.-->
+<!--        Il file di configurazione &egrave;-->
+<!--        <a href="./resources/json/coldServiceSystemConfig.json">coldServiceSystemConfig.json</a>-->
+
+<!--        <pre>-->
+<!--{-->
+<!--    "LOCATION":{-->
+<!--        "HOME":...,-->
+<!--        "INDOOR":...,-->
+<!--        "PORT":...-->
+<!--    }-->
+<!--    "MAXW":...,-->
+<!--    "DLIMIT":...-->
+<!--}-->
+<!--        </pre>-->
+
+        Da qui si evince una nuova problematica: come rappresentare la posizione
+        dei punti d'interesse ( <k>HOME</k>, <k>INDOOR</k> e <k>PORT</k>) e del robot.
+        <br/><br/>
+        &Egrave; possibile usare uno di questi approcci:
+        <ul>
+            <li>Usare un sistema di coordinate cartesiane X e Y</li>
+            <li>Usare gli elementi strutturali della <kc>Service Area</kc>
+            (pareti o ostacoli) come punti di riferimento</li>
+        </ul>
+        <ks>Coordinate Cartesiane</ks>
+        <br/><br/>
+        L'uso di tali coordinate impone la necessit&agrave; di scegliere un'unit&agrave; di misura in
+        modo da mappare opportunamente la <i>Service Area</i>. Per fare ci&ograve; si pu&ograve; usare
+        il DDR robot come unit&agrave; e mappare la <i>Service Area</i> come una griglia composta da
+        celle di dimensione <kc>RD</kc> (la dimensione del DDR robot).
+        <img src="./resources/images/transportTrollery_coordinate.png" alt="" style="width:50% ; height:50% ;">
+        <br/><br/>
+        I luoghi di interesse verranno rappresentati da una coppia di valori <b>(X,Y)</b>
+        <pre>
+(0,0) inica la cella home
+(X,Y) indica la cella che si trova X celle sotto HOME e Y celle alla sua destra
+        </pre>
+        <i>Vantaggi e svantaggi</i>
+        <br/><br/>
+        <pro>+</pro> Possibilit&agrave; di riuso di software gi&agrave; sviluppato per mappare, identificare il
+        percorso ed eseguire il piano trovato ( )
+<!--        TODO: Inserire link a progetti-->
+        <br/><br/>
+        <cons>-</cons> Potrebbe essere necessario effettuare degli aggiustamenti in quanto le dimensioni della
+        stanza potrebbero essere multiple di RD.
+        <br/>
+        <cons>-</cons> La stanza deve essere mappata
+        <br/><br/>
+        <ks>Punti di riferimento</ks>
+        <br/><br/>
+        Tale soluzione si basa sul <kc>BoundaryWalker</kc>, un robot capace di muoversi lungo il perimetro
+        di una stanza delimitata da pareti, sfruttando le collisioni con le pareti per capire quando fare
+        una rotazione. Sapendo che alcuni punti di interesse si trovano agli angoli delle pareti si potrebbe
+        sfruttare il sonar montato sul DDR robot per rilevare la collisione con le pareti in modo da comprendere
+        se si &egrave; raggiunto un dato punto di interesse.
+        <br/><br/>
+        <i>Vantaggi e svantaggi</i>
+        <br/><br/>
+        <pro>+</pro> Minor complessit&agrave; del caso precedente.
+        <br/>
+        <pro>+</pro> Non necessita l'uso di software esterno, a differenza del caso precedente.
+        <br/><br/>
+        <cons>-</cons> Essendo non tutti i punti di interesse sul bordo della stanza, tale soluzione potrebbe
+        non avere successo, con un eventuale lavoro in pi&ugrave; mirato allo sviluppo di un robot in grado
+        di rilevare anche la posizione di tali punti.
+        <br/>
+        <cons>-</cons> Il codice deve prevedere tutti i percorsi che il robot pu&ograve; effettuare, eventualmente
+        anche non sul bordo per trovare gli altri punti di interesse.
+        <br/>
+        <cons>-</cons> Software poco riusabile
+        <br/><br/>
+        <b>Conclusione</b>
+        <br/><br/>
+        Si consiglia di usare il sistema di coordinate cartesiane, poich&egrave; riusabile anche per <kc>Service Area</kc>
+        differenti e permette di usare software gi&agrave; sviluppato per mappare, pianificare ed eseguire il percorso.
+        <br/>
+<!--        Il file di configurazione avr&agrave; informazioni del tipo:-->
+<!--        <pre>-->
+<!--{-->
+<!--    "LOCATION":{-->
+<!--        "HOME":[0,0],-->
+<!--        "INDOOR":[4,1],-->
+<!--        "PORT":[2,2]-->
+<!--    }-->
+<!--    "MAXW":100,-->
+<!--    "DLIMIT":50-->
+<!--}        </pre>-->
+        <h4>Plan finding</h4>
+        Avendo deciso come orientarsi nella stanza e come individuare i punti di interesse, ci possiamo occupare
+        di come comprendere quale percorso si debba scegliere per arrivare in un dato punto di interesse.
+        <br/>
+        Anche qui sono possibili vari approcci:
+        <ul>
+            <li>Muoversi in linea retta</li>
+            <li>Muoversi mediante la generazione di un piano</li>
+        </ul>
+
+        <ks>Linea Retta</ks>
+        Tale soluzione prevede di muovere il roboto lungo una linea retta che collega il punto di partenza
+        con quello di arrivo <br/> <br/>
+        <img src="./resources/images/transportTrollery_linearetta.png" alt="" style="width:50% ; height:50% ;">
+        <br/> <br/>
+        Il problema relativo a tale soluzione &egrave; che il DDR robot si muove su se stesso di
+        90&ordm;( <!-- TODO: link -->). Per tale motivo il roboto non riesce a muoversi su una linea
+        a diversa angolazione (non linea retta). Un possibile percorso sarebbe il seguente.
+        <img src="./resources/images/transportTrollery_spezzata.png" alt="" style="width:50% ; height:50% ;">
+        <br/> <br/>
+        Per eseguire un percorso diretto si dovrebbe modificare il <kc>basicrobot23</kc> in modo da accettare
+        angolature diverse.
+        <br/><br/>
+        <i>Vantaggi e svantaggi</i>
+        <br/><br/>
+        <pro>+</pro> Percorso pi&ugrave; se si riuscisse a modificare il basicrobot23
+        <br/><br/>
+        <cons>-</cons> Dover apportare modifiche al basicrobot23
+        <cons>-</cons> Impossibili&agrave; di uso di software gi&agrave; sviluppato per pianificare ed eseguire il percorso
+        <br/>
+        <ks>Muoversi usando la generazione di un piano</ks>
+        Tale soluzione si basa su come il robot &egrave; in grado di muoversi e basa la soluzione su tale modalit&agrave;
+        <br/> <br/>
+        <img src="./resources/images/transportTrollery_spezzata.png" alt="" style="width:50% ; height:50% ;">
+        <br/><br/>
+        <i>Vantaggi e svantaggi</i>
+        <br/><br/>
+        <pro>+</pro> Si possono usare i componenti software a disposizione per pianificare un percorso partendo
+        dalle coordinate cartesiane della destinazione ed eseguirlo.
+        <br/>
+        <pro>+</pro> Non si hanno vincoli su dove si devono trovare i punti di interesse
+        <br/><br/>
+        <cons>-</cons> I percorsi potrebbero essere pi&ugrave; lunghi rispetto al caso precedente
+        <br/><br/>
+        <b>Conclusione</b>
+        Considerando ci&ograve; detto finora, si decide di usare la soluzione che prevede di muoversi
+        mediante una sequenza di mosse perch&egrave; consente di usare il software esistente per pianificare
+        ed eseguire il percorso abbattendo i tempi di sviluppo.
+        <br/><br/>
+        Per quanto riguarda il <kc>planexec</kc> esso viene gestito dal <i>basicrobot23</i>.
+        Pi&ugrave; nel dettagli grazie all'uso di richieste come <i>moverobot</i> si richiama il robotpos che a
+        sua volta usa il <kc>planner</kc> in modo da creare ed eseguire il piano individuato per raggiungere l'obiettivo.
+
+        <h4>Gestione delle azioni di deposito e movimento</h4>
+        Bisogna a questo punto comprendere quale componente del sistema debba essere il responsabile delle operazioni di deposito e movimento.
+        Tali operazioni devono essere responsabilit&agrave; del <kc>ColdStorageServiceService</kc>, del <kc>transportTrolley</kc> o sarebbe opportuno
+        dividere le responsabilit&agrave; tra i due attori? <br/><br/>
+        Risulta evidente assegnare al <i>ColdStorageServiceService</i> la responsabilit&agrave; delle operazioni di deposito, in quanto esso &egrave; il destinatario
+        delle richieste di deposito provenienti dal truck. <br/>
+        Per quanto riguarda invece le operazioni di movimento, tale responsabilit&agrave; pu&ograve; essere assegnato sia al <i>ColdStorageServiceService</i> che al <i>transportTrolley</i>.
+        Tuttavia, volendo rispettare il principio di <a href="https://it.wikipedia.org/wiki/Principio_di_singola_responsabilit%C3%A0"><i><b>singola responsabilit&agrave;</b></i></a> e volendo evitare di avere un attore troppo complesso,
+        si consiglia agli sviluppatori di assegnare al <i>transportTrolley</i> la responsabilit&agrave; delle operazioni di movimento. In tal modo il <i>transportTrolley</i>
+        funger&agrave; da attuatore, e nel caso in cui esso debba far uso di un <kc>planner</kc>, potrebbe essere posto su di un nodo computazionale pi&ugrave; potente,
+        senza causare un eccessivo <i>overhead</i> sulla rete dovuto ai messaggi di movimento. <br/><br/>
+        In ultima analisi, si potrebbe decidere di attuare un'ulteriore separazione delle responsabilit&agrave; operando come segue: <br/><br/>
+        Attribuire al componente <i>ColdStorageServiceService</i> le responsabilit&agrave; di:
+        <ol>
+            <li>Accettare/Rifiutare richieste da parte del <i>truckDriver</i></li>
+            <li>Coordinare le operazioni di carico e scarico, cio&egrave; richiedere o comandare al <i>transportTrolley</i> l'esecuzione di qualche azione</li>
+        </ol>
+        Attribuire al componente <i>transportTrolley</i> le responsabilit&agrave; di:
+        <ol>
+            <li>Muovere il DDR robot verso la destinazione stabilita</li>
+            <li>Eseguire le azioni di carico e scarico del materiale</li>
+        </ol>
+
+        Seguire tale approccio richiederebbe, quindi, una modifica dell'architettura logica del sistema, in quanto prevederebbe la suddivisione del <i>ColdStorageServiceService</i> in due componenti
+        distinti, uno dedito alla ricezione e valutazione delle richieste di deposito e uno dedito alla coordinazione delle operazioni carico/scarico. Allo stesso modo, bisognerebbe
+        operare una modifica nell'architettura del <i>transportTrolley</i>, in quanto sarebbe opportuno attribuire ad un componente la responsabilit&agrave; delle operazioni di movimento e
+        ad un altro la responsabilit&agrave; delle operazioni di carico/scarico. <br/><br/>
+        <ks>Seguire questa strada permetterebbe di ottenere componenti che adempiono ad una singola responsabilit&agrave; e tale responsabilit&agrave; sarebbe totalmente incapsulata nel componente stesso.</ks>
+
+        <h6>Interazioni</h6>
+
+        Per quanto riguarda l'interazione tra i componenti possiamo, in prima battuta, affermare che essi interagiscono a scambio di messaggi.
+        L'utilizzo del linguagguio <kc>QAk</kc> ci permette di tipizzare i messaggi in modo tale da avere un controllo maggiore sulle interazioni tra i componenti.
+        Nasce quindi il problema di individuare il tipo di messaggio per ogni interazione:
+
+
+        <h6>Gestione stati</h6>
+
+        <h4>Stato TransportTrolley</h4>
+        In previsione delle fasi successive del progetto, sarebbe opportuno mantenere lo stato del <i>transportTrolley</i>. In particolare occorrerebe tenere traccia della posizione
+        del <i>transportTrolley</i> e del suo stato (inteso come stato di attivit&agrave;). <br/>
+<!--            TODO: rivedere link-->
+        Dall'<a href="../../Sprint0/userDocs/sprint0.html">analisi dei requisiti </a> &egrave; emerso che lo stato del <i>transportTrolley</i> e la sua posizione nella stanza possono essere
+        rappresentati dai seguenti enumerativi:
+        <pre>
+<key>enum</key> <key>class</key> CurrStateTrolley { IDLE, STOPPED, MOVING, PICKINGUP, DROPPINGOUT }</pre>
+        <pre>
+<key>enum</key> <key>class</key> TTPosition { HOME, INDOOR, ONTHEROAD, PORT }</pre>
+
+        Sebbene quanto stabilito in fase di analisi dei requisiti sia corretto, occorre tenere presente che il <i>transportTrolley</i> potrebbe trovarsi in una posizione diffirente da
+        quelle indicate nell'enumerativo <kc>TTPosition</kc>. In particolare, durante un'azione di movimento, il <i>transportTrolley</i> potrebbe trovarsi in una posizione
+        intermedia tra due punti d'interesse della stanza. Per questo motivo riteniamo necessaria la seguente modifica dell'enumerativo <i>TTPosition</i>:
+        <pre>
+<key>enum</key> <key>class</key> TTPosition { HOME, INDOOR,PORT, ONTHEROAD }</pre>
+        Come nel caso precedente, le soluzioni possibili per mantenere lo stato del <i>transportTrolley</i> sono diverse.Si decide di adottare la soluzione che
+        prevede di mantenere lo stato in una classe in modo che esso sia accessibile da terze parti, come riportato di seguito:
+        <pre>
+<key>enum class</key> CurrStateTrolley {
+    IDLE, STOPPED, MOVING, PICKINGUP, DROPPINGOUT
+}
+<key>enum class</key> TTPosition{
+   HOME, INDOOR, ONTHEROAD, PORT
+}
+<key>data class</key> TransportTrolleyState(
+        <key>private var</key> currState : CurrStateTrolley = CurrStateTrolley.IDLE,
+        <key>private var</key> currPosition : TTPosition = TTPosition.HOME
+){
+    <key>fun</key> setCurrState(state : CurrStateTrolley) {...}
+    <key>fun</key> setCurrPosition(position : TTPosition) {...}
+    <key>fun</key> getCurrState() : CurrStateTrolley {...}
+    <key>fun</key> getCurrPosition() : TTPosition {...}
+}</pre>
+<!--TODO: revisionare link -->
+        Il codice completo di questa classe &egrave; consultabile in <a href="./resources/kotlin/TransportTrolleyState.kt">TransportTrolleyState.kt</a>
+
+        <h3>ColdStorageService</h3>
+        <h6>Obiettivo</h6>
+        Sviluppare un attore che implementi il ColdStorageService e le sue interazioni col TransportTrolley e BasicRobot, in modo che: <br/> <br/>
+        <ul>
+            <li>Valuti le richieste di deposito provenienti dal truck</li>
+            <li>Coordini le operazioni di carico e scarico del trolley</li>
+            <li>Sia in grado di mandare e ricevere comandi al Truck e al TransportTrolley e gestire eventuali risposte</li>
+        </ul>
+
+        <h3>Ticket</h3>
+        Dal tema finale si evince la necessit&agrave; di gestire i ticket utili per la corretta esecuzione del sistema.<br/> <br/>
+        Si &egrave; quindi pensato di creare una classe che soddisfi il problema. <br/> <br/>
+        La classe Ticket &egrave; composta da due attributi: <br/> <br/>
+        <ul>
+            <li>id: Int</li>
+            <li>ticketTime: LocalDateTime</li>
+        </ul>
+        L'id &egrave; univoco e viene generato dal ColdStorageService, mentre il ticketTime &egrave; il tempo di validit&agrave; del ticket espresso in secondi.
+
+        <pre>
+<code>// Ticket Model</code>
+<key>class</key> Ticket(id: Int, ticketTime: Long) {
+     <key>val id</key>: Int
+     <key>private val</key> ticketTime: LocalDateTime
+     <key>private var</key> isExpired: Boolean = false
+
+    <code>// Costruttore</code>
+    <key>init</key> {
+        this.id = id
+        this.ticketTime = LocalDateTime.now().plus(ticketTime,ChronoUnit.SECONDS)
+    }
+}
+        </pre>
+
+        Per verificare se il ticket &egrave; valido, viene utilizzato il metodo isExpired() che restituisce un booleano.<br/>
+        <pre>
+<key>fun</key> isExpired(): Boolean {
+    isExpired = LocalDateTime.now() > ticketTime
+    return isExpired
+}
+        </pre>
+
+        Il codice completo di questa classe &egrave; consultabile in <a href="../unibo.coldstorageservice/resources/model/Ticket.kt">Ticket.kt</a>
+
+
+        <h5>Gestione dei ticket</h5>
+        Dall'analisi del problema si evince la necessit&agrave; di gestire le varie casistiche che si possono presentare quando il BasicRobot presenta il ticket per il carico. <br/> <br/>
+        <ul>
+            <li>Il ticket &egrave; <b>valido</b> non scaduto &rarr; ColdStorageService restituisce messaggio <b>charge taken</b></li>
+            <li>Il ticket non &egrave; valido &rarr; ColdStorageService restituisce messaggio di ticket non valido, e il robot pu&ograve; riprovare ad inserire il ticket giusto fin quando non scade il ticket</li>
+            <li>Il ticket &egrave; valido ma <b>scaduto</b> &rarr; ColdStorageService restituisce messaggio di ticket scaduto e l'operazione si intende rifiutata</li>
+        </ul>
+
+        <h3>Singleton</h3>
+        Per quanto riguarda la gestione del ColdStorageService &egrave; stato deciso di utilizzare il pattern <i>Singleton</i> in modo da avere un unico attore che gestisce le richieste di deposito e che aggiorna gli attributi interni. <br/>
+        Creando un'istanza da una classe con il singleton design pattern ci si assicura che non ne vengano create delle altre. Il singleton rende questa classe <b>accessibile globalmente</b> all'interno del software.
+        Per assicurarsi che l'istanza creata rimanga l'unica, bisogna impedire che l'utente possa crearne di nuove. Il costruttore deve quindi dichiarare il modello "<b>private</b>". In questo modo solamente il codice contenuto nel singleton può istanziare lo stesso singleton.
+        Questo garantisce che l’utente ottenga un solo e unico oggetto, sempre lo stesso. Quando questa istanza viene resa disponibile, non ne vengono create di nuove.
+
+        <pre>
+<code>// ColdStorageService.kt</code>
+<key>class</key> ColdStorageService {
+    <key>private val</key> MAXW : Double = 100.0
+    <key>private val</key> TICKETTIME: Long = 1
+    <key>private var</key> currentWeightStorage : Double = 0.0
+    <key>private val</key> ticketList : ArrayList<Ticket> = arrayListOf()
+    <key>private var</key> ticketNumber: Int = 0;
+    <key>private var</key> rejectedRequestCounter: Int = 0;
+
+    <key>companion object</key> {
+        <key>private var</key> instance: ColdStorageService? = null
+        <key>private fun</key> getInstance() =
+        instance ?: synchronized(this) {
+            instance ?: ColdStorageService().also { instance = it }
+    }
+}
+        </pre>
+        Il codice completo di questa classe &egrave; consultabile in <a href="../unibo.coldstorageservice/resources/ColdStorageService.kt">TransportTrolleyState.kt</a>
+
+        <h6>Interazioni</h6>
+        Per quanto riguarda l'interazione tra i componenti possiamo, in prima battuta, affermare che essi interagiscono a scambio di messaggi. L'utilizzo del linguagguio QAk ci permette di tipizzare i messaggi in modo tale da avere un controllo maggiore sulle interazioni tra i componenti. Nasce quindi il problema di individuare il tipo di messaggio per ogni interazione:
+        <h6>Gestione stati</h6>
+        Nell'analisi dei requisiti &egrave; emersa la necessit&agrave; di mantenere lo stato del <i>ColdStorageService</i>. In particolare occorre tenere traccia del <b>peso attuale del carico</b> e del <b>numero di richieste rifiutate</b>. <br/>
+        Nella seguente immagine vengono mostrati gli stati in cui il <i>ColdStorageService</i> pu&ograve; trovarsi. <br><br>
+        <img src="resources/images/CSS_DiagramState.png" alt=""> <br><br>
+        <ul>
+            <li> Nello stato <b>setup</b> il <i>ColdStorageService</i> esegue tutte le operazioni di inizializzazione, stampa un messaggio e si dirige nello stato <b>idle</b></li>
+            <li> Nello stato <b>idle</b> il <i>ColdStorageService</i> &egrave; in attesa di un comando tra <kc>storeFood</kc>/<kc>sendTicket</kc>/<kc>pickupdone</kc>/<kc>deposit dagli altri attori</kc></li>
+            <li> All'arrivo della richiesta di <kc>storeFood</kc>, il <i>ColdStorageService</i> riceve la richiesta di deposito dal <i>truck</i> e valuta se accettarla o rifiutarla secondo la funzione <i>canStore</i>
+                <ul>
+                    <li>
+                        Se la richiesta viene accettata, il <i>ColdStorageService</i> si dirige nello stato <b>AcceptRequest</b>
+                    </li>
+                    <li>
+                        Se la richiesta viene rifiutata, il <i>ColdStorageService</i> si dirige nello stato <b>RejectRequest</b>
+                    </li>
+                </ul>
+                <pre>
+<code>// canStore Function</code>
+    <key>fun</key> canStore(requestWeightToStore: Double): Boolean{
+        return (requestWeightToStore + getCurrentWeightStorage() <= getMAXW())
+    }
+                </pre>
+            </li>
+            <li>Nello stato <b>AcceptRequest</b> il ColdStorageService genera il ticket per il truck, incrementa lo stato del ticket number, aggiunge il ticket nella lista dei validi, risponde con <kc>storeAccepted</kc> e torna in <b>idle</b>
+            <pre>
+<code>// AcceptRequest State</code>
+<key>State</key> acceptRequest{
+    [#
+    	var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME)
+    	ColdStorageService.incrementTicketNumber()
+        ColdStorageService.getTicketList().add(TICKET)
+    #]
+    replyTo storeFood with storeAccepted : storeAccepted(TICKETNUMBER)
+} Goto idle
+            </pre>
+            </li>
+            <li>Nello stato <b>RejectRequest</b> il ColdStorageService incrementa il numero di richieste rifiutate, restituisce la risposta <kc>storeRejected</kc> e torna in <b>idle</b>
+            <pre>
+<code>// RejectRequest State</code>
+<key>State</key> rejectRequest{
+    [#
+	    ColdStorageService.incrementRejectedRequestCounter()
+    #]
+    replyTo storeFood with storeRejected : storeRejected(_)
+} Goto idle
+            </pre>
+            </li>
+            <li>
+                All'arrivo della richiesta di <kc>sendTicket</kc>, il <i>ColdStorageService</i> riceve la richiesta di ticket dal <i>BasicRobot</i> e valuta se accettarla o rifiutarla secondo la funzione <i>ticketEvaluation</i>, che richiama la funzione <i>isExpired</i> vista sopra. <br>
+                La funzione prende in ingresso l'id del ticket e restituisce un booleano che indica se il ticket &egrave; valido o meno.
+                <ul>
+                    <li>
+                        Se il ticket &egrave; presente nella lista dei ticket attivi e non &egrave; scaduto, il <i>ColdStorageService</i> rimuove il ticket da quelli validi, risponde con <kc>ticketValid</kc> e torna in <b>idle</b>
+                    </li>
+                    <li>
+                        Se il ticket non &egrave; presente nella lista dei validi, il <i>ColdStorageService</i> si dirige verso lo stato <b>sendInvalidTicket</b>
+                    </li>
+                    <li>
+                        Se il ticket &egrave; presente nella lista dei validi ma &egrave; scaduto, il <i>ColdStorageService</i> si dirige verso lo stato <b>sendExpiredTicket</b>
+                    </li>
+                </ul>
+            </li>
+            <li>Nello stato <b>sendInvalidTicket</b>, il <i>ColdStorageService</i> stampa il messaggio di errore, risponde con <kc>ticketNotValid</kc> e torna in <b>idle</b></li>
+            <li>Nello stato <b>removeEpiredTicket</b>, il <i>ColdStorageService</i> aumenta il numero di richieste rifiutate, rimuove il ticket dalla lista degli attivi, risponde con <kc>ticketExpired</kc> e torna in <b>idle</b>
+                <pre>
+<code>// removeExpiredTicket State</code>
+<key>State</key> removeExpiredTicket {
+    println("Ticket of id ${payloadArg(0)} is expired - Reject Request") color red
+    replyTo sendTicket with ticketExpired : ticketExpired(_)
+    [#
+        val TICKETID = payloadArg(0).toInt()
+        val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
+        resources.ColdStorageService.incrementRejectedRequestCounter()
+        resources.ColdStorageService.getTicketList().remove(TICKET)
+    #]
+} Goto idle</pre>
+            </li>
+            <li>All'arrivo della richiesta di <kc>deposit</kc>, il <i>ColdStorageService</i> si dirige nello stato <b>charged</b></li>
+            <li>Nello stato <b>charged</b>, il <i>ColdStorageService</i> invia una richiesta di <kc>pickup</kc> al BasicRobot e torna in <b>idle</b></li>
+            <li>All'arrivo della richiesta di <kc>pickupdone</kc>, il <i>ColdStorageService</i> si dirige nello stato <b>taken</b></li>
+            <li>Nello stato <b>taken</b>, il <i>ColdStorageService</i> risponde con <kc>chargeTaken</kc> e torna in <b>idle</b></li>
+        </ul>
+
+
     </div>
 
-    <h2>Architettura Logica</h2>
-     <div class="remark">
-             <br>
-         Modello ctxcoldstorageservice: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint1/src/sprint1.qak" target="_blank">sprint1.qak</a> <!-- TODO controllare modello e aggiunger elink giusto -->
-         Modello ctxmocktruck: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint1/src/sprint1.qak" target="_blank">mocktruck.qak</a>
-         <br>
-             <img src="./resources/images/coldstorageservicearch.png" alt="architettura logica"> <br>
-         Le risposte <b>ticket Reply</b> e <b>store Reply</b> sono state scritte in quel modo per motivii grafici in realtà rappresentano rispettivamente: <b>ticketAccepted/ticketRejected/ticketNotValid</b> e <b>storeAccepted/storeRejected</b>
-     </div>
+    <div class="remark">
+        <h3>Back to Home</h3>
+        <div id= "bh">
+            Dalle Users story si evince che appena la deposit action termina se non ci sono altre richieste
+            da serivire il <kc>TransportTrolley</kc> deve tornare nella posizione <kc>HOME</kc>.
+            <br/>
+            Tale comportamento richiede un'analisi approfondita.
+        </div>
+        <h6>Gestione back to Home</h6>
+        Innanzitutto bisogna comprendere quale componente debba incaricarsi del rientro alla posizione
+        <i>HOME</i>. &Egrave; stato stabilito, in precedenza, che il <kc>ColdStorageService</kc> si incarica delle
+        responsabilit&agrave; di gestire il <kc>DDR Robot</kc>, mentre il <i>TranportTrolley</i> si occupa della
+        gestione dei suoi movimenti e l'esecuzione delle attivit&agrave; ad esso relativo.
+        <br/><br/>
+        Dunque si deve porre in una di queste categorie il requisito <kc>Back to Home</kc>: &egrave; un'azione o
+        un movimento?
+        <br/><br/>
+        Tale requisito pu&ograve; essere considerato come un movimento del robot, ovvero come un'azione che sposta
+        il <i>DDR Robot</i> dalla posizione attuale fino ad <i>HOME</i>. Visto che il movimento &egrave; vincolato
+        al soddisfacimento di un requisito (assenza di ulteriori richieste nel sistema) pu&ograve; essere considerata
+        un'attivit&agrave; che il robot deve svolgere quando si verificano determinate condizioni.
+        <br/>
+        La condizione da verificare &egrave; l'assenza di ulteriori richieste nel sistema.
 
+        <br/><br/>
+        Per tale motivo &egrave; stato deciso di sfruttare la capacit&agrave; di avere una propria coda
+        delle richieste: nel caso in cui non siano pi&ugrave; presenti richieste in coda nel <kc>transportTrolley</kc>, questo
+        pu&ograve; tornare in <i>HOME</i>, in caso contrario torna in <i>INDOOR</i>. Tale attivit&egrave; viene duque gestita
+        internamente al <kc>transportTrolley</kc>
 
-       <!--  <h2>Piano di lavoro</h2>
+        <h2>Architettura Logica</h2>
+        <div class="remark">
+            <br>
+            Modello ctxcoldstorageservice: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint1/src/sprint1.qak" target="_blank">sprint1.qak</a> <!-- TODO controllare modello e aggiunger elink giusto -->
+            Modello ctxmocktruck: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint1/src/sprint1.qak" target="_blank">mocktruck.qak</a>
+            <br>
+            <img src="./resources/images/coldstorageservicearch.png" alt="architettura logica"> <br>
+            Le risposte <b>ticket Reply</b> e <b>store Reply</b> sono state scritte in quel modo per motivii grafici in realtà rappresentano rispettivamente: <b>ticketAccepted/ticketRejected/ticketNotValid</b> e <b>storeAccepted/storeRejected</b>
+        </div>
 
-         </div> -->
-
-             <h2>Project</h2>
-              <div class="remark">
-                      <h3>MockTruck</h3>
-                      Il MockTruck &egrave stato modellato come un <b>Attore Qak</b>. Esso &egrave composto da vari stati, i quali si ripetono ciclicamente per simulare l'interazione di un conducente con la <b>ServiceAccessGUI</b>.<br>
-                      I messaggi di risposta del ticket sono stati modificati in <b>ticketValid</b>/<b>ticketNotValid</b>/<b>ticketExpired</b>.<br>
-                      Questo comportamento non implica la presenza di conducenti multipli, ma piuttosto di uno che cerca ciclicamente di effettuare un deposito. Di seguito &egrave riportato il diagramma degli stati e il diagramma delle interazioni con il ColdStorageService.
-                      <br>
-                      <img src="resources/images/MockTruckState.drawio.png" alt="MockTruckState">
-                      <br>
-                      <br>
-                      <img src="resources/images/interactionChartMockTruck.drawio.png" alt="MockTruckState">
-                      <br>
-                      Gli stati che rappresentano un rifiuto o un errore del sistema (Rejected, HandleError, handleTicketExpired) mostrano messaggi di errore e ritornano all'inizio ciclo.<br> Lo stato handleTicketNotValid stampa un messaggio di errore e riprova ad inserire di nuovo il ticket.<br></bRE> La transizione tra gli stati <b>Accepted</b> e <b>SendTicket</b> rappresenta il percorso che il conducente deve intraprendere per arrivare all'area <b>INDOOR</b>.
-                      Lo stato <b>SendDeposit</b> implementa l'approccio "as soon as possible" descritto nell'analisi del problema: appena il messaggio <b>chargeTaken</b> viene ricevuto, il conducente lascia l'area indoor. Prima di riprendere il ciclo, nello stato <b>IDLE</b> &egrave presente una pausa.
-                      <pre>
+            <h2>Project</h2>
+             <div class="remark">
+                 <h3>MockTruck</h3>
+                 Il MockTruck &egrave stato modellato come un <b>Attore Qak</b>. Esso &egrave composto da vari stati, i quali si ripetono ciclicamente per simulare l'interazione di un conducente con la <b>ServiceAccessGUI</b>.<br>
+                 I messaggi di risposta del ticket sono stati modificati in <b>ticketValid</b>/<b>ticketNotValid</b>/<b>ticketExpired</b>.<br>
+                 Questo comportamento non implica la presenza di conducenti multipli, ma piuttosto di uno che cerca ciclicamente di effettuare un deposito. Di seguito &egrave riportato il diagramma degli stati e il diagramma delle interazioni con il ColdStorageService.
+                 <br>
+                 <img src="resources/images/MockTruckState.drawio.png" alt="MockTruckState">
+                 <br>
+                 <br>
+                 <img src="resources/images/interactionChartMockTruck.drawio.png" alt="MockTruckState">
+                 <br>
+                 Gli stati che rappresentano un rifiuto o un errore del sistema (Rejected, HandleError, handleTicketExpired) mostrano messaggi di errore e ritornano all'inizio ciclo.<br> Lo stato handleTicketNotValid stampa un messaggio di errore e riprova ad inserire di nuovo il ticket.<br></bRE> La transizione tra gli stati <b>Accepted</b> e <b>SendTicket</b> rappresenta il percorso che il conducente deve intraprendere per arrivare all'area <b>INDOOR</b>.
+                 Lo stato <b>SendDeposit</b> implementa l'approccio "as soon as possible" descritto nell'analisi del problema: appena il messaggio <b>chargeTaken</b> viene ricevuto, il conducente lascia l'area indoor. Prima di riprendere il ciclo, nello stato <b>IDLE</b> &egrave presente una pausa.
+                 <pre>
 Thread.sleep(Random.nextLong(1, 2001))
    </pre>
-                      Sono presenti tre variabili che vengono modificate ad ogni ciclo.
-                      <pre>
+                 Sono presenti tre variabili che vengono modificate ad ogni ciclo.
+                 <pre>
 <key>var</key> FW = 0
 <key>var</key> DT = 1000L
 <key>var</key> TICKETID = 0
    </pre>
-                      In particolare, le variabili <b>FW</b> e <b>DT</b> vengono inizializzate con valori casuali attraverso una funzione all'interno dello stato <b>IDLE</b>:
-                      <pre>
+                 In particolare, le variabili <b>FW</b> e <b>DT</b> vengono inizializzate con valori casuali attraverso una funzione all'interno dello stato <b>IDLE</b>:
+                 <pre>
 <key>fun</key> initDriver(){
     FW = Random.nextInt(1, 101)
     DT = Random.nextLong(1, 2001)
 }
    </pre>
-                      Invece la variabile <b>TICKETID</b> viene assegnata nello stato <b>Accepted</b>, prendendo il valore dalla risposta <b>storeAccepted</b>.
-                      <pre>
+                 Invece la variabile <b>TICKETID</b> viene assegnata nello stato <b>Accepted</b>, prendendo il valore dalla risposta <b>storeAccepted</b>.
+                 <pre>
 <key2>onMsg</key2> (storeAccepted : storeAccepted(TICKETID)){
     [#
         TICKETID = payloadArg(0).toInt()
     #]
 }
    </pre>
-                  </div>
+                 <h3>TransportTrolley Component</h3>
+<!--                 TODO: check nomi immagini-->
+                 Il <kc>transportTrolley</kc> &egrave; stato progettato come unico componente, grazie alla possibilit&agrave; di uso delle funzionalit&agrave; di <kc>basicrobot23</kc> . Tuttavia, si &egrave; reso necessario l'introduzione di un terzo
+                 componente, che prenda in carico le richieste provenienti dal <kc>...</kc> e faccia da <b>orchestratore</b> per gli altri componenti. <br/>
 
-             </div>
+                 <h4>TransportTrolley</h4>
+                 La figura seguente riporta lo schema di interazione dei componenti: <br/><br/>
+                 <img src="./resources/images/transportTrollery_interazione.png" alt="" style="width:50% ; height:50% ;">
+                 <br/><br/>
 
-         <h2>Testing</h2>
-         <div class="remark">
-             <!-- TODO vedere se inserire le classi di utilit&agrave coapobs-->
-             <h3>MockTruck</h3>
+                 Anche questo componente verr&agrave; implementato come una <ks>coroutine Kotlin</ks> utilizzando il metalinguaggio QAk. Di seguito sono riportati il progetto della macchina
+                 a stati finiti e la sua implementazione in QAk. <br/><br/>
+                 <img src="./resources/images/transportTrollery_stati.png" alt="" style=""><br/><br/>
+                 Nello stato <i><b>idle</b></i> il <i>TransportTrolleyCore</i> rimane in attesa di un comando (<kc>pickup</kc>/<kc>dropout</kc>/<kc>gotohome</kc>) da parte del <i>...</i>. <br/>
+                 Nel caso in cui arrivi il messaggio <kc>gotohome</kc>, il <i>TransportTrolleyCore</i> transita allo stato <i><b>bakcHome</b></i>, in cui richiede al <i>TransportTrolleyMover</i> di muovere il robot
+                 verso la posizione <kc>HOME</kc>, nel caso in cui la risposta del <i>TransportTrolleyMover</i> sia positiva transita allo stato <b>backHomeRes</b> e quindi allo stato <b>idle</b>. <br/>
+                 Nel caso in cui arrivi il messaggio <kc>pickup</kc>, il <i>TransportTrolleyCore</i> transita allo stato <b>pickupMove</b>, in cui richiede al <i>TransportTrolleyMover</i> di muovere il robot
+                 verso l'<kc>INDOOR</kc> e rimane in attesa di un messaggio di conferma o errore da parte del <i>TransportTrolleyMover</i>. Se arriva una conferma allora il
+                 <i>TransportTrolleyCore</i> transita allo stato <b>pickupExec</b>, in cui chiede al <i>TransportTrolleyExecutor</i> di eseguire un'azione di carico, attende dunque
+                 una conferma o un messaggio di errore dallo stesso. Se arriva una conferma il componente transita allo stato <b>pickupRes</b> in cui invia una <kc>pickupdone</kc> al
+                 <i>...</i>, rientra quindi allo stato <b>idle</b>.<br/>
+                 Nel caso in cui arrivi il messaggio <kc>dropout</kc>, l'iter da seguire &egrave; lo stesso del caso precedente l'unica differenza sta nelle destinazioni verso cui bisogna muovere
+                 il robot e nelle azioni da eseguire. <br/>
+                 Nel caso in cui un'azione di movimento o l'esecuzione di un'azione di carico/scarico generino un errore, sono stati previsti due stati in cui tale errore verr&agrave; gestito.
+                 Il <i>TransportTrolleyCore</i> transita allo stato<b>moveErr</b> per gestire un errore di movimento. L'esecuzione di un movimento, genera errori solo nel caso
+                 in cui il robot fisico incontri qualche ostacolo sul suo percorso. Poi che da requisiti sappiamo che l'ambiente in cui opera il robot &egrave; privo di ostacoli,
+                 abbiamo deciso di gestire l'errore come segue: dopo aver ricevuto un messaggio di errore dal robot, il <i>TransportTrolleyMover</i> tenter&agrave; di completare il percorso
+                 per tre volte, se fallisce per tre volte consecutivamente invier&agrave; al <i>TransportTrolleyCore</i> il messaggio <kc>moveKo</kc>, quest'ultimo transiter&agrave; nello stato di errore
+                 sopracitato e richieder&agrave; assistenza. <br/>
+                 Per quanto riguarda gli errori dovuti all'esecuzione di un'azione essi non sono gestiti in quanto il committente ha specificato che le azioni possono essere
+                 simulate con dei <ks>delay</ks>, pertanto risultano infallibili. <br/>
+
+                 <pre>
+<key2>QActor</key2> transporttrolley <key2>context</key2> ctxcoldstorageservice{
+	<key2>State</key2> init initial{
+		...
+	}<key2>Transition</key2> t0 <key2>whenReply</key2> engagedone -> idle
+				   <key2>whenReply</key2> engagerefused -> waitforfree
+
+	<key2>State</key2> waitforfree{
+		println("$name | already engaged") color green
+	}
+
+	<key2>State</key2> idle {
+		...
+  	}
+ 	<key2>Transition</key2> t0 <key2>whenRequest</key2> pickup -> moverobottoindoor
+
+ 	<key2>State</key2> moverobottoindoor {
+ 		...
+ 	}
+ 	<key2>Transition</key2> t2 <key2>whenReply</key2> moverobotdone -> movetoport
+ 				  <key2>whenReply</key2> moverobotfailed -> robotmovefailed
+	<key2>State</key2> movetoport{
+		...
+	}
+	<key2>Transition</key2> t3 <key2>whenReply</key2> moverobotdone -> depositactionended
+ 				  <key2>whenReply</key2> moverobotfailed -> robotmovefailed
+	<key2>State</key2> depositactionended{
+		...
+	}
+	<key2>Transition</key2> t4 <key2>whenTime</key2> 3000 -> robottohome
+	<key2>whenRequest</key2> pickup -> moverobottoindoor
+	//se arriva un messagio prima di 3s moverobottoindoor altrimenti torno in home
+
+	<key2>State</key2> robottohome{
+		...
+	}
+	<key2>Transition</key2> t5 <key2>whenReply</key2> moverobotdone -> idle
+ 				  <key2>whenReply</key2> moverobotfailed -> robotmovefailed
+
+ 	//control failed robot moves
+ 	<key2>State</key2> robotmovefailed{
+ 		println("$name | robot failed to move") color red
+ 	}
+
+}
+</pre>
+            </div>
+            <h2>Testing</h2>
+            <div class="remark">
+                <h3>MockTruck</h3>
                 Per testare il <b>MockTruck</b> &egrave; stata creata la classe che rappresenta lo stato del truck <a href="">TruckState.kt</a> <!-- TODO inserire il link -->; all'interno del quale &egrave presente anche un enumerativo che rappresenta i possibili stati che pu&ograve assumere il mocktruck:
-             <pre>
+                <pre>
 <key>enum</key> class CurrStateTruck { IDLE, SENDSTORE, REJECTED, ACCEPTED, SENDTICKET, HANDLETICKETEXPIRED, SENDDEPOSIT, HANDLEERROR}
                  </pre>
-             Nell'ambito dell'attore Qak, &egrave stata introdotta una nuova variabile denominata <b>truckstate</b>:
+                Nell'ambito dell'attore Qak, &egrave stata introdotta una nuova variabile denominata <b>truckstate</b>:
 
-             <pre>
+                <pre>
 <key>val</key> truckstate = TruckState()
 </pre>
-             Questa variabile viene aggiornata ogni volta che lo stato del truck cambia, mediante le seguenti operazioni:
+                Questa variabile viene aggiornata ogni volta che lo stato del truck cambia, mediante le seguenti operazioni:
 
-             <pre>
+                <pre>
 [#truckstate.setState(CurrStateTruck.CURRENTSTATE)#]
 updateResource[#truckstate.toJsonString()#]
 </pre>
-             In questo modo un <b>observer</b> pu&ograve osservare lo stato del mock truck in modo da rendere pi&ugrave; semplici i test.
-             <br>
-             L'attore &egrave stato ulteriormente modificato con l'aggiunta di nuovi <b>Dispatch</b> che consentono alla classe di test di modificare lo stato. Di seguito sono elencati gli stati con le relative transizioni:
-             <pre>
+                In questo modo un <b>observer</b> pu&ograve osservare lo stato del mock truck in modo da rendere pi&ugrave; semplici i test.
+                <br>
+                L'attore &egrave stato ulteriormente modificato con l'aggiunta di nuovi <b>Dispatch</b> che consentono alla classe di test di modificare lo stato. Di seguito sono elencati gli stati con le relative transizioni:
+                <pre>
 <key2>Dispatch</key2> testStore : testStore(_)
 <key2>Dispatch</key2> testTicket : testTicket(_)
 <key2>Dispatch</key2> testDeposit : testDeposit(_)
@@ -174,10 +706,10 @@ updateResource[#truckstate.toJsonString()#]
 <key2>whenMsg</key2> testDeposit -> sendDeposit
 <key2>whenMsg</key2> reset -> idle
              </pre>
-             Le procedure di test sono implementate all'interno del file <a href="">TestMockTruckActor.kt</a> <!-- TODO inserire il link -->. Il metodo <b>@Before</b> si occupa dell'inizializzazione della connessione o, se gi&agrave inizializzata, invia il messaggio <b>reset</b> al mocktruck.
+                Le procedure di test sono implementate all'interno del file <a href="">TestMockTruckActor.kt</a> <!-- TODO inserire il link -->. Il metodo <b>@Before</b> si occupa dell'inizializzazione della connessione o, se gi&agrave inizializzata, invia il messaggio <b>reset</b> al mocktruck.
 
-             Ciascun test inizia inviando un <b>dispatch</b> che imposta lo stato desiderato del mocktruck, seguito dall'esecuzione delle operazioni di test e dalla verifica dei risultati. Ecco un esempio:
-             <pre>
+                Ciascun test inizia inviando un <b>dispatch</b> che imposta lo stato desiderato del mocktruck, seguito dall'esecuzione delle operazioni di test e dalla verifica dei risultati. Ecco un esempio:
+                <pre>
 @Before
 <key>fun</key> before() {
     if(!setupOk){
@@ -207,16 +739,16 @@ updateResource[#truckstate.toJsonString()#]
     Assert.assertTrue(newState.contains("ACCEPTED"))
 }
 </pre>
-             Questi metodi di test sono finalizzati a verificare diverse situazioni, ad esempio lo stato "ACCEPTED" dopo un tentativo di memorizzazione (<b>testStoreFoodAccepted</b>), lo stato "REJECTED" dopo un tentativo di memorizzazione non riuscito (<b>testStoreFoodRejected</b>), lo stato "TICKETEXPIRED" dopo l'invio di un biglietto scaduto (<b>testSendTicketExpired</b>), e cos&igrave; via. Ogni test invia i messaggi appropriati, aspetta un breve periodo di tempo per la risposta e quindi verifica lo stato attuale del mock truck.
+                Questi metodi di test sono finalizzati a verificare diverse situazioni, ad esempio lo stato "ACCEPTED" dopo un tentativo di memorizzazione (<b>testStoreFoodAccepted</b>), lo stato "REJECTED" dopo un tentativo di memorizzazione non riuscito (<b>testStoreFoodRejected</b>), lo stato "TICKETEXPIRED" dopo l'invio di un biglietto scaduto (<b>testSendTicketExpired</b>), e cos&igrave; via. Ogni test invia i messaggi appropriati, aspetta un breve periodo di tempo per la risposta e quindi verifica lo stato attuale del mock truck.
 
-             In questo modo, si garantisce che il mock truck si comporti correttamente in diverse circostanze e che gli stati cambino secondo le aspettative.
-             <h3>ColdStorageService</h3>
-             Le procedure di test sono implementate all'interno del file <a href="">TestColdStorageService.kt</a> <!-- TODO inserire il link -->. <br>
-             Il metodo <b>setUp</b> si occupa dell'inizializzazione della connessione o, se gi&agrave inizializzata, resetta tutti gli attributi della classe <b>ColdStorageService</b>.
-             Ciascun test inizia inviando una richiesta relativo alla parte da testare e poi analizza la risposta alla richiesta.<br>
-             In particolare i test che sfruttano i ticket modificano gli attributi della classe <b>ColdStorageService</b> utilizzando i metodi forniti; inoltre il <b>testDeposit</b> simula la risposta del <b>TrasportTrolley</b>.
-             Di seguito &egrave; riportato un esempio:
-             <pre>
+                In questo modo, si garantisce che il mock truck si comporti correttamente in diverse circostanze e che gli stati cambino secondo le aspettative.
+                <h3>ColdStorageService</h3>
+                Le procedure di test sono implementate all'interno del file <a href="">TestColdStorageService.kt</a> <!-- TODO inserire il link -->. <br>
+                Il metodo <b>setUp</b> si occupa dell'inizializzazione della connessione o, se gi&agrave inizializzata, resetta tutti gli attributi della classe <b>ColdStorageService</b>.
+                Ciascun test inizia inviando una richiesta relativo alla parte da testare e poi analizza la risposta alla richiesta.<br>
+                In particolare i test che sfruttano i ticket modificano gli attributi della classe <b>ColdStorageService</b> utilizzando i metodi forniti; inoltre il <b>testDeposit</b> simula la risposta del <b>TrasportTrolley</b>.
+                Di seguito &egrave; riportato un esempio:
+                <pre>
 @Before
 <key>fun</key> setUp() {
     if(!setupOk){
@@ -247,56 +779,166 @@ updateResource[#truckstate.toJsonString()#]
     assertTrue(rep.contains("chargeTaken"))
 }
              </pre>
-         </div>
+                <h3>TestTransportTrolley</h3>
+                I seguenti test sono stati sviluppati per verificare che il <kc>TransportTrolley</kc> si connetta
+                al <kc>basicrobot</kc> ed effettui le operazioni necessarie.
+                <pre>
+@Test
+@Throws(InterruptedException::class)
+    <key>fun</key> testPick() {
+        CommUtils.outmagenta("TestTrasportTrolley  |  testPickup...")
+        <key>var</key> pickup = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,1)"
+        <key>var</key> rep = ""
+        GlobalScope.launch {
+            try {
+                rep = connTT.request(pickup)
+            } catch (e: Exception) {
+                CommUtils.outmagenta("TestColdStorageService  |   some err in request: $e")
+            }
+        }
+        <key>var</key> newState = obsTT.getNext()
+        println(newState.toString())
+        Assert.assertEquals("INDOOR", newState.getCurrPosition().toString())
+        Assert.assertEquals("PICKINGUP", newState.getCurrState().toString())
+        newState = obsTT.getNext()
+        Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
+        Assert.assertEquals("MOVING", newState.getCurrState().toString())
+        Thread.sleep(7000)
+        Assert.assertTrue(rep.contains("pickupdone"))
+    }
+
+@Test
+@Throws(InterruptedException::class)
+    <key>fun</key> testPickQueue() {
+        CommUtils.outmagenta("TestTrasportTrolley  |  testPickupQueue...")
+        <key>val</key> pickup = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,1)"
+        <key>var</key> rep = ""
+        GlobalScope.launch {
+            try {
+                rep = connTT.request(pickup)
+            } catch (e: Exception) {
+                CommUtils.outmagenta("TestColdStorageService  |   some err in request: $e")
+            }
+        }
+        Thread.sleep(7000)
+        <key>val</key> pickupQue = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,2)"
+        <key>var</key> rep1 = ""
+        GlobalScope.launch {
+            try {
+                rep1 = connTT.request(pickupQue)
+            } catch (e: Exception) {
+                CommUtils.outmagenta("TestColdStorageService  |   some err in request: $e")
+            }
+        }
+        <key>var</key> newState = obsTT.getNext()
+        Assert.assertEquals("INDOOR", newState.getCurrPosition().toString())
+        Assert.assertEquals("PICKINGUP", newState.getCurrState().toString())
+        newState = obsTT.getNext()
+        Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
+        Assert.assertEquals("MOVING", newState.getCurrState().toString())
+        Thread.sleep(7000)
+        Assert.assertTrue(rep.contains("pickupdone"))
+        Thread.sleep(7000)
+        Assert.assertTrue(rep1.contains("pickupdone"))
+    }
+
+@Test
+@Throws(InterruptedException::class)
+    <key>fun</key> testMoveToHome() {
+        CommUtils.outmagenta("TestTrasportTrolley  |  testMoveToIndoor...")
+        <key>var</key> pickup = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,1)"
+        <key>var</key> repp = ""
+        GlobalScope.launch {
+            try {
+                repp = connTT.request(pickup)
+            } catch (e: Exception) {
+                CommUtils.outmagenta("TestColdStorageService  |   some err in request: $e")
+            }
+        }
+        Thread.sleep(12000)
+        <key>var</key> newState = obsTT.getNext()
+        println(newState.toString())
+        <key>var</key> move = "msg(moverobot, request, testunit, basicrobot, moverobot(4, 3),1)"
+        <key>var</key> rep = ""
+        try {
+            rep = connRobot.request(move)
+        } catch (e: Exception) {
+            CommUtils.outmagenta("TestColdStorageService	|	 some err in request: $e")
+        }
+        newState = obsTT.currentTypedState!!
+        Thread.sleep(5000)
+        Assert.assertEquals("IDLE",obsTT.currentTypedState!!.getCurrState().toString())
+        Assert.assertEquals("HOME", obsTT.currentTypedState!!.getCurrPosition().toString())
+    }
+                </pre>
+                Alla fine di ogni test il robot deve tornare in <kc>HOME</kc> e per fare ci&ograve;
+                si &egrave; inserito il seguente codice:
+                <pre>
+@Before
+    <key>fun</key> setUp() {
+        if (!setup) {
+            //setUp
+        } else {
+            <key>val</key> goHome = "msg(moverobot, request, testunit, basicrobot, moverobot(0,0) ,1)"
+            <key>var</key> rep=""
+            try {
+                rep = connRobot.request(goHome)
+            }catch (e: Exception) {
+                CommUtils.outmagenta("TestTrasportTrolley	|	 some err in request: $e")
+            }
+            Thread.sleep(7000)
+            obsTT.clearHistory()
+
+        }
+    }
+                </pre>
+            </div>
 
 
-<!--
-         <h2>Deployment</h2>
-         <div class="remark">
+            <h2>Deployment</h2>
+            <div class="remark">
 
-         </div>
+            </div>
 
+    <!--
+                <h2>Maintenance</h2>
+                -->
+    <!-- USEFUL
+    <table style="width:100%" border="1">
+    <tr>
+    <td style="width:40%">
+    </td>
+    <td></td>
+    </tr>
+    </table>
+    -->
 
-         <h2>Maintenance</h2>
-         -->
-<!-- USEFUL
-<table style="width:100%" border="1">
-<tr>
-<td style="width:40%">
-</td>
-<td></td>
-</tr>
-</table>
--->
-
-<br/><br/>
+    <br/><br/>
 </div>
 
 <div class="stud">
-    By Students: <br>
+    By Students: <br/>
     <div class="studentCardRow">
-    <div class="studentCard">
-        <div class="studentName">Leonardo Focardi</div>
-        <div class="studentEmail"><a href= "mailto:leonardo.focardi@studio.unibo.it">leonardo.focardi@studio.unibo.it</a>
+        <div class="studentCard">
+            <div class="studentName">Leonardo Focardi</div>
+            <div class="studentEmail"><a href= "mailto:leonardo.focardi@studio.unibo.it">leonardo.focardi@studio.unibo.it</a>
             </div>
-        <div class="studentImg"><img class="studentAvatar" src="resources/boys/leo.jpg"></div>
-    </div>
+            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/leo.jpg"></div>
+        </div>
         <div class="studentCard">
             <div class="studentName">Christian Galeone</div>
             <div class="studentEmail"><a href= "mailto:christian.galeone@studio.unibo.it">christian.galeone@studio.unibo.it</a></div>
-            <div class="studentImg"><img class="studentAvatar" src="resources/boys/christian.jpg"></div>
+            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/christian.jpg"></div>
         </div>
         <div class="studentCard">
             <div class="studentName">Gianmiriano Porrazzo</div>
             <div class="studentEmail"><a href= "mailto:gianmiriano.porrazzo@studio.unibo.it">gianmiriano.porrazzo@studio.unibo.it</a></div>
-            <div class="studentImg"><img class="studentAvatar" src="resources/boys/gian.jpg"></div>
+            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/gian.jpg"></div>
         </div>
     </div>
 
     <div class="repo">
         GIT repo: <a href="https://github.com/LEOB3TA/issProject2023">https://github.com/LEOB3TA/issProject2023</a>
     </div>
-
-</div>
 </body>
 </html>

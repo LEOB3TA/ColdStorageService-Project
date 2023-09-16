@@ -1,0 +1,365 @@
+SystemC transporttrolley
+
+/*Messaggio di uscita*/
+Dispatch exit:		exit(_)
+
+/*Messaggi azioni di deposito */
+
+Request pickup:		pickup(_)
+Reply	pickupdone:	pickupdone(_)
+Dispatch dropout  : dropout(FW) //peso
+Event	dropoutdone: dropoutdone(_)
+
+/*BackHome */
+Dispatch gotohome: gotohome(_)
+
+/*Movimenti */
+
+Request moveto: moveto(POS)
+Reply moveok:	moveok(_)
+Reply moveko:	moveko(_)
+
+/*Messaggi di azione */
+Request execaction : exeaction(ACT)// ACT = PICKUP | DROPOUT
+Reply execok :	execok(_)
+Reply execko :	execko(_)
+
+// BASICTROBOT
+/*Messaggi planexec  */
+Request doplan: doplan(PATH, OWNER, STEPTIME)
+Reply doplandone: doplandone(ARG)
+Reply doplanfail: doplanfail(ARG)
+
+/*Basicrobot */
+Dispatch cmd	:cmd(MOVE) // MOVE = w | s | l | r | h
+Dispatch end	:end(ARG)
+Dispatch setidirection : setdirection (DIR)
+
+Request step	:step(TIME)
+Reply	stepdone:stepdone(V)
+Reply 	stepfailed:stepfailed(DURATION,CAUSE)
+
+Request moverobot:moverobot(TARGETX,TARGETY)
+Reply moverobotdone: moverobotok(ARG)
+Reply moverobotfailed:moverobotfailed(PLANDONE, PLANTODO)
+
+Dispatch setrobotstate: setpos(X,Y,D)
+Dispatch setdirection: dir(D)// D = up|down|left|right
+
+Request getrobotstate:getrobotstate(ARG)
+Reply robotstate: robotstate(POS,DIR)
+/*Messaggi engager */
+Request engage        : engage(OWNER, STEPTIME)	
+Reply   engagedone    : engagedone(ARG)
+Reply   engagerefused : engagerefused(ARG)
+
+Dispatch disengage    : disengage(ARG)
+
+
+//Contesti
+
+Context ctxcoldstorageservice ip [host="localhost" port=8092] //porta a caso
+Context ctxbasicrobot ip [host="127.0.0.1" port=8020] //porta a caso
+
+ExternalQActor basicrobot context ctxbasicrobot
+//ExternalQActor planexec context ctxbasicrobot
+//ExternalQActor engager context ctxbasicrobot
+//ExternalQActor coldstorageservicecore context ctxcoldstorageservice
+CodedQActor pathobs context ctxbasicrobot className "observers.planexecCoapObserver"
+
+/*Componente che si occupa di gestire richieste ed azioni */
+
+QActor transporttrolleycore context ctxcoldstorageservice{
+	
+	[#
+		lateinit var POS : String
+		val tTState = transporttrolley.state.TransportTrolleyState()
+		var updateFlag = 0
+		var FW = 0F
+	#]
+	
+	State init initial{
+		[# utility.Banner.transportTrolleyBanner()#]
+		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	starting...")#]
+		request basicrobot -m engage:engage(transporttrolleycore,330)
+		updateResource[#tTState.toJsonString()#]
+		
+	}
+	Transition t0 whenReply engagedone -> idle
+				   whenReply engagerefused -> end
+
+	State idle{
+		
+		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	waiting...")#]
+		
+	}Transition t0 whenRequest pickup -> pickupMove
+					whenMsg dropout -> dropoutMove
+					whenMsg gotohome -> backHome
+					whenMsg exit -> end
+	State pickupMove{
+		request transporttrolleymover -m moveto : moveto(INDOOR)
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.ONTHEROAD)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		
+	}Transition t0 whenReply moveok -> pickupExec
+					whenReply moveko -> moveErr
+
+	State pickupExec{
+		request transporttrolleyexecutor -m execaction : execaction(PICKUP)
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.PICKINGUP)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.INDOOR)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		
+	}Transition t0 whenReply execok -> pickupRes
+					whenReply execko -> execErr
+
+	State pickupRes{
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.IDLE)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		replyTo pickup with pickupdone : pickupdone(_)
+	}Goto idle
+
+	State dropoutMove{
+		onMsg(dropout : dropout(FW)){
+			[#	
+				try{
+					FW = payloadArg(0).trim().uppercase().toFloat()
+					POS = "PORT"
+				}catch(e : Exception){}	
+			#]	
+		}
+		request transporttrolleymover -m moveto : moveto($POS)
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.ONTHEROAD)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		
+	}Transition t0 whenReply moveok -> dropoutExec
+					whenReply moveko -> moveErr
+
+	State dropoutExec{
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.DROPPINGOUT)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.valueOf(POS))
+		#]
+		updateResource[#tTState.toJsonString()#]
+		request transporttrolleyexecutor -m execaction : execaction(DROPOUT)
+	}Transition t0 whenReply execok -> dropoutRes
+					whenReply execko -> execErr
+
+	State dropoutRes{
+		
+		emit dropoutdone : dropoutdone
+
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.IDLE)
+		#]
+		
+		updateResource[#tTState.toJsonString()#]
+		
+	}Goto idle
+
+	State backHome{
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.MOVING)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.ONTHEROAD)
+		#]
+		updateResource[#tTState.toJsonString()#]
+		request transporttrolleymover -m moveto : moveto(HOME)
+	}Transition t0 whenReply moveok -> backHomeRes
+					whenReply moveko -> moveErr
+
+	State backHomeRes{
+		[#
+			tTState.setCurrState(transporttrolley.state.CurrStateTrolley.IDLE)
+			tTState.setCurrPosition(transporttrolley.state.TTPosition.HOME)	
+		#]
+		updateResource[#tTState.toJsonString()#]
+	}Goto idle
+
+	State moveErr{
+		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	something went wrong...assistance required.")#]
+		//forward coldstorageservicecore -m exit : exit(_)
+		forward transporttrolleycore -m exit : exit(_) 
+	}Goto idle 
+
+	State execErr{
+		//Still to be implemented 		
+	}
+
+	State end{
+		forward transporttrolleyexecutor -m exit : exit(_)
+		forward transporttrolleymover -m exit : exit(_)
+		terminate 0
+	}
+}
+/*Componente incaricato di muovere il DDR robot */
+
+QActor transporttrolleymover context ctxcoldstorageservice{
+	
+	[#
+		val planner = unibo.planner23.Planner23Util()
+		lateinit var destination  : String
+		var xDestination : Int = 0
+		var yDestination : Int = 0
+		var dir : String = "" 
+		var PATH = ""
+		var PATHSTILLTODO = ""
+		var attempt : Int = 0
+		var direction : String = ""
+		var someToFix : Boolean = false
+	#]
+	
+	State init initial{
+		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	starting...")#]
+		[# planner.initAI() #]
+	}Goto idle
+
+	State idle{
+		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	waiting...")#]
+		
+		[#someToFix = false#]
+		
+	}Transition t0 whenRequest moveto -> destinationEval
+					whenMsg exit -> end
+
+	State destinationEval{
+		
+		onMsg(moveto : moveto(POS)){
+			[#	
+				try{
+					destination = payloadArg(0).trim().uppercase()
+				
+					xDestination = utility.ServiceAreaDestinationConfig.getXDestination(destination)
+					yDestination = utility.ServiceAreaDestinationConfig.getYDestination(destination)
+					dir 		 = utility.ServiceAreaDestinationConfig.getPlannerDirection(destination)
+				}catch(e : Exception){}	
+			#]	
+		}
+		
+	}Goto plan
+
+	State plan{
+		
+		[#
+			planner.setGoal(xDestination, yDestination)
+			planner.doPlan()
+			PATH = planner.doPlanCompact()
+			unibo.basicomm23.utils.CommUtils.outcyan("$name	|	moving to $destination")
+		#]
+
+	}Goto execMove
+
+	State execMove{
+		
+		request basicrobot -m doplan : doplan($PATH)
+		
+	}Transition t0 whenReply doplandone -> lookForFix
+					whenReply doplanfail -> moveKo
+				
+	State lookForFix{
+		[# planner.doPathOnMap(PATH) #] 
+		[# someToFix = false #]
+		if[# planner.getDirection() != dir #]{
+			[# someToFix = true #]
+		}
+		
+	}Goto fixDir if[# someToFix #]
+					else moveOk 
+				
+	State fixDir{
+		forward basicrobot -m setdirection : setdirection( dir)
+		[# 
+			//PATH = utility.DirectionFixer.getPathForFixDir(planner.getDirection(), dir) 
+		 	unibo.basicomm23.utils.CommUtils.outcyan("$name	|	fixing direction")
+		#]
+		
+	}Goto execMove
+	
+	State moveOk{
+		
+		[# attempt = 0 #]
+		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	arrived in $destination")#]
+		
+		replyTo moveto with moveok : moveok
+		
+	}Goto idle
+
+	State moveKo{
+		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	moveKo")#]
+		[#attempt++#]
+		onMsg(doplanfail : doplanfail(ARG)){
+			[#	
+				try{
+					PATHSTILLTODO = payloadArg(0)
+				}catch(e : Exception){}	
+			#]
+		}
+		if[#attempt==3#]{
+			[# attempt = 0 #]
+			replyTo moveto with moveko : moveko(_)
+		}
+		else{
+			request basicrobot -m doplan : doplan($PATHSTILLTODO)	
+		}
+		
+	}Transition t0 whenReply doplandone -> lookForFix
+					whenReply doplanfail -> moveKo 
+						
+	State end{
+		terminate 0
+	}
+}
+
+/*Componente che si occupa di eseguire le azioni */
+
+QActor transporttrolleyexecutor context ctxcoldstorageservice{
+	
+	[#
+		lateinit var action : String	
+	#]
+	
+	State init initial{
+		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	starting...")#]
+	}Goto idle
+	
+	State idle{
+		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	waiting...")#]
+	}Transition t0 whenRequest execaction -> actionEval
+					whenMsg exit -> end
+	
+	State actionEval{
+		onMsg(execaction : execaction(ACT)){
+			[#	
+				try{
+					action = payloadArg(0).trim().uppercase()
+				}catch(e : Exception){}	
+			#]	
+		}
+	}Goto execPickup if[#action.equals("PICKUP")#]
+						else execDropout
+	
+	State execPickup{
+		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	$action execution")#]
+		[#delay(kotlin.random.Random.nextLong(3000, 5000))#]
+		replyTo execaction with execok : execok(_)
+	}Goto idle
+	
+	State execDropout{
+		[# unibo.basicomm23.utils.CommUtils.outcyan("$name	|	$action execution")#]
+		[#delay(kotlin.random.Random.nextLong(2000, 4000))#]
+		replyTo execaction with execok : execok(_)
+	}Goto idle
+	
+	State end{
+		terminate 0
+	}
+}

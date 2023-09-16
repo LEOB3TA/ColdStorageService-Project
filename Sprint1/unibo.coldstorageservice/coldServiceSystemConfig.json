@@ -1,0 +1,10 @@
+{
+  "_commment_" : "location has x,y, and degrees",
+  "LOCATION": {
+    "HOME": [0,0, 90],
+    "INDOOR": [0,4, 90],
+    "COLDROOM": [4, 3, 0]
+  },
+  "MAXW": 500,
+  "DLIMIT": 40
+}
