@@ -5,7 +5,7 @@ import resources.model.Ticket
 
 
 class ColdStorageService {
-    private var MAXW : Double = 0.0
+    private var MAXW : Double = 100.0
     private var DLIMIT : Int =0
     private val TICKETTIME: Long = 1
     private var currentWeightStorage : Double = 0.0
