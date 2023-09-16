@@ -10,9 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import resources.truckstate.TruckState
-import kotlin.random.Random
-
+	
 class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
@@ -24,11 +22,11 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 		       	var FW = 0
 		        var DT = 1000L  //DT= driver time tempo che ci mette il driver dopo aver ricevuto la richiesta per arrivare alla INDOOR
 		        var TICKETID = 0
-		        val truckstate = TruckState()
+		        val truckstate = resources.truckstate.TruckState()
 		        
 		        fun initDriver(){
-		        	FW =  Random.nextInt(1, 101)
-		        	DT = Random.nextLong(1, 2001)
+		        	FW =  kotlin.random.Random.nextInt(1, 101)
+		        	DT = kotlin.random.Random.nextLong(1, 2001)
 		        }
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
@@ -48,7 +46,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						CommUtils.outgreen("$name |	in idle")
 						
 						        	initDriver()
-						        	Thread.sleep(Random.nextLong(1, 2001))	
+						        	Thread.sleep(kotlin.random.Random.nextLong(1, 2001))	
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
