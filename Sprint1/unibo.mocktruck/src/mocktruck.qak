@@ -24,7 +24,7 @@ QActor mocktruck context ctxtruck{
         
         fun initDriver(){
         	FW =  kotlin.random.Random.nextInt(1, 101)
-        	DT = kotlin.random.Random.nextLong(1, 2001)
+        	DT = kotlin.random.Random.nextLong(1, 5001)
         }
     #]
     State s0 initial{
@@ -38,7 +38,7 @@ QActor mocktruck context ctxtruck{
         println("$name |	in idle") color green
         [#
         	initDriver()
-        	Thread.sleep(kotlin.random.Random.nextLong(1, 2001))	
+        	Thread.sleep(kotlin.random.Random.nextLong(1, 5001))	
         #]
     }Goto sendStore
 

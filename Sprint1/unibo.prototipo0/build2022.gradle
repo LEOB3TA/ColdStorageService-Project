@@ -39,8 +39,6 @@ dependencies {
     // Use the Kotlin JUnit integration.
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
 
-    implementation 'com.google.code.gson:gson:2.8.6'
-
     /* COROUTINES ********************************************************************************************************** */
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
     implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: "$kotlinVersion", ext: 'pom'
@@ -119,7 +117,7 @@ eclipse {
 
 application {
     // Define the main class for the application.
-    mainClass = 'it.unibo.ctxtruck.MainCtxtruckKt'
+    mainClass = 'it.unibo.ctxprototipo0.MainCtxprototipo0Kt'
 }
 
  jar {
