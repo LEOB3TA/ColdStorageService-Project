@@ -23,7 +23,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 		        var DT = 1000L  //DT= driver time tempo che ci mette il driver dopo aver ricevuto la richiesta per arrivare alla INDOOR
 		        var TICKETID = 0
 		        val truckstate = resources.truckstate.TruckState()
-		        
+		
 		        fun initDriver(){
 		        	FW =  kotlin.random.Random.nextInt(1, 101)
 		        	DT = kotlin.random.Random.nextLong(1, 5001)
@@ -46,7 +46,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						CommUtils.outgreen("$name |	in idle")
 						
 						        	initDriver()
-						        	Thread.sleep(kotlin.random.Random.nextLong(1, 5001))	
+						        	Thread.sleep(kotlin.random.Random.nextLong(1, 15001))
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

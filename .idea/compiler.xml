@@ -2,6 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="Sprint0-unibo.coldstorageservice" target="11" />
+      <module name="Sprint0-unibo.coldstorageservice.main" target="11" />
       <module name="Sprint0Reviewed-unibo.coldstorageservice" target="11" />
       <module name="Sprint0Reviewed-unibo.coldstorageservice.main" target="11" />
       <module name="Sprint0Reviewed-unibo.coldstorageservice.test" target="11" />
@@ -20,6 +22,9 @@
       <module name="unibo.old_css" target="11" />
       <module name="unibo.old_css.main" target="11" />
       <module name="unibo.old_css.test" target="11" />
+      <module name="unibo.prototipo0.unibo.coldstorageservice" target="11" />
+      <module name="unibo.prototipo0.unibo.coldstorageservice.main" target="11" />
+      <module name="unibo.prototipo0.unibo.coldstorageservice.test" target="11" />
       <module name="unibo.transporttrolley" target="11" />
       <module name="unibo.transporttrolley.main" target="11" />
       <module name="unibo.transportTrolley.main" target="11" />
