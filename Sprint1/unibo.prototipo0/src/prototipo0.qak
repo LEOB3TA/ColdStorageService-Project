@@ -71,10 +71,9 @@ QActor mocktruck context ctxprototipo0{
         println("$name |	in idle") color green
         [#
         	initDriver()
-        	CommUtils.delay(kotlin.random.Random.nextInt(1, 15001))
+        	delay(kotlin.random.Random.nextLong(1, 15001))
         #]
-      
-
+    
     }Goto sendStore
 
     State sendStore {
