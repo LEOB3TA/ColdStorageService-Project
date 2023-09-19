@@ -23,6 +23,7 @@
         vi &egrave; un robot che ha il compito di trasportare del cibo da un punto di partenza - chiamato INDOOR - alla cella
         frigorifera.
     </div>
+    <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint0Reviewed/userDocs/sprint0Reviewed.html">Sprint0 </a>
 
     <h2>Requirements</h2>
     <div class="remark">
@@ -175,8 +176,10 @@
         <i>Vantaggi e svantaggi</i>
         <br/><br/>
         <pro>+</pro> Possibilit&agrave; di riuso di software gi&agrave; sviluppato per mappare, identificare il
-        percorso ed eseguire il piano trovato ( )
-<!--        TODO: Inserire link a progetti-->
+        percorso ed eseguire il piano trovato (
+        <a href="https://github.com/anatali/issLab23/tree/main/unibo.planner23">unibo.planner23</a>,
+        <a href="https://github.com/anatali/issLab23/tree/main/unibo.basicrobot23">unibo.planner23</a>
+        ) a cui, eventualmente apportare modifiche.
         <br/><br/>
         <cons>-</cons> Potrebbe essere necessario effettuare degli aggiustamenti in quanto le dimensioni della
         stanza potrebbero essere multiple di RD.
@@ -238,7 +241,8 @@
         <img src="./resources/images/transportTrollery_linearetta.png" alt="" style="width:50% ; height:50% ;">
         <br/> <br/>
         Il problema relativo a tale soluzione &egrave; che il DDR robot si muove su se stesso di
-        90&ordm;( <!-- TODO: link -->). Per tale motivo il roboto non riesce a muoversi su una linea
+        <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/VirtualRobot23.html#virtualrobot23">90&ordm;</a>.
+        Per tale motivo il roboto non riesce a muoversi su una linea
         a diversa angolazione (non linea retta). Un possibile percorso sarebbe il seguente.
         <img src="./resources/images/transportTrollery_spezzata.png" alt="" style="width:50% ; height:50% ;">
         <br/> <br/>
@@ -249,7 +253,7 @@
         <br/><br/>
         <pro>+</pro> Percorso pi&ugrave; se si riuscisse a modificare il basicrobot23
         <br/><br/>
-        <cons>-</cons> Dover apportare modifiche al basicrobot23
+        <cons>-</cons> Dover apportare modifiche al basicrobot23<br/>
         <cons>-</cons> Impossibili&agrave; di uso di software gi&agrave; sviluppato per pianificare ed eseguire il percorso
         <br/>
         <ks>Muoversi usando la generazione di un piano</ks>
@@ -276,33 +280,31 @@
         sua volta usa il <kc>planner</kc> in modo da creare ed eseguire il piano individuato per raggiungere l'obiettivo.
 
         <h4>Gestione delle azioni di deposito e movimento</h4>
-        Bisogna a questo punto comprendere quale componente del sistema debba essere il responsabile delle operazioni di deposito e movimento.
-        Tali operazioni devono essere responsabilit&agrave; del <kc>ColdStorageServiceService</kc>, del <kc>transportTrolley</kc> o sarebbe opportuno
-        dividere le responsabilit&agrave; tra i due attori? <br/><br/>
-        Risulta evidente assegnare al <i>ColdStorageServiceService</i> la responsabilit&agrave; delle operazioni di deposito, in quanto esso &egrave; il destinatario
-        delle richieste di deposito provenienti dal truck. <br/>
-        Per quanto riguarda invece le operazioni di movimento, tale responsabilit&agrave; pu&ograve; essere assegnato sia al <i>ColdStorageServiceService</i> che al <i>transportTrolley</i>.
-        Tuttavia, volendo rispettare il principio di <a href="https://it.wikipedia.org/wiki/Principio_di_singola_responsabilit%C3%A0"><i><b>singola responsabilit&agrave;</b></i></a> e volendo evitare di avere un attore troppo complesso,
-        si consiglia agli sviluppatori di assegnare al <i>transportTrolley</i> la responsabilit&agrave; delle operazioni di movimento. In tal modo il <i>transportTrolley</i>
-        funger&agrave; da attuatore, e nel caso in cui esso debba far uso di un <kc>planner</kc>, potrebbe essere posto su di un nodo computazionale pi&ugrave; potente,
-        senza causare un eccessivo <i>overhead</i> sulla rete dovuto ai messaggi di movimento. <br/><br/>
-        In ultima analisi, si potrebbe decidere di attuare un'ulteriore separazione delle responsabilit&agrave; operando come segue: <br/><br/>
+<!--        Bisogna a questo punto comprendere quale componente del sistema debba essere il responsabile delle operazioni di deposito e movimento.-->
+<!--        Tali operazioni devono essere responsabilit&agrave; del <kc>ColdStorageServiceService</kc>, del <kc>TranportTrolley</kc> o sarebbe opportuno-->
+<!--        dividere le responsabilit&agrave; tra i due attori? <br/><br/>-->
+<!--        Risulta evidente assegnare al <i>ColdStorageServiceService</i> la responsabilit&agrave; delle operazioni di deposito, in quanto esso &egrave; il destinatario-->
+<!--        delle richieste di deposito provenienti dal truck. <br/>-->
+<!--        Per quanto riguarda invece le operazioni di movimento, tale responsabilit&agrave; pu&ograve; essere assegnato sia al <i>ColdStorageServiceService</i> che al <i>TranportTrolley</i>.-->
+<!--        Tuttavia, volendo rispettare il principio di <a href="https://it.wikipedia.org/wiki/Principio_di_singola_responsabilit%C3%A0"><i><b>singola responsabilit&agrave;</b></i></a> e volendo evitare di avere un attore troppo complesso,-->
+<!--        si consiglia agli sviluppatori di assegnare al <i>TranportTrolley</i> la responsabilit&agrave; delle operazioni di movimento. In tal modo il <i>TranportTrolley</i>-->
+<!--        funger&agrave; da attuatore, e nel caso in cui esso debba far uso di un <kc>planner</kc>, potrebbe essere posto su di un nodo computazionale pi&ugrave; potente,-->
+<!--        senza causare un eccessivo <i>overhead</i> sulla rete dovuto ai messaggi di movimento. <br/><br/>-->
+        Si potrebbe decidere di: <br/>
         Attribuire al componente <i>ColdStorageServiceService</i> le responsabilit&agrave; di:
         <ol>
-            <li>Accettare/Rifiutare richieste da parte del <i>truckDriver</i></li>
-            <li>Coordinare le operazioni di carico e scarico, cio&egrave; richiedere o comandare al <i>transportTrolley</i> l'esecuzione di qualche azione</li>
+            <li>Accettare/Rifiutare richieste da parte del <i>MockTruck</i></li>
+            <li>Coordinare le operazioni di carico e scarico, cio&egrave; richiedere o comandare al <i>TranportTrolley</i> l'esecuzione di qualche azione</li>
         </ol>
-        Attribuire al componente <i>transportTrolley</i> le responsabilit&agrave; di:
+        Attribuire al componente <i>TranportTrolley</i> le responsabilit&agrave; di:
         <ol>
             <li>Muovere il DDR robot verso la destinazione stabilita</li>
             <li>Eseguire le azioni di carico e scarico del materiale</li>
         </ol>
 
         Seguire tale approccio richiederebbe, quindi, una modifica dell'architettura logica del sistema, in quanto prevederebbe la suddivisione del <i>ColdStorageServiceService</i> in due componenti
-        distinti, uno dedito alla ricezione e valutazione delle richieste di deposito e uno dedito alla coordinazione delle operazioni carico/scarico. Allo stesso modo, bisognerebbe
-        operare una modifica nell'architettura del <i>transportTrolley</i>, in quanto sarebbe opportuno attribuire ad un componente la responsabilit&agrave; delle operazioni di movimento e
-        ad un altro la responsabilit&agrave; delle operazioni di carico/scarico. <br/><br/>
-        <ks>Seguire questa strada permetterebbe di ottenere componenti che adempiono ad una singola responsabilit&agrave; e tale responsabilit&agrave; sarebbe totalmente incapsulata nel componente stesso.</ks>
+        distinti, uno dedito alla ricezione e valutazione delle richieste di deposito e uno dedito alla coordinazione delle operazioni carico/scarico. Per quanto riguarda il <i>TranportTrolley</i>,
+        riesce a gestire le prime comunicando col <i>basicrobot23</i> e la seconda risulta esesre il comportamento che deve implementare<br/><br/>
 
         <h6>Interazioni</h6>
 
@@ -314,22 +316,22 @@
         <h6>Gestione stati</h6>
 
         <h4>Stato TransportTrolley</h4>
-        In previsione delle fasi successive del progetto, sarebbe opportuno mantenere lo stato del <i>transportTrolley</i>. In particolare occorrerebe tenere traccia della posizione
-        del <i>transportTrolley</i> e del suo stato (inteso come stato di attivit&agrave;). <br/>
-<!--            TODO: rivedere link-->
-        Dall'<a href="../../Sprint0/userDocs/sprint0.html">analisi dei requisiti </a> &egrave; emerso che lo stato del <i>transportTrolley</i> e la sua posizione nella stanza possono essere
+        In previsione delle fasi successive del progetto, sarebbe opportuno mantenere lo stato del <i>TranportTrolley</i>. In particolare sarebbe necessario tenere traccia della posizione
+        del <i>TranportTrolley</i> e del suo stato (inteso come stato di attivit&agrave;). <br/>
+
+        Dall'<a href="../../Sprint0/userDocs/sprint0.html">analisi dei requisiti </a> &egrave; emerso che lo stato del <i>TranportTrolley</i> e la sua posizione nella stanza possono essere
         rappresentati dai seguenti enumerativi:
         <pre>
 <key>enum</key> <key>class</key> CurrStateTrolley { IDLE, STOPPED, MOVING, PICKINGUP, DROPPINGOUT }</pre>
         <pre>
 <key>enum</key> <key>class</key> TTPosition { HOME, INDOOR, ONTHEROAD, PORT }</pre>
 
-        Sebbene quanto stabilito in fase di analisi dei requisiti sia corretto, occorre tenere presente che il <i>transportTrolley</i> potrebbe trovarsi in una posizione diffirente da
-        quelle indicate nell'enumerativo <kc>TTPosition</kc>. In particolare, durante un'azione di movimento, il <i>transportTrolley</i> potrebbe trovarsi in una posizione
+        Sebbene quanto stabilito in fase di analisi dei requisiti sia corretto, occorre tenere presente che il <i>TranportTrolley</i> potrebbe trovarsi in una posizione diffirente da
+        quelle indicate nell'enumerativo <kc>TTPosition</kc>. In particolare, durante un'azione di movimento, il <i>TranportTrolley</i> potrebbe trovarsi in una posizione
         intermedia tra due punti d'interesse della stanza. Per questo motivo riteniamo necessaria la seguente modifica dell'enumerativo <i>TTPosition</i>:
         <pre>
 <key>enum</key> <key>class</key> TTPosition { HOME, INDOOR,PORT, ONTHEROAD }</pre>
-        Come nel caso precedente, le soluzioni possibili per mantenere lo stato del <i>transportTrolley</i> sono diverse.Si decide di adottare la soluzione che
+        Come nel caso precedente, le soluzioni possibili per mantenere lo stato del <i>TranportTrolley</i> sono diverse.Si decide di adottare la soluzione che
         prevede di mantenere lo stato in una classe in modo che esso sia accessibile da terze parti, come riportato di seguito:
         <pre>
 <key>enum class</key> CurrStateTrolley {
@@ -347,8 +349,7 @@
     <key>fun</key> getCurrState() : CurrStateTrolley {...}
     <key>fun</key> getCurrPosition() : TTPosition {...}
 }</pre>
-<!--TODO: revisionare link -->
-        Il codice completo di questa classe &egrave; consultabile in <a href="./resources/kotlin/TransportTrolleyState.kt">TransportTrolleyState.kt</a>
+        Il codice completo di questa classe &egrave; consultabile in <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/unibo.coldstorageservice/resources/state/TransportTrolleyState.kt">TransportTrolleyState.kt</a>
 
         <h3>ColdStorageService</h3>
         <h6>Obiettivo</h6>
@@ -406,7 +407,7 @@
         <h3>Singleton</h3>
         Per quanto riguarda la gestione del ColdStorageService &egrave; stato deciso di utilizzare il pattern <i>Singleton</i> in modo da avere un unico attore che gestisce le richieste di deposito e che aggiorna gli attributi interni. <br/>
         Creando un'istanza da una classe con il singleton design pattern ci si assicura che non ne vengano create delle altre. Il singleton rende questa classe <b>accessibile globalmente</b> all'interno del software.
-        Per assicurarsi che l'istanza creata rimanga l'unica, bisogna impedire che l'utente possa crearne di nuove. Il costruttore deve quindi dichiarare il modello "<b>private</b>". In questo modo solamente il codice contenuto nel singleton può istanziare lo stesso singleton.
+        Per assicurarsi che l'istanza creata rimanga l'unica, bisogna impedire che l'utente possa crearne di nuove. Il costruttore deve quindi dichiarare il modello "<b>private</b>". In questo modo solamente il codice contenuto nel singleton pu&ograve; istanziare lo stesso singleton.
         Questo garantisce che l’utente ottenga un solo e unico oggetto, sempre lo stesso. Quando questa istanza viene resa disponibile, non ne vengono create di nuove.
 
         <pre>
@@ -538,18 +539,19 @@
 
         <br/><br/>
         Per tale motivo &egrave; stato deciso di sfruttare la capacit&agrave; di avere una propria coda
-        delle richieste: nel caso in cui non siano pi&ugrave; presenti richieste in coda nel <kc>transportTrolley</kc>, questo
+        delle richieste: nel caso in cui non siano pi&ugrave; presenti richieste in coda nel <kc>TranportTrolley</kc>, questo
         pu&ograve; tornare in <i>HOME</i>, in caso contrario torna in <i>INDOOR</i>. Tale attivit&egrave; viene duque gestita
-        internamente al <kc>transportTrolley</kc>
+        internamente al <kc>TranportTrolley</kc>
     </div>
         <h2>Architettura Logica</h2>
         <div class="remark">
             <br>
-            Modello ctxcoldstorageservice: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint1/src/sprint1.qak" target="_blank">sprint1.qak</a> <!-- TODO controllare modello e aggiunger elink giusto -->
-            Modello ctxmocktruck: <a style="font-size: larger" href="https://github.com/LEOB3TA/issProject2023/blob/main/Sprint1/src/sprint1.qak" target="_blank">mocktruck.qak</a>
+            Modello ctxcoldstorageservice: <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/unibo.coldstorageservice/src/coldstorageservice.qak" target="_blank">sprint1.qak</a>
+            Modello ctxmocktruck: <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/unibo.mocktruck/src/mocktruck.qak" target="_blank">mocktruck.qak</a>
             <br>
             <img src="./resources/images/coldstorageservicearch.png" alt="architettura logica"> <br>
-            Le risposte <b>ticket Reply</b> e <b>store Reply</b> sono state scritte in quel modo per motivii grafici in realtà rappresentano rispettivamente: <b>ticketAccepted/ticketRejected/ticketNotValid</b> e <b>storeAccepted/storeRejected</b>
+            Le risposte <b>ticket Reply</b> e <b>store Reply</b> sono state scritte in quel modo per motivii grafici in realt&agrave;
+            rappresentano rispettivamente: <b>ticketAccepted/ticketRejected/ticketNotValid</b> e <b>storeAccepted/storeRejected</b>
         </div>
 
 
@@ -592,8 +594,8 @@ Thread.sleep(Random.nextLong(1, 2001))
 }
    </pre>
                  <h3>TransportTrolley Component</h3>
-<!--                 TODO: check nomi immagini-->
-                 Il <kc>transportTrolley</kc> &egrave; stato progettato come unico componente, grazie alla possibilit&agrave; di uso delle funzionalit&agrave; di <kc>basicrobot23</kc> . Tuttavia, si &egrave; reso necessario l'introduzione di un terzo
+
+                 Il <kc>TranportTrolley</kc> &egrave; stato progettato come unico componente, grazie alla possibilit&agrave; di uso delle funzionalit&agrave; di <kc>basicrobot23</kc> . Tuttavia, si &egrave; reso necessario l'introduzione di un terzo
                  componente, che prenda in carico le richieste provenienti dal <kc>...</kc> e faccia da <b>orchestratore</b> per gli altri componenti. <br/>
 
                  <h4>TransportTrolley</h4>
@@ -604,24 +606,17 @@ Thread.sleep(Random.nextLong(1, 2001))
                  Anche questo componente verr&agrave; implementato come una <ks>coroutine Kotlin</ks> utilizzando il metalinguaggio QAk. Di seguito sono riportati il progetto della macchina
                  a stati finiti e la sua implementazione in QAk. <br/><br/>
                  <img src="./resources/images/transportTrollery_stati.png" alt="" style=""><br/><br/>
-                 Nello stato <i><b>idle</b></i> il <i>TransportTrolleyCore</i> rimane in attesa di un comando (<kc>pickup</kc>/<kc>dropout</kc>/<kc>gotohome</kc>) da parte del <i>...</i>. <br/>
-                 Nel caso in cui arrivi il messaggio <kc>gotohome</kc>, il <i>TransportTrolleyCore</i> transita allo stato <i><b>bakcHome</b></i>, in cui richiede al <i>TransportTrolleyMover</i> di muovere il robot
-                 verso la posizione <kc>HOME</kc>, nel caso in cui la risposta del <i>TransportTrolleyMover</i> sia positiva transita allo stato <b>backHomeRes</b> e quindi allo stato <b>idle</b>. <br/>
-                 Nel caso in cui arrivi il messaggio <kc>pickup</kc>, il <i>TransportTrolleyCore</i> transita allo stato <b>pickupMove</b>, in cui richiede al <i>TransportTrolleyMover</i> di muovere il robot
-                 verso l'<kc>INDOOR</kc> e rimane in attesa di un messaggio di conferma o errore da parte del <i>TransportTrolleyMover</i>. Se arriva una conferma allora il
-                 <i>TransportTrolleyCore</i> transita allo stato <b>pickupExec</b>, in cui chiede al <i>TransportTrolleyExecutor</i> di eseguire un'azione di carico, attende dunque
-                 una conferma o un messaggio di errore dallo stesso. Se arriva una conferma il componente transita allo stato <b>pickupRes</b> in cui invia una <kc>pickupdone</kc> al
-                 <i>...</i>, rientra quindi allo stato <b>idle</b>.<br/>
-                 Nel caso in cui arrivi il messaggio <kc>dropout</kc>, l'iter da seguire &egrave; lo stesso del caso precedente l'unica differenza sta nelle destinazioni verso cui bisogna muovere
-                 il robot e nelle azioni da eseguire. <br/>
-                 Nel caso in cui un'azione di movimento o l'esecuzione di un'azione di carico/scarico generino un errore, sono stati previsti due stati in cui tale errore verr&agrave; gestito.
-                 Il <i>TransportTrolleyCore</i> transita allo stato<b>moveErr</b> per gestire un errore di movimento. L'esecuzione di un movimento, genera errori solo nel caso
-                 in cui il robot fisico incontri qualche ostacolo sul suo percorso. Poi che da requisiti sappiamo che l'ambiente in cui opera il robot &egrave; privo di ostacoli,
-                 abbiamo deciso di gestire l'errore come segue: dopo aver ricevuto un messaggio di errore dal robot, il <i>TransportTrolleyMover</i> tenter&agrave; di completare il percorso
-                 per tre volte, se fallisce per tre volte consecutivamente invier&agrave; al <i>TransportTrolleyCore</i> il messaggio <kc>moveKo</kc>, quest'ultimo transiter&agrave; nello stato di errore
-                 sopracitato e richieder&agrave; assistenza. <br/>
-                 Per quanto riguarda gli errori dovuti all'esecuzione di un'azione essi non sono gestiti in quanto il committente ha specificato che le azioni possono essere
-                 simulate con dei <ks>delay</ks>, pertanto risultano infallibili. <br/>
+                 <!--                 TODO: riorganizzzare testo-->
+                 Nello stato <i><b>idle</b></i> il <i>TransportTrolley</i> rimane in attesa di un comando da parte del <i>ColdStorageService</i>. <br/><br/>
+                 Nel caso in cui arrivi il messaggio di <i>pickup</i>, si transita nello stato di <i>moverobottoindoor</i>.
+                 Da qui in poi si transita in una catena di stati che fungono da base per mandare i messaggi al <i>basicrobot23</i>
+                 in modo da far muovere effettivamente il robot.<br/>
+                 Se, per qualsiasi motivo, ci si trovasse nella situazione in cui viene restituito un <kc>moverobotfailed</kc>
+                 il <i>TransportTrolley</i> si ritrova in uno stato di errore, con eventuale conseguente uscita dall'applicazione.
+                 <br/><br/>
+                 Alla fine della sequenza di stati che porta al deposito del carico, ci si ritrova in <kc>PORT</kc>.
+                 Se &egrave; presente una ulteriore richiesta, ricomincio la trafila, tornando in <kc>INDOOR</kc>, altrimenti,
+                 dopo 3 secondi in cui non ricevo richieste, torna in <kc>HOME</kc>.
 
                  <pre>
 <key2>QActor</key2> transporttrolley <key2>context</key2> ctxcoldstorageservice{
@@ -673,7 +668,8 @@ Thread.sleep(Random.nextLong(1, 2001))
             <h2>Testing</h2>
             <div class="remark">
                 <h3>MockTruck</h3>
-                Per testare il <b>MockTruck</b> &egrave; stata creata la classe che rappresenta lo stato del truck <a href="">TruckState.kt</a> <!-- TODO inserire il link -->; all'interno del quale &egrave presente anche un enumerativo che rappresenta i possibili stati che pu&ograve assumere il mocktruck:
+                Per testare il <b>MockTruck</b> &egrave; stata creata la classe che rappresenta lo stato del truck
+                <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/unibo.mocktruck/resources/truckstate/TruckState.kt">TruckState.kt</a>; all'interno del quale &egrave presente anche un enumerativo che rappresenta i possibili stati che pu&ograve assumere il mocktruck:
                 <pre>
 <key>enum</key> class CurrStateTruck { IDLE, SENDSTORE, REJECTED, ACCEPTED, SENDTICKET, HANDLETICKETEXPIRED, SENDDEPOSIT, HANDLEERROR}
                  </pre>
@@ -702,7 +698,7 @@ updateResource[#truckstate.toJsonString()#]
 <key2>whenMsg</key2> testDeposit -> sendDeposit
 <key2>whenMsg</key2> reset -> idle
              </pre>
-                Le procedure di test sono implementate all'interno del file <a href="">TestMockTruckActor.kt</a> <!-- TODO inserire il link -->. Il metodo <b>@Before</b> si occupa dell'inizializzazione della connessione o, se gi&agrave inizializzata, invia il messaggio <b>reset</b> al mocktruck.
+                Le procedure di test sono implementate all'interno del file <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/unibo.mocktruck/src/test/it.unibo/testtruck/TestMockTruckActor.kt">TestMockTruckActor.kt</a>. Il metodo <b>@Before</b> si occupa dell'inizializzazione della connessione o, se gi&agrave inizializzata, invia il messaggio <b>reset</b> al mocktruck.
 
                 Ciascun test inizia inviando un <b>dispatch</b> che imposta lo stato desiderato del mocktruck, seguito dall'esecuzione delle operazioni di test e dalla verifica dei risultati. Ecco un esempio:
                 <pre>
@@ -739,7 +735,7 @@ updateResource[#truckstate.toJsonString()#]
 
                 In questo modo, si garantisce che il mock truck si comporti correttamente in diverse circostanze e che gli stati cambino secondo le aspettative.
                 <h3>ColdStorageService</h3>
-                Le procedure di test sono implementate all'interno del file <a href="">TestColdStorageService.kt</a> <!-- TODO inserire il link -->. <br>
+                Le procedure di test sono implementate all'interno del file <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/unibo.coldstorageservice/src/test.it.unibo/TestColdStorageService.kt">TestColdStorageService.kt</a>. <br>
                 Il metodo <b>setUp</b> si occupa dell'inizializzazione della connessione o, se gi&agrave inizializzata, resetta tutti gli attributi della classe <b>ColdStorageService</b>.
                 Ciascun test inizia inviando una richiesta relativo alla parte da testare e poi analizza la risposta alla richiesta.<br>
                 In particolare i test che sfruttano i ticket modificano gli attributi della classe <b>ColdStorageService</b> utilizzando i metodi forniti; inoltre il <b>testDeposit</b> simula la risposta del <b>TrasportTrolley</b>.
@@ -776,7 +772,9 @@ updateResource[#truckstate.toJsonString()#]
 }
              </pre>
                 <h3>TestTransportTrolley</h3>
-                I seguenti test sono stati sviluppati per verificare che il <kc>TransportTrolley</kc> si connetta
+                Le procedure di test sono implementate all'interno del file <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/unibo.coldstorageservice/src/test.it.unibo/TestTrasportTrolley.kt">TestTransportTrolley.kt</a>. <br>
+
+                Questi sono stati sviluppati per verificare che il <kc>TransportTrolley</kc> si connetta
                 al <kc>basicrobot</kc> ed effettui le operazioni necessarie.
                 <pre>
 @Test
@@ -890,10 +888,63 @@ updateResource[#truckstate.toJsonString()#]
                 </pre>
             </div>
 
+    <h2>Piano di lavoro</h2>
+    <div class="remark">
+        Tutti gli sprint sotto intendono delle migliorie e delle eventuali modifiche del lavoro fatto negli sprint precedenti
+<!--        <h3>Sprint 1 (Tempo stimato per lo sviluppo : 1 settimana circa)</h3>-->
+<!--        Core business dell'applicazione:-->
+<!--        <ul>-->
+<!--            <li>Transport trolley e interfacciamento con il basic robot</li>-->
+<!--            <li>Cold storage service</li>-->
+<!--            <li>Simulatore dei driver</li>-->
+<!--        </ul>-->
+        <h3>Sprint 2</h3>
+        Aggiunta specifiche di movimento del transport trolley:
+        <ul>
+            <li>Led</li>
+            <li>Controller</li>
+            <li>Sonar</li>
+        </ul>
+        <h3>Sprint 3</h3>
+        Sviluppo inteerfacce grafiche:
+        <ul>
+            <li>ServiceStatusGui</li>
+            <li>ServiceAccessGui</li>
+            <h3>Sprint 4</h3>
+            Deploy sul raspberry:
+            <ul>
+                <li>Creazione del supporto per led fisico</li>
+                <li>Deploy del sonar</li>
+                <li>Deploy del basic robot</li>
+            </ul>
+        </ul>
+    </div>
 
-            <h2>Deployment</h2>
+            <h2>Avviare il sistema</h2>
             <div class="remark">
-
+                <ol >
+                    <li style="font-size: 25px">
+                        <em style="font-size: 25px">Avviare il <bc>WebRobot23</bc></em>
+                        <p style="font-size: 16px">In tal modo si avviano il <i>basicrobot23</i> ed il <i>wenv</i></p>
+                        <pre style="font-size: 16px">
+cd ColdStorageService-Project/Sprint1/unibo.basicrobot23
+docker-compose -f webbasicrobot23.yaml up</pre>
+                    </li>
+                    <li style="font-size: 25px">
+                        <em style="font-size: 25px">Avviare il <bc>ColdStorageService</bc></em>
+                        <p style="font-size: 16px">In tal modo si avviano il <i>ColdStorageService</i> ed il <i>TransportTrolley</i></p>
+                        <pre style="font-size: 16px">
+cd ColdStorageService-Project/Sprint1/unibo.coldstorageservice
+./gradlew run</pre>
+                    </li>
+                    <li style="font-size: 25px">
+                        <em style="font-size: 25px">Avviare il <bc>MockTruck</bc></em>
+                        <p style="font-size: 16px">In tal modo si avvia il <i>MockTruck</i></p>
+                        <pre style="font-size: 16px">
+cd ColdStorageService-Project/Sprint1/unibo.mocktruck
+./gradlew run</pre>
+                    </li>
+                </ol>
             </div>
 
     <!--

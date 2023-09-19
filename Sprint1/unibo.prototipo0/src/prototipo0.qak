@@ -277,7 +277,7 @@ QActor transporttrolley context ctxprototipo0{
 		discardMsg Off
 		// engage
 		println("$name | request engage") color green
-		request basicrobot -m engage : engage ($MyName, 330)
+		request basicrobot -m engage : engage ($MyName, 320)
 		updateResource[#tTState.toJsonString()#]
 		//printCurrentMessage color black
 	}Transition t0 //whenTime 10000 -> error
