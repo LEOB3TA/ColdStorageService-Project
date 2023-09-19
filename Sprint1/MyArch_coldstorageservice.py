@@ -35,7 +35,7 @@ with Diagram('coldstorageserviceArch', show=False, outformat='png', graph_attr=g
      coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='ticket Reply', fontcolor='forestgreen') >> mockTruck
      coldstorageservice >> Edge(color='forestgreen', style='dashed', xlabel='chargeTaken', fontcolor='forestgreen') >> mockTruck
      transporttrolley >> Edge(color='forestgreen', style='dashed', xlabel='pickupdone', fontcolor='forestgreen') >> coldstorageservice
-     transporttrolley >> Edge(color='magenta', style='solid', xlabel='pickup', fontcolor='magenta') >> coldstorageservice
+     coldstorageservice >> Edge(color='magenta', style='solid', xlabel='pickup', fontcolor='magenta') >> transporttrolley
      transporttrolley >> Edge(color='magenta', style='solid', xlabel='engage', fontcolor='magenta') >> basicrobot
      transporttrolley >> Edge(color='magenta', style='solid', xlabel='doplan', fontcolor='magenta') >> basicrobot
      transporttrolley >> Edge(color='magenta', style='solid', xlabel='moverobot', fontcolor='magenta') >> basicrobot
