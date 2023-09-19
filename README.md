@@ -21,12 +21,12 @@ Group project for the university course "Ingegneria dei sistemi software" Prof. 
 
 ## Instructions
 ### Mode 1:
-- Download the release
+- Download the zip inside release
 - Use the script startPrototype-***.sh/bat to execute the prototype
 ### Mode 2:
 You have to install **Gradle** on your computer
 
-- Download the release
+- Download the source code from release
 - Unzip the source code
 - Start the basicrobot
 ```bash
