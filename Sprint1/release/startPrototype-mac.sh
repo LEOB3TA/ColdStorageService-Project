@@ -15,11 +15,11 @@ docker-compose -f webbasicrobot23.yaml up -d
 
 # Wait for the containers to initialize
 echo "wait for the containers to inizialize"
-sleep 1
+sleep 3
 
 # Open the default web browser to localhost:8090
 open http://localhost:8090
-sleep 5
+sleep 15
 
 # Start the unibo.prototipo0-1.0-all.jar file (assuming it's in the current directory)
 java -jar unibo.prototipo0-1.0-all.jar
