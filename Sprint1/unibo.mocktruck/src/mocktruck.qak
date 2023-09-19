@@ -26,22 +26,22 @@ QActor mocktruck context ctxtruck{
         	FW =  kotlin.random.Random.nextInt(1, 101)
         	DT = kotlin.random.Random.nextLong(1, 5001)
         }
-    #]
+        #]
     State s0 initial{
 		println("$name |	started") color green
 		println("this is an infinite loop, you need to kill the program to stop this") color red
 		discardMsg Off
-		
+
     }Goto idle
 
     State idle {
         println("$name |	in idle") color green
         [#
         	initDriver()
-        	Thread.sleep(kotlin.random.Random.nextLong(1, 5001))	
+        	delay(kotlin.random.Random.nextLong(1, 15001))
         #]
     }Goto sendStore
-
+    
     State sendStore {
     	 println("$name |	sendStore") color green
         request coldstorageservice -m storeFood : storeFood($FW)

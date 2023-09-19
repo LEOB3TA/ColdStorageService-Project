@@ -87,9 +87,9 @@ QActor mocktruck context ctxtruck{
     	[#truckstate.setState(CurrStateTruck.IDLE)#]
     	updateResource[#truckstate.toJsonString()#]
         println("$name |	in idle") color green
-        [#
+             [#
         	initDriver()
-        	Thread.sleep(Random.nextLong(1, 2001))	
+        	delay(kotlin.random.Random.nextLong(1, 15001))
         #]
     }Transition t0  whenTime 60000 -> handleError
      whenMsg testStore -> sendStore

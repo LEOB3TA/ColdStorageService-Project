@@ -73,7 +73,6 @@ QActor mocktruck context ctxprototipo0{
         	initDriver()
         	delay(kotlin.random.Random.nextLong(1, 15001))
         #]
-    
     }Goto sendStore
 
     State sendStore {
