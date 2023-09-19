@@ -566,7 +566,7 @@ Thread.sleep(Random.nextLong(1, 2001))
                  <h6>Gestione stati</h6>
                  Nell'analisi dei requisiti &egrave; emersa la necessit&agrave; di mantenere lo stato del <i>ColdStorageService</i>. In particolare occorre tenere traccia del <b>peso attuale del carico</b> e del <b>numero di richieste rifiutate</b>. <br/>
                  Nella seguente immagine vengono mostrati gli stati in cui il <i>ColdStorageService</i> pu&ograve; trovarsi. <br><br>
-                 <img src="resources/images/CSS_DiagramState.png" alt=""> <br><br>
+                 <img src="resources/images/CSS_State.drawio.png" alt=""> <br><br>
                  <ul>
                      <li> Nello stato <b>setup</b> il <i>ColdStorageService</i> esegue tutte le operazioni di inizializzazione, stampa un messaggio e si dirige nello stato <b>idle</b></li>
                      <li> Nello stato <b>idle</b> il <i>ColdStorageService</i> &egrave; in attesa di un comando tra <kc>storeFood</kc>/<kc>sendTicket</kc>/<kc>pickupdone</kc>/<kc>deposit dagli altri attori</kc></li>
