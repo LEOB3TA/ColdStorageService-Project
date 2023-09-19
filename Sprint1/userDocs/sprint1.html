@@ -922,6 +922,17 @@ updateResource[#truckstate.toJsonString()#]
 
             <h2>Avviare il sistema</h2>
             <div class="remark">
+                <h5>Avvio automatizzato</h5>
+
+                Scaricare la release da <b>Github</b>, utilizzare lo script adeguato per il proprio sistema:
+                <ul>
+                    <li>Linux: <b>startPrototype-linux.sh</b></li>
+                    <li>MacOS: <b>startPrototype-mac.sh</b></li>
+                    <li>Windows: <b>startPrototype-win.bat</b></li>
+                </ul>
+
+                <h5>Avvio manuale</h5>
+
                 <ol >
                     <li style="font-size: 25px">
                         <em style="font-size: 25px">Avviare il <bc>WebRobot23</bc></em>
@@ -931,17 +942,10 @@ cd ColdStorageService-Project/Sprint1/unibo.basicrobot23
 docker-compose -f webbasicrobot23.yaml up</pre>
                     </li>
                     <li style="font-size: 25px">
-                        <em style="font-size: 25px">Avviare il <bc>ColdStorageService</bc></em>
-                        <p style="font-size: 16px">In tal modo si avviano il <i>ColdStorageService</i> ed il <i>TransportTrolley</i></p>
+                        <em style="font-size: 25px">Avviare il <bc>ColdStorageService</bc>,<bc>MockTruck</bc> e <bc>Trasporttrolley</bc></em>
+                        <p style="font-size: 16px">In tal modo si avviano le varie componenti</p>
                         <pre style="font-size: 16px">
-cd ColdStorageService-Project/Sprint1/unibo.coldstorageservice
-./gradlew run</pre>
-                    </li>
-                    <li style="font-size: 25px">
-                        <em style="font-size: 25px">Avviare il <bc>MockTruck</bc></em>
-                        <p style="font-size: 16px">In tal modo si avvia il <i>MockTruck</i></p>
-                        <pre style="font-size: 16px">
-cd ColdStorageService-Project/Sprint1/unibo.mocktruck
+cd ColdStorageService-Project/Sprint1/unibo.prototipo0
 ./gradlew run</pre>
                     </li>
                 </ol>
