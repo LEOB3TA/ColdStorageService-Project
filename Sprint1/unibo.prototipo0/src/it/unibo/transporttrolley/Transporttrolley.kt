@@ -34,7 +34,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					action { //it:State
 						discardMessages = false
 						CommUtils.outgreen("$name | request engage")
-						request("engage", "engage($MyName,330)" ,"basicrobot" )  
+						request("engage", "engage($MyName,320)" ,"basicrobot" )  
 						updateResourceRep(tTState.toJsonString() 
 						)
 						//genTimer( actor, state )
