@@ -428,92 +428,8 @@
     }
 }
         </pre>
-        Il codice completo di questa classe &egrave; consultabile in <a href="../unibo.coldstorageservice/resources/ColdStorageService.kt">TransportTrolleyState.kt</a>
+        Il codice completo di questa classe &egrave; consultabile in <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/unibo.coldstorageservice/resources/ColdStorageService.kt">ColdStorageService.kt</a>
 
-        <h6>Interazioni</h6>
-        Per quanto riguarda l'interazione tra i componenti possiamo, in prima battuta, affermare che essi interagiscono a scambio di messaggi. L'utilizzo del linguagguio QAk ci permette di tipizzare i messaggi in modo tale da avere un controllo maggiore sulle interazioni tra i componenti. Nasce quindi il problema di individuare il tipo di messaggio per ogni interazione:
-        <h6>Gestione stati</h6>
-        Nell'analisi dei requisiti &egrave; emersa la necessit&agrave; di mantenere lo stato del <i>ColdStorageService</i>. In particolare occorre tenere traccia del <b>peso attuale del carico</b> e del <b>numero di richieste rifiutate</b>. <br/>
-        Nella seguente immagine vengono mostrati gli stati in cui il <i>ColdStorageService</i> pu&ograve; trovarsi. <br><br>
-        <img src="resources/images/CSS_DiagramState.png" alt=""> <br><br>
-        <ul>
-            <li> Nello stato <b>setup</b> il <i>ColdStorageService</i> esegue tutte le operazioni di inizializzazione, stampa un messaggio e si dirige nello stato <b>idle</b></li>
-            <li> Nello stato <b>idle</b> il <i>ColdStorageService</i> &egrave; in attesa di un comando tra <kc>storeFood</kc>/<kc>sendTicket</kc>/<kc>pickupdone</kc>/<kc>deposit dagli altri attori</kc></li>
-            <li> All'arrivo della richiesta di <kc>storeFood</kc>, il <i>ColdStorageService</i> riceve la richiesta di deposito dal <i>truck</i> e valuta se accettarla o rifiutarla secondo la funzione <i>canStore</i>
-                <ul>
-                    <li>
-                        Se la richiesta viene accettata, il <i>ColdStorageService</i> si dirige nello stato <b>AcceptRequest</b>
-                    </li>
-                    <li>
-                        Se la richiesta viene rifiutata, il <i>ColdStorageService</i> si dirige nello stato <b>RejectRequest</b>
-                    </li>
-                </ul>
-                <pre>
-<code>// canStore Function</code>
-    <key>fun</key> canStore(requestWeightToStore: Double): Boolean{
-        return (requestWeightToStore + getCurrentWeightStorage() <= getMAXW())
-    }
-                </pre>
-            </li>
-            <li>Nello stato <b>AcceptRequest</b> il ColdStorageService genera il ticket per il truck, incrementa lo stato del ticket number, aggiunge il ticket nella lista dei validi, risponde con <kc>storeAccepted</kc> e torna in <b>idle</b>
-            <pre>
-<code>// AcceptRequest State</code>
-<key>State</key> acceptRequest{
-    [#
-    	var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME)
-    	ColdStorageService.incrementTicketNumber()
-        ColdStorageService.getTicketList().add(TICKET)
-    #]
-    replyTo storeFood with storeAccepted : storeAccepted(TICKETNUMBER)
-} Goto idle
-            </pre>
-            </li>
-            <li>Nello stato <b>RejectRequest</b> il ColdStorageService incrementa il numero di richieste rifiutate, restituisce la risposta <kc>storeRejected</kc> e torna in <b>idle</b>
-            <pre>
-<code>// RejectRequest State</code>
-<key>State</key> rejectRequest{
-    [#
-	    ColdStorageService.incrementRejectedRequestCounter()
-    #]
-    replyTo storeFood with storeRejected : storeRejected(_)
-} Goto idle
-            </pre>
-            </li>
-            <li>
-                All'arrivo della richiesta di <kc>sendTicket</kc>, il <i>ColdStorageService</i> riceve la richiesta di ticket dal <i>BasicRobot</i> e valuta se accettarla o rifiutarla secondo la funzione <i>ticketEvaluation</i>, che richiama la funzione <i>isExpired</i> vista sopra. <br>
-                La funzione prende in ingresso l'id del ticket e restituisce un booleano che indica se il ticket &egrave; valido o meno.
-                <ul>
-                    <li>
-                        Se il ticket &egrave; presente nella lista dei ticket attivi e non &egrave; scaduto, il <i>ColdStorageService</i> rimuove il ticket da quelli validi, risponde con <kc>ticketValid</kc> e torna in <b>idle</b>
-                    </li>
-                    <li>
-                        Se il ticket non &egrave; presente nella lista dei validi, il <i>ColdStorageService</i> si dirige verso lo stato <b>sendInvalidTicket</b>
-                    </li>
-                    <li>
-                        Se il ticket &egrave; presente nella lista dei validi ma &egrave; scaduto, il <i>ColdStorageService</i> si dirige verso lo stato <b>sendExpiredTicket</b>
-                    </li>
-                </ul>
-            </li>
-            <li>Nello stato <b>sendInvalidTicket</b>, il <i>ColdStorageService</i> stampa il messaggio di errore, risponde con <kc>ticketNotValid</kc> e torna in <b>idle</b></li>
-            <li>Nello stato <b>removeEpiredTicket</b>, il <i>ColdStorageService</i> aumenta il numero di richieste rifiutate, rimuove il ticket dalla lista degli attivi, risponde con <kc>ticketExpired</kc> e torna in <b>idle</b>
-                <pre>
-<code>// removeExpiredTicket State</code>
-<key>State</key> removeExpiredTicket {
-    println("Ticket of id ${payloadArg(0)} is expired - Reject Request") color red
-    replyTo sendTicket with ticketExpired : ticketExpired(_)
-    [#
-        val TICKETID = payloadArg(0).toInt()
-        val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
-        resources.ColdStorageService.incrementRejectedRequestCounter()
-        resources.ColdStorageService.getTicketList().remove(TICKET)
-    #]
-} Goto idle</pre>
-            </li>
-            <li>All'arrivo della richiesta di <kc>deposit</kc>, il <i>ColdStorageService</i> si dirige nello stato <b>charged</b></li>
-            <li>Nello stato <b>charged</b>, il <i>ColdStorageService</i> invia una richiesta di <kc>pickup</kc> al BasicRobot e torna in <b>idle</b></li>
-            <li>All'arrivo della richiesta di <kc>pickupdone</kc>, il <i>ColdStorageService</i> si dirige nello stato <b>taken</b></li>
-            <li>Nello stato <b>taken</b>, il <i>ColdStorageService</i> risponde con <kc>chargeTaken</kc> e torna in <b>idle</b></li>
-        </ul>
         <h3>Back to Home</h3>
         <div id= "bh">
             Dalle Users story si evince che appena la deposit action termina se non ci sono altre richieste
@@ -593,7 +509,190 @@ Thread.sleep(Random.nextLong(1, 2001))
     #]
 }
    </pre>
-                 <h3>TransportTrolley Component</h3>
+   <pre>
+<key2>QActor</key2> mocktruck <key2>context</key2> ctxtruck{
+
+    <key2>State</key2> s0 initial{
+        ...
+    }<key2>Goto</key2> idle
+
+    <key2>State</key2> idle {
+        ...
+    }<key2>Goto</key2> sendStore
+
+    <key2>State</key2> sendStore {
+        ...
+    } <key2>Transition</key2> t0 <key2>whenTime</key2> 60000 -> handleError
+                                 <key2>whenReply</key2> storeAccepted -> accepted
+                                 <key2>whenReply</key2> storeRejected -> rejected
+
+    <key2>State</key2> rejected{
+        ...
+    }<key2>Goto</key2> idle
+
+    <key2>State</key2> accepted{
+        ...
+    }<key2>Transition</key2> t0 whenTimeVar DT -> sendTicket
+
+    <key2>State</key2> sendTicket{
+        ...
+    } <key2>Transition</key2> t0 <key2>whenTime</key2> 60000 -> handleError
+                                 <key2>whenReply</key2> ticketValid -> sendDeposit
+                                 <key2>whenReply</key2> ticketExpired -> handleTicketExpired
+
+
+    <key2>State</key2> sendDeposit{
+        ...
+    } <key2>Transition</key2> t0  <key2>whenTime</key2> 60000 -> handleError
+                                  <key2>whenReply</key2> chargeTaken -> idle
+
+    <key2>State</key2> handleError{
+        ...
+    } <key2>Goto</key2> idle
+
+    <key2>State</key2> handleTicketExpired{
+        ...
+    } <key2>Goto</key2> idle
+
+    <key2>State</key2> handleTicketNotValid{
+        ...
+    } <key2>Goto</key2> sendTicket
+
+}
+   </pre>
+                 <h3>ColdStorageService</h3>
+                 <h6>Interazioni</h6>
+                 Per quanto riguarda l'interazione tra i componenti possiamo, in prima battuta, affermare che essi interagiscono a scambio di messaggi. L'utilizzo del linguagguio QAk ci permette di tipizzare i messaggi in modo tale da avere un controllo maggiore sulle interazioni tra i componenti. Nasce quindi il problema di individuare il tipo di messaggio per ogni interazione:
+                 <h6>Gestione stati</h6>
+                 Nell'analisi dei requisiti &egrave; emersa la necessit&agrave; di mantenere lo stato del <i>ColdStorageService</i>. In particolare occorre tenere traccia del <b>peso attuale del carico</b> e del <b>numero di richieste rifiutate</b>. <br/>
+                 Nella seguente immagine vengono mostrati gli stati in cui il <i>ColdStorageService</i> pu&ograve; trovarsi. <br><br>
+                 <img src="resources/images/CSS_DiagramState.png" alt=""> <br><br>
+                 <ul>
+                     <li> Nello stato <b>setup</b> il <i>ColdStorageService</i> esegue tutte le operazioni di inizializzazione, stampa un messaggio e si dirige nello stato <b>idle</b></li>
+                     <li> Nello stato <b>idle</b> il <i>ColdStorageService</i> &egrave; in attesa di un comando tra <kc>storeFood</kc>/<kc>sendTicket</kc>/<kc>pickupdone</kc>/<kc>deposit dagli altri attori</kc></li>
+                     <li> All'arrivo della richiesta di <kc>storeFood</kc>, il <i>ColdStorageService</i> riceve la richiesta di deposito dal <i>truck</i> e valuta se accettarla o rifiutarla secondo la funzione <i>canStore</i>
+                         <ul>
+                             <li>
+                                 Se la richiesta viene accettata, il <i>ColdStorageService</i> si dirige nello stato <b>AcceptRequest</b>
+                             </li>
+                             <li>
+                                 Se la richiesta viene rifiutata, il <i>ColdStorageService</i> si dirige nello stato <b>RejectRequest</b>
+                             </li>
+                         </ul>
+                         <pre>
+<code>// canStore Function</code>
+    <key>fun</key> canStore(requestWeightToStore: Double): Boolean{
+        return (requestWeightToStore + getCurrentWeightStorage() <= getMAXW())
+    }
+                </pre>
+                     </li>
+                     <li>Nello stato <b>AcceptRequest</b> il ColdStorageService genera il ticket per il truck, incrementa lo stato del ticket number, aggiunge il ticket nella lista dei validi, risponde con <kc>storeAccepted</kc> e torna in <b>idle</b>
+                         <pre>
+<code>// AcceptRequest State</code>
+<key>State</key> acceptRequest{
+    [#
+    	var TICKET : Ticket = Ticket(TICKETNUMBER, TICKETTIME)
+    	ColdStorageService.incrementTicketNumber()
+        ColdStorageService.getTicketList().add(TICKET)
+    #]
+    replyTo storeFood with storeAccepted : storeAccepted(TICKETNUMBER)
+} Goto idle
+            </pre>
+                     </li>
+                     <li>Nello stato <b>RejectRequest</b> il ColdStorageService incrementa il numero di richieste rifiutate, restituisce la risposta <kc>storeRejected</kc> e torna in <b>idle</b>
+                         <pre>
+<code>// RejectRequest State</code>
+<key>State</key> rejectRequest{
+    [#
+	    ColdStorageService.incrementRejectedRequestCounter()
+    #]
+    replyTo storeFood with storeRejected : storeRejected(_)
+} Goto idle
+            </pre>
+                     </li>
+                     <li>
+                         All'arrivo della richiesta di <kc>sendTicket</kc>, il <i>ColdStorageService</i> riceve la richiesta di ticket dal <i>BasicRobot</i> e valuta se accettarla o rifiutarla secondo la funzione <i>ticketEvaluation</i>, che richiama la funzione <i>isExpired</i> vista sopra. <br>
+                         La funzione prende in ingresso l'id del ticket e restituisce un booleano che indica se il ticket &egrave; valido o meno.
+                         <ul>
+                             <li>
+                                 Se il ticket &egrave; presente nella lista dei ticket attivi e non &egrave; scaduto, il <i>ColdStorageService</i> rimuove il ticket da quelli validi, risponde con <kc>ticketValid</kc> e torna in <b>idle</b>
+                             </li>
+                             <li>
+                                 Se il ticket non &egrave; presente nella lista dei validi, il <i>ColdStorageService</i> si dirige verso lo stato <b>sendInvalidTicket</b>
+                             </li>
+                             <li>
+                                 Se il ticket &egrave; presente nella lista dei validi ma &egrave; scaduto, il <i>ColdStorageService</i> si dirige verso lo stato <b>sendExpiredTicket</b>
+                             </li>
+                         </ul>
+                     </li>
+                     <li>Nello stato <b>sendInvalidTicket</b>, il <i>ColdStorageService</i> stampa il messaggio di errore, risponde con <kc>ticketNotValid</kc> e torna in <b>idle</b></li>
+                     <li>Nello stato <b>removeEpiredTicket</b>, il <i>ColdStorageService</i> aumenta il numero di richieste rifiutate, rimuove il ticket dalla lista degli attivi, risponde con <kc>ticketExpired</kc> e torna in <b>idle</b>
+                         <pre>
+<code>// removeExpiredTicket State</code>
+<key>State</key> removeExpiredTicket {
+    println("Ticket of id ${payloadArg(0)} is expired - Reject Request") color red
+    replyTo sendTicket with ticketExpired : ticketExpired(_)
+    [#
+        val TICKETID = payloadArg(0).toInt()
+        val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
+        resources.ColdStorageService.incrementRejectedRequestCounter()
+        resources.ColdStorageService.getTicketList().remove(TICKET)
+    #]
+} Goto idle</pre>
+                     </li>
+                     <li>All'arrivo della richiesta di <kc>deposit</kc>, il <i>ColdStorageService</i> si dirige nello stato <b>charged</b></li>
+                     <li>Nello stato <b>charged</b>, il <i>ColdStorageService</i> invia una richiesta di <kc>pickup</kc> al BasicRobot e torna in <b>idle</b></li>
+                     <li>All'arrivo della richiesta di <kc>pickupdone</kc>, il <i>ColdStorageService</i> si dirige nello stato <b>taken</b></li>
+                     <li>Nello stato <b>taken</b>, il <i>ColdStorageService</i> risponde con <kc>chargeTaken</kc> e torna in <b>idle</b></li>
+                 </ul>
+
+                 <pre>
+<key>QActor</key> coldstorageservice <key>context</key> ctxcoldstorageservice {
+    <key>State</key> setup initial {
+        ...
+    }<key>Goto</key> idle
+
+    <key>State</key> idle {
+        ...
+    }
+    <key>Transition</key> t0 <key>whenRequest</key> storeFood -> requestEvaluation
+                             <key>whenRequest</key> sendTicket -> ticketEvaluation
+                             <key>whenRequest</key> deposit -> charged
+                             <key>whenReply</key> pickupdone -> taken
+                             <key>whenEvent</key> local_movef -> error
+
+    <key>State</key> requestEvaluation {
+        ...
+    } <key>Goto</key> acceptRequest if[# resources.ColdStorageService.canStore(requestWeightToStore) #]
+                      else rejectRequest
+
+    <key>State</key> acceptRequest{
+        ...
+    }<key>Goto</key> idle
+
+
+    <key>State</key> rejectRequest{
+        ...
+    }<key>Goto</key> idle
+
+    <key>State</key> charged{
+        ...
+    }<key>Goto</key> idle
+
+    <key>State</key> taken{
+        ...
+    }<key>Goto</key> idle
+
+    <key>State</key> ticketEvaluation {
+        ...
+    }<key>Goto</key> idle
+
+    <key>State</key> error{
+        ...
+    }
+}
+                 </pre>
+                 <h3>TransportTrolley</h3>
 
                  Il <kc>TranportTrolley</kc> &egrave; stato progettato come unico componente, grazie alla possibilit&agrave; di uso delle funzionalit&agrave; di <kc>basicrobot23</kc> . Tuttavia, si &egrave; reso necessario l'introduzione di un terzo
                  componente, che prenda in carico le richieste provenienti dal <kc>...</kc> e faccia da <b>orchestratore</b> per gli altri componenti. <br/>
@@ -606,7 +705,7 @@ Thread.sleep(Random.nextLong(1, 2001))
                  Anche questo componente verr&agrave; implementato come una <ks>coroutine Kotlin</ks> utilizzando il metalinguaggio QAk. Di seguito sono riportati il progetto della macchina
                  a stati finiti e la sua implementazione in QAk. <br/><br/>
                  <img src="./resources/images/transportTrollery_stati.png" alt="" style=""><br/><br/>
-                 <!--                 TODO: riorganizzzare testo-->
+
                  Nello stato <i><b>idle</b></i> il <i>TransportTrolley</i> rimane in attesa di un comando da parte del <i>ColdStorageService</i>. <br/><br/>
                  Nel caso in cui arrivi il messaggio di <i>pickup</i>, si transita nello stato di <i>moverobottoindoor</i>.
                  Da qui in poi si transita in una catena di stati che fungono da base per mandare i messaggi al <i>basicrobot23</i>
@@ -620,48 +719,53 @@ Thread.sleep(Random.nextLong(1, 2001))
 
                  <pre>
 <key2>QActor</key2> transporttrolley <key2>context</key2> ctxcoldstorageservice{
-	<key2>State</key2> init initial{
-		...
-	}<key2>Transition</key2> t0 <key2>whenReply</key2> engagedone -> idle
-				   <key2>whenReply</key2> engagerefused -> waitforfree
+    <key2>State</key2> init initial{
+        ...
+    }<key2>Transition</key2> t0 //whenTime 10000 -> error
+        </key2>whenReply</key2> engagedone -> idle
+        </key2>whenReply</key2> engagerefused -> waitforfree
 
-	<key2>State</key2> waitforfree{
-		println("$name | already engaged") color green
-	}
+    <key2>State</key2> error{
+        ...
+    }
 
-	<key2>State</key2> idle {
-		...
-  	}
- 	<key2>Transition</key2> t0 <key2>whenRequest</key2> pickup -> moverobottoindoor
+    <key2>State</key2> waitforfree{
+        ...
+    } <key2>Transition</key2> t0 </key2>whenTime</key2> 10000 -> idle
 
- 	<key2>State</key2> moverobottoindoor {
- 		...
- 	}
- 	<key2>Transition</key2> t2 <key2>whenReply</key2> moverobotdone -> movetoport
- 				  <key2>whenReply</key2> moverobotfailed -> robotmovefailed
-	<key2>State</key2> movetoport{
-		...
-	}
-	<key2>Transition</key2> t3 <key2>whenReply</key2> moverobotdone -> depositactionended
- 				  <key2>whenReply</key2> moverobotfailed -> robotmovefailed
-	<key2>State</key2> depositactionended{
-		...
-	}
-	<key2>Transition</key2> t4 <key2>whenTime</key2> 3000 -> robottohome
-	<key2>whenRequest</key2> pickup -> moverobottoindoor
-	//se arriva un messagio prima di 3s moverobottoindoor altrimenti torno in home
+    <key2>State</key2> idle {
+        ...
+    }
+    <key2>Transition</key2> t0 </key2>whenRequest</key2> pickup -> moverobottoindoor
 
-	<key2>State</key2> robottohome{
-		...
-	}
-	<key2>Transition</key2> t5 <key2>whenReply</key2> moverobotdone -> idle
- 				  <key2>whenReply</key2> moverobotfailed -> robotmovefailed
+    <key2>State</key2> moverobottoindoor {
+        ...
+    }
+    <key2>Transition</key2> t0 </key2>whenReply</key2> moverobotdone -> movetoport
+    </key2>whenReply</key2> moverobotfailed -> robotmovefailed
 
- 	//control failed robot moves
- 	<key2>State</key2> robotmovefailed{
- 		println("$name | robot failed to move") color red
- 	}
 
+    <key2>State</key2> movetoport{
+    ...
+    }
+    <key2>Transition</key2> t0 </key2>whenReply</key2> moverobotdone -> depositactionended
+                     </key2>whenReply</key2> moverobotfailed -> robotmovefailed
+
+    <key2>State</key2> depositactionended{
+        ...
+    }
+    <key2>Transition</key2> t0 </key2>whenTime</key2> 3000 -> robottohome
+    </key2>whenRequest</key2> pickup -> moverobottoindoor
+
+    <key2>State</key2> robottohome{
+        ...
+    }
+    <key2>Transition</key2> t0 </key2>whenReply</key2> moverobotdone -> idle
+    </key2>whenReply</key2> moverobotfailed -> robotmovefailed
+
+    <key2>State</key2> robotmovefailed{
+        ...
+    }
 }
 </pre>
             </div>
@@ -886,6 +990,11 @@ updateResource[#truckstate.toJsonString()#]
         }
     }
                 </pre>
+                <h3>Prototipo0</h3>
+                Nella precedente fase di progettazione sono stati riportati i qak relativi al progetto <i>unibo.coldstorageservice</i>, nel
+                quale sono stati usati contesti diversi. <br/>
+                Al fine di verificare che il sistema allo stato attuale funzioni, &egrave; stato creato il progetto <i>unibo.prototipo0</i>, nel quale
+                gli attori appartengono tutti allo stesso contesto
             </div>
 
     <h2>Piano di lavoro</h2>
@@ -909,7 +1018,7 @@ updateResource[#truckstate.toJsonString()#]
         Sviluppo inteerfacce grafiche:
         <ul>
             <li>ServiceStatusGui</li>
-            <li>ServiceAccessGui</li>
+<!--            <li>ServiceAccessGui</li>-->
             <h3>Sprint 4</h3>
             Deploy sul raspberry:
             <ul>
