@@ -28,6 +28,8 @@ with Diagram('prototipo1Arch', show=False, outformat='png', graph_attr=graphattr
           coldstorageservice=Custom('coldstorageservice','./qakicons/symActorSmall.png')
           transporttrolley=Custom('transporttrolley','./qakicons/symActorSmall.png')
           sonar23=Custom('sonar23','./qakicons/symActorSmall.png')
+          ledqakactor=Custom('ledqakactor','./qakicons/symActorSmall.png')
+          controller23=Custom('controller23','./qakicons/symActorSmall.png')
           sonar=Custom('sonar(coded)','./qakicons/codedQActor.png')
           datacleaner=Custom('datacleaner(coded)','./qakicons/codedQActor.png')
           distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
@@ -37,5 +39,6 @@ with Diagram('prototipo1Arch', show=False, outformat='png', graph_attr=graphattr
      coldstorageservice >> Edge(color='magenta', style='solid', decorate='true', label='<pickup &nbsp; >',  fontcolor='magenta') >> transporttrolley
      mocktruck >> Edge(color='magenta', style='solid', decorate='true', label='<storeFood &nbsp; sendTicket &nbsp; deposit &nbsp; >',  fontcolor='magenta') >> coldstorageservice
      transporttrolley >> Edge(color='magenta', style='solid', decorate='true', label='<engage &nbsp; moverobot &nbsp; >',  fontcolor='magenta') >> basicrobot
+     controller23 >> Edge(color='blue', style='solid',  label='<ledCmd &nbsp; >',  fontcolor='blue') >> ledqakactor
      transporttrolley >> Edge(color='blue', style='solid',  label='<disengage &nbsp; setrobotstate &nbsp; cmd &nbsp; >',  fontcolor='blue') >> basicrobot
 diag
