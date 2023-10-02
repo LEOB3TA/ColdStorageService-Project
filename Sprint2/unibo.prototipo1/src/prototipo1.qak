@@ -1,6 +1,6 @@
 System/* -trace*/prototipo1
 
-// Messaggi scambiati con mocktruck
+// Messaggi scambiati con mocktruck //TODO inserire i from sulle reply
 Request deposit : deposit(_)
 Request sendTicket : sendTicket(TICKETID)
 Request storeFood : storeFood(FW)
@@ -40,6 +40,10 @@ Event local_movef : movef(_)
 Event sonardata : distance (D) //dataclenaer
 Event obstacle : obstacle(D)	//distancefilter
 Event alarm		: alarm(X)		//per tt
+Event robotmoving : robotmoving(_) //TODO controllare nel trasporttrolley l'evento
+
+//Led 
+Dispatch ledCmd : ledCmd ( ON,OFF,BLINK )
 
 Dispatch coapUpdate: coapUpdate(RES,VAL)
 
@@ -53,7 +57,9 @@ ExternalQActor basicrobot context ctxbasicrobot
 
 //CodedQActor pathobs context ctxbasicrobot className "resources.observers.planexecCoapObserver"
 //Sonar
-CodedQActor sonar context ctxprototipo1 className "sonarSimulator"
+
+//CodedQActor sonar  context ctxrasp className "rx.sonarHCSR04Support23"   //SU RASP
+CodedQActor sonar context ctxprototipo1 className "rx.sonarSimulator" //in LOCALE
 CodedQActor datacleaner    context ctxprototipo1 className "rx.dataCleaner"
 CodedQActor distancefilter context ctxprototipo1 className "rx.distanceFilter"
 
@@ -438,4 +444,64 @@ QActor sonar23 context ctxprototipo1{
 		println("$name BYE")
 	}
 }
+
+
+
+QActor ledqakactor context ctxprototipo1 {
+
+  State s0 initial{
+		println("${name} STARTS")
+	}
+	Transition t0 whenMsg ledCmd -> doCmd
+
+	State doCmd{ //da codificare i comandi del raspberry
+		//printCurrentMessage
+		onMsg( ledCmd : ledCmd(V) ){
+			[# var Cmd = payloadArg(0) #]
+			if [# Cmd=="on" #]{
+				//[# CommUtils.outyellow( "${name} - on") #]
+				println("${name} - on") color magenta
+			} if [# Cmd=="off" #]{
+				//[# CommUtils.outyellow( "${name} - off")#]
+				println("${name} - off") color magenta
+			}else{
+				//[# CommUtils.outyellow( "${name} - off")#]
+				println("${name} - blink") color magenta
+			}
+		}
+	}
+	Transition t0 whenMsg ledCmd -> doCmd
+}
+
+QActor controller23 context ctxprototipo1{ //ctxpc{
+[# val DLIMIT = 30 #] //valore casuale
+	State s0 initial{
+		println("${name} STARTS - Activates the sonar")
+	//	forward sonar23 -m sonaractivate : info(ok) TODO controllare se ci va messi
+	}
+	Transition t0 whenEvent sonardata -> doBusinessWork
+				whenEvent robotmoving -> doBusinessWork
+
+	State doBusinessWork{
+		//printCurrentMessage
+		onMsg( sonardata : distance(D)){
+			[# var D = payloadArg(0).toInt() #]
+			//Interact with the Led
+			if [# D <= DLIMIT #]{
+ 				//println("${name} - Turn the Led on")
+				forward ledqakactor -m ledCmd : ledCmd(on)
+			}else{
+ 				//println("${name} - Turn the Led off")
+				forward ledqakactor -m ledCmd : ledCmd(off)
+			}
+		}
+		onMsg( robotmoving : robotmoving(_)){
+			forward ledqakactor -m ledCmd : ledCmd(blink)
+		}
+	}
+	Transition t0 whenEvent sonardata -> doBusinessWork
+
+}
+
+
 
