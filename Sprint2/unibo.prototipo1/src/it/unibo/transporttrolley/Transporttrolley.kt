@@ -27,8 +27,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				var HOMEY= 0;
 				//println("$HOMEX,$HOMEY");
 				var TICKETID = 0;
-				val tTState = state.TransportTrolleyState()
-				val MyName = name
+				val tTState = state.TransportTrolleyState();
+				val MyName = name;
+				//val MINT = 10
 		return { //this:ActionBasciFsm
 				state("init") { //this:State
 					action { //it:State
@@ -98,6 +99,18 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						)
 						CommUtils.outgreen("$name | moving robot to indoor.")
 						request("moverobot", "moverobot($INDOORX,$INDOORY)" ,"basicrobot" )  
+						emit("robotmoving", "robotmoving(_)" ) 
+						if( checkMsgContent( Term.createTerm("alarm(X)"), Term.createTerm("alarm(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								tTState.setCurrState(state.CurrStateTrolley.STOPPED) 
+								forward("cmd", "cmd(s)" ,"basicrobot" ) 
+						}
+						if( checkMsgContent( Term.createTerm("resume(_)"), Term.createTerm("resume(_)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								tTState.setCurrState(state.CurrStateTrolley.MOVING) 
+								emit("robotmoving", "robotmoving(_)" ) 
+								forward("cmd", "cmd(r)" ,"basicrobot" ) 
+						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -117,6 +130,18 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						CommUtils.outgreen("$name | moving robot to coldroom")
 						answer("pickup", "pickupdone", "pickupdone(_)"   )  
 						request("moverobot", "moverobot($CRX,$CRY)" ,"basicrobot" )  
+						emit("robotmoving", "robotmoving(_)" ) 
+						if( checkMsgContent( Term.createTerm("alarm(X)"), Term.createTerm("alarm(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								tTState.setCurrState(state.CurrStateTrolley.STOPPED) 
+								forward("cmd", "cmd(s)" ,"basicrobot" ) 
+						}
+						if( checkMsgContent( Term.createTerm("resume(_)"), Term.createTerm("resume(_)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								tTState.setCurrState(state.CurrStateTrolley.MOVING) 
+								emit("robotmoving", "robotmoving(_)" ) 
+								forward("cmd", "cmd(r)" ,"basicrobot" ) 
+						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -158,6 +183,18 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						updateResourceRep(tTState.toJsonString() 
 						)
 						request("moverobot", "moverobot($HOMEX,$HOMEY)" ,"basicrobot" )  
+						emit("robotmoving", "robotmoving(_)" ) 
+						if( checkMsgContent( Term.createTerm("alarm(X)"), Term.createTerm("alarm(X)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								tTState.setCurrState(state.CurrStateTrolley.STOPPED) 
+								forward("cmd", "cmd(s)" ,"basicrobot" ) 
+						}
+						if( checkMsgContent( Term.createTerm("resume(_)"), Term.createTerm("resume(_)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								tTState.setCurrState(state.CurrStateTrolley.MOVING) 
+								emit("robotmoving", "robotmoving(_)" ) 
+								forward("cmd", "cmd(r)" ,"basicrobot" ) 
+						}
 						delay(6300) 
 						forward("cmd", "cmd(l)" ,"basicrobot" ) 
 						CommUtils.outred("dir correction")

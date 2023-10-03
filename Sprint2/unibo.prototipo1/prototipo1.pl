@@ -17,6 +17,8 @@ event( sonardata, distance(D) ).
 event( obstacle, obstacle(D) ).
 event( alarm, alarm(X) ).
 event( robotmoving, robotmoving(_) ).
+event( resume, resume(_) ).
+dispatch( sonaractivate, info(D) ).
 dispatch( ledCmd, ledCmd(ON,OFF,BLINK) ).
 dispatch( coapUpdate, coapUpdate(RES,VAL) ).
 %====================================================================================
