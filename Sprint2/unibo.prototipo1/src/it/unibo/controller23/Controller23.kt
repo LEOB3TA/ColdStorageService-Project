@@ -29,8 +29,8 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t031",targetState="doBusinessWork",cond=whenEvent("sonardata"))
-					transition(edgeName="t032",targetState="doBusinessWork",cond=whenEvent("robotmoving"))
+					 transition(edgeName="t032",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					transition(edgeName="t033",targetState="doBusinessWork",cond=whenEvent("robotmoving"))
 				}	 
 				state("doBusinessWork") { //this:State
 					action { //it:State
@@ -53,7 +53,7 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t033",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t034",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}

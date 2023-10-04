@@ -1,34 +1,34 @@
 System/* -trace*/prototipo1
 
-// Messaggi scambiati con mocktruck //TODO inserire i from sulle reply
+// Messaggi scambiati con mocktruck 
 Request deposit : deposit(_)
 Request sendTicket : sendTicket(TICKETID)
 Request storeFood : storeFood(FW)
-Reply storeAccepted : storeAccepted(TICKETID)
-Reply storeRejected : storeRejected(_)
-Reply chargeTaken : chargeTaken(_)
-Reply ticketValid : ticketValid(_)
-Reply ticketNotValid : ticketNotValid(_)
-Reply ticketExpired : ticketExpired(_)
+Reply storeAccepted : storeAccepted(TICKETID) for storeFood
+Reply storeRejected : storeRejected(_) for storeFood
+Reply chargeTaken : chargeTaken(_) for deposit
+Reply ticketValid : ticketValid(_) for sendTicket
+Reply ticketNotValid : ticketNotValid(_) for sendTicket
+Reply ticketExpired : ticketExpired(_) for sendTicket
 
 // Messaggi scambiati con transporttrolley
-Request pickup:    pickup(_)
-Reply  pickupdone:  pickupdone(_)
+Request pickup:    pickup(_) 
+Reply  pickupdone:  pickupdone(_) for pickup
 
 // Messaggi scambiati col basicrobot23
 
 Request engage        : engage(ARG)
-Reply   engagedone    : engagedone(ARG)
-Reply   engagerefused : engagerefused(ARG)
+Reply   engagedone    : engagedone(ARG) for engage
+Reply   engagerefused : engagerefused(ARG) for engage
 Dispatch disengage    : disengage(ARG)
 
 Request  doplan     : doplan( PATH, OWNER, STEPTIME )
-Reply doplandone    : doplandone( ARG )
-Reply doplanfailed  : doplanfailed( ARG )
+Reply doplandone    : doplandone( ARG ) for doplan
+Reply doplanfailed  : doplanfailed( ARG ) for doplan
 
 Request moverobot    :  moverobot(TARGETX, TARGETY)
-Reply moverobotdone  :  moverobotok(ARG)
-Reply moverobotfailed:  moverobotfailed(PLANDONE, PLANTODO)
+Reply moverobotdone  :  moverobotok(ARG) for moverobot
+Reply moverobotfailed:  moverobotfailed(PLANDONE, PLANTODO) for moverobot
 
 Dispatch setrobotstate: setpos(X,Y,D)
 Dispatch setdirection : dir( D )  	  //D =up|down!left|right
@@ -39,8 +39,8 @@ Event local_movef : movef(_)
 //Sonar
 Event sonardata : distance(D) //dataclenaer
 Event obstacle : obstacle(D)	//distancefilter
-Event alarm		: alarm(X)		//per tt TODO: l'argomento è utile?
-Event robotmoving : robotmoving(_)  //TODO: vedere se farlo local o di altro tipo o se lasciare cos
+Event alarm		: alarm(X)		//per tt TODO: l'argomento ï¿½ utile?
+Event robotmoving : robotmoving(_)  
 Event resume:resume(_)
 Dispatch sonaractivate: info(D) //D = DLIMIT
 
@@ -119,7 +119,7 @@ QActor mocktruck context ctxprototipo1{
    State sendTicket{
    		 request coldstorageservice -m sendTicket : sendTicket($TICKETID)
    		 println("$name |	send ticket") color green
-   } Transition t0 whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
+   } Transition t0 whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'ï¿½ un errore interno al sistema, il driver abbandona
    					whenReply ticketValid -> sendDeposit
     				whenReply ticketExpired -> handleTicketExpired
 
@@ -127,7 +127,7 @@ QActor mocktruck context ctxprototipo1{
     State sendDeposit{
         request coldstorageservice -m deposit : deposit(_)
         println("$name |	send deposit") color green
-    } Transition t0  whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
+    } Transition t0  whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'ï¿½ un errore interno al sistema, il driver abbandona
     					whenReply chargeTaken -> idle
 
     State handleError{
@@ -164,7 +164,6 @@ QActor coldstorageservice context ctxprototipo1 {
 
     State idle {
         println("$name |	in idle") color green
-        // updateResource[#maxw.toJsonString()#] // TODO: fai check se serve o meno
     }
     Transition t0 whenRequest storeFood -> requestEvaluation
     			  whenRequest sendTicket -> ticketEvaluation
@@ -199,8 +198,6 @@ QActor coldstorageservice context ctxprototipo1 {
     		resources.ColdStorageService.getTicketList().add(TICKET)
     	#]
         replyTo storeFood with storeAccepted : storeAccepted($TICKETNUMBER) 
-        // TODO: check se tornare tutto il ticket o solo numero -> alla persona serve solo il numero : possiamo o tornare
-        // l'oggetto ticket e ricavare il numero o usare direttamente il numero
     }Goto idle
 
 	/*
@@ -348,18 +345,35 @@ QActor transporttrolley context ctxprototipo1{
 		onMsg(alarm: alarm(X)){
 			// stop tt
 			[#tTState.setCurrState(state.CurrStateTrolley.STOPPED)#]
-			forward basicrobot -m cmd:cmd(s) //TODO: verificare quale comando ferma
+			updateResource[#tTState.toJsonString()#]
+			forward basicrobot -m cmd:cmd(h) //TODO sitemare e nuovo plan to
 			//TODO: MINT per fermare nuovi stop 
 		}
 		
 		onMsg(resume: resume(_)){
 			[#tTState.setCurrState(state.CurrStateTrolley.MOVING)#]
+			updateResource[#tTState.toJsonString()#]
 			emit robotmoving: robotmoving(_)
 			forward basicrobot -m cmd:cmd(r) //TODO :verificare comando per resume
 		}
  	}
- 	Transition t0 whenReply moverobotdone -> movetoport
- 				  whenReply moverobotfailed -> robotmovefailed
+ 	Transition t0 whenEvent alarm -> handlerobotstopped
+ 				whenReply moverobotdone -> movetoport
+ 				  whenReply moverobotfailed -> robotmovefailed //TODO controllare cosa accade in caso di emissione dell'evento alarm perchÃ¨ non Ã¨ da escludere che non funzioni
+ 				  
+  	State handlerobotstopped{ //TODO aggiungere il fatto di MINT, capire in che stato deve andare dopo
+  		[#tTState.setCurrState(state.CurrStateTrolley.STOPPED)#]
+		updateResource[#tTState.toJsonString()#]
+  		onMsg(moverobotfailed : moverobotfailed(PLANDONE,PLANTODO)){
+  			[#val PLANTODO = payloadArg(1)#]
+  		}
+  		onMsg(resume: resume(_)){
+  			[#tTState.setCurrState(state.CurrStateTrolley.MOVING)#]
+			updateResource[#tTState.toJsonString()#]
+			emit robotmoving: robotmoving(_)
+			request basicrobot -m doplan:doplan($PLANTODO)
+  		}
+  	}
 
 
 	//when robot has taken kg from camion -> move robot to coldroom
@@ -410,7 +424,7 @@ QActor transporttrolley context ctxprototipo1{
 	}
 	Transition t0 whenTime 3000 -> robottohome
 	whenRequest pickup -> moverobottoindoor
-	//se arriva un messagio prima di 3s moverobottoindoor altrimenti torno in home opppure se c'è già  una pickup in coda
+	//se arriva un messagio prima di 3s moverobottoindoor altrimenti torno in home opppure se c'ï¿½ giï¿½ una pickup in coda
 
 	State robottohome{
 		[#
@@ -455,7 +469,7 @@ QActor transporttrolley context ctxprototipo1{
 }
 
 // Implementazione sonar 
-//TODO: verificare in quale contesto si debba inserire
+//TODO: verificare in quale contesto si debba inserire, credo nello stesso contensto fino a quando non si mette nel rasp
 //TODO: catch event alarm on tt and make it stop
 
 QActor sonar23 context ctxprototipo1{
@@ -511,7 +525,7 @@ QActor ledqakactor context ctxprototipo1 {
 	}
 	Transition t0 whenMsg ledCmd -> doCmd
 
-	State doCmd{ //da codificare i comandi del raspberry
+	State doCmd{ //da codificare i comandi del raspberry sprint4 
 		//printCurrentMessage
 		onMsg( ledCmd : ledCmd(V) ){
 			[# var Cmd = payloadArg(0) #]
