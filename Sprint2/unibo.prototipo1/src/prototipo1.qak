@@ -276,6 +276,7 @@ QActor coldstorageservice context ctxprototipo1 {
 }
 
 QActor transporttrolley context ctxprototipo1{
+	// TODO: verificare se i duration in kotlin vanno
 	[#
 		var CRX = 4;
 		var CRY = 3;
@@ -287,7 +288,9 @@ QActor transporttrolley context ctxprototipo1{
 		var TICKETID = 0;
 		val tTState = state.TransportTrolleyState();
 		val MyName = name;
-		//val MINT = 10
+		val ts = TimeSource.Monotonic;
+		val m1 = ts.markNow();
+		val MINT : Duration= 10.milliseconds
 	#]
 	State init initial{
 		discardMsg Off
@@ -342,39 +345,41 @@ QActor transporttrolley context ctxprototipo1{
 		
 		emit robotmoving: robotmoving(_)
 		
-		onMsg(alarm: alarm(X)){
-			// stop tt
-			[#tTState.setCurrState(state.CurrStateTrolley.STOPPED)#]
-			updateResource[#tTState.toJsonString()#]
-			forward basicrobot -m cmd:cmd(h) //TODO sitemare e nuovo plan to
-			//TODO: MINT per fermare nuovi stop 
-		}
-		
-		onMsg(resume: resume(_)){
-			[#tTState.setCurrState(state.CurrStateTrolley.MOVING)#]
-			updateResource[#tTState.toJsonString()#]
-			emit robotmoving: robotmoving(_)
-			forward basicrobot -m cmd:cmd(r) //TODO :verificare comando per resume
-		}
- 	}
- 	Transition t0 whenEvent alarm -> handlerobotstopped
- 				whenReply moverobotdone -> movetoport
+ 	} 
+ 	Transition t0 whenEvent alarm -> handlerobotstopped 
+ 				  whenReply moverobotdone -> movetoport
  				  whenReply moverobotfailed -> robotmovefailed //TODO controllare cosa accade in caso di emissione dell'evento alarm perchè non è da escludere che non funzioni
  				  
-  	State handlerobotstopped{ //TODO aggiungere il fatto di MINT, capire in che stato deve andare dopo
-  		[#tTState.setCurrState(state.CurrStateTrolley.STOPPED)#]
-		updateResource[#tTState.toJsonString()#]
-  		onMsg(moverobotfailed : moverobotfailed(PLANDONE,PLANTODO)){
-  			[#val PLANTODO = payloadArg(1)#]
-  		}
-  		onMsg(resume: resume(_)){
-  			[#tTState.setCurrState(state.CurrStateTrolley.MOVING)#]
+  	State handlerobotstopped{ 
+  		[#
+  			var PLANTODO = ""
+  			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
+  			if ((m1+MINT).hasPassedNow()){	
+  		#]
+  			forward basicrobot -m cmd:cmd(h) // mando per fermare
 			updateResource[#tTState.toJsonString()#]
-			emit robotmoving: robotmoving(_)
-			request basicrobot -m doplan:doplan($PLANTODO)
-  		}
-  	}
-
+  			onMsg(moverobotfailed : moverobotfailed(PLANDONE,PLANTODO)){
+  				[#PLANTODO = payloadArg(1)#]
+  			}
+  		
+  			onMsg(resume: resume(_)){
+  				[#tTState.setCurrState(state.CurrStateTrolley.MOVING)#]
+				updateResource[#tTState.toJsonString()#]
+				emit robotmoving: robotmoving(_)
+				request basicrobot -m doplan:doplan($PLANTODO)
+  			}
+  			//TODO: posso mandarmi un resume? 
+  			//TODO: verificare se la resume viene effettivamente inviata (posso rimanere bloccato in attesa infinita di una resume?)
+  		[#	
+  			}else{ 
+  		#]
+  				[#tTState.setCurrState(state.CurrStateTrolley.MOVING)#]
+				updateResource[#tTState.toJsonString()#]
+				emit robotmoving: robotmoving(_)
+				request basicrobot -m doplan:doplan($PLANTODO)
+  		[#	}#]
+  			
+  	}Goto idle
 
 	//when robot has taken kg from camion -> move robot to coldroom
 	State movetoport{
@@ -391,18 +396,9 @@ QActor transporttrolley context ctxprototipo1{
 		request basicrobot -m moverobot:moverobot($CRX,$CRY)
 		emit robotmoving: robotmoving(_)
 		
-		onMsg(alarm: alarm(X)){
-			// stop tt
-			[#tTState.setCurrState(state.CurrStateTrolley.STOPPED)#]
-			forward basicrobot -m cmd:cmd(s) 			
-		}
-		onMsg(resume: resume(_)){
-			[#tTState.setCurrState(state.CurrStateTrolley.MOVING)#]
-			emit robotmoving: robotmoving(_)
-			forward basicrobot -m cmd:cmd(r) 
-		}
 	}
-	Transition t0 whenReply moverobotdone -> depositactionended
+	Transition t0 whenEvent alarm -> handlerobotstopped
+				  whenReply moverobotdone -> depositactionended
  				  whenReply moverobotfailed -> robotmovefailed
 
 	State depositactionended{
@@ -434,18 +430,8 @@ QActor transporttrolley context ctxprototipo1{
 		updateResource[#tTState.toJsonString()#]
 		//send event "robot is in home"
 		request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
-		emit robotmoving: robotmoving(_)
 		
-		onMsg(alarm: alarm(X)){
-			// stop tt
-			[#tTState.setCurrState(state.CurrStateTrolley.STOPPED)#]
-			forward basicrobot -m cmd:cmd(s) 			
-		}
-		onMsg(resume: resume(_)){
-			[#tTState.setCurrState(state.CurrStateTrolley.MOVING)#]
-			emit robotmoving: robotmoving(_)
-			forward basicrobot -m cmd:cmd(r) 
-		}
+		emit robotmoving: robotmoving(_)
 		
 		delay 6300
 		forward basicrobot -m cmd : cmd ( l )
@@ -454,7 +440,8 @@ QActor transporttrolley context ctxprototipo1{
 		forward basicrobot -m setrobotstate : setpos (0,0,d) // d= down	*/
 		println ("dir correction") color red
 	}
-	Transition t0 whenReply moverobotdone -> idle
+	Transition t0 whenEvent alarm -> handlerobotstopped
+	  			  whenReply moverobotdone -> idle
  				  whenReply moverobotfailed -> robotmovefailed
 
 
@@ -469,8 +456,7 @@ QActor transporttrolley context ctxprototipo1{
 }
 
 // Implementazione sonar 
-//TODO: verificare in quale contesto si debba inserire, credo nello stesso contensto fino a quando non si mette nel rasp
-//TODO: catch event alarm on tt and make it stop
+//contesto: nello stesso contensto fino a quando non si mette nel rasp
 
 QActor sonar23 context ctxprototipo1{
 	State s0 initial{
