@@ -34,6 +34,9 @@ event( resume, resume(_) ).
 dispatch( sonaractivate, info(D) ).
 dispatch( ledCmd, ledCmd(ON,OFF,BLINK) ).
 dispatch( coapUpdate, coapUpdate(RES,VAL) ).
+dispatch( gotomovetoport, gotomovetoport(_) ).
+dispatch( gotodepositactionended, gotodepositactionended(_) ).
+dispatch( gotorobottohome, gotorobottohome(_) ).
 %====================================================================================
 context(ctxbasicrobot, "127.0.0.1",  "TCP", "8020").
 context(ctxprototipo1, "localhost",  "TCP", "8099").

@@ -18,21 +18,26 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
+		var DLIMIT = 30 
+			var Appl = sysUtil.getActor("transporttrolley") != null  
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						var Appl = sysUtil.getActor("transporttrolley") != null 
 						CommUtils.outblack("sonar | start with appl: $Appl")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t029",targetState="work",cond=whenDispatch("sonaractivate"))
+					 transition(edgeName="t035",targetState="work",cond=whenDispatch("sonaractivate"))
 				}	 
 				state("work") { //this:State
 					action { //it:State
-						var DLIMIT = payloadArg(0).toInt() 
+						if( checkMsgContent( Term.createTerm("info(D)"), Term.createTerm("info(DLIMIT)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 println(payloadArg(0).toInt())
+											DLIMIT = payloadArg(0).toInt() 
+						}
 						updateResourceRep( "Sonar waiting" 
 						)
 						//genTimer( actor, state )
@@ -40,8 +45,8 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t030",targetState="handlesonardata",cond=whenEvent("sonardata"))
-					transition(edgeName="t031",targetState="handleobstacle",cond=whenEvent("obstacle"))
+					 transition(edgeName="t036",targetState="handlesonardata",cond=whenEvent("sonardata"))
+					transition(edgeName="t037",targetState="handleobstacle",cond=whenEvent("obstacle"))
 				}	 
 				state("handlesonardata") { //this:State
 					action { //it:State

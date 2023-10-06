@@ -10,10 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
-import kotlin.time.TimeSource
 
 class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
@@ -24,19 +22,19 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		
-				var CRX = 4;
-				var CRY = 3;
-				var INDOORX= 0;
-				var INDOORY= 4;
-				var HOMEX= 0;
-				var HOMEY= 0;
-				//println("$HOMEX,$HOMEY");
-				var TICKETID = 0;
-				val tTState = state.TransportTrolleyState();
-				val MyName = name;
-				val ts = TimeSource.Monotonic;
-				val m1 = ts.markNow();
-				val MINT : Duration = 10.milliseconds
+				var CRX = 4
+				var CRY = 3
+				var INDOORX= 0
+				var INDOORY= 4
+				var HOMEX= 0
+				var HOMEY= 0
+				//println("$HOMEX,$HOMEY")
+				var TICKETID = 0
+				val tTState = state.TransportTrolleyState()
+				val MyName = name
+				val ts = kotlin.time.TimeSource.Monotonic
+				var m1 = ts.markNow()
+				val MINT : kotlin.time.Duration= 10.milliseconds
 		return { //this:ActionBasciFsm
 				state("init") { //this:State
 					action { //it:State
@@ -120,18 +118,23 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					action { //it:State
 						
 						  			var PLANTODO = ""
+						  			val savedState = tTState.getCurrState()
 						  			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
 						  			if ((m1+MINT).hasPassedNow()){	
-						forward("cmd", "cmd(h)" ,"basicrobot" ) 
+						  				m1 = ts.markNow()
 						updateResourceRep(tTState.toJsonString() 
 						)
 						if( checkMsgContent( Term.createTerm("moverobotfailed(PLANDONE,PLANTODO)"), Term.createTerm("moverobotfailed(PLANDONE,PLANTODO)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								PLANTODO = payloadArg(1) 
 						}
+						if( checkMsgContent( Term.createTerm("doplanfailed(ARG)"), Term.createTerm("doplanfailed(PLANDONE,PLANTODO)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								PLANTODO = payloadArg(1) 
+						}
 						if( checkMsgContent( Term.createTerm("resume(_)"), Term.createTerm("resume(_)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								tTState.setCurrState(state.CurrStateTrolley.MOVING) 
+								tTState.setCurrState(savedState) 
 								updateResourceRep(tTState.toJsonString() 
 								)
 								emit("robotmoving", "robotmoving(_)" ) 
@@ -139,7 +142,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						}
 							
 						  			}else{ 
-						tTState.setCurrState(state.CurrStateTrolley.MOVING) 
+						tTState.setCurrState(savedState) 
 						updateResourceRep(tTState.toJsonString() 
 						)
 						emit("robotmoving", "robotmoving(_)" ) 
@@ -150,12 +153,36 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="idle", cond=doswitch() )
+					 transition(edgeName="t021",targetState="handlerobotstopped",cond=whenEvent("alarm"))
+					transition(edgeName="t022",targetState="goahead",cond=whenReply("doplandone"))
+					transition(edgeName="t023",targetState="handlerobotstopped",cond=whenReply("doplanfailed"))
+				}	 
+				state("goahead") { //this:State
+					action { //it:State
+						 	when {
+													tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP ->  
+						forward("gotomovetoport", "gotomovetoport(_)" ,"transporttrolley" ) 
+						
+													tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT ->  
+						forward("gotodepositactionended", "gotodepositactionended(_)" ,"transporttrolley" ) 
+						
+													tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->  
+						forward("gotorobottohome", "gotorobottohome(_)" ,"transporttrolley" ) 
+						
+									} 
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t024",targetState="movetoport",cond=whenDispatch("gotomovetoport"))
+					transition(edgeName="t025",targetState="depositactionended",cond=whenDispatch("gotodepositactionended"))
+					transition(edgeName="t026",targetState="robottohome",cond=whenDispatch("gotorobottohome"))
 				}	 
 				state("movetoport") { //this:State
 					action { //it:State
 						
-									tTState.setCurrState(state.CurrStateTrolley.MOVING)
+									tTState.setCurrState(state.CurrStateTrolley.MOVINGTOPORT)
 									tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
 						updateResourceRep(tTState.toJsonString() 
 						)
@@ -169,9 +196,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t021",targetState="handlerobotstopped",cond=whenEvent("alarm"))
-					transition(edgeName="t022",targetState="depositactionended",cond=whenReply("moverobotdone"))
-					transition(edgeName="t023",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
+					 transition(edgeName="t027",targetState="handlerobotstopped",cond=whenEvent("alarm"))
+					transition(edgeName="t028",targetState="depositactionended",cond=whenReply("moverobotdone"))
+					transition(edgeName="t029",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
 				}	 
 				state("depositactionended") { //this:State
 					action { //it:State
@@ -195,13 +222,13 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				 	 		stateTimer = TimerActor("timer_depositactionended", 
 				 	 					  scope, context!!, "local_tout_transporttrolley_depositactionended", 3000.toLong() )
 					}	 	 
-					 transition(edgeName="t024",targetState="robottohome",cond=whenTimeout("local_tout_transporttrolley_depositactionended"))   
-					transition(edgeName="t025",targetState="moverobottoindoor",cond=whenRequest("pickup"))
+					 transition(edgeName="t030",targetState="robottohome",cond=whenTimeout("local_tout_transporttrolley_depositactionended"))   
+					transition(edgeName="t031",targetState="moverobottoindoor",cond=whenRequest("pickup"))
 				}	 
 				state("robottohome") { //this:State
 					action { //it:State
 						
-									tTState.setCurrState(state.CurrStateTrolley.MOVING)
+									tTState.setCurrState(state.CurrStateTrolley.MOVINGTOHOME)
 									tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
 						updateResourceRep(tTState.toJsonString() 
 						)
@@ -215,9 +242,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t026",targetState="handlerobotstopped",cond=whenEvent("alarm"))
-					transition(edgeName="t027",targetState="idle",cond=whenReply("moverobotdone"))
-					transition(edgeName="t028",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
+					 transition(edgeName="t032",targetState="handlerobotstopped",cond=whenEvent("alarm"))
+					transition(edgeName="t033",targetState="idle",cond=whenReply("moverobotdone"))
+					transition(edgeName="t034",targetState="robotmovefailed",cond=whenReply("moverobotfailed"))
 				}	 
 				state("robotmovefailed") { //this:State
 					action { //it:State

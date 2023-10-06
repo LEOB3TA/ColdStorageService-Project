@@ -22,7 +22,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 		       	var FW = 0
 		        var DT = 1000L  //DT= driver time tempo che ci mette il driver dopo aver ricevuto la richiesta per arrivare alla INDOOR
 		        var TICKETID = 0
-		        val truckstate = resources.truckstate.TruckState()
+		        val truckstate = resources.state.TruckState()
 		
 		        fun initDriver(){
 		        	FW =  kotlin.random.Random.nextInt(1, 101)

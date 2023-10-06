@@ -3,7 +3,7 @@ package state
 import com.google.gson.Gson
 
 enum class CurrStateTrolley  {
-    IDLE,STOPPED,MOVING,PICKINGUP,DROPPINGOUT
+    IDLE,STOPPED,MOVINGTOPORT,MOVINGTOHOME,PICKINGUP,DROPPINGOUT
 }
 
 enum class TTPosition{

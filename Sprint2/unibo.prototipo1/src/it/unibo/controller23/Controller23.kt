@@ -23,14 +23,14 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outblack("${name} STARTS - Activates the sonar")
-						forward("sonaractivate", "info(DLIMIT)" ,"sonar23" ) 
+						forward("sonaractivate", "info($DLIMIT)" ,"sonar23" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t034",targetState="doBusinessWork",cond=whenEvent("sonardata"))
-					transition(edgeName="t035",targetState="doBusinessWork",cond=whenEvent("robotmoving"))
+					 transition(edgeName="t040",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					transition(edgeName="t041",targetState="doBusinessWork",cond=whenEvent("robotmoving"))
 				}	 
 				state("doBusinessWork") { //this:State
 					action { //it:State
@@ -53,7 +53,7 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t036",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t042",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}

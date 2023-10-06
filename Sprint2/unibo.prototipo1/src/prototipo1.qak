@@ -49,6 +49,11 @@ Dispatch ledCmd : ledCmd ( ON,OFF,BLINK )
 
 Dispatch coapUpdate: coapUpdate(RES,VAL)
 
+//Messaggi autoinviati transporttrolley
+Dispatch gotomovetoport : gotomovetoport(_)
+Dispatch gotodepositactionended : gotodepositactionended(_)
+Dispatch gotorobottohome : gotorobottohome(_)
+
 Context ctxbasicrobot ip [host="127.0.0.1" port=8020]
 Context ctxprototipo1 ip [host="localhost" port=8099]
 //Context ctxtruck ip[host="127.0.0.1" port=8092] //indirizzo interno alla rete
@@ -70,7 +75,7 @@ QActor mocktruck context ctxprototipo1{
        	var FW = 0
         var DT = 1000L  //DT= driver time tempo che ci mette il driver dopo aver ricevuto la richiesta per arrivare alla INDOOR
         var TICKETID = 0
-        val truckstate = resources.truckstate.TruckState()
+        val truckstate = resources.state.TruckState()
 
         fun initDriver(){
         	FW =  kotlin.random.Random.nextInt(1, 101)
@@ -278,19 +283,19 @@ QActor coldstorageservice context ctxprototipo1 {
 QActor transporttrolley context ctxprototipo1{
 	// TODO: verificare se i duration in kotlin vanno
 	[#
-		var CRX = 4;
-		var CRY = 3;
-		var INDOORX= 0;
-		var INDOORY= 4;
-		var HOMEX= 0;
-		var HOMEY= 0;
-		//println("$HOMEX,$HOMEY");
-		var TICKETID = 0;
-		val tTState = state.TransportTrolleyState();
-		val MyName = name;
-		val ts = TimeSource.Monotonic;
-		val m1 = ts.markNow();
-		val MINT : Duration= 10.milliseconds
+		var CRX = 4
+		var CRY = 3
+		var INDOORX= 0
+		var INDOORY= 4
+		var HOMEX= 0
+		var HOMEY= 0
+		//println("$HOMEX,$HOMEY")
+		var TICKETID = 0
+		val tTState = state.TransportTrolleyState()
+		val MyName = name
+		val ts = kotlin.time.TimeSource.Monotonic
+		var m1 = ts.markNow()
+		val MINT : kotlin.time.Duration= 10.milliseconds
 	#]
 	State init initial{
 		discardMsg Off
@@ -353,38 +358,60 @@ QActor transporttrolley context ctxprototipo1{
   	State handlerobotstopped{ 
   		[#
   			var PLANTODO = ""
+  			val savedState = tTState.getCurrState()
   			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
   			if ((m1+MINT).hasPassedNow()){	
+  				m1 = ts.markNow()
   		#]
-  			forward basicrobot -m cmd:cmd(h) // mando per fermare
 			updateResource[#tTState.toJsonString()#]
   			onMsg(moverobotfailed : moverobotfailed(PLANDONE,PLANTODO)){
   				[#PLANTODO = payloadArg(1)#]
   			}
+  			onMsg(doplanfailed : doplanfailed(PLANDONE,PLANTODO)){
+  				[#PLANTODO = payloadArg(1)#]
+  			}
   		
   			onMsg(resume: resume(_)){
-  				[#tTState.setCurrState(state.CurrStateTrolley.MOVING)#]
+  				[#tTState.setCurrState(savedState)#]
 				updateResource[#tTState.toJsonString()#]
 				emit robotmoving: robotmoving(_)
 				request basicrobot -m doplan:doplan($PLANTODO)
   			}
   			//TODO: posso mandarmi un resume? 
+  			// TODO si mette in attesa della resume oppure procede?? secondo me no (LEO)
   			//TODO: verificare se la resume viene effettivamente inviata (posso rimanere bloccato in attesa infinita di una resume?)
   		[#	
   			}else{ 
   		#]
-  				[#tTState.setCurrState(state.CurrStateTrolley.MOVING)#]
+  				[#tTState.setCurrState(savedState)#]
 				updateResource[#tTState.toJsonString()#]
 				emit robotmoving: robotmoving(_)
 				request basicrobot -m doplan:doplan($PLANTODO)
   		[#	}#]
+  		
+		
   			
-  	}Goto idle
+  	}Transition t0  whenEvent alarm -> handlerobotstopped 
+  					whenReply doplandone -> goahead
+  					whenReply doplanfailed -> handlerobotstopped
+  					
+	State goahead{
+		[# 	when {
+							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] forward transporttrolley -m gotomovetoport : gotomovetoport(_)[#
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] forward transporttrolley -m gotodepositactionended : gotodepositactionended(_)[#
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME -> #] forward transporttrolley -m gotorobottohome : gotorobottohome(_)[#
+			}#]
+	}Transition t0 whenMsg gotomovetoport -> movetoport
+					whenMsg gotodepositactionended -> depositactionended
+					whenMsg gotorobottohome -> robottohome
+  					
+  	
+
 
 	//when robot has taken kg from camion -> move robot to coldroom
 	State movetoport{
 		[#
-			tTState.setCurrState(state.CurrStateTrolley.MOVING)
+			tTState.setCurrState(state.CurrStateTrolley.MOVINGTOPORT)
 			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
 		#]
 		updateResource[#tTState.toJsonString()#]
@@ -424,7 +451,7 @@ QActor transporttrolley context ctxprototipo1{
 
 	State robottohome{
 		[#
-			tTState.setCurrState(state.CurrStateTrolley.MOVING)
+			tTState.setCurrState(state.CurrStateTrolley.MOVINGTOHOME)
 			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
 		#]
 		updateResource[#tTState.toJsonString()#]
@@ -459,15 +486,21 @@ QActor transporttrolley context ctxprototipo1{
 //contesto: nello stesso contensto fino a quando non si mette nel rasp
 
 QActor sonar23 context ctxprototipo1{
+	[#var DLIMIT = 30 
+	var Appl = sysUtil.getActor("transporttrolley") != null #]
 	State s0 initial{
-		[#var Appl = sysUtil.getActor("transporttrolley") != null#]
+		
 		println("sonar | start with appl: $Appl")
 	}Transition t0 whenMsg sonaractivate -> work
 				 //whenMsg sonardeactivate -> end
 	
 	State work{
-		//TODO: eventualmente modificare con onMsg all'interno dello stato
-		[#var DLIMIT = payloadArg(0).toInt()#]
+		onMsg(sonaractivate : info(DLIMIT)){
+		
+		[# println(payloadArg(0).toInt())
+			DLIMIT = payloadArg(0).toInt()#
+		]
+		}
 		updateResource[# "Sonar waiting"#]
 	}Transition t0 whenEvent sonardata -> handlesonardata
 	              whenEvent obstacle  -> handleobstacle
@@ -534,7 +567,7 @@ QActor controller23 context ctxprototipo1{ //ctxpc{
 [# val DLIMIT = 30 #] //valore casuale
 	State s0 initial{
 		println("${name} STARTS - Activates the sonar")
-		forward sonar23 -m sonaractivate : info(DLIMIT) //TODO controllare se ci va messi
+		forward sonar23 -m sonaractivate : info($DLIMIT) //TODO controllare se ci va messi
 	}
 	Transition t0 whenEvent sonardata -> doBusinessWork
 				whenEvent robotmoving -> doBusinessWork
