@@ -32,7 +32,7 @@ event( alarm, alarm(X) ).
 event( robotmoving, robotmoving(_) ).
 event( resume, resume(_) ).
 dispatch( sonaractivate, info(D) ).
-dispatch( ledCmd, ledCmd(ON,OFF,BLINK) ).
+dispatch( ledCmd, ledCmd(CMD) ).
 dispatch( coapUpdate, coapUpdate(RES,VAL) ).
 dispatch( gotomovetoport, gotomovetoport(_) ).
 dispatch( gotodepositactionended, gotodepositactionended(_) ).

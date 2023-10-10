@@ -39,15 +39,15 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								 var D = payloadArg(0).toInt()  
 								CommUtils.outred("$D")
 								if(  D <= DLIMIT  
-								 ){forward("ledCmd", "ledCmd(on)" ,"ledqakactor" ) 
+								 ){forward("ledCmd", "ledCmd(ON)" ,"ledqakactor" ) 
 								}
 								else
-								 {forward("ledCmd", "ledCmd(off)" ,"ledqakactor" ) 
+								 {forward("ledCmd", "ledCmd(OFF)" ,"ledqakactor" ) 
 								 }
 						}
 						if( checkMsgContent( Term.createTerm("robotmoving(_)"), Term.createTerm("robotmoving(_)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								forward("ledCmd", "ledCmd(blink)" ,"ledqakactor" ) 
+								forward("ledCmd", "ledCmd(BLINK)" ,"ledqakactor" ) 
 						}
 						//genTimer( actor, state )
 					}

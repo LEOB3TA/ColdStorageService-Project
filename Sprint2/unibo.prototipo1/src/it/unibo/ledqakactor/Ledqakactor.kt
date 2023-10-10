@@ -31,13 +31,15 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 				}	 
 				state("doCmd") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("ledCmd(ON,OFF,BLINK)"), Term.createTerm("ledCmd(V)"), 
+						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
+						 	   
+						if( checkMsgContent( Term.createTerm("ledCmd(CMD)"), Term.createTerm("ledCmd(CMD)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 var Cmd = payloadArg(0)  
-								if(  Cmd=="on"  
+								if(  Cmd=="ON"  
 								 ){CommUtils.outmagenta("${name} - on")
 								}
-								if(  Cmd=="off"  
+								if(  Cmd=="OFF"  
 								 ){CommUtils.outmagenta("${name} - off")
 								}
 								else

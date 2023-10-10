@@ -45,7 +45,7 @@ Event resume:resume(_)
 Dispatch sonaractivate: info(D) //D = DLIMIT
 
 //Led 
-Dispatch ledCmd : ledCmd ( ON,OFF,BLINK )
+Dispatch ledCmd : ledCmd ( CMD )
 
 Dispatch coapUpdate: coapUpdate(RES,VAL)
 
@@ -552,13 +552,13 @@ QActor ledqakactor context ctxprototipo1 {
 	Transition t0 whenMsg ledCmd -> doCmd
 
 	State doCmd{ //da codificare i comandi del raspberry sprint4 
-		//printCurrentMessage
-		onMsg( ledCmd : ledCmd(V) ){
+		printCurrentMessage
+		onMsg( ledCmd : ledCmd(CMD) ){
 			[# var Cmd = payloadArg(0) #]
-			if [# Cmd=="on" #]{
+			if [# Cmd=="ON" #]{
 				//[# CommUtils.outyellow( "${name} - on") #]
 				println("${name} - on") color magenta
-			} if [# Cmd=="off" #]{
+			} if [# Cmd=="OFF" #]{
 				//[# CommUtils.outyellow( "${name} - off")#]
 				println("${name} - off") color magenta
 			}else{
@@ -587,14 +587,14 @@ QActor controller23 context ctxprototipo1{ //ctxpc{
 			//Interact with the Led
 			if [# D <= DLIMIT #]{
  				//println("${name} - Turn the Led on")
-				forward ledqakactor -m ledCmd : ledCmd(on)
+				forward ledqakactor -m ledCmd : ledCmd(ON)
 			}else{
  				//println("${name} - Turn the Led off")
-				forward ledqakactor -m ledCmd : ledCmd(off)
+				forward ledqakactor -m ledCmd : ledCmd(OFF)
 			}
 		}
 		onMsg( robotmoving : robotmoving(_)){
-			forward ledqakactor -m ledCmd : ledCmd(blink)
+			forward ledqakactor -m ledCmd : ledCmd(BLINK)
 		}
 	}
 	Transition t0 whenEvent sonardistance -> doBusinessWork
