@@ -35,9 +35,10 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("info(D)"), Term.createTerm("info(DLIMIT)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 println(payloadArg(0).toInt())
+								 
 											DLIMIT = payloadArg(0).toInt() 
 						}
+						CommUtils.outred("Sonar waiting")
 						updateResourceRep( "Sonar waiting" 
 						)
 						//genTimer( actor, state )
@@ -45,7 +46,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t036",targetState="handlesonardata",cond=whenEvent("sonardata"))
+					 transition(edgeName="t036",targetState="handlesonardata",cond=whenEvent("sonardistance"))
 					transition(edgeName="t037",targetState="handleobstacle",cond=whenEvent("obstacle"))
 				}	 
 				state("handlesonardata") { //this:State
@@ -53,10 +54,13 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 						if( checkMsgContent( Term.createTerm("distance(D)"), Term.createTerm("distance(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								var D = payloadArg(0).toInt() 
-								CommUtils.outmagenta("$name distance ${payloadArg(0)}")
 								if( D>DLIMIT 
 								 ){emit("resume", "resume(_)" ) 
-								CommUtils.outblack("RESUMING TransportTrolley")
+								CommUtils.outgreen("RESUMING TransportTrolley")
+								}
+								if( D <= DLIMIT 
+								 ){emit("alarm", "alarm(obstacle)" ) 
+								CommUtils.outred("STOP TransportTrolley")
 								}
 						}
 						//genTimer( actor, state )

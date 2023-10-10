@@ -122,6 +122,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						  			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
 						  			if ((m1+MINT).hasPassedNow()){	
 						  				m1 = ts.markNow()
+						CommUtils.outred("receive alarm signal")
 						updateResourceRep(tTState.toJsonString() 
 						)
 						if( checkMsgContent( Term.createTerm("moverobotfailed(PLANDONE,PLANTODO)"), Term.createTerm("moverobotfailed(PLANDONE,PLANTODO)"), 
@@ -134,6 +135,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						}
 						if( checkMsgContent( Term.createTerm("resume(_)"), Term.createTerm("resume(_)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
+								CommUtils.outred("resume the robot")
 								tTState.setCurrState(savedState) 
 								updateResourceRep(tTState.toJsonString() 
 								)
@@ -142,6 +144,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						}
 							
 						  			}else{ 
+						CommUtils.outred("ignored alarm signal")
 						tTState.setCurrState(savedState) 
 						updateResourceRep(tTState.toJsonString() 
 						)
@@ -159,6 +162,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("goahead") { //this:State
 					action { //it:State
+						CommUtils.outred("resume netx state")
 						 	when {
 													tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP ->  
 						forward("gotomovetoport", "gotomovetoport(_)" ,"transporttrolley" ) 

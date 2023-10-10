@@ -29,14 +29,15 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t040",targetState="doBusinessWork",cond=whenEvent("sonardata"))
-					transition(edgeName="t041",targetState="doBusinessWork",cond=whenEvent("robotmoving"))
+					 transition(edgeName="t040",targetState="doBusinessWork",cond=whenEvent("sonardistance"))
 				}	 
 				state("doBusinessWork") { //this:State
 					action { //it:State
+						CommUtils.outblue("business work controller")
 						if( checkMsgContent( Term.createTerm("distance(D)"), Term.createTerm("distance(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 var D = payloadArg(0).toInt()  
+								CommUtils.outred("$D")
 								if(  D <= DLIMIT  
 								 ){forward("ledCmd", "ledCmd(on)" ,"ledqakactor" ) 
 								}
@@ -53,7 +54,7 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t042",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t041",targetState="doBusinessWork",cond=whenEvent("sonardistance"))
 				}	 
 			}
 		}

@@ -37,7 +37,7 @@ Dispatch cmd       	: cmd(MOVE)		 //MOVE=w|s|d|a|r|l|h
 Event local_movef : movef(_)
 
 //Sonar
-Event sonardata : distance(D) //dataclenaer
+Event sonardistance : distance(D) //dataclenaer
 Event obstacle : obstacle(D)	//distancefilter
 Event alarm		: alarm(X)		//per tt TODO: l'argomento � utile?
 Event robotmoving : robotmoving(_)  
@@ -281,7 +281,6 @@ QActor coldstorageservice context ctxprototipo1 {
 }
 
 QActor transporttrolley context ctxprototipo1{
-	// TODO: verificare se i duration in kotlin vanno
 	[#
 		var CRX = 4
 		var CRY = 3
@@ -363,6 +362,7 @@ QActor transporttrolley context ctxprototipo1{
   			if ((m1+MINT).hasPassedNow()){	
   				m1 = ts.markNow()
   		#]
+  			println("receive alarm signal") color red
 			updateResource[#tTState.toJsonString()#]
   			onMsg(moverobotfailed : moverobotfailed(PLANDONE,PLANTODO)){
   				[#PLANTODO = payloadArg(1)#]
@@ -372,6 +372,7 @@ QActor transporttrolley context ctxprototipo1{
   			}
   		
   			onMsg(resume: resume(_)){
+  				println("resume the robot") color red
   				[#tTState.setCurrState(savedState)#]
 				updateResource[#tTState.toJsonString()#]
 				emit robotmoving: robotmoving(_)
@@ -383,6 +384,7 @@ QActor transporttrolley context ctxprototipo1{
   		[#	
   			}else{ 
   		#]
+  				println("ignored alarm signal") color red
   				[#tTState.setCurrState(savedState)#]
 				updateResource[#tTState.toJsonString()#]
 				emit robotmoving: robotmoving(_)
@@ -396,6 +398,7 @@ QActor transporttrolley context ctxprototipo1{
   					whenReply doplanfailed -> handlerobotstopped
   					
 	State goahead{
+		println("resume netx state") color red
 		[# 	when {
 							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] forward transporttrolley -m gotomovetoport : gotomovetoport(_)[#
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] forward transporttrolley -m gotodepositactionended : gotodepositactionended(_)[#
@@ -485,11 +488,10 @@ QActor transporttrolley context ctxprototipo1{
 // Implementazione sonar 
 //contesto: nello stesso contensto fino a quando non si mette nel rasp
 
-QActor sonar23 context ctxprototipo1{
+QActor sonar23 context ctxprototipo1{ //TODO controllare se handleobstacle è superflua
 	[#var DLIMIT = 30 
 	var Appl = sysUtil.getActor("transporttrolley") != null #]
 	State s0 initial{
-		
 		println("sonar | start with appl: $Appl")
 	}Transition t0 whenMsg sonaractivate -> work
 				 //whenMsg sonardeactivate -> end
@@ -497,22 +499,27 @@ QActor sonar23 context ctxprototipo1{
 	State work{
 		onMsg(sonaractivate : info(DLIMIT)){
 		
-		[# println(payloadArg(0).toInt())
+		[# 
 			DLIMIT = payloadArg(0).toInt()#
 		]
 		}
+		println ("Sonar waiting") color red
 		updateResource[# "Sonar waiting"#]
-	}Transition t0 whenEvent sonardata -> handlesonardata
+	}Transition t0 whenEvent sonardistance -> handlesonardata
 	              whenEvent obstacle  -> handleobstacle
 	              
 	State handlesonardata{
-		onMsg(sonardata : distance(D)){
+		onMsg(sonardistance : distance(D)){
 			[#var D = payloadArg(0).toInt()#]
-			println("$name distance ${payloadArg(0)}") color magenta
+			//println("$name distance ${payloadArg(0)}") color magenta
 			if [#D>DLIMIT#]{
 				emit resume: resume(_)
-				println("RESUMING TransportTrolley")
+				println("RESUMING TransportTrolley") color green
 			}
+			if [#D <= DLIMIT#]{
+				emit alarm : alarm(obstacle)
+			    println("STOP TransportTrolley") color red
+			}		
 		}
 	}Goto work
 	
@@ -569,13 +576,14 @@ QActor controller23 context ctxprototipo1{ //ctxpc{
 		println("${name} STARTS - Activates the sonar")
 		forward sonar23 -m sonaractivate : info($DLIMIT) //TODO controllare se ci va messi
 	}
-	Transition t0 whenEvent sonardata -> doBusinessWork
-				whenEvent robotmoving -> doBusinessWork
+	Transition t0 whenEvent sonardistance -> doBusinessWork
 
 	State doBusinessWork{
 		//printCurrentMessage
-		onMsg( sonardata : distance(D)){
+		println("business work controller") color blue
+		onMsg( sonardistance : distance(D)){
 			[# var D = payloadArg(0).toInt() #]
+			println("$D") color red
 			//Interact with the Led
 			if [# D <= DLIMIT #]{
  				//println("${name} - Turn the Led on")
@@ -589,7 +597,7 @@ QActor controller23 context ctxprototipo1{ //ctxpc{
 			forward ledqakactor -m ledCmd : ledCmd(blink)
 		}
 	}
-	Transition t0 whenEvent sonardata -> doBusinessWork
+	Transition t0 whenEvent sonardistance -> doBusinessWork
 
 }
 

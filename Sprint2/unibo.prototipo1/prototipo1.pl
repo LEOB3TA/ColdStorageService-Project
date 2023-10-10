@@ -26,7 +26,7 @@ dispatch( setrobotstate, setpos(X,Y,D) ).
 dispatch( setdirection, dir(D) ).
 dispatch( cmd, cmd(MOVE) ).
 event( local_movef, movef(_) ).
-event( sonardata, distance(D) ).
+event( sonardistance, distance(D) ).
 event( obstacle, obstacle(D) ).
 event( alarm, alarm(X) ).
 event( robotmoving, robotmoving(_) ).
