@@ -37,7 +37,7 @@ Dispatch cmd       	: cmd(MOVE)		 //MOVE=w|s|d|a|r|l|h
 Event local_movef : movef(_)
 
 //Sonar
-Event sonardistance : distance(D) //dataclenaer
+Event sonardata : distance(D) //dataclenaer
 Event obstacle : obstacle(D)	//distancefilter
 Event alarm		: alarm(X)		//per tt TODO: l'argomento � utile?
 Event robotmoving : robotmoving(_)  
@@ -505,11 +505,11 @@ QActor sonar23 context ctxprototipo1{ //TODO controllare se handleobstacle è su
 		}
 		println ("Sonar waiting") color red
 		updateResource[# "Sonar waiting"#]
-	}Transition t0 whenEvent sonardistance -> handlesonardata
+	}Transition t0 whenEvent sonardata -> handlesonardata
 	              whenEvent obstacle  -> handleobstacle
 	              
 	State handlesonardata{
-		onMsg(sonardistance : distance(D)){
+		onMsg(sonardata : distance(D)){
 			[#var D = payloadArg(0).toInt()#]
 			//println("$name distance ${payloadArg(0)}") color magenta
 			if [#D>DLIMIT#]{
@@ -576,12 +576,12 @@ QActor controller23 context ctxprototipo1{ //ctxpc{
 		println("${name} STARTS - Activates the sonar")
 		forward sonar23 -m sonaractivate : info($DLIMIT) //TODO controllare se ci va messi
 	}
-	Transition t0 whenEvent sonardistance -> doBusinessWork
+	Transition t0 whenEvent sonardata -> doBusinessWork
 
 	State doBusinessWork{
 		//printCurrentMessage
 		println("business work controller") color blue
-		onMsg( sonardistance : distance(D)){
+		onMsg( sonardata : distance(D)){
 			[# var D = payloadArg(0).toInt() #]
 			println("$D") color red
 			//Interact with the Led
@@ -597,7 +597,7 @@ QActor controller23 context ctxprototipo1{ //ctxpc{
 			forward ledqakactor -m ledCmd : ledCmd(BLINK)
 		}
 	}
-	Transition t0 whenEvent sonardistance -> doBusinessWork
+	Transition t0 whenEvent sonardata -> doBusinessWork
 
 }
 
