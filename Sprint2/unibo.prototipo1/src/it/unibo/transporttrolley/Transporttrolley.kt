@@ -112,8 +112,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t018",targetState="handlerobotstopped",cond=whenEvent("alarm"))
-					transition(edgeName="t019",targetState="movetoport",cond=whenReply("moverobotdone"))
+					 transition(edgeName="t018",targetState="movetoport",cond=whenReply("moverobotdone"))
+					transition(edgeName="t019",targetState="handlerobotstopped",cond=whenReply("moverobotfailed"))
 				}	 
 				state("handlerobotstopped") { //this:State
 					action { //it:State
@@ -122,17 +122,19 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						  			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
 						  			if ((m1+MINT).hasPassedNow()){	
 						  				m1 = ts.markNow()
-						CommUtils.outred("receive alarm signal")
 						updateResourceRep(tTState.toJsonString() 
 						)
 						if( checkMsgContent( Term.createTerm("moverobotfailed(PLANDONE,PLANTODO)"), Term.createTerm("moverobotfailed(PLANDONE,PLANTODO)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
+								CommUtils.outred("robot move fail")
 								PLANTODO = payloadArg(1) 
 						}
 						if( checkMsgContent( Term.createTerm("doplanfailed(ARG)"), Term.createTerm("doplanfailed(PLANDONE,PLANTODO)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
+								CommUtils.outred("robot plan fail")
 								PLANTODO = payloadArg(1) 
 						}
+						CommUtils.outred(PLANTODO)
 							
 						  			}else{ 
 						CommUtils.outred("ignored alarm signal")
@@ -148,6 +150,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					sysaction { //it:State
 					}	 	 
 					 transition(edgeName="t020",targetState="resumerobot",cond=whenEvent("resume"))
+					transition(edgeName="t021",targetState="handlerobotstopped",cond=whenReply("moverobotfailed"))
+					transition(edgeName="t022",targetState="handlerobotstopped",cond=whenReply("doplanfailed"))
 				}	 
 				state("resumerobot") { //this:State
 					action { //it:State
@@ -157,19 +161,20 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 								tTState.setCurrState(savedState) 
 								updateResourceRep(tTState.toJsonString() 
 								)
-								emit("robotmoving", "robotmoving(_)" ) 
+								CommUtils.outred(PLANTODO)
 								request("doplan", "doplan($PLANTODO)" ,"basicrobot" )  
+								emit("robotmoving", "robotmoving(_)" ) 
 						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t021",targetState="goahead",cond=whenReply("doplandone"))
+					 transition(edgeName="t023",targetState="goahead",cond=whenReply("doplandone"))
 				}	 
 				state("goahead") { //this:State
 					action { //it:State
-						CommUtils.outred("resume netx state")
+						CommUtils.outred("resume next state")
 						 	when {
 													tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP ->  
 						forward("gotomovetoport", "gotomovetoport(_)" ,"transporttrolley" ) 
@@ -186,9 +191,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t022",targetState="movetoport",cond=whenDispatch("gotomovetoport"))
-					transition(edgeName="t023",targetState="depositactionended",cond=whenDispatch("gotodepositactionended"))
-					transition(edgeName="t024",targetState="robottohome",cond=whenDispatch("gotorobottohome"))
+					 transition(edgeName="t024",targetState="movetoport",cond=whenDispatch("gotomovetoport"))
+					transition(edgeName="t025",targetState="depositactionended",cond=whenDispatch("gotodepositactionended"))
+					transition(edgeName="t026",targetState="robottohome",cond=whenDispatch("gotorobottohome"))
 				}	 
 				state("movetoport") { //this:State
 					action { //it:State
@@ -207,8 +212,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t025",targetState="handlerobotstopped",cond=whenEvent("alarm"))
-					transition(edgeName="t026",targetState="depositactionended",cond=whenReply("moverobotdone"))
+					 transition(edgeName="t027",targetState="depositactionended",cond=whenReply("moverobotdone"))
+					transition(edgeName="t028",targetState="handlerobotstopped",cond=whenReply("moverobotfailed"))
 				}	 
 				state("depositactionended") { //this:State
 					action { //it:State
@@ -232,8 +237,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				 	 		stateTimer = TimerActor("timer_depositactionended", 
 				 	 					  scope, context!!, "local_tout_transporttrolley_depositactionended", 3000.toLong() )
 					}	 	 
-					 transition(edgeName="t027",targetState="robottohome",cond=whenTimeout("local_tout_transporttrolley_depositactionended"))   
-					transition(edgeName="t028",targetState="moverobottoindoor",cond=whenRequest("pickup"))
+					 transition(edgeName="t029",targetState="robottohome",cond=whenTimeout("local_tout_transporttrolley_depositactionended"))   
+					transition(edgeName="t030",targetState="moverobottoindoor",cond=whenRequest("pickup"))
 				}	 
 				state("robottohome") { //this:State
 					action { //it:State
@@ -252,8 +257,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t029",targetState="handlerobotstopped",cond=whenEvent("alarm"))
-					transition(edgeName="t030",targetState="idle",cond=whenReply("moverobotdone"))
+					 transition(edgeName="t031",targetState="idle",cond=whenReply("moverobotdone"))
+					transition(edgeName="t032",targetState="handlerobotstopped",cond=whenReply("moverobotfailed"))
 				}	 
 				state("robotmovefailed") { //this:State
 					action { //it:State

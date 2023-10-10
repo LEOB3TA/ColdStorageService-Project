@@ -352,9 +352,9 @@ QActor transporttrolley context ctxprototipo1{
 		emit robotmoving: robotmoving(_)
 		
  	} 
- 	Transition t0 whenEvent alarm -> handlerobotstopped 
+ 	Transition t0 //whenEvent alarm -> handlerobotstopped 
  				  whenReply moverobotdone -> movetoport
- 				//  whenReply moverobotfailed -> robotmovefailed //TODO controllare cosa accade in caso di emissione dell'evento alarm perchè non è da escludere che non funzioni
+ 				 whenReply moverobotfailed -> handlerobotstopped //TODO controllare cosa accade in caso di emissione dell'evento alarm perchè non è da escludere che non funzioni
  				  
   	State handlerobotstopped{ 
   		[#
@@ -363,15 +363,19 @@ QActor transporttrolley context ctxprototipo1{
   			if ((m1+MINT).hasPassedNow()){	
   				m1 = ts.markNow()
   		#]
-  			println("receive alarm signal") color red
+  			
 			updateResource[#tTState.toJsonString()#]
   			onMsg(moverobotfailed : moverobotfailed(PLANDONE,PLANTODO)){
+  				println("robot move fail") color red
   				[#PLANTODO = payloadArg(1)#]
+  		
   			}
   			onMsg(doplanfailed : doplanfailed(PLANDONE,PLANTODO)){
+  				println("robot plan fail") color red
   				[#PLANTODO = payloadArg(1)#]
+  			
   			}
-  		
+  		println(PLANTODO) color red
   		[#	
   			}else{ 
   		#]
@@ -385,22 +389,23 @@ QActor transporttrolley context ctxprototipo1{
 		
   			
   	}Transition t0  whenEvent resume -> resumerobot
-  	  			//	whenEvent alarm -> handlerobotstopped 
+  	  				whenReply moverobotfailed -> handlerobotstopped 
   				//	whenReply doplandone -> goahead
-  				//	whenReply doplanfailed -> handlerobotstopped
+  					whenReply doplanfailed -> handlerobotstopped
   					
 	State resumerobot{
 		  		onMsg(resume: resume(_)){
   				println("resume the robot") color red
   				[#tTState.setCurrState(savedState)#]
 				updateResource[#tTState.toJsonString()#]
-				emit robotmoving: robotmoving(_)
+				println(PLANTODO) color red
 				request basicrobot -m doplan:doplan($PLANTODO)
+				emit robotmoving: robotmoving(_)
   			}
 	}Transition t0 whenReply doplandone -> goahead
   					
 	State goahead{
-		println("resume netx state") color red
+		println("resume next state") color red
 		[# 	when {
 							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] forward transporttrolley -m gotomovetoport : gotomovetoport(_)[#
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] forward transporttrolley -m gotodepositactionended : gotodepositactionended(_)[#
@@ -429,9 +434,9 @@ QActor transporttrolley context ctxprototipo1{
 		emit robotmoving: robotmoving(_)
 		
 	}
-	Transition t0 whenEvent alarm -> handlerobotstopped
-				  whenReply moverobotdone -> depositactionended
- 				//  whenReply moverobotfailed -> robotmovefailed
+	Transition t0 //whenEvent alarm -> handlerobotstopped 
+ 				  whenReply moverobotdone -> depositactionended
+ 				 whenReply moverobotfailed -> handlerobotstopped //TODO controllare cosa accade in caso di emissione dell'evento alarm perchè non è da escludere che non funzioni
 
 	State depositactionended{
 		[#
@@ -472,9 +477,9 @@ QActor transporttrolley context ctxprototipo1{
 		forward basicrobot -m setrobotstate : setpos (0,0,d) // d= down	*/
 		println ("dir correction") color red
 	}
-	Transition t0 whenEvent alarm -> handlerobotstopped
+	Transition t0 //whenEvent alarm -> handlerobotstopped
 	  			  whenReply moverobotdone -> idle
- 				//  whenReply moverobotfailed -> robotmovefailed
+ 				  whenReply moverobotfailed -> handlerobotstopped
 
 
  	//control failed robot moves
