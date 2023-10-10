@@ -23,7 +23,7 @@ class sonarSimulator ( name : String ) : ActorBasic( name ) {
 
     override suspend fun actorBody(msg : IApplMessage){
   		println("$tt $name | received  $msg "  )
-		delay(15000)
+		delay(20000)
 		if( msg.msgId() == "simulatorstart") startDataReadSimulation(   )
      }
   	

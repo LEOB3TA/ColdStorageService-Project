@@ -29,7 +29,8 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t040",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t035",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t036",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 				state("doBusinessWork") { //this:State
 					action { //it:State
@@ -45,16 +46,24 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								 {forward("ledCmd", "ledCmd(OFF)" ,"ledqakactor" ) 
 								 }
 						}
-						if( checkMsgContent( Term.createTerm("robotmoving(_)"), Term.createTerm("robotmoving(_)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								forward("ledCmd", "ledCmd(BLINK)" ,"ledqakactor" ) 
-						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t041",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t037",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t038",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+				}	 
+				state("blinkled") { //this:State
+					action { //it:State
+						forward("ledCmd", "ledCmd(BLINK)" ,"ledqakactor" ) 
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t039",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t040",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}

@@ -295,6 +295,8 @@ QActor transporttrolley context ctxprototipo1{
 		val ts = kotlin.time.TimeSource.Monotonic
 		var m1 = ts.markNow()
 		val MINT : kotlin.time.Duration= 10.milliseconds
+		var PLANTODO = ""
+		var savedState = tTState.getCurrState()
 	#]
 	State init initial{
 		discardMsg Off
@@ -352,12 +354,11 @@ QActor transporttrolley context ctxprototipo1{
  	} 
  	Transition t0 whenEvent alarm -> handlerobotstopped 
  				  whenReply moverobotdone -> movetoport
- 				  whenReply moverobotfailed -> robotmovefailed //TODO controllare cosa accade in caso di emissione dell'evento alarm perchè non è da escludere che non funzioni
+ 				//  whenReply moverobotfailed -> robotmovefailed //TODO controllare cosa accade in caso di emissione dell'evento alarm perchè non è da escludere che non funzioni
  				  
   	State handlerobotstopped{ 
   		[#
-  			var PLANTODO = ""
-  			val savedState = tTState.getCurrState()
+  			savedState = tTState.getCurrState()
   			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
   			if ((m1+MINT).hasPassedNow()){	
   				m1 = ts.markNow()
@@ -371,16 +372,6 @@ QActor transporttrolley context ctxprototipo1{
   				[#PLANTODO = payloadArg(1)#]
   			}
   		
-  			onMsg(resume: resume(_)){
-  				println("resume the robot") color red
-  				[#tTState.setCurrState(savedState)#]
-				updateResource[#tTState.toJsonString()#]
-				emit robotmoving: robotmoving(_)
-				request basicrobot -m doplan:doplan($PLANTODO)
-  			}
-  			//TODO: posso mandarmi un resume? 
-  			// TODO si mette in attesa della resume oppure procede?? secondo me no (LEO)
-  			//TODO: verificare se la resume viene effettivamente inviata (posso rimanere bloccato in attesa infinita di una resume?)
   		[#	
   			}else{ 
   		#]
@@ -393,9 +384,20 @@ QActor transporttrolley context ctxprototipo1{
   		
 		
   			
-  	}Transition t0  whenEvent alarm -> handlerobotstopped 
-  					whenReply doplandone -> goahead
-  					whenReply doplanfailed -> handlerobotstopped
+  	}Transition t0  whenEvent resume -> resumerobot
+  	  			//	whenEvent alarm -> handlerobotstopped 
+  				//	whenReply doplandone -> goahead
+  				//	whenReply doplanfailed -> handlerobotstopped
+  					
+	State resumerobot{
+		  		onMsg(resume: resume(_)){
+  				println("resume the robot") color red
+  				[#tTState.setCurrState(savedState)#]
+				updateResource[#tTState.toJsonString()#]
+				emit robotmoving: robotmoving(_)
+				request basicrobot -m doplan:doplan($PLANTODO)
+  			}
+	}Transition t0 whenReply doplandone -> goahead
   					
 	State goahead{
 		println("resume netx state") color red
@@ -429,7 +431,7 @@ QActor transporttrolley context ctxprototipo1{
 	}
 	Transition t0 whenEvent alarm -> handlerobotstopped
 				  whenReply moverobotdone -> depositactionended
- 				  whenReply moverobotfailed -> robotmovefailed
+ 				//  whenReply moverobotfailed -> robotmovefailed
 
 	State depositactionended{
 		[#
@@ -472,7 +474,7 @@ QActor transporttrolley context ctxprototipo1{
 	}
 	Transition t0 whenEvent alarm -> handlerobotstopped
 	  			  whenReply moverobotdone -> idle
- 				  whenReply moverobotfailed -> robotmovefailed
+ 				//  whenReply moverobotfailed -> robotmovefailed
 
 
  	//control failed robot moves
@@ -506,7 +508,7 @@ QActor sonar23 context ctxprototipo1{ //TODO controllare se handleobstacle è su
 		println ("Sonar waiting") color red
 		updateResource[# "Sonar waiting"#]
 	}Transition t0 whenEvent sonardata -> handlesonardata
-	              whenEvent obstacle  -> handleobstacle
+	             // whenEvent obstacle  -> handleobstacle
 	              
 	State handlesonardata{
 		onMsg(sonardata : distance(D)){
@@ -576,7 +578,8 @@ QActor controller23 context ctxprototipo1{ //ctxpc{
 		println("${name} STARTS - Activates the sonar")
 		forward sonar23 -m sonaractivate : info($DLIMIT) //TODO controllare se ci va messi
 	}
-	Transition t0 whenEvent sonardata -> doBusinessWork
+	Transition t0 whenEvent robotmoving -> blinkled
+	whenEvent sonardata -> doBusinessWork
 
 	State doBusinessWork{
 		//printCurrentMessage
@@ -593,11 +596,15 @@ QActor controller23 context ctxprototipo1{ //ctxpc{
 				forward ledqakactor -m ledCmd : ledCmd(OFF)
 			}
 		}
-		onMsg( robotmoving : robotmoving(_)){
-			forward ledqakactor -m ledCmd : ledCmd(BLINK)
-		}
+	
 	}
-	Transition t0 whenEvent sonardata -> doBusinessWork
+	Transition t0 whenEvent robotmoving -> blinkled
+	 whenEvent sonardata -> doBusinessWork
+	 
+	 State blinkled{
+			forward ledqakactor -m ledCmd : ledCmd(BLINK)
+	 }Transition t0 whenEvent robotmoving -> blinkled
+	 whenEvent sonardata -> doBusinessWork
 
 }
 
