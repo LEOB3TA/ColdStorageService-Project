@@ -5,6 +5,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import unibo.basicomm23.interfaces.IApplMessage
 import unibo.basicomm23.utils.CommUtils
+import kotlin.random.Random
 
 /*
 -------------------------------------------------------------------------------------------------
@@ -22,30 +23,31 @@ class sonarSimulator ( name : String ) : ActorBasic( name ) {
 
     override suspend fun actorBody(msg : IApplMessage){
   		println("$tt $name | received  $msg "  )
-		delay(5000)
+		delay(15000)
 		if( msg.msgId() == "simulatorstart") startDataReadSimulation(   )
      }
   	
 //@kotlinx.coroutines.ObsoleteCoroutinesApi
 
 	suspend fun startDataReadSimulation(    ){
-		val data = sequence<Int>{
+		/*val data = sequence<Int>{
 			var v0 = 80
 			yield(v0)
 			while(true){
 				v0 = v0 - 5
 				yield( v0 )
 			}
-		}
+		}*/
 		var i = 0
 			while( i < 20 ){
- 	 			val m1 = "distance( ${data.elementAt(i)} )"
+ 	 			//val m1 = "distance( ${data.elementAt(i)} )"
+				val m1= "distance( ${Random.nextInt(0,80)} )"
 				i++
- 				val event = CommUtils.buildEvent( name,"sonardistance",m1)
+ 				val event = CommUtils.buildEvent( name,"sonardistance", m1)
   				//emitLocalStreamEvent( event ) //ORIGINAL FROM NATALI
  				println("$tt $name | generates $event")
  				emit(event)  //APPROPRIATE ONLY IF NOT INCLUDED IN A PIPE
- 				delay( 500 )
+ 				delay( 1500 )
   			}			
 			terminate()
 	}
