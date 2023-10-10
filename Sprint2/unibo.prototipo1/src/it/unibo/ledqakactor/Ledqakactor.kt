@@ -42,9 +42,9 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 								if(  Cmd=="OFF"  
 								 ){CommUtils.outmagenta("${name} - off")
 								}
-								else
-								 {CommUtils.outmagenta("${name} - blink")
-								 }
+								if(  Cmd=="BLINK"  
+								 ){CommUtils.outmagenta("${name} - blink")
+								}
 						}
 						//genTimer( actor, state )
 					}

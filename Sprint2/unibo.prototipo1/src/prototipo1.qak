@@ -561,7 +561,7 @@ QActor ledqakactor context ctxprototipo1 {
 			} if [# Cmd=="OFF" #]{
 				//[# CommUtils.outyellow( "${name} - off")#]
 				println("${name} - off") color magenta
-			}else{
+			}if [# Cmd=="BLINK" #] {
 				//[# CommUtils.outyellow( "${name} - off")#]
 				println("${name} - blink") color magenta
 			}
