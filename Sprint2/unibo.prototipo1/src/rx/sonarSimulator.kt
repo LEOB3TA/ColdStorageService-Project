@@ -15,12 +15,14 @@ sonarSimulator.kt
 class sonarSimulator ( name : String ) : ActorBasic( name ) {
 	init{
 		//autostart
+
 		runBlocking{  autoMsg("simulatorstart","do") }
 	}
 //@kotlinx.coroutines.ObsoleteCoroutinesApi
 
     override suspend fun actorBody(msg : IApplMessage){
   		println("$tt $name | received  $msg "  )
+		delay(5000)
 		if( msg.msgId() == "simulatorstart") startDataReadSimulation(   )
      }
   	
@@ -40,9 +42,9 @@ class sonarSimulator ( name : String ) : ActorBasic( name ) {
  	 			val m1 = "distance( ${data.elementAt(i)} )"
 				i++
  				val event = CommUtils.buildEvent( name,"sonardistance",m1)
-  				emitLocalStreamEvent( event )
+  				//emitLocalStreamEvent( event ) //ORIGINAL FROM NATALI
  				println("$tt $name | generates $event")
- 				//emit(event)  //APPROPRIATE ONLY IF NOT INCLUDED IN A PIPE
+ 				emit(event)  //APPROPRIATE ONLY IF NOT INCLUDED IN A PIPE
  				delay( 500 )
   			}			
 			terminate()
