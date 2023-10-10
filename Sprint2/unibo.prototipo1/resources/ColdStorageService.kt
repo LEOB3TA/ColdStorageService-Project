@@ -7,7 +7,7 @@ import resources.model.Ticket
 class ColdStorageService {
     private var MAXW : Double = 100.0
     private var DLIMIT : Int =0
-    private val TICKETTIME: Long = 1
+    private val TICKETTIME: Long = 3
     private var currentWeightStorage : Double = 0.0
     private val ticketList : ArrayList<Ticket> = arrayListOf()
     private var ticketNumber: Int = 0
