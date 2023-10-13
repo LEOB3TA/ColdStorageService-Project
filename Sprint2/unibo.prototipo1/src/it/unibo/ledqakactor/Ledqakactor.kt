@@ -18,6 +18,9 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
+		
+				var ledState =  state.TransportTrolleyState() 
+				var current = ledState.getCurrLed()//per print
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -37,13 +40,22 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 var Cmd = payloadArg(0)  
 								if(  Cmd=="ON"  
-								 ){CommUtils.outmagenta("${name} - on")
+								 ){ 
+													ledState.setLed(state.LedState.ON) 
+													current = ledState.getCurrLed()
+								CommUtils.outmagenta("${name} - $current")
 								}
 								if(  Cmd=="OFF"  
-								 ){CommUtils.outmagenta("${name} - off")
+								 ){ 
+													ledState.setLed(state.LedState.OFF) 
+													current = ledState.getCurrLed()	
+								CommUtils.outmagenta("${name} - $current")
 								}
 								if(  Cmd=="BLINK"  
-								 ){CommUtils.outmagenta("${name} - blink")
+								 ){ 
+													ledState.setLed(state.LedState.BLINKS) 
+													current = ledState.getCurrLed()
+								CommUtils.outmagenta("${name} - $current")
 								}
 						}
 						//genTimer( actor, state )

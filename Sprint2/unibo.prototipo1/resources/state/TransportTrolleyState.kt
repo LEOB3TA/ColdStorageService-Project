@@ -10,9 +10,14 @@ enum class TTPosition{
     HOME, INDOOR, ONTHEROAD, PORT
 }
 
+enum class LedState{
+    ON, OFF, BLINKS
+}
+
 data class TransportTrolleyState(
     private var currState: CurrStateTrolley = CurrStateTrolley.IDLE,
-    private var currPosition: TTPosition = TTPosition.HOME
+    private var currPosition: TTPosition = TTPosition.HOME,
+    private var currLed : LedState = LedState.OFF
 ){
     fun setCurrState(state: CurrStateTrolley){
         currState = state
@@ -25,6 +30,13 @@ data class TransportTrolleyState(
     }
     fun getCurrPosition() : TTPosition{
         return currPosition
+    }
+
+    fun getCurrLed(): LedState {
+        return currLed
+    }
+    fun setLed(state: LedState){
+        currLed = state
     }
 
     companion object{
