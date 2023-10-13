@@ -294,7 +294,7 @@ QActor transporttrolley context ctxprototipo1{
 		val MyName = name
 		val ts = kotlin.time.TimeSource.Monotonic
 		var m1 = ts.markNow()
-		val MINT : kotlin.time.Duration= 10.milliseconds
+		val MINT : kotlin.time.Duration= 1.seconds
 		var PLANTODO = ""
 		var savedState = tTState.getCurrState()
 	#]
@@ -352,11 +352,12 @@ QActor transporttrolley context ctxprototipo1{
 		emit robotmoving: robotmoving(_)
 		
  	} 
- 	Transition t0 //whenEvent alarm -> handlerobotstopped 
+ 	Transition t0 
  				  whenReply moverobotdone -> movetoport
- 				 whenReply moverobotfailed -> handlerobotstopped //TODO controllare cosa accade in caso di emissione dell'evento alarm perchè non è da escludere che non funzioni
+ 				 whenReply moverobotfailed -> handlerobotstopped 
  				  
   	State handlerobotstopped{ 
+  		println("$name |handle robot stopped") color green
   		[#
   			savedState = tTState.getCurrState()
   			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
@@ -365,17 +366,6 @@ QActor transporttrolley context ctxprototipo1{
   		#]
   			
 			updateResource[#tTState.toJsonString()#]
-  			onMsg(moverobotfailed : moverobotfailed(PLANDONE,PLANTODO)){
-  				println("robot move fail") color red
-  				[#PLANTODO = payloadArg(1)#]
-  		
-  			}
-  			onMsg(doplanfailed : doplanfailed(PLANDONE,PLANTODO)){
-  				println("robot plan fail") color red
-  				[#PLANTODO = payloadArg(1)#]
-  			
-  			}
-  		println(PLANTODO) color red
   		[#	
   			}else{ 
   		#]
@@ -383,37 +373,50 @@ QActor transporttrolley context ctxprototipo1{
   				[#tTState.setCurrState(savedState)#]
 				updateResource[#tTState.toJsonString()#]
 				emit robotmoving: robotmoving(_)
-				request basicrobot -m doplan:doplan($PLANTODO)
+				[# 	when {
+							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)[#
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] request basicrobot -m moverobot:moverobot($CRX,$CRY)[#
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
+							delay 6300
+							forward basicrobot -m cmd : cmd ( l )
+							[#}}#]
   		[#	}#]
   		
 		
   			
   	}Transition t0  whenEvent resume -> resumerobot
+  					whenReply moverobotdone -> goahead
   	  				whenReply moverobotfailed -> handlerobotstopped 
-  				//	whenReply doplandone -> goahead
-  					whenReply doplanfailed -> handlerobotstopped
   					
 	State resumerobot{
+		println("$name | resume robot") color green
 		  		onMsg(resume: resume(_)){
-  				println("resume the robot") color red
+		  		emit robotmoving: robotmoving(_)
   				[#tTState.setCurrState(savedState)#]
-				updateResource[#tTState.toJsonString()#]
-				println(PLANTODO) color red
-				request basicrobot -m doplan:doplan($PLANTODO)
-				emit robotmoving: robotmoving(_)
-  			}
-	}Transition t0 whenReply doplandone -> goahead
+  						[# 	when {
+							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)[#
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] request basicrobot -m moverobot:moverobot($CRX,$CRY)[#
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
+						
+							[#}}#]
+				}
+	}Transition t0 whenReply moverobotdone -> goahead
+		whenReply moverobotfailed -> handlerobotstopped 
   					
 	State goahead{
-		println("resume next state") color red
+		println("$name | go ahead with next state") color green
 		[# 	when {
 							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] forward transporttrolley -m gotomovetoport : gotomovetoport(_)[#
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] forward transporttrolley -m gotodepositactionended : gotodepositactionended(_)[#
-							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME -> #] forward transporttrolley -m gotorobottohome : gotorobottohome(_)[#
-			}#]
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] 	delay 6300
+							forward basicrobot -m cmd : cmd ( l )
+							forward transporttrolley -m gotorobottohome : gotorobottohome(_)
+								
+		[#
+			}}#]
 	}Transition t0 whenMsg gotomovetoport -> movetoport
 					whenMsg gotodepositactionended -> depositactionended
-					whenMsg gotorobottohome -> robottohome
+					whenMsg gotorobottohome -> idle
   					
   	
 
@@ -465,6 +468,7 @@ QActor transporttrolley context ctxprototipo1{
 			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
 		#]
 		updateResource[#tTState.toJsonString()#]
+			println("$name | back to home" ) color green
 		//send event "robot is in home"
 		request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
 		
@@ -475,7 +479,6 @@ QActor transporttrolley context ctxprototipo1{
 		/*delay 6500
 		forward basicrobot -m setdirection : dir( DOWN )
 		forward basicrobot -m setrobotstate : setpos (0,0,d) // d= down	*/
-		println ("dir correction") color red
 	}
 	Transition t0 //whenEvent alarm -> handlerobotstopped
 	  			  whenReply moverobotdone -> idle
@@ -521,12 +524,10 @@ QActor sonar23 context ctxprototipo1{ //TODO controllare se handleobstacle è su
 			//println("$name distance ${payloadArg(0)}") color magenta
 			if [#D>DLIMIT#]{
 				emit resume: resume(_)
-				println("RESUMING TransportTrolley") color green
 			}
 			if [#D <= DLIMIT#]{
 				emit alarm : alarm(obstacle)
-			    println("STOP TransportTrolley") color red
-			}		
+							}		
 		}
 	}Goto work
 	
@@ -580,15 +581,15 @@ QActor ledqakactor context ctxprototipo1 {
 QActor controller23 context ctxprototipo1{ //ctxpc{
 [# val DLIMIT = 30 #] //valore casuale
 	State s0 initial{
-		println("${name} STARTS - Activates the sonar")
+		println("${name} STARTS - Activates the sonar") color magenta
 		forward sonar23 -m sonaractivate : info($DLIMIT) //TODO controllare se ci va messi
 	}
 	Transition t0 whenEvent robotmoving -> blinkled
 	whenEvent sonardata -> doBusinessWork
 
 	State doBusinessWork{
+		println("${name} BUSINESS WORK") color magenta
 		//printCurrentMessage
-		println("business work controller") color blue
 		onMsg( sonardata : distance(D)){
 			[# var D = payloadArg(0).toInt() #]
 			println("$D") color red

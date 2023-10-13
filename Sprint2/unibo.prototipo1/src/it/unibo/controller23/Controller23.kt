@@ -22,19 +22,19 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outblack("${name} STARTS - Activates the sonar")
+						CommUtils.outmagenta("${name} STARTS - Activates the sonar")
 						forward("sonaractivate", "info($DLIMIT)" ,"sonar23" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t037",targetState="blinkled",cond=whenEvent("robotmoving"))
-					transition(edgeName="t038",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t038",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t039",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 				state("doBusinessWork") { //this:State
 					action { //it:State
-						CommUtils.outblue("business work controller")
+						CommUtils.outmagenta("${name} BUSINESS WORK")
 						if( checkMsgContent( Term.createTerm("distance(D)"), Term.createTerm("distance(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 var D = payloadArg(0).toInt()  
@@ -51,8 +51,8 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t039",targetState="blinkled",cond=whenEvent("robotmoving"))
-					transition(edgeName="t040",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t040",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t041",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 				state("blinkled") { //this:State
 					action { //it:State
@@ -62,8 +62,8 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t041",targetState="blinkled",cond=whenEvent("robotmoving"))
-					transition(edgeName="t042",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t042",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t043",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}

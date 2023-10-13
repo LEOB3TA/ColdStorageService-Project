@@ -23,7 +23,7 @@ class sonarSimulator ( name : String ) : ActorBasic( name ) {
 
     override suspend fun actorBody(msg : IApplMessage){
   		println("$tt $name | received  $msg "  )
-		delay(20000)
+		delay(10000)
 		if( msg.msgId() == "simulatorstart") startDataReadSimulation(   )
      }
   	
@@ -48,7 +48,8 @@ class sonarSimulator ( name : String ) : ActorBasic( name ) {
  				println("$tt $name | generates $event")
  				emit(event)  //APPROPRIATE ONLY IF NOT INCLUDED IN A PIPE
  				delay( 1500 )
-  			}			
+  			}
+			emit(CommUtils.buildEvent( name,"sonardistance", "distance(10000)"))
 			terminate()
 	}
 

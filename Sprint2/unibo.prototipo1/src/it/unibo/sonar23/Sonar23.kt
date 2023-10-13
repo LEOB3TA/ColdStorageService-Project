@@ -29,7 +29,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t033",targetState="work",cond=whenDispatch("sonaractivate"))
+					 transition(edgeName="t034",targetState="work",cond=whenDispatch("sonaractivate"))
 				}	 
 				state("work") { //this:State
 					action { //it:State
@@ -46,7 +46,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t034",targetState="handlesonardata",cond=whenEvent("sonardata"))
+					 transition(edgeName="t035",targetState="handlesonardata",cond=whenEvent("sonardata"))
 				}	 
 				state("handlesonardata") { //this:State
 					action { //it:State
@@ -55,11 +55,9 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 								var D = payloadArg(0).toInt() 
 								if( D>DLIMIT 
 								 ){emit("resume", "resume(_)" ) 
-								CommUtils.outgreen("RESUMING TransportTrolley")
 								}
 								if( D <= DLIMIT 
 								 ){emit("alarm", "alarm(obstacle)" ) 
-								CommUtils.outred("STOP TransportTrolley")
 								}
 						}
 						//genTimer( actor, state )
