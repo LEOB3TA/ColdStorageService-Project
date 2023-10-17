@@ -29,7 +29,9 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t029",targetState="stayoff",cond=whenEvent("robotathome"))
+					 transition(edgeName="t038",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t039",targetState="stayoff",cond=whenEvent("robotathome"))
+					transition(edgeName="t040",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 				state("doBusinessWork") { //this:State
 					action { //it:State
@@ -47,9 +49,9 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t030",targetState="blinkled",cond=whenEvent("robotmoving"))
-					transition(edgeName="t031",targetState="stayoff",cond=whenEvent("robotathome"))
-					transition(edgeName="t032",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t041",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t042",targetState="stayoff",cond=whenEvent("robotathome"))
+					transition(edgeName="t043",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 				state("stayoff") { //this:State
 					action { //it:State
@@ -59,7 +61,7 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t033",targetState="blinkled",cond=whenEvent("robotmoving"))
+					 transition(edgeName="t044",targetState="blinkled",cond=whenEvent("robotmoving"))
 				}	 
 				state("blinkled") { //this:State
 					action { //it:State
@@ -69,9 +71,9 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t034",targetState="blinkled",cond=whenEvent("robotmoving"))
-					transition(edgeName="t035",targetState="stayoff",cond=whenEvent("robotathome"))
-					transition(edgeName="t036",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t045",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t046",targetState="stayoff",cond=whenEvent("robotathome"))
+					transition(edgeName="t047",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}
