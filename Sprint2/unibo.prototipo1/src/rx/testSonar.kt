@@ -25,12 +25,7 @@ class testSonar( name : String): ActorBasic(name) {
         println("$tt $name | generates $event")
         emit(event)  //APPROPRIATE ONLY IF NOT INCLUDED IN A PIPE
         delay( 1500 )
-        emit(event)  //APPROPRIATE ONLY IF NOT INCLUDED IN A PIPE
-        delay( 1500 )
         emit(CommUtils.buildEvent( name,"sonardistance", "distance(45)"))
-        terminate()
-        emit(CommUtils.buildEvent( name,"sonardistance", "distance(35)"))
-        terminate()
     }
 
 }
