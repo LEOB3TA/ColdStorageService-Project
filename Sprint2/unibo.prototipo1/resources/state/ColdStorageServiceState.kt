@@ -1,4 +1,4 @@
-package resources.state
+package state
 
 import com.google.gson.Gson
 
