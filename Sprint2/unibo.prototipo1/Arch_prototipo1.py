@@ -29,7 +29,6 @@ with Diagram('prototipo1Arch', show=False, outformat='png', graph_attr=graphattr
           sonar23=Custom('sonar23','./qakicons/symActorSmall.png')
           ledqakactor=Custom('ledqakactor','./qakicons/symActorSmall.png')
           controller23=Custom('controller23','./qakicons/symActorSmall.png')
-          sonar=Custom('sonar(coded)','./qakicons/codedQActor.png')
           datacleaner=Custom('datacleaner(coded)','./qakicons/codedQActor.png')
           distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
      coldstorageservice >> Edge( label='local_movef', **eventedgeattr, fontcolor='red') >> sys

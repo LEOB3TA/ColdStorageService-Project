@@ -70,7 +70,8 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					sysaction { //it:State
 					}	 	 
 					 transition(edgeName="t034",targetState="blinkled",cond=whenEvent("robotmoving"))
-					transition(edgeName="t035",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					transition(edgeName="t035",targetState="stayoff",cond=whenEvent("robotathome"))
+					transition(edgeName="t036",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}

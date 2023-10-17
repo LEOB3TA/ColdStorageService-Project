@@ -42,7 +42,6 @@ dispatch( gotorobottohome, gotorobottohome(_) ).
 context(ctxbasicrobot, "127.0.0.1",  "TCP", "8020").
 context(ctxprototipo1, "localhost",  "TCP", "8099").
  qactor( basicrobot, ctxbasicrobot, "external").
-  qactor( sonar, ctxprototipo1, "rx.testSonar").
   qactor( datacleaner, ctxprototipo1, "rx.dataCleaner").
   qactor( distancefilter, ctxprototipo1, "rx.distanceFilter").
   qactor( coldstorageservice, ctxprototipo1, "it.unibo.coldstorageservice.Coldstorageservice").

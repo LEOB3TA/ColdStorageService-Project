@@ -618,7 +618,8 @@ QActor controller23 context ctxprototipo1{ //ctxpc{
 	 State blinkled{
 			forward ledqakactor -m ledCmd : ledCmd(BLINK)
 	 }Transition t0 whenEvent robotmoving -> blinkled
-	 whenEvent sonardata -> doBusinessWork
+	 				whenEvent robotathome -> stayoff
+	 				whenEvent sonardata -> doBusinessWork
 
 }
 

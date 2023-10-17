@@ -80,6 +80,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				state("idle") { //this:State
 					action { //it:State
 						CommUtils.outgreen("$name | engaged")
+						emit("robotathome", "robotathome(_)" ) 
+						CommUtils.outblack("$name | emitted athome")
 						
 									tTState.setCurrState(state.CurrStateTrolley.IDLE)
 									tTState.setCurrPosition(state.TTPosition.HOME)
