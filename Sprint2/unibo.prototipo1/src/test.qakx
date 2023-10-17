@@ -196,7 +196,6 @@ QActor coldstorageservice context ctxprototipo1 {
     
    State error{
    	println("$name | robot failed to move") color red
- 		emit local_movef : local_movef(_)
  		println("$name | close") color red
  		[# System.exit(0) #]
    }
