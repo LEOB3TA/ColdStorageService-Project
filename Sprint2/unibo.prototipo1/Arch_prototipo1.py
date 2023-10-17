@@ -33,6 +33,7 @@ with Diagram('prototipo1Arch', show=False, outformat='png', graph_attr=graphattr
           datacleaner=Custom('datacleaner(coded)','./qakicons/codedQActor.png')
           distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
      coldstorageservice >> Edge( label='local_movef', **eventedgeattr, fontcolor='red') >> sys
+     transporttrolley >> Edge( label='robotathome', **eventedgeattr, fontcolor='red') >> sys
      transporttrolley >> Edge( label='robotmoving', **eventedgeattr, fontcolor='red') >> sys
      transporttrolley >> Edge( label='local_movef', **eventedgeattr, fontcolor='red') >> sys
      sonar23 >> Edge( label='resume', **eventedgeattr, fontcolor='red') >> sys

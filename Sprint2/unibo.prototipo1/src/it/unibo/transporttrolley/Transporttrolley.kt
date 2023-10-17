@@ -35,7 +35,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				val ts = kotlin.time.TimeSource.Monotonic
 				var m1 = ts.markNow()
 				val MINT : kotlin.time.Duration= 1.seconds
-				var PLANTODO = ""
 				var savedState = tTState.getCurrState()
 		return { //this:ActionBasciFsm
 				state("init") { //this:State
@@ -45,6 +44,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						request("engage", "engage($MyName,320)" ,"basicrobot" )  
 						updateResourceRep(tTState.toJsonString() 
 						)
+						emit("robotathome", "robotathome(_)" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -83,7 +83,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						
 									tTState.setCurrState(state.CurrStateTrolley.IDLE)
 									tTState.setCurrPosition(state.TTPosition.HOME)
-									tTState.setLed(state.LedState.OFF)
 						updateResourceRep(tTState.toJsonString() 
 						)
 						forward("setrobotstate", "setpos(0,0,d)" ,"basicrobot" ) 
@@ -102,7 +101,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 								
 											tTState.setCurrState(state.CurrStateTrolley.PICKINGUP)
 											tTState.setCurrPosition(state.TTPosition.INDOOR)
-											tTState.setLed(state.LedState.BLINKS)
 						}
 						updateResourceRep(tTState.toJsonString() 
 						)
@@ -123,7 +121,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						
 						  			savedState = tTState.getCurrState()
 						  			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
-						  			tTState.setLed(state.LedState.ON)
 						  			if ((m1+MINT).hasPassedNow()){	
 						  				m1 = ts.markNow()
 						updateResourceRep(tTState.toJsonString() 
@@ -144,8 +141,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						
 													tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{  
 						request("moverobot", "moverobot($HOMEX,$HOMEY)" ,"basicrobot" )  
-						delay(6300) 
-						forward("cmd", "cmd(l)" ,"basicrobot" ) 
 						}} 
 							} 
 						//genTimer( actor, state )
@@ -196,6 +191,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 													tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{  
 						delay(6300) 
 						forward("cmd", "cmd(l)" ,"basicrobot" ) 
+						emit("robotathome", "robotathome(_)" ) 
 						forward("gotorobottohome", "gotorobottohome(_)" ,"transporttrolley" ) 
 						
 									}} 
@@ -213,7 +209,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						
 									tTState.setCurrState(state.CurrStateTrolley.MOVINGTOPORT)
 									tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
-									tTState.setLed(state.LedState.BLINKS)
 						updateResourceRep(tTState.toJsonString() 
 						)
 						CommUtils.outgreen("$name | robot is in indoor")
@@ -260,7 +255,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						
 									tTState.setCurrState(state.CurrStateTrolley.MOVINGTOHOME)
 									tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
-									tTState.setLed(state.LedState.BLINKS)
 						updateResourceRep(tTState.toJsonString() 
 						)
 						CommUtils.outgreen("$name | back to home")
@@ -268,6 +262,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						emit("robotmoving", "robotmoving(_)" ) 
 						delay(6300) 
 						forward("cmd", "cmd(l)" ,"basicrobot" ) 
+						emit("robotathome", "robotathome(_)" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

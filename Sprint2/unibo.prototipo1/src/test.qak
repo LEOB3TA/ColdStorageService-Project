@@ -36,11 +36,12 @@ Dispatch cmd       	: cmd(MOVE)		 //MOVE=w|s|d|a|r|l|h
 
 Event local_movef : movef(_)
 
-//Sonar
+//Sonar e movimenti robot
 Event sonardata : distance(D) //dataclenaer
 Event obstacle : obstacle(D)	//distancefilter
 Event alarm		: alarm(X)		//per tt TODO: l'argomento � utile?
 Event robotmoving : robotmoving(_)  
+Event robotathome : robotathome(_)
 Event resume:resume(_)
 Dispatch sonaractivate: info(D) //D = DLIMIT
 
@@ -63,6 +64,7 @@ ExternalQActor basicrobot context ctxbasicrobot
 //ExternalQActor mocktruck context ctxtruck
 
 //Sonar
+
 
 //CodedQActor sonar  context ctxrasp className "rx.sonarHCSR04Support23"   //SU RASP
 CodedQActor sonar context ctxprototipo1 className "rx.testSonar" //Sonar per il test
@@ -216,7 +218,6 @@ QActor transporttrolley context ctxprototipo1{
 		val ts = kotlin.time.TimeSource.Monotonic
 		var m1 = ts.markNow()
 		val MINT : kotlin.time.Duration= 1.seconds
-		var PLANTODO = ""
 		var savedState = tTState.getCurrState()
 	#]
 	State init initial{
@@ -225,6 +226,7 @@ QActor transporttrolley context ctxprototipo1{
 		println("$name | request engage") color green
 		request basicrobot -m engage : engage ($MyName, 320)
 		updateResource[#tTState.toJsonString()#]
+		emit robotathome : robotathome(_)
 		//printCurrentMessage color black
 	}Transition t0 //whenTime 10000 -> error
 				   whenReply engagedone -> idle
@@ -246,7 +248,6 @@ QActor transporttrolley context ctxprototipo1{
 		[#
 			tTState.setCurrState(state.CurrStateTrolley.IDLE)
 			tTState.setCurrPosition(state.TTPosition.HOME)
-			tTState.setLed(state.LedState.OFF)
 		#]
 		updateResource[#tTState.toJsonString()#]
 		// State print for debug
@@ -265,7 +266,6 @@ QActor transporttrolley context ctxprototipo1{
  			[#
 			tTState.setCurrState(state.CurrStateTrolley.PICKINGUP)
 			tTState.setCurrPosition(state.TTPosition.INDOOR)
-			tTState.setLed(state.LedState.BLINKS)
 			#]
  		}
 		updateResource[#tTState.toJsonString()#]
@@ -284,7 +284,6 @@ QActor transporttrolley context ctxprototipo1{
   		[#
   			savedState = tTState.getCurrState()
   			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
-  			tTState.setLed(state.LedState.ON)
   			if ((m1+MINT).hasPassedNow()){	
   				m1 = ts.markNow()
   		#]
@@ -293,7 +292,7 @@ QActor transporttrolley context ctxprototipo1{
   		[#	
   			}else{ 
   		#]
-  				println("ignored alarm signal") color red
+  		println("ignored alarm signal") color red
   				[#tTState.setCurrState(savedState)#]
 				updateResource[#tTState.toJsonString()#]
 				emit robotmoving: robotmoving(_)
@@ -301,11 +300,8 @@ QActor transporttrolley context ctxprototipo1{
 							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)[#
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] request basicrobot -m moverobot:moverobot($CRX,$CRY)[#
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
-							delay 6300
-							forward basicrobot -m cmd : cmd ( l )
 							[#}}#]
   		[#	}#]
-  		
 		
   			
   	}Transition t0  whenEvent resume -> resumerobot
@@ -334,6 +330,7 @@ QActor transporttrolley context ctxprototipo1{
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] forward transporttrolley -m gotodepositactionended : gotodepositactionended(_)[#
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] 	delay 6300
 							forward basicrobot -m cmd : cmd ( l )
+							emit robotathome : robotathome(_)
 							forward transporttrolley -m gotorobottohome : gotorobottohome(_)
 								
 		[#
@@ -350,7 +347,6 @@ QActor transporttrolley context ctxprototipo1{
 		[#
 			tTState.setCurrState(state.CurrStateTrolley.MOVINGTOPORT)
 			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
-			tTState.setLed(state.LedState.BLINKS)
 		#]
 		updateResource[#tTState.toJsonString()#]
 		//send event "robot is in indoor"
@@ -392,7 +388,6 @@ QActor transporttrolley context ctxprototipo1{
 		[#
 			tTState.setCurrState(state.CurrStateTrolley.MOVINGTOHOME)
 			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
-			tTState.setLed(state.LedState.BLINKS)
 		#]
 		updateResource[#tTState.toJsonString()#]
 			println("$name | back to home" ) color green
@@ -403,6 +398,7 @@ QActor transporttrolley context ctxprototipo1{
 		
 		delay 6300
 		forward basicrobot -m cmd : cmd ( l )
+		emit robotathome : robotathome(_)
 		/*delay 6500
 		forward basicrobot -m setdirection : dir( DOWN )
 		forward basicrobot -m setrobotstate : setpos (0,0,d) // d= down	*/
@@ -458,62 +454,49 @@ QActor sonar23 context ctxprototipo1{ //TODO controllare se handleobstacle è su
 		}
 	}Goto work
 	
-	State handleobstacle{
-		onMsg( obstacle : obstacle(D)){			
-			[#var D = payloadArg(0).toInt()#]
-			println("$name handleobstacle ALARM ${payloadArg(0)}") color magenta
-			// Alarm requirements
-			if [#D <= DLIMIT#]{
-				emit alarm : alarm(obstacle)
-			    println("STOP TransportTrolley")	
-			}		
-		}
-		
-	}
-	Goto end if [# Appl == true #]  else work  
-	
-	State end{
-		println("$name BYE")
-	}
 }
 
 
 
 QActor ledqakactor context ctxprototipo1 {
 	[#
-		var ledState =  state.TransportTrolleyState() 
-		var current = ledState.getCurrLed()//per print
+		val ledState = state.LedState()
+		ledState.setState(state.LState.OFF)
+		var current=ledState.getCurrState()
 	#]
 
   State s0 initial{
+  	updateResource[#ledState.toJsonString()#]
 		println("${name} STARTS")
 	}
 	Transition t0 whenMsg ledCmd -> doCmd
 
 	State doCmd{ //da codificare i comandi del raspberry sprint4 
-		printCurrentMessage
 		onMsg( ledCmd : ledCmd(CMD) ){
 			[# var Cmd = payloadArg(0) #]
 			if [# Cmd=="ON" #]{
 				//[# CommUtils.outyellow( "${name} - on") #]
 				[# 
-					ledState.setLed(state.LedState.ON) 
-					current = ledState.getCurrLed()
+					ledState.setState(state.LState.ON)
+					current = ledState.getCurrState()
 				#]
+				updateResource[#ledState.toJsonString()#]
 				println("${name} - $current") color magenta
 			} if [# Cmd=="OFF" #]{
 				//[# CommUtils.outyellow( "${name} - off")#]
 				[# 
-					ledState.setLed(state.LedState.OFF) 
-					current = ledState.getCurrLed()	
+					ledState.setState(state.LState.OFF)
+					current = ledState.getCurrState()	
 				#]
+				updateResource[#ledState.toJsonString()#]
 				println("${name} - $current") color magenta
 			}if [# Cmd=="BLINK" #] {
 				//[# CommUtils.outyellow( "${name} - off")#]
 				[# 
-					ledState.setLed(state.LedState.BLINKS) 
-					current = ledState.getCurrLed()
+					ledState.setState(state.LState.BLINKS)
+					current = ledState.getCurrState()
 				#]
+				updateResource[#ledState.toJsonString()#]
 				println("${name} - $current") color magenta
 			}
 		}
@@ -521,14 +504,16 @@ QActor ledqakactor context ctxprototipo1 {
 	Transition t0 whenMsg ledCmd -> doCmd
 }
 
+
 QActor controller23 context ctxprototipo1{ //ctxpc{
 [# val DLIMIT = 30 #] //valore casuale
 	State s0 initial{
 		println("${name} STARTS - Activates the sonar") color magenta
 		forward sonar23 -m sonaractivate : info($DLIMIT) //TODO controllare se ci va messi
 	}
-	Transition t0 whenEvent robotmoving -> blinkled
-	whenEvent sonardata -> doBusinessWork
+	Transition t0 //whenEvent robotmoving -> blinkled
+	whenEvent robotathome -> stayoff
+//	whenEvent sonardata -> doBusinessWork
 
 	State doBusinessWork{
 		println("${name} BUSINESS WORK") color magenta
@@ -540,15 +525,18 @@ QActor controller23 context ctxprototipo1{ //ctxpc{
 			if [# D <= DLIMIT #]{
  				//println("${name} - Turn the Led on")
 				forward ledqakactor -m ledCmd : ledCmd(ON)
-			}else{
- 				//println("${name} - Turn the Led off")
-				forward ledqakactor -m ledCmd : ledCmd(OFF)
 			}
 		}
 	
 	}
 	Transition t0 whenEvent robotmoving -> blinkled
+	whenEvent robotathome -> stayoff
 	 whenEvent sonardata -> doBusinessWork
+	 
+	 State stayoff{
+ 				//println("${name} - Turn the Led off")
+				forward ledqakactor -m ledCmd : ledCmd(OFF)
+	 }Transition t0 whenEvent robotmoving -> blinkled
 	 
 	 State blinkled{
 			forward ledqakactor -m ledCmd : ledCmd(BLINK)

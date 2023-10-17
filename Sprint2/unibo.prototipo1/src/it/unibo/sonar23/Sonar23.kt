@@ -29,7 +29,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t034",targetState="work",cond=whenDispatch("sonaractivate"))
+					 transition(edgeName="t025",targetState="work",cond=whenDispatch("sonaractivate"))
 				}	 
 				state("work") { //this:State
 					action { //it:State
@@ -46,7 +46,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t035",targetState="handlesonardata",cond=whenEvent("sonardata"))
+					 transition(edgeName="t026",targetState="handlesonardata",cond=whenEvent("sonardata"))
 				}	 
 				state("handlesonardata") { //this:State
 					action { //it:State

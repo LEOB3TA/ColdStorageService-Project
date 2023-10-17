@@ -4,11 +4,13 @@ import it.unibo.ctxprototipo1.main
 import it.unibo.kactor.QakContext
 import it.unibo.kactor.sysUtil
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import rx.testSonar
+import state.LedState
 import state.TransportTrolleyState
 import test.it.unibo.coapobs.TypedCoapTestObserver
 import unibo.basicomm23.coap.CoapConnection
@@ -23,6 +25,7 @@ class TestPrototipo1{
         private lateinit var connTT: Interaction2021
         private lateinit var connRobot: Interaction2021
         private lateinit var obsTT: TypedCoapTestObserver<TransportTrolleyState>
+        private lateinit var obsLS: TypedCoapTestObserver<LedState>
     }
     @Before
     fun setUp() {
@@ -57,6 +60,7 @@ class TestPrototipo1{
             }
             startObs("localhost:8099")
             println(obsTT.getNext().toString())
+            println(obsLS.getNext().toString())
         } else {
             val goHome = "msg(moverobot, request, testunit, basicrobot, moverobot(0,0) ,1)"
             var rep = ""
@@ -67,6 +71,7 @@ class TestPrototipo1{
             }
             Thread.sleep(7000)
             obsTT.clearHistory()
+            obsLS.clearHistory()
 
         }
     }
@@ -75,14 +80,22 @@ class TestPrototipo1{
         val setupOkA = ArrayBlockingQueue<Boolean>(1)
         object : Thread() {
             override fun run() {
-                val ctx = "ctxprototipo1"
-                val actor = "transporttrolley"
-                val path = "$ctx/$actor"
-                val coapConn = CoapConnection(addr, path)
+                var ctx = "ctxprototipo1"
+                var actor = "transporttrolley"
+                var path = "$ctx/$actor"
+                var coapConn = CoapConnection(addr, path)
                 obsTT = TypedCoapTestObserver {
                     TransportTrolleyState.fromJsonString(it)
                 }
                 coapConn.observeResource(obsTT)
+                 ctx = "ctxprototipo1"
+                 actor = "ledqakactor"
+                 path = "$ctx/$actor"
+                 coapConn = CoapConnection(addr, path)
+                obsLS = TypedCoapTestObserver {
+                    LedState.fromJsonString(it)
+                }
+                coapConn.observeResource(obsLS)
                 try {
                     setupOkA.put(true)
                 } catch (e: InterruptedException) {
@@ -100,7 +113,8 @@ class TestPrototipo1{
         val pickup = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,1)"
         var rep = ""
         println(obsTT.currState.toString().substringAfterLast(":").substring(1,4))
-        Assert.assertEquals("OFF", obsTT.currState.toString().substringAfterLast(":").substring(1,4))
+        println(obsLS.currState.toString())
+        //Assert.assertEquals("OFF", obsTT.currState.toString().substringAfterLast(":").substring(1,4))
                 /*Thread.sleep(2000)*/
 
         GlobalScope.launch {
@@ -112,20 +126,19 @@ class TestPrototipo1{
         }
 
         var newState= obsTT.getNext()
-
+        var newStateLed = obsLS.getNext()
         Assert.assertEquals("INDOOR", newState.getCurrPosition().toString())
         Assert.assertEquals("PICKINGUP", newState.getCurrState().toString())
-        Assert.assertEquals("BLINKS", newState.getCurrLed().toString())
-
+        Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
 
         newState = obsTT.getNext()
         Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
         Assert.assertEquals("MOVINGTOPORT", newState.getCurrState().toString())
-        Assert.assertEquals("BLINKS", newState.getCurrLed().toString())
+        Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
         newState = obsTT.getNext()
         Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
         Assert.assertEquals("STOPPED", newState.getCurrState().toString())
-        Assert.assertEquals("ON", newState.getCurrLed().toString())
+        Assert.assertEquals("ON", newStateLed.getCurrState().toString())
         newState = obsTT.getNext()
 
         Assert.assertEquals("PORT", newState.getCurrPosition().toString())
@@ -145,7 +158,7 @@ class TestPrototipo1{
         newState = obsTT.getNext()
         Assert.assertEquals("HOME", newState.getCurrPosition().toString())
         Assert.assertEquals("IDLE", newState.getCurrState().toString())
-        Assert.assertEquals("OFF", newState.getCurrLed().toString())
+        Assert.assertEquals("OFF", newStateLed.getCurrState().toString())
 
         //Thread.sleep(3000)
         Assert.assertTrue(rep.contains("pickupdone"))

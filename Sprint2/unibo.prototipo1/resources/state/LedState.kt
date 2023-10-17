@@ -19,8 +19,8 @@ data class LedState(
 
     companion object{
         private val gson = Gson()
-        fun fromJsonString(str : String) : LState {
-            return gson.fromJson(str, LState::class.java)
+        fun fromJsonString(str : String) : LedState {
+            return gson.fromJson(str, LedState::class.java)
         }
     }
 

@@ -29,7 +29,7 @@ class testSonar( name : String): ActorBasic(name) {
         delay( 1500 )
         emit(CommUtils.buildEvent( name,"sonardistance", "distance(45)"))
         terminate()
-        emit(CommUtils.buildEvent( name,"sonardistance", "distance(10000)"))
+        emit(CommUtils.buildEvent( name,"sonardistance", "distance(35)"))
         terminate()
     }
 

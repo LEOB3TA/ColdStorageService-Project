@@ -30,6 +30,7 @@ event( sonardata, distance(D) ).
 event( obstacle, obstacle(D) ).
 event( alarm, alarm(X) ).
 event( robotmoving, robotmoving(_) ).
+event( robotathome, robotathome(_) ).
 event( resume, resume(_) ).
 dispatch( sonaractivate, info(D) ).
 dispatch( ledCmd, ledCmd(CMD) ).

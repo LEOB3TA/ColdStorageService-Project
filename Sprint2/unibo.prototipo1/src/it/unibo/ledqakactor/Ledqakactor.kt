@@ -19,11 +19,14 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		
-				var ledState =  state.TransportTrolleyState() 
-				var current = ledState.getCurrLed()//per print
+				val ledState = state.LedState()
+				ledState.setState(state.LState.OFF)
+				var current=ledState.getCurrState()
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
+						updateResourceRep(ledState.toJsonString() 
+						)
 						CommUtils.outblack("${name} STARTS")
 						//genTimer( actor, state )
 					}
@@ -34,27 +37,31 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 				}	 
 				state("doCmd") { //this:State
 					action { //it:State
-						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
-						 	   
 						if( checkMsgContent( Term.createTerm("ledCmd(CMD)"), Term.createTerm("ledCmd(CMD)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 var Cmd = payloadArg(0)  
 								if(  Cmd=="ON"  
 								 ){ 
-													ledState.setLed(state.LedState.ON) 
-													current = ledState.getCurrLed()
+													ledState.setState(state.LState.ON)
+													current = ledState.getCurrState()
+								updateResourceRep(ledState.toJsonString() 
+								)
 								CommUtils.outmagenta("${name} - $current")
 								}
 								if(  Cmd=="OFF"  
 								 ){ 
-													ledState.setLed(state.LedState.OFF) 
-													current = ledState.getCurrLed()	
+													ledState.setState(state.LState.OFF)
+													current = ledState.getCurrState()	
+								updateResourceRep(ledState.toJsonString() 
+								)
 								CommUtils.outmagenta("${name} - $current")
 								}
 								if(  Cmd=="BLINK"  
 								 ){ 
-													ledState.setLed(state.LedState.BLINKS) 
-													current = ledState.getCurrLed()
+													ledState.setState(state.LState.BLINKS)
+													current = ledState.getCurrState()
+								updateResourceRep(ledState.toJsonString() 
+								)
 								CommUtils.outmagenta("${name} - $current")
 								}
 						}
