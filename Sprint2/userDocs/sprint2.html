@@ -42,7 +42,15 @@
 
     <h2>Problem analysis</h2>
     <div class="remark">
-    <h3>TransportTrolley e Sonar</h3>
+    <h3>Sonar</h3>
+        <h4>Obiettivo</h4>
+        Avere un componente che fornisca la <b>distanza</b> del robot da un ostacolo
+        <h4>Problemi</h4>
+        Non avendo ancora a disposizione un sonar fisico, &egrave; necessario simulare una simulazione di un sonar
+        <h4>Possibili soluzioni</h4>
+        Il cliente ci ha precedentemente fornito il software per il <b>Sonar</b> (<a href="https://github.com/anatali/issLab23/tree/main/unibo.sonarqak23">unibo.sonarqak23</a>) che fornisce un implementazione sia per il sonar simulato sia per il sonar fisico.
+        A partire da questo e in caso servissero utilizzando alcune modifiche è possibile riutilizzarlo
+    <h3>Interazioni del TransportTrolley</h3>
         <h4>Obiettivo</h4>
         Far interagire il <b>TrasportTrolley</b> con il <b>Sonar</b> in modo che rispetti i requisiti imposti dal commitente, in particolare il <b>TrasportTrolley</b> deve:
         <ol>
@@ -50,16 +58,26 @@
             <li><b>Ripartire</b> quando il Sonar rileva una distanza <u>maggiore</u> di <b>DLIMIT</b></li>
         </ol>
         <h4>Problemi</h4>
-            <ol>
-                <li>Il software fornito dal cliente &egrave; veramente riutilizzabile o necessita di modifiche</li>
-            </ol>
-        <h3>Led e TransportTrolley</h3>
+            Il software fornito dal cliente &egrave; riutilizzabile o necessita di modifiche per adattarlo a tale comportamento?</li>
+        <h3>Led</h3>
         <h4>Obiettivo</h4>
         Gestire il <b>Led</b> in modo che rispetti i requisiti imposti dal cliente in particolare deve:
         <ol>
             <li>Essere <b>Spento</b> quando il TransportTrolley è in <b>HOME</b> </li>
             <li><b>Lampeggiare</b> quando il TransportTrolley è <b>in movimento</b></li>
             <li>Essere <b>Acceso</b> quando il TransportTrolley è <b>fermo</b></li>
+        </ol>
+        <h4>Problemi</h4>
+        <ol>
+            <li>Non avendo ancora un led fisico è necessario implementare una simulazione del led</li>
+            <li>Che tipo di componente è il <b>Led</b> all'interno del nostro sistema</li>
+            <li>Interazione <b>Sonar-Led</b></li>
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+            <li>Prendendo spunto da<a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarSystem23</a>, per ora il <b>Led</b> può essere modellato utilizzando delle <b>Print</b></li>
+            <li>Per rispettare l'integrità del progetto e per utilizzare il linguaggio <b>Qak</b> può essere modellato come un <b>attore</b></li>
+            <li>L'interazione può avvenire direttamente con il <b>Sonar</b> oppure avviene in modo differente? Per rispondere a questa domanda è necessaria un'ulteriore analisi del progetto <a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarSystem23</a> fornitoci dal cliente da rimandare durante il progetto</li>
         </ol>
     </div>
         <h2>Architettura Logica</h2>
