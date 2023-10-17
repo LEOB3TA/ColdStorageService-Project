@@ -49,7 +49,7 @@ class sonarSimulator ( name : String ) : ActorBasic( name ) {
  				emit(event)  //APPROPRIATE ONLY IF NOT INCLUDED IN A PIPE
  				delay( 1500 )
   			}
-			emit(CommUtils.buildEvent( name,"sonardistance", "distance(10000)"))
+			emit(CommUtils.buildEvent( name,"sonardistance", "distance(35)"))
 			terminate()
 	}
 

@@ -29,7 +29,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t025",targetState="work",cond=whenDispatch("sonaractivate"))
+					 transition(edgeName="t034",targetState="work",cond=whenDispatch("sonaractivate"))
 				}	 
 				state("work") { //this:State
 					action { //it:State
@@ -46,7 +46,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t026",targetState="handlesonardata",cond=whenEvent("sonardata"))
+					 transition(edgeName="t035",targetState="handlesonardata",cond=whenEvent("sonardata"))
 				}	 
 				state("handlesonardata") { //this:State
 					action { //it:State
@@ -66,36 +66,6 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					sysaction { //it:State
 					}	 	 
 					 transition( edgeName="goto",targetState="work", cond=doswitch() )
-				}	 
-				state("handleobstacle") { //this:State
-					action { //it:State
-						if( checkMsgContent( Term.createTerm("obstacle(D)"), Term.createTerm("obstacle(D)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								var D = payloadArg(0).toInt() 
-								CommUtils.outmagenta("$name handleobstacle ALARM ${payloadArg(0)}")
-								if( D <= DLIMIT 
-								 ){emit("alarm", "alarm(obstacle)" ) 
-								CommUtils.outblack("STOP TransportTrolley")
-								}
-						}
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition( edgeName="goto",targetState="end", cond=doswitchGuarded({ Appl == true  
-					}) )
-					transition( edgeName="goto",targetState="work", cond=doswitchGuarded({! ( Appl == true  
-					) }) )
-				}	 
-				state("end") { //this:State
-					action { //it:State
-						CommUtils.outblack("$name BYE")
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
 				}	 
 			}
 		}
