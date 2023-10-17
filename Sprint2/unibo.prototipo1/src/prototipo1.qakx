@@ -70,8 +70,87 @@ CodedQActor datacleaner    context ctxprototipo1 className "rx.dataCleaner"
 CodedQActor distancefilter context ctxprototipo1 className "rx.distanceFilter"
 
 
-QActor coldstorageservice context ctxcoldstorageservice {
-	
+QActor mocktruck context ctxprototipo1{
+    [#
+       	var FW = 0
+        var DT = 1000L  //DT= driver time tempo che ci mette il driver dopo aver ricevuto la richiesta per arrivare alla INDOOR
+        var TICKETID = 0
+        val truckstate = resources.state.TruckState()
+
+        fun initDriver(){
+        	FW =  kotlin.random.Random.nextInt(1, 101)
+        	DT = kotlin.random.Random.nextLong(1, 5001)
+        }
+    #]
+    State s0 initial{
+		println("$name |	started") color green
+		println("this is an infinite loop, you need to kill the program to stop this") color red
+		discardMsg Off
+
+    }Goto idle
+
+    State idle {
+        println("$name |	in idle") color green
+        [#
+        	initDriver()
+        	delay(kotlin.random.Random.nextLong(1, 15001))
+        #]
+    }Goto sendStore
+
+    State sendStore {
+    	 println("$name |	sendStore") color green
+        request coldstorageservice -m storeFood : storeFood($FW)
+
+    } Transition t0 whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
+    whenReply storeAccepted -> accepted
+                    whenReply storeRejected -> rejected
+
+   State rejected{
+   		printCurrentMessage
+   		println("$name |	request rejected") color green
+   }Goto idle
+
+    State accepted{
+   		printCurrentMessage
+   		onMsg (storeAccepted : storeAccepted(TICKETID)){
+   		[#
+   			TICKETID = payloadArg(0).toInt()
+   		#]
+   		}
+
+   		println("$name |	request accepted") color green
+   }Transition t0 whenTimeVar DT -> sendTicket
+
+   State sendTicket{
+   		 request coldstorageservice -m sendTicket : sendTicket($TICKETID)
+   		 println("$name |	send ticket") color green
+   } Transition t0 whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'� un errore interno al sistema, il driver abbandona
+   					whenReply ticketValid -> sendDeposit
+    				whenReply ticketExpired -> handleTicketExpired
+
+
+    State sendDeposit{
+        request coldstorageservice -m deposit : deposit(_)
+        println("$name |	send deposit") color green
+    } Transition t0  whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'� un errore interno al sistema, il driver abbandona
+    					whenReply chargeTaken -> idle
+
+    State handleError{
+    	println("$name |	COLD STORAGE SERVICE ERROR") color red
+    } Goto idle
+
+	State handleTicketExpired{
+		println("$name |	ticket expired") color green
+	} Goto idle
+
+	State handleTicketNotValid{
+		println("$name |	ticket Not valid retry") color green
+	} Goto sendTicket
+
+}
+
+QActor coldstorageservice context ctxprototipo1 {
+
  	[#
         	val MAXW = resources.ColdStorageService.getMAXW()
 			val TICKETTIME = resources.ColdStorageService.getTICKETTIME()
@@ -79,25 +158,24 @@ QActor coldstorageservice context ctxcoldstorageservice {
 		   	var requestWeightToStore = 0.0
 		   	var TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
 		   	#]
-	
+
     State setup initial {
         	println("$name |	setup") color blue
         	discardMsg Off
-       
+
     }
 
   Goto idle
-        
+
     State idle {
         println("$name |	in idle") color green
-        // updateResource[#maxw.toJsonString()#] // TODO: fai check se serve o meno
-    }  
+    }
     Transition t0 whenRequest storeFood -> requestEvaluation
     			  whenRequest sendTicket -> ticketEvaluation
     			  whenRequest deposit -> charged
     			  whenReply pickupdone -> taken
     			  whenEvent local_movef -> error
-    
+
     /*
      *  REQUEST EVALUATION
      *  1. Funzione canStore gestisce la logica
@@ -108,32 +186,32 @@ QActor coldstorageservice context ctxcoldstorageservice {
     	        onMsg(storeFood : storeFood(FW)){
            println("Request evaluation to store ${payloadArg(0)} kg") color blue
            [#requestWeightToStore=payloadArg(0).toDouble()#]
-           
+
        }
-    } Goto acceptRequest if[# resources.ColdStorageService.canStore(requestWeightToStore) #] 
+    } Goto acceptRequest if[# resources.ColdStorageService.canStore(requestWeightToStore) #]
                             else rejectRequest
-             
+
      /*
       *  ACCEPT REQUEST
       *  Generazione TICKET +
-      */     
+      */
      State acceptRequest{
     	[#
     		TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
-    		var TICKET : resources.model.Ticket = resources.model.Ticket(TICKETNUMBER, TICKETTIME) 	
-    		resources.ColdStorageService.incrementTicketNumber()	
+    		var TICKET : resources.model.Ticket = resources.model.Ticket(TICKETNUMBER, TICKETTIME)
+    		resources.ColdStorageService.incrementTicketNumber()
     		resources.ColdStorageService.getTicketList().add(TICKET)
     	#]
-        replyTo storeFood with storeAccepted : storeAccepted($TICKETNUMBER) // TODO: check se tornare tutto il ticket o solo numero
+        replyTo storeFood with storeAccepted : storeAccepted($TICKETNUMBER) 
     }Goto idle
-    
+
 	/*
 	 *  REJECT REQUEST
 	 */
     State rejectRequest{
         replyTo storeFood with storeRejected : storeRejected(_)
-    }Goto idle   
-    
+    }Goto idle
+
     /* Non usato
      State dropout{
     	forward transporttrolley -m dropout : dropout(FW)
@@ -145,13 +223,15 @@ QActor coldstorageservice context ctxcoldstorageservice {
     	println("$name |	in charged") color green
     	request transporttrolley -m pickup : pickup(_)
     }Goto idle
-    
+
     State taken{
     	println("$name |	in taken") color green
     	replyTo deposit with chargeTaken : chargeTaken(_)
     }Goto idle
-    
-     /*
+
+
+
+    /*
 	 *  TICKET EVALUATION
 	 *  Il coldStorageService controlla se il ticket ricevuto in input � uguale a quello che si aspetta.
 	 * 	In caso di errore, il truck pu� riprovare ad inserire il numero del ticket fin quando non scade il TICKETTIME.
@@ -200,7 +280,6 @@ QActor coldstorageservice context ctxcoldstorageservice {
    }
 }
 
-
 QActor transporttrolley context ctxprototipo1{
 	[#
 		var CRX = 4
@@ -246,6 +325,7 @@ QActor transporttrolley context ctxprototipo1{
 		[#
 			tTState.setCurrState(state.CurrStateTrolley.IDLE)
 			tTState.setCurrPosition(state.TTPosition.HOME)
+			tTState.setLed(state.LedState.OFF)
 		#]
 		updateResource[#tTState.toJsonString()#]
 		// State print for debug
@@ -264,6 +344,7 @@ QActor transporttrolley context ctxprototipo1{
  			[#
 			tTState.setCurrState(state.CurrStateTrolley.PICKINGUP)
 			tTState.setCurrPosition(state.TTPosition.INDOOR)
+			tTState.setLed(state.LedState.BLINKS)
 			#]
  		}
 		updateResource[#tTState.toJsonString()#]
@@ -282,6 +363,7 @@ QActor transporttrolley context ctxprototipo1{
   		[#
   			savedState = tTState.getCurrState()
   			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
+  			tTState.setLed(state.LedState.ON)
   			if ((m1+MINT).hasPassedNow()){	
   				m1 = ts.markNow()
   		#]
@@ -347,6 +429,7 @@ QActor transporttrolley context ctxprototipo1{
 		[#
 			tTState.setCurrState(state.CurrStateTrolley.MOVINGTOPORT)
 			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
+			tTState.setLed(state.LedState.BLINKS)
 		#]
 		updateResource[#tTState.toJsonString()#]
 		//send event "robot is in indoor"
@@ -387,6 +470,7 @@ QActor transporttrolley context ctxprototipo1{
 		[#
 			tTState.setCurrState(state.CurrStateTrolley.MOVINGTOHOME)
 			tTState.setCurrPosition(state.TTPosition.ONTHEROAD)
+			tTState.setLed(state.LedState.BLINKS)
 		#]
 		updateResource[#tTState.toJsonString()#]
 			println("$name | back to home" ) color green
