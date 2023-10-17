@@ -23,6 +23,7 @@
         vi &egrave; un robot che ha il compito di trasportare del cibo da un punto di partenza - chiamato INDOOR - alla cella
         frigorifera.
     </div>
+    <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint0/userDocs/sprint0.html">Sprint0 </a><br>
     <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/userDocs/sprint1.html">Sprint1 </a>
 
     <h2>Requirements</h2>
@@ -32,29 +33,42 @@
 
     <h3>Work plan</h3>
     <div class="remark">
-<!--        <ul>-->
-<!--            <li>A partire dallo sprint0 analizzare il core business dell'applicazione</li>-->
-<!--            <li>Trovare ad analizzare eventuali criticit&agrave; dei requisiti</li>-->
-<!--            <li>Implementare un simulatore del truck, in modo da simulare un interazione del driver con la <b>ServiceAccessGui</b>, che interagisca con il <b>ColdStorageService</b></li>-->
-<!--            <li>Implementare il <b>ColdStorageService</b></li>-->
-<!--            <li>Implementare il <b>TrasportTrolley</b> e interfacciarlo con il <b>BasicRobot</b></li>-->
-<!--            <li>Testing del sistema</li>-->
-<!--            <li>Aggregare le varie componenti in modo da creare un primo prototipo del sistema</li>-->
+        Riutilizzando e adattando i componenti software precedentemente forniti dal cliente e analizzati nello <b>sprint0</b> per la gestione del sonar e del led (<a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarSystem23</a>, <a href="https://github.com/anatali/issLab23/tree/main/unibo.sonarqak23">unibo.sonarqak23</a>):
+        <ul>
+            <li>Far interagire il <b>TrasportTrolley</b> con il <b>Sonar</b></li>
+            <li>Simulare il comportamento del <b>Led</b> nei confronti del <b>Sonar</b></li>
         </ul>
     </div>
 
     <h2>Problem analysis</h2>
     <div class="remark">
-
+    <h3>TransportTrolley e Sonar</h3>
+        <h4>Obiettivo</h4>
+        Far interagire il <b>TrasportTrolley</b> con il <b>Sonar</b> in modo che rispetti i requisiti imposti dal commitente, in particolare il <b>TrasportTrolley</b> deve:
+        <ol>
+            <li><b>Fermarsi</b> quando il Sonar rileva una distanza <u>minore</u> di una variabile <b>DLIMIT</b></li>
+            <li><b>Ripartire</b> quando il Sonar rileva una distanza <u>maggiore</u> di <b>DLIMIT</b></li>
+        </ol>
+        <h4>Problemi</h4>
+            <ol>
+                <li>Il software fornito dal cliente &egrave; veramente riutilizzabile o necessita di modifiche</li>
+            </ol>
+        <h3>Led e TransportTrolley</h3>
+        <h4>Obiettivo</h4>
+        Gestire il <b>Led</b> in modo che rispetti i requisiti imposti dal cliente in particolare deve:
+        <ol>
+            <li>Essere <b>Spento</b> quando il TransportTrolley è in <b>HOME</b> </li>
+            <li><b>Lampeggiare</b> quando il TransportTrolley è <b>in movimento</b></li>
+            <li>Essere <b>Acceso</b> quando il TransportTrolley è <b>fermo</b></li>
+        </ol>
     </div>
         <h2>Architettura Logica</h2>
-
+            <h1>Inserire immagine</h1>
         </div>
-
-
             <h2>Project</h2>
              <div class="remark">
-
+                <h3>Sonar</h3>
+                 Il Sonar è stato precedentemente modellato come
             </div>
             <h2>Testing</h2>
             <div class="remark">
