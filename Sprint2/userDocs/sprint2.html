@@ -50,7 +50,7 @@
         Non avendo ancora a disposizione un sonar fisico, &egrave; necessario simulare una simulazione di un sonar
         <h4>Possibili soluzioni</h4>
         Il cliente ci ha precedentemente fornito il software per il <b>Sonar</b> (<a href="https://github.com/anatali/issLab23/tree/main/unibo.sonarqak23">unibo.sonarqak23</a>) che fornisce un implementazione sia per il sonar simulato sia per il sonar fisico.
-        A partire da questo e in caso servissero utilizzando alcune modifiche è possibile riutilizzarlo
+        A partire da questo e in caso servissero utilizzando alcune modifiche &egrave possibile riutilizzarlo
     <h3>Interazioni del TransportTrolley</h3>
         <h4>Obiettivo</h4>
         Far interagire il <b>TrasportTrolley</b> con il <b>Sonar</b> in modo che rispetti i requisiti imposti dal commitente, in particolare il <b>TrasportTrolley</b> deve:
@@ -64,21 +64,21 @@
         <h4>Obiettivo</h4>
         Gestire il <b>Led</b> in modo che rispetti i requisiti imposti dal cliente in particolare deve:
         <ol>
-            <li>Essere <b>Spento</b> quando il TransportTrolley è in <b>HOME</b> </li>
-            <li><b>Lampeggiare</b> quando il TransportTrolley è <b>in movimento</b></li>
-            <li>Essere <b>Acceso</b> quando il TransportTrolley è <b>fermo</b></li>
+            <li>Essere <b>Spento</b> quando il TransportTrolley &egrave in <b>HOME</b> </li>
+            <li><b>Lampeggiare</b> quando il TransportTrolley &egrave <b>in movimento</b></li>
+            <li>Essere <b>Acceso</b> quando il TransportTrolley &egrave <b>fermo</b></li>
         </ol>
         <h4>Problemi</h4>
         <ol>
-            <li>Non avendo ancora un led fisico è necessario implementare una simulazione del led</li>
-            <li>Che tipo di componente è il <b>Led</b> all'interno del nostro sistema</li>
+            <li>Non avendo ancora un led fisico &egrave necessario implementare una simulazione del led</li>
+            <li>Che tipo di componente &egrave il <b>Led</b> all'interno del nostro sistema</li>
             <li>Interazione <b>Sonar-Led</b></li>
         </ol>
         <h4>Possibili soluzioni</h4>
         <ol>
-            <li>Prendendo spunto da<a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarSystem23</a>, per ora il <b>Led</b> può essere modellato utilizzando delle <b>Print</b></li>
-            <li>Per rispettare l'integrità del progetto e per utilizzare il linguaggio <b>Qak</b> può essere modellato come un <b>attore</b></li>
-            <li>L'interazione può avvenire direttamente con il <b>Sonar</b> oppure avviene in modo differente? Per rispondere a questa domanda è necessaria un'ulteriore analisi del progetto <a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarSystem23</a> fornitoci dal cliente da rimandare durante il progetto</li>
+            <li>Prendendo spunto da<a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarSystem23</a>, per ora il <b>Led</b> pu&ograve essere modellato utilizzando delle <b>Print</b></li>
+            <li>Per rispettare l'integrit&agrave del progetto e per utilizzare il linguaggio <b>Qak</b> pu&ograve essere modellato come un <b>attore</b></li>
+            <li>L'interazione pu&ograve avvenire direttamente con il <b>Sonar</b> oppure avviene in modo differente? Per rispondere a questa domanda &egrave necessaria un'ulteriore analisi del progetto <a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarSystem23</a> fornitoci dal cliente da rimandare durante il progetto</li>
         </ol>
     </div>
         <h2>Architettura Logica</h2>
@@ -89,107 +89,109 @@
         </div>
             <h2>Project</h2>
              <div class="remark">
+                 <h3>Modifiche rispetto allo sprint1</h3>
+                 &Egrave; stato aumentato il <b>tickettime</b> a <b>3 secondi</b> in modo da avere meno ticket scaduti
                  <h3>DLIMIT</h3>
-                 Il valore del valore <b>DLIMIT</b> è stato impostato a 30.<br>
-                 In questo momento del progetto senza il sonar fisico è un valore <b>puramente casuale</b> per verificare il funzionamento.
+                 Il valore del valore <b>DLIMIT</b> &egrave stato impostato a 30.<br>
+                 In questo momento del progetto senza il sonar fisico &egrave un valore <b>puramente casuale</b> per verificare il funzionamento.
                 <h3>Sonar</h3>
                  Tramite l'analisi del software fornito si evince che fornisce un'astrazione del sonar fisico e ne implementa il funzionamento.<br>
-                 Quindi è utilizzabile all'interno del prototipo come <b>CodedQakActor</b> nelle due implementazioni disponibili: <b>sonarSimulator</b> nel nostro caso o <b>sonarHCSR04Support23</b> quando avremo un sonar fisico. È inoltre necessario utilizzare <b>dataCleaner</b> e <b>distanceFilter</b> per filtrare i valori forniti dal sonar.<br>
+                 Quindi &egrave utilizzabile all'interno del prototipo come <b>CodedQakActor</b> nelle due implementazioni disponibili: <b>sonarSimulator</b> nel nostro caso o <b>sonarHCSR04Support23</b> quando avremo un sonar fisico. &egrave inoltre necessario utilizzare <b>dataCleaner</b> e <b>distanceFilter</b> per filtrare i valori forniti dal sonar.<br>
                  <pre>
- //CodedQActor sonar  context ctxrasp className "rx.sonarHCSR04Support23"   //SU RASP
-CodedQActor sonar context ctxprototipo1 className "rx.sonarSimulator" //in LOCALE
-CodedQActor datacleaner    context ctxprototipo1 className "rx.dataCleaner"
-CodedQActor distancefilter context ctxprototipo1 className "rx.distanceFilter"
+ //CodedQActor sonar  <key2>context</key2> ctxrasp className "rx.sonarHCSR04Support23"   //SU RASP
+<key2>CodedQActor</key2> sonar <key2>context</key2> ctxprototipo1 className "rx.sonarSimulator" //in LOCALE
+<key2>CodedQActor</key2> datacleaner    <key2>context</key2> ctxprototipo1 className "rx.dataCleaner"
+<key2>CodedQActor</key2> distancefilter <key2>context</key2> ctxprototipo1 className "rx.distanceFilter"
                  </pre>
                  Devono essere introdotti dei <b>nuovi messaggi</b>:
                  <pre>
-Event sonardata : distance(D) //dataclenaer
-Event obstacle : obstacle(D)	//distancefilter
-Event alarm		: alarm(X)		//viene emesso al rilevamento di un ostacolo
-Event resume:resume(_) //viene emesso quando la distanza rilevata > DLIMIT
-Dispatch sonaractivate: info(D)
+<key2>Event</key2> sonardata : distance(D) //dataclenaer
+<key2>Event</key2> obstacle : obstacle(D)	//distancefilter
+<key2>Event</key2> alarm		: alarm(X)		//viene emesso al rilevamento di un ostacolo
+<key2>Event</key2> resume:resume(_) //viene emesso quando la distanza rilevata > DLIMIT
+<key2>Dispatch</key2> sonaractivate: info(D)
                  </pre>
                  Tuttavia, durante l'implementazione del progetto, ci siamo resi conto che l'implementazione predefinita del <b>SonarSimulator</b> non era adatta al nostro progetto poiché, come un sonar reale, forniva una distanza decrescente. Di conseguenza, il robot si sarebbe fermato senza ripartire, e il led sarebbe rimasto sempre acceso. Quindi, abbiamo apportato una modifica.<br>
-                 La modifica consiste nell'invio di <b>valori casuali</b> nel range da <b>0 a 80</b>, in modo che il robot possa ripartire dopo essersi fermato. Inoltre, abbiamo aumentato l'intervallo di tempo tra due valori forniti dal sonar per renderlo più visibile nella console. Nel sonar reale, il ritardo tra due valori è molto breve.<br>
+                 La modifica consiste nell'invio di <b>valori casuali</b> nel range da <b>0 a 80</b>, in modo che il robot possa ripartire dopo essersi fermato. Inoltre, abbiamo aumentato l'intervallo di tempo tra due valori forniti dal sonar per renderlo pi&ugrave visibile nella console. Nel sonar reale, il ritardo tra due valori &egrave molto breve.<br>
                  Il sonar emette quindi <b>20</b> distanze diverse e alla fine dei cicli emette la distanza <b>35</b> in modo da sbloccare il boto nel caso fosse bloccato.
                  <pre>
  ...
  suspend fun startDataReadSimulation(    ){
-    var i = 0
+    <key>var</key> i = 0
         while( i < 20 ){
-            val m1= "distance( ${Random.nextInt(0,80)} )"
+            <key>val</key> m1= "distance( ${Random.nextInt(0,80)} )"
             i++
-            val event = CommUtils.buildEvent( name,"sonardistance", m1)
-            println("$tt $name | generates $event")
-            emit(event)
+            <key>val</key> event = CommUtils.buildEvent( name,"sonardistance", m1)
+            <key>println</key>("$tt $name | generates $event")
+            <key>emit</key>(event)
             delay( 1500 )
         }
-        emit(CommUtils.buildEvent( name,"sonardistance", "distance(35)"))
+        <key>emit</key>(CommUtils.buildEvent( name,"sonardistance", "distance(35)"))
         terminate()
 }
                  </pre>
-                 Inoltre è stato necessario modificare il <b>distancefilter</b> inserendo il nostro valore<b>DLIMIT</b>.<br>
-                 Per sfruttare i messaggi emessi dalle varie comonenti è stato necessario utilizzare il seguente attore:
+                 Inoltre &egrave stato necessario modificare il <b>distancefilter</b> inserendo il nostro valore<b>DLIMIT</b>.<br>
+                 Per sfruttare i messaggi emessi dalle varie comonenti &egrave stato necessario utilizzare il seguente attore:
                  <pre>
-QActor sonar23 context ctxprototipo1{
-[#var DLIMIT = 30
-var Appl = sysUtil.getActor("transporttrolley") != null #]
-State s0 initial{
-    println("sonar | start with appl: $Appl")
-}Transition t0 whenMsg sonaractivate -> work
-             //whenMsg sonardeactivate -> end
+<key2>QActor</key2> sonar23 <key2>context</key2> ctxprototipo1{
+[#<key>var</key> DLIMIT = 30
+<key>var</key> Appl = sysUtil.getActor("transporttrolley") != null #]
+<key2>State</key2> s0 <key2>initial</key2>{
+    <key2>println</key2>("sonar | start with appl: $Appl")
+}<key2>Transition</key2> t0 <key2>whenMsg</key2> sonaractivate -> work
+             //<key2>whenMsg</key2> sonardeactivate -> end
 
-State work{
+<key2>State</key2> work{
     updateResource[# "Sonar waiting"#]
-}Transition t0 whenEvent sonardata -> handlesonardata
-              whenEvent obstacle  -> handleobstacle
+}<key2>Transition</key2> t0 <key2>whenEvent</key2> sonardata -> handlesonardata
+              <key2>whenEvent</key2> obstacle  -> handleobstacle
 
-State handlesonardata{
+<key2>State</key2> handlesonardata{
     printCurrentMessage
     updateResource [# "sonar23 handles $currentMsg" #]
     onMsg(sonardata : distance(D)){
-        [#var D = payloadArg(0).toInt()#]
-        //println("$name distance ${payloadArg(0)}") color magenta
+        [#<key>var</key> D = payloadArg(0).toInt()#]
+        //<key2>println</key2>("$name distance ${payloadArg(0)}") color magenta
         if [#D>DLIMIT#]{
-            emit resume: resume(_)
+            <key2>emit</key2> resume: resume(_)
         }
         }
-}Goto work
+}<key2>Goto</key2> work
 
-	State handleobstacle{
+	<key2>State</key2> handleobstacle{
 		onMsg( obstacle : obstacle(D)){
-			println("$name handleobstacle ALARM ${payloadArg(0)}") color magenta
-			emit alarm : alarm(_)
+			<key2>println</key2>("$name handleobstacle ALARM ${payloadArg(0)}") color magenta
+			<key2>emit</key2> alarm : alarm(_)
 		}
                  </pre>
                 <h3>TransportTrolley</h3>
                  Per controllare il <b>Led</b> sono stati creati due eventi:
                  <pre>
-Event robotmoving : robotmoving(_)  //viene emesso ogni volta che il robot è in movimento
-Event robotathome : robotathome(_) //viene emesso quando il robot è in home
+<key2>Event</key2> robotmoving : robotmoving(_)  //viene emesso ogni volta che il robot &egrave in movimento
+<key2>Event</key2> robotathome : robotathome(_) //viene emesso quando il robot &egrave in home
                  </pre>
-                 Il <b>TransportTrolley</b> è collegato al <b>BasicRobot</b> (vedere <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/userDocs/sprint1.html">Sprint1</a> per i dettagli).
-                 Il <b>BasicRobot</b> si ferma automaticamente quando riceve un evento <b>Alarm</b> e risponde con il messaggio <b>MoveRobotFailed</b>, quindi è stato modificato il <b>TransportTrolley</b> in modo da reagire a tali risposte.<br>
+                 Il <b>TransportTrolley</b> &egrave collegato al <b>BasicRobot</b> (vedere <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/userDocs/sprint1.html">Sprint1</a> per i dettagli).
+                 Il <b>BasicRobot</b> si ferma automaticamente quando riceve un evento <b>Alarm</b> e risponde con il messaggio <b>MoveRobotFailed</b>, quindi &egrave stato modificato il <b>TransportTrolley</b> in modo da reagire a tali risposte.<br>
                  Per farlo ogni stato di movimento possiede una transizione allo stato <b>handlerobotstopped</b> in caso di risposta <b>MoveRobotFailed</b>. Di seguito viene riportato un esempio:
                  <pre>
-State moverobottoindoor {
+<key2>State</key2> moverobottoindoor {
     ...
-    emit robotmoving : robotmoving(_)
+    <key2>emit</key2> robotmoving : robotmoving(_)
 }
-Transition t0 whenReply moverobotdone -> movetoport
-             whenReply moverobotfailed -> handlerobotstopped
+<key2>Transition</key2> t0 <key2>whenReply</key2> moverobotdone -> movetoport
+             <key2>whenReply</key2> moverobotfailed -> handlerobotstopped
                  </pre>
-                 Lo stato <b>handlerobotstopped</b> gestisce il <b>salvataggio dello stato</b> e il la gestione del timer <b>MINT</b> che è stato attualmente fissato a un secondo.
+                 Lo stato <b>handlerobotstopped</b> gestisce il <b>salvataggio dello stato</b> e il la gestione del timer <b>MINT</b> che &egrave stato attualmente fissato a un secondo.
                  <pre>
-val ts = kotlin.time.TimeSource.Monotonic
-var m1 = ts.markNow()
-val MINT : kotlin.time.Duration= 1.seconds
-var savedState = tTState.getCurrState()
+<key>val</key> ts = kotlin.time.TimeSource.Monotonic
+<key>var</key> m1 = ts.markNow()
+<key>val</key> MINT : kotlin.time.Duration= 1.seconds
+<key>var</key> savedState = tTState.getCurrState()
                  </pre>
                  Di seguito viene riportato lo stato <b>handlerobotstopped</b>:
                  <pre>
-State handlerobotstopped{
-  		println("$name |handle robot stopped") color green
+<key2>State</key2> handlerobotstopped{
+  		<key2>println</key2>("$name |handle robot stopped") color green
   		[#
   			savedState = tTState.getCurrState()
   			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
@@ -202,10 +204,10 @@ State handlerobotstopped{
   		[#
   			}else{
   		#]
-  				println("ignored alarm signal") color red
+  				<key2>println</key2>("ignored alarm signal") color red
   				[#tTState.setCurrState(savedState)#]
 				updateResource[#tTState.toJsonString()#]
-				emit robotmoving: robotmoving(_)
+				<key2>emit</key2> robotmoving: robotmoving(_)
 				[# 	when {
 							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)[#
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] request basicrobot -m moverobot:moverobot($CRX,$CRY)[#
@@ -215,24 +217,24 @@ State handlerobotstopped{
 
 
 
-  	}Transition t0  whenEvent resume -> resumerobot
-  					whenReply moverobotdone -> goahead
-  	  				whenReply moverobotfailed -> handlerobotstopped
+  	}<key2>Transition</key2> t0  <key2>whenEvent</key2> resume -> resumerobot
+  					<key2>whenReply</key2> moverobotdone -> goahead
+  	  				<key2>whenReply</key2> moverobotfailed -> handlerobotstopped
                  </pre>
-                 Lo stato <b>resumerobot</b> serve per far ripartire il robot dopo averlo fermato, invece lo stato <b>goahead</b> è necessario per andare negli stati successivi a quello salvato.
+                 Lo stato <b>resumerobot</b> serve per far ripartire il robot dopo averlo fermato, invece lo stato <b>goahead</b> &egrave necessario per andare negli stati successivi a quello salvato.
                  All'interno dello stato <b>goahead</b> il trasporttrolley si autoinvia delle <b>Dispatch</b> per scegliere lo stato da dove proseguire:
                  <pre>
 //Messaggi autoinviati transporttrolley
-Dispatch gotomovetoport : gotomovetoport(_)
-Dispatch gotodepositactionended : gotodepositactionended(_)
-Dispatch gotorobottohome : gotorobottohome(_)
+<key2>Dispatch</key2> gotomovetoport : gotomovetoport(_)
+<key2>Dispatch</key2> gotodepositactionended : gotodepositactionended(_)
+<key2>Dispatch</key2> gotorobottohome : gotorobottohome(_)
                  </pre>
                  Di seguito vengono riportati i nuovi stati:
                  <pre>
-State resumerobot{
-    println("$name | resume robot") color green
+<key2>State</key2> resumerobot{
+    <key2>println</key2>("$name | resume robot") color green
             onMsg(resume: resume(_)){
-            emit robotmoving: robotmoving(_)
+            <key2>emit</key2> robotmoving: robotmoving(_)
             [#tTState.setCurrState(savedState)#]
                     [# 	when {
                         tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)[#
@@ -241,24 +243,24 @@ State resumerobot{
 
                         [#}}#]
             }
-}Transition t0 whenReply moverobotdone -> goahead
-    whenReply moverobotfailed -> handlerobotstopped
+}<key2>Transition</key2> t0 <key2>whenReply</key2> moverobotdone -> goahead
+    <key2>whenReply</key2> moverobotfailed -> handlerobotstopped
 
-State goahead{
-    println("$name | go ahead with next state") color green
+<key2>State</key2> goahead{
+    <key2>println</key2>("$name | go ahead with next state") color green
     [# 	when {
                         tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] forward transporttrolley -m gotomovetoport : gotomovetoport(_)[#
                         tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] forward transporttrolley -m gotodepositactionended : gotodepositactionended(_)[#
                         tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] 	delay 6300
                         forward basicrobot -m cmd : cmd ( l )
-                        emit robotathome : robotathome(_)
+                        <key2>emit</key2> robotathome : robotathome(_)
                         forward transporttrolley -m gotorobottohome : gotorobottohome(_)
 
     [#
         }}#]
-}Transition t0 whenMsg gotomovetoport -> movetoport
-                whenMsg gotodepositactionended -> depositactionended
-                whenMsg gotorobottohome -> idle
+}<key2>Transition</key2> t0 <key2>whenMsg</key2> gotomovetoport -> movetoport
+                <key2>whenMsg</key2> gotodepositactionended -> depositactionended
+                <key2>whenMsg</key2> gotorobottohome -> idle
                  </pre>
                  <h3>Led</h3>
                  Prendendo spunto dal progetto fornitoci dal cliente l'interazione con il led avviene in <b>due fasi</b> e tramite <b>due attori</b>.<br>
@@ -266,67 +268,67 @@ State goahead{
                  Viene introdotto quindi il seguente messaggio:
                  <pre>
 //Led
-Dispatch ledCmd : ledCmd ( CMD )
+<key2>Dispatch</key2> ledCmd : ledCmd ( CMD )
                  </pre>
                  Di seguito viene riportato <b>Controller23</b> opportunamente modficiato per rispettare i requisiti:
                  <pre>
-QActor controller23 context ctxprototipo1{ //ctxpc{
-[# val DLIMIT = 30 #] //valore casuale
-	State s0 initial{
-		println("${name} STARTS - Activates the sonar") color magenta
+<key2>QActor</key2> controller23 <key2>context</key2> ctxprototipo1{ //ctxpc{
+[# <key>val</key> DLIMIT = 30 #] //valore casuale
+	<key2>State</key2> s0 <key2>initial</key2>{
+		<key2>println</key2>("${name} STARTS - Activates the sonar") color magenta
 		forward sonar23 -m sonaractivate : info($DLIMIT)
 	}
-	Transition t0 whenEvent robotmoving -> blinkled
-	whenEvent robotathome -> stayoff
-	whenEvent sonardata -> doBusinessWork
+	<key2>Transition</key2> t0 <key2>whenEvent</key2> robotmoving -> blinkled
+	<key2>whenEvent</key2> robotathome -> stayoff
+	<key2>whenEvent</key2> sonardata -> doBusinessWork
 
-	State doBusinessWork{
-		println("${name} BUSINESS WORK") color magenta
+	<key2>State</key2> doBusinessWork{
+		<key2>println</key2>("${name} BUSINESS WORK") color magenta
 		//printCurrentMessage
 		onMsg( sonardata : distance(D)){
-			[# var D = payloadArg(0).toInt() #]
-			println("$D") color red
+			[# <key>var</key> D = payloadArg(0).toInt() #]
+			<key2>println</key2>("$D") color red
 			//Interact with the Led
 			if [# D <= DLIMIT #]{
- 				//println("${name} - Turn the Led on")
+ 				//<key2>println</key2>("${name} - Turn the Led on")
 				forward ledqakactor -m ledCmd : ledCmd(ON)
 			}
 		}
 
 	}
-	Transition t0 whenEvent robotmoving -> blinkled
-	whenEvent robotathome -> stayoff
-	 whenEvent sonardata -> doBusinessWork
+	<key2>Transition</key2> t0 <key2>whenEvent</key2> robotmoving -> blinkled
+	<key2>whenEvent</key2> robotathome -> stayoff
+	 <key2>whenEvent</key2> sonardata -> doBusinessWork
 
-	 State stayoff{
- 				//println("${name} - Turn the Led off")
+	 <key2>State</key2> stayoff{
+ 				//<key2>println</key2>("${name} - Turn the Led off")
 				forward ledqakactor -m ledCmd : ledCmd(OFF)
-	 }Transition t0 whenEvent robotmoving -> blinkled
+	 }<key2>Transition</key2> t0 <key2>whenEvent</key2> robotmoving -> blinkled
 
-	 State blinkled{
+	 <key2>State</key2> blinkled{
 			forward ledqakactor -m ledCmd : ledCmd(BLINK)
-	 }Transition t0 whenEvent robotmoving -> blinkled
-	 				whenEvent robotathome -> stayoff
-	 				whenEvent sonardata -> doBusinessWork
+	 }<key2>Transition</key2> t0 <key2>whenEvent</key2> robotmoving -> blinkled
+	 				<key2>whenEvent</key2> robotathome -> stayoff
+	 				<key2>whenEvent</key2> sonardata -> doBusinessWork
 
                  </pre>
-                 Per la gestione del Led è stato introdotto una classe di utilità che rappresenta lo stato del led <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/c6d592a38af81701a2b6f8e19466733fb75afeb0/Sprint2/unibo.prototipo1/resources/state/LedState.kt" target="_blank">LedState.kt</a> che viene utilizzato all'interno dell'attore del led:
+                 Per la gestione del Led &egrave stato introdotto una classe di utilit&agrave che rappresenta lo stato del led <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/c6d592a38af81701a2b6f8e19466733fb75afeb0/Sprint2/unibo.prototipo1/resources/state/LedState.kt" target="_blank">LedState.kt</a> che viene utilizzato all'interno dell'attore del led:
                  <pre>
-QActor ledqakactor context ctxprototipo1 {
+<key2>QActor</key2> ledqakactor <key2>context</key2> ctxprototipo1 {
 	[#
-		val ledState = state.LedState()
+		<key><key>val</key></key> ledState = state.LedState()
 		ledState.setState(state.LState.OFF)
-		var current = ledState.getCurrState()
+		<key>var</key> current = ledState.getCurrState()
 	#]
 
-  State s0 initial{
-		println("${name} STARTS")
+  <key2>State</key2> s0 <key2>initial</key2>{
+		<key2>println</key2>("${name} STARTS")
 	}
-	Transition t0 whenMsg ledCmd -> doCmd
+	<key2>Transition</key2> t0 <key2>whenMsg</key2> ledCmd -> doCmd
 
-	State doCmd{ //da codificare i comandi del raspberry sprint4
+	<key2>State</key2> doCmd{ //da codificare i comandi del raspberry sprint4
 		onMsg( ledCmd : ledCmd(CMD) ){
-			[# var Cmd = payloadArg(0) #]
+			[# <key>var</key> Cmd = payloadArg(0) #]
 			if [# Cmd=="ON" #]{
 				//[# CommUtils.outyellow( "${name} - on") #]
 				[#
@@ -334,7 +336,7 @@ QActor ledqakactor context ctxprototipo1 {
 					current = ledState.getCurrState()
 				#]
 				updateResource[#ledState.toJsonString()#]
-				println("${name} - $current") color magenta
+				<key2>println</key2>("${name} - $current") color magenta
 			} if [# Cmd=="OFF" #]{
 				//[# CommUtils.outyellow( "${name} - off")#]
 				[#
@@ -342,7 +344,7 @@ QActor ledqakactor context ctxprototipo1 {
 					current = ledState.getCurrState()
 				#]
 				updateResource[#ledState.toJsonString()#]
-				println("${name} - $current") color magenta
+				<key2>println</key2>("${name} - $current") color magenta
 			}if [# Cmd=="BLINK" #] {
 				//[# CommUtils.outyellow( "${name} - off")#]
 				[#
@@ -350,11 +352,11 @@ QActor ledqakactor context ctxprototipo1 {
 					current = ledState.getCurrState()
 				#]
 				updateResource[#ledState.toJsonString()#]
-				println("${name} - $current") color magenta
+				<key2>println</key2>("${name} - $current") color magenta
 			}
 		}
 	}
-	Transition t0 whenMsg ledCmd -> doCmd
+	<key2>Transition</key2> t0 <key2>whenMsg</key2> ledCmd -> doCmd
                  </pre>
              </div>
             <h2>Testing</h2>
