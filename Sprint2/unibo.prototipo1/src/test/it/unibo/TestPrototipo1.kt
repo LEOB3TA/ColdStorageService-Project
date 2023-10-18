@@ -4,12 +4,10 @@ import it.unibo.ctxprototipo1.main
 import it.unibo.kactor.QakContext
 import it.unibo.kactor.sysUtil
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import rx.testSonar
 import state.LedState
 import state.TransportTrolleyState
 import test.it.unibo.coapobs.TypedCoapTestObserver
@@ -112,10 +110,11 @@ class TestPrototipo1{
         CommUtils.outmagenta("Test led & sonar | Led state & sonar events ...")
         val pickup = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,1)"
         var rep = ""
-        println(obsTT.currState.toString().substringAfterLast(":").substring(1,4))
-        println(obsLS.currState.toString())
-        //Assert.assertEquals("OFF", obsTT.currState.toString().substringAfterLast(":").substring(1,4))
-                /*Thread.sleep(2000)*/
+        var sonarE =""
+        /*println(obsTT.currState.toString().substringAfterLast(":").substring(1,5))
+        println(obsLS.currState.toString().substringAfterLast(":").substring(1,4))*/
+        Assert.assertEquals("OFF", obsLS.currState.toString().substringAfterLast(":").substring(1,4))
+
 
         GlobalScope.launch {
             try {
@@ -125,6 +124,7 @@ class TestPrototipo1{
             }
         }
 
+
         var newState= obsTT.getNext()
         var newStateLed = obsLS.getNext()
         Assert.assertEquals("INDOOR", newState.getCurrPosition().toString())
@@ -132,35 +132,64 @@ class TestPrototipo1{
         Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
 
         newState = obsTT.getNext()
+        newStateLed = obsLS.getNext()
         Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
         Assert.assertEquals("MOVINGTOPORT", newState.getCurrState().toString())
         Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
+        sonarE= "msg(sonardistance, event, testunit, transporttrolley, distance(19), 1)"
+        try{
+            connTT.forward(sonarE)
+        }catch (e: Exception) {
+            CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
+        }
+
         newState = obsTT.getNext()
+        newStateLed = obsLS.getNext()
         Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
         Assert.assertEquals("STOPPED", newState.getCurrState().toString())
         Assert.assertEquals("ON", newStateLed.getCurrState().toString())
+        Thread.sleep(3000)//per far vedere che si ferma e riprende, altrimenti è troppo veloce
+        sonarE = "msg(sonardistance, event, testunit, transporttrolley, distance(42), 1)"
+        try{
+            connTT.forward(sonarE)
+        }catch (e: Exception) {
+            CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
+        }
+
+
         newState = obsTT.getNext()
+        //println("DEBUGSTATES: ${newState}, ${newStateLed}, ${obsLS.currState.toString()}")
 
         Assert.assertEquals("PORT", newState.getCurrPosition().toString())
         Assert.assertEquals("DROPPINGOUT", newState.getCurrState().toString())
-        //Thread.sleep(7000)
+
 
         newState = obsTT.getNext()
+        //println("DEBUGSTATES: ${newState}, ${newStateLed}, ${obsLS.currState.toString()}")
 
         Assert.assertEquals("PORT", newState.getCurrPosition().toString())
         Assert.assertEquals("IDLE", newState.getCurrState().toString())
 
-        newState = obsTT.getNext()
 
+        newState = obsTT.getNext()
+        //println("DEBUGSTATES: ${newState}, ${newStateLed}, ${obsLS.currState.toString()}")
         Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
         Assert.assertEquals("MOVINGTOHOME", newState.getCurrState().toString())
 
+
+
         newState = obsTT.getNext()
+        //newStateLed = obsLS.getNext()
         Assert.assertEquals("HOME", newState.getCurrPosition().toString())
         Assert.assertEquals("IDLE", newState.getCurrState().toString())
-        Assert.assertEquals("OFF", newStateLed.getCurrState().toString())
 
-        //Thread.sleep(3000)
+
+
+        Thread.sleep(1000)
+        Assert.assertEquals("OFF",obsLS.currState.toString().substringAfterLast(":").substring(1,4))
+        //println("DEBUGSTATES: ${newState}, ${newStateLed}, ${obsLS.currState.toString()}")
+
         Assert.assertTrue(rep.contains("pickupdone"))
+
     }
 }

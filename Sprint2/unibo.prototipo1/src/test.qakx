@@ -67,7 +67,7 @@ ExternalQActor basicrobot context ctxbasicrobot
 
 
 //CodedQActor sonar  context ctxrasp className "rx.sonarHCSR04Support23"   //SU RASP
-CodedQActor sonar context ctxprototipo1 className "rx.testSonar" //Sonar per il test
+
 CodedQActor datacleaner    context ctxprototipo1 className "rx.dataCleaner"
 CodedQActor distancefilter context ctxprototipo1 className "rx.distanceFilter"
 
@@ -244,17 +244,23 @@ QActor transporttrolley context ctxprototipo1{
 
 	State idle {
 		println("$name | engaged") color green
+		//delay 1000
+		emit robotathome:robotathome(_)
+		//delay 1000
+		println("$name | emitted athome")
 		[#
 			tTState.setCurrState(state.CurrStateTrolley.IDLE)
 			tTState.setCurrPosition(state.TTPosition.HOME)
 		#]
 		updateResource[#tTState.toJsonString()#]
+		
 		// State print for debug
 		//[#
 		//	println(tTState.getCurrState())
 		//	println(tTState.getCurrPosition())
 		//#]
 		forward basicrobot -m setrobotstate : setpos (0,0,d) // d= down
+		
 		println("$name | waiting for commands.") color green
   	}
  	Transition t0 whenRequest pickup -> moverobottoindoor
@@ -540,7 +546,8 @@ QActor controller23 context ctxprototipo1{ //ctxpc{
 	 State blinkled{
 			forward ledqakactor -m ledCmd : ledCmd(BLINK)
 	 }Transition t0 whenEvent robotmoving -> blinkled
-	 whenEvent sonardata -> doBusinessWork
+	 				whenEvent robotathome -> stayoff
+	 				whenEvent sonardata -> doBusinessWork
 
 }
 
