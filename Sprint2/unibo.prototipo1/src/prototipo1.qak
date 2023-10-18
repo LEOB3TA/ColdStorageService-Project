@@ -508,29 +508,34 @@ QActor sonar23 context ctxprototipo1{
 				 //whenMsg sonardeactivate -> end
 	
 	State work{
-		onMsg(sonaractivate : info(DLIMIT)){
-		
-		[# 
-			DLIMIT = payloadArg(0).toInt()#
-		]
-		}
-		println ("Sonar waiting") color red
 		updateResource[# "Sonar waiting"#]
 	}Transition t0 whenEvent sonardata -> handlesonardata
-	             
-	              
+	              whenEvent obstacle  -> handleobstacle
+
 	State handlesonardata{
+		printCurrentMessage
+		updateResource [# "sonar23 handles $currentMsg" #]
 		onMsg(sonardata : distance(D)){
 			[#var D = payloadArg(0).toInt()#]
 			//println("$name distance ${payloadArg(0)}") color magenta
 			if [#D>DLIMIT#]{
 				emit resume: resume(_)
 			}
-			if [#D <= DLIMIT#]{
-				emit alarm : alarm(obstacle)
-							}	
+			}
+	}Goto work
+
+	State handleobstacle{
+		onMsg( obstacle : obstacle(D)){			
+			println("$name handleobstacle ALARM ${payloadArg(0)}") color magenta
+			emit alarm : alarm(_)			
 		}
-	}Goto work  
+
+	}
+	Goto /*sonar23 if [# Appl == true #]  else*/ work  
+
+	State sonar23{
+		println("$name BYE")
+	}
 	
 }
 

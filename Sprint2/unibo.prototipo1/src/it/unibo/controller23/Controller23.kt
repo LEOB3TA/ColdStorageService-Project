@@ -29,9 +29,9 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t038",targetState="blinkled",cond=whenEvent("robotmoving"))
-					transition(edgeName="t039",targetState="stayoff",cond=whenEvent("robotathome"))
-					transition(edgeName="t040",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t039",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t040",targetState="stayoff",cond=whenEvent("robotathome"))
+					transition(edgeName="t041",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 				state("doBusinessWork") { //this:State
 					action { //it:State
@@ -49,9 +49,9 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t041",targetState="blinkled",cond=whenEvent("robotmoving"))
-					transition(edgeName="t042",targetState="stayoff",cond=whenEvent("robotathome"))
-					transition(edgeName="t043",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t042",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t043",targetState="stayoff",cond=whenEvent("robotathome"))
+					transition(edgeName="t044",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 				state("stayoff") { //this:State
 					action { //it:State
@@ -61,7 +61,7 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t044",targetState="blinkled",cond=whenEvent("robotmoving"))
+					 transition(edgeName="t045",targetState="blinkled",cond=whenEvent("robotmoving"))
 				}	 
 				state("blinkled") { //this:State
 					action { //it:State
@@ -71,8 +71,9 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t045",targetState="blinkled",cond=whenEvent("robotmoving"))
-					transition(edgeName="t046",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t046",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t047",targetState="stayoff",cond=whenEvent("robotathome"))
+					transition(edgeName="t048",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}
