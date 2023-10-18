@@ -21,17 +21,19 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 		
 				val ledState = state.LedState()
 				ledState.setState(state.LState.OFF)
-				var current = ledState.getCurrState()
+				var current=ledState.getCurrState()
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
+						updateResourceRep(ledState.toJsonString() 
+						)
 						CommUtils.outblack("${name} STARTS")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t037",targetState="doCmd",cond=whenDispatch("ledCmd"))
+					 transition(edgeName="t028",targetState="doCmd",cond=whenDispatch("ledCmd"))
 				}	 
 				state("doCmd") { //this:State
 					action { //it:State
@@ -68,7 +70,7 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t038",targetState="doCmd",cond=whenDispatch("ledCmd"))
+					 transition(edgeName="t029",targetState="doCmd",cond=whenDispatch("ledCmd"))
 				}	 
 			}
 		}

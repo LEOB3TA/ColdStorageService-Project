@@ -106,15 +106,15 @@ class TestPrototipo1{
 
     @Test
     @Throws(InterruptedException::class)
-    fun testLed(){
+    fun testLedSonar(){
         CommUtils.outmagenta("Test led & sonar | Led state & sonar events ...")
         val pickup = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,1)"
         var rep = ""
         var sonarE =""
+        val sonarIng = "msg(sonardistance, event, testunit, transporttrolley, distance(13), 1)"
         /*println(obsTT.currState.toString().substringAfterLast(":").substring(1,5))
         println(obsLS.currState.toString().substringAfterLast(":").substring(1,4))*/
         Assert.assertEquals("OFF", obsLS.currState.toString().substringAfterLast(":").substring(1,4))
-
 
         GlobalScope.launch {
             try {
@@ -123,10 +123,22 @@ class TestPrototipo1{
                 CommUtils.outmagenta("TestColdStorageService  |   some err in request: $e")
             }
         }
-
-
         var newState= obsTT.getNext()
         var newStateLed = obsLS.getNext()
+        Assert.assertEquals("INDOOR", newState.getCurrPosition().toString())
+        Assert.assertEquals("PICKINGUP", newState.getCurrState().toString())
+        Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
+
+        try{
+            connTT.forward(sonarIng)
+        }catch (e: Exception) {
+            CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
+        }
+        //println("DEBUGSTATES: ${obsTT.currState.toString().substringAfter(":").substring(1,8)}")
+        Assert.assertNotSame("STOPPED", obsTT.currState.toString().substringAfter(":").substring(1,10))
+        newState= obsTT.getNext()
+        newStateLed = obsLS.getNext()
+        newStateLed = obsLS.getNext()
         Assert.assertEquals("INDOOR", newState.getCurrPosition().toString())
         Assert.assertEquals("PICKINGUP", newState.getCurrState().toString())
         Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
@@ -139,9 +151,11 @@ class TestPrototipo1{
         sonarE= "msg(sonardistance, event, testunit, transporttrolley, distance(19), 1)"
         try{
             connTT.forward(sonarE)
+            connTT.forward(sonarIng)
         }catch (e: Exception) {
             CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
         }
+        println("ignored because before 2 seconds")
 
         newState = obsTT.getNext()
         newStateLed = obsLS.getNext()
@@ -156,8 +170,8 @@ class TestPrototipo1{
             CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
         }
 
-
         newState = obsTT.getNext()
+
         //println("DEBUGSTATES: ${newState}, ${newStateLed}, ${obsLS.currState.toString()}")
 
         Assert.assertEquals("PORT", newState.getCurrPosition().toString())
@@ -176,7 +190,13 @@ class TestPrototipo1{
         Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
         Assert.assertEquals("MOVINGTOHOME", newState.getCurrState().toString())
 
-
+        try{
+            connTT.forward(sonarE)
+        }catch (e: Exception) {
+            CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
+        }
+        //println("DEBUGSTATES: ${obsTT.currState.toString().substringAfter(":").substring(1,8)}")
+        Assert.assertNotSame("STOPPED", obsTT.currState.toString().substringAfter(":").substring(1,4))
 
         newState = obsTT.getNext()
         //newStateLed = obsLS.getNext()
@@ -192,4 +212,5 @@ class TestPrototipo1{
         Assert.assertTrue(rep.contains("pickupdone"))
 
     }
+
 }
