@@ -1,0 +1,565 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<!--
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<link rel="stylesheet" type="text/css" href="resources/css/sprint0.css">
+
+<head>
+
+    <title>Sprint2</title></head>
+
+<body>
+<!--
+<div id="top">
+    <h1><b>PROGETTO DI INGEGNERIA DEI SISTEMI SOFTWARE</b> - SPRINT 0 <font size="5"></font></h1>
+    <h3>Gruppo di lavoro: Focardi, Galeone, Porrazzo <font size="3"></font></h3>
+</div>
+-->
+<div class="body">
+    <h2>Introduction</h2>
+    <div class="remark"> Progetto finale di ISS, finalizzato allo sviluppo software di un magazzino refrigerato, nel
+        quale
+        vi &egrave; un robot che ha il compito di trasportare del cibo da un punto di partenza - chiamato INDOOR - alla cella
+        frigorifera.
+    </div>
+    <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint0Reviewed/userDocs/sprint0Reviewed.html">Sprint0 </a><br>
+    <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/userDocs/sprint1.html">Sprint1 </a>
+
+    <h2>Requirements</h2>
+    <div class="remark">
+        <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/TemaFinale23.html">Tema Finale </a>
+    </div>
+
+    <h3>Work plan</h3>
+    <div class="remark">
+        Riutilizzando e adattando i componenti software precedentemente forniti dal cliente e analizzati nello <b>sprint0</b> per la gestione del sonar e del led (<a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarSystem23</a>, <a href="https://github.com/anatali/issLab23/tree/main/unibo.sonarqak23">unibo.sonarqak23</a>):
+        <ul>
+            <li>Far interagire il <b>TrasportTrolley</b> con il <b>Sonar</b></li>
+            <li>Simulare il comportamento del <b>Led</b> nei confronti del <b>Sonar</b></li>
+        </ul>
+    </div>
+
+    <h2>Problem analysis</h2>
+    Per ulteriori informazioni riguardanti il software precedentemente fornito fare riferimento allo     <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint0Reviewed/userDocs/sprint0Reviewed.html">Sprint0 </a><br>
+    <div class="remark">
+    <h3>Sonar</h3>
+        <h4>Obiettivo</h4>
+        Avere un componente che fornisca la <b>distanza</b> del robot da un ostacolo
+        <h4>Problemi</h4>
+        Non avendo ancora a disposizione un sonar fisico, &egrave; necessario simulare una simulazione di un sonar
+        <h4>Possibili soluzioni</h4>
+        Il cliente ci ha precedentemente fornito il software per il <b>Sonar</b> (<a href="https://github.com/anatali/issLab23/tree/main/unibo.sonarqak23">unibo.sonarqak23</a>) che fornisce un implementazione sia per il sonar simulato sia per il sonar fisico.
+        A partire da questo e in caso servissero utilizzando alcune modifiche &egrave; possibile riutilizzarlo
+    <h3>Interazioni del TransportTrolley</h3>
+        <h4>Obiettivo</h4>
+        Far interagire il <b>TrasportTrolley</b> con il <b>Sonar</b> in modo che rispetti i requisiti imposti dal commitente, in particolare il <b>TrasportTrolley</b> deve:
+        <ol>
+            <li><b>Fermarsi</b> quando il Sonar rileva una distanza <u>minore</u> di una variabile <b>DLIMIT</b></li>
+            <li><b>Ripartire</b> quando il Sonar rileva una distanza <u>maggiore</u> di <b>DLIMIT</b></li>
+        </ol>
+        <h4>Problemi</h4>
+            Il software fornito dal cliente &egrave; riutilizzabile o necessita di modifiche per adattarlo a tale comportamento?</li>
+        <h3>Led</h3>
+        <h4>Obiettivo</h4>
+        Gestire il <b>Led</b> in modo che rispetti i requisiti imposti dal cliente in particolare deve:
+        <ol>
+            <li>Essere <b>Spento</b> quando il TransportTrolley &egrave; in <b>HOME</b> </li>
+            <li><b>Lampeggiare</b> quando il TransportTrolley &egrave; <b>in movimento</b></li>
+            <li>Essere <b>Acceso</b> quando il TransportTrolley &egrave; <b>fermo</b></li>
+        </ol>
+        <h4>Problemi</h4>
+        <ol>
+            <li>Non avendo ancora un led fisico &egrave; necessario implementare una simulazione del led</li>
+            <li>Che tipo di componente &egrave; il <b>Led</b> all'interno del nostro sistema</li>
+            <li>Interazione <b>Sonar-Led</b></li>
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+            <li>Prendendo spunto da<a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarSystem23</a>, per ora il <b>Led</b> pu&ograve essere modellato utilizzando delle <b>Print</b></li>
+            <li>Per rispettare l'integrit&agrave del progetto e per utilizzare il linguaggio <b>Qak</b> pu&ograve essere modellato come un <b>attore</b></li>
+            <li>L'interazione pu&ograve avvenire direttamente con il <b>Sonar</b> oppure avviene in modo differente? Per rispondere a questa domanda &egrave; necessaria un'ulteriore analisi del progetto <a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarSystem23</a> fornitoci dal cliente da rimandare durante il progetto</li>
+        </ol>
+    </div>
+        <h2>Architettura Logica</h2>
+    <br>
+    Modello prototipo: <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2/unibo.prototipo1/src/prototipo1.qak" target="_blank">protipo1.qak</a>
+    <br>
+    <img height="100%" width="100%" src="./resources/images/prototipo1arch.png" alt="architettura logica"> <br>
+        </div>
+            <h2>Project</h2>
+             <div class="remark">
+                 <h3>Modifiche rispetto allo sprint1</h3>
+                 &Egrave; stato aumentato il <b>tickettime</b> a <b>3 secondi</b> in modo da avere meno ticket scaduti
+                 <h3>DLIMIT</h3>
+                 Il valore della costante <b>DLIMIT</b> &egrave; stato impostato a 30.<br>
+                 In questo momento del progetto senza il sonar fisico &egrave; un valore <b>puramente casuale</b> per verificare il funzionamento.
+                <h3>Sonar</h3>
+                 Tramite l'analisi del software fornito si evince che fornisce un'astrazione del sonar fisico e ne implementa il funzionamento.<br>
+                 Quindi &egrave; utilizzabile all'interno del prototipo come <b>CodedQakActor</b> nelle due implementazioni disponibili: <b>sonarSimulator</b> nel nostro caso o <b>sonarHCSR04Support23</b> quando avremo un sonar fisico. &egrave; inoltre necessario utilizzare <b>dataCleaner</b> e <b>distanceFilter</b> per filtrare i valori forniti dal sonar.<br>
+                 <pre>
+ //CodedQActor sonar  <key2>context</key2> ctxrasp className "rx.sonarHCSR04Support23"   //SU RASP
+<key2>CodedQActor</key2> sonar <key2>context</key2> ctxprototipo1 className "rx.sonarSimulator" //in LOCALE
+<key2>CodedQActor</key2> datacleaner    <key2>context</key2> ctxprototipo1 className "rx.dataCleaner"
+<key2>CodedQActor</key2> distancefilter <key2>context</key2> ctxprototipo1 className "rx.distanceFilter"
+                 </pre>
+                 Devono essere introdotti dei <b>nuovi messaggi</b>:
+                 <pre>
+<key2>Event</key2> sonardata : distance(D) //dataclenaer
+<key2>Event</key2> obstacle : obstacle(D)	//distancefilter
+<key2>Event</key2> alarm		: alarm(X)		//viene emesso al rilevamento di un ostacolo
+<key2>Event</key2> resume:resume(_) //viene emesso quando la distanza rilevata > DLIMIT
+<key2>Dispatch</key2> sonaractivate: info(D)
+                 </pre>
+                 Tuttavia, durante l'implementazione del progetto, ci siamo resi conto che l'implementazione predefinita del <b>SonarSimulator</b> non era adatta al nostro progetto poiché, come un sonar reale, forniva una distanza decrescente. Di conseguenza, il robot si sarebbe fermato senza ripartire, e il led sarebbe rimasto sempre acceso. Quindi, abbiamo apportato una modifica.<br>
+                 La modifica consiste nell'invio di <b>valori casuali</b> nel range da <b>0 a 80</b>, in modo che il robot possa ripartire dopo essersi fermato. Inoltre, abbiamo aumentato l'intervallo di tempo tra due valori forniti dal sonar per renderlo pi&ugrave visibile nella console. Nel sonar reale, il ritardo tra due valori &egrave; molto breve.<br>
+                 Il sonar emette quindi <b>20</b> distanze diverse e alla fine dei cicli emette la distanza <b>35</b> in modo da sbloccare il boto nel caso fosse bloccato.
+                 <pre>
+ ...
+ suspend fun startDataReadSimulation(    ){
+    <key>var</key> i = 0
+        while( i < 20 ){
+            <key>val</key> m1= "distance( ${Random.nextInt(0,80)} )"
+            i++
+            <key>val</key> event = CommUtils.buildEvent( name,"sonardistance", m1)
+            <key>println</key>("$tt $name | generates $event")
+            <key>emit</key>(event)
+            delay( 1500 )
+        }
+        <key>emit</key>(CommUtils.buildEvent( name,"sonardistance", "distance(35)"))
+        terminate()
+}
+                 </pre>
+                 Inoltre &egrave; stato necessario modificare il <b>distancefilter</b> inserendo il nostro valore <b>DLIMIT</b>.<br>
+                 Per sfruttare i messaggi emessi dalle varie comonenti &egrave stato necessario utilizzare il seguente attore:
+                 <pre>
+<key2>QActor</key2> sonar23 <key2>context</key2> ctxprototipo1{
+[#<key>var</key> DLIMIT = 30
+<key>var</key> Appl = sysUtil.getActor("transporttrolley") != null #]
+<key2>State</key2> s0 <key2>initial</key2>{
+    <key2>println</key2>("sonar | start with appl: $Appl")
+}<key2>Transition</key2> t0 <key2>whenMsg</key2> sonaractivate -> work
+             //<key2>whenMsg</key2> sonardeactivate -> end
+
+<key2>State</key2> work{
+    updateResource[# "Sonar waiting"#]
+}<key2>Transition</key2> t0 <key2>whenEvent</key2> sonardata -> handlesonardata
+              <key2>whenEvent</key2> obstacle  -> handleobstacle
+
+<key2>State</key2> handlesonardata{
+    printCurrentMessage
+    updateResource [# "sonar23 handles $currentMsg" #]
+    onMsg(sonardata : distance(D)){
+        [#<key>var</key> D = payloadArg(0).toInt()#]
+        //<key2>println</key2>("$name distance ${payloadArg(0)}") color magenta
+        if [#D>DLIMIT#]{
+            <key2>emit</key2> resume: resume(_)
+        }
+        }
+}<key2>Goto</key2> work
+
+	<key2>State</key2> handleobstacle{
+		onMsg( obstacle : obstacle(D)){
+			<key2>println</key2>("$name handleobstacle ALARM ${payloadArg(0)}") color magenta
+			<key2>emit</key2> alarm : alarm(_)
+		}
+                 </pre>
+                <h3>TransportTrolley</h3>
+                 Per controllare il <b>Led</b> sono stati creati due eventi:
+                 <pre>
+<key2>Event</key2> robotmoving : robotmoving(_)  //viene emesso ogni volta che il robot &egrave; in movimento
+<key2>Event</key2> robotathome : robotathome(_) //viene emesso quando il robot &egrave; in home
+                 </pre>
+                 Il <b>TransportTrolley</b> &egrave; collegato al <b>BasicRobot</b> (vedere <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/userDocs/sprint1.html">Sprint1</a> per i dettagli).
+                 Il <b>BasicRobot</b> si ferma automaticamente quando riceve un evento <b>Alarm</b> e risponde con il messaggio <b>MoveRobotFailed</b>, quindi &egrave; stato modificato il <b>TransportTrolley</b> in modo da reagire a tali risposte.<br>
+                 Per farlo ogni stato di movimento possiede una transizione allo stato <b>handlerobotstopped</b> in caso di risposta <b>MoveRobotFailed</b>. Di seguito viene riportato un esempio:
+                 <pre>
+<key2>State</key2> moverobottoindoor {
+    ...
+    <key2>emit</key2> robotmoving : robotmoving(_)
+}
+<key2>Transition</key2> t0 <key2>whenReply</key2> moverobotdone -> movetoport
+             <key2>whenReply</key2> moverobotfailed -> handlerobotstopped
+                 </pre>
+                 Lo stato <b>handlerobotstopped</b> gestisce il <b>salvataggio dello stato</b> e il la gestione del timer <b>MINT</b> che &egrave; stato attualmente fissato a un secondo.
+                 <pre>
+<key>val</key> ts = kotlin.time.TimeSource.Monotonic
+<key>var</key> m1 = ts.markNow()
+<key>val</key> MINT : kotlin.time.Duration= 1.seconds
+<key>var</key> savedState = tTState.getCurrState()
+                 </pre>
+                 Di seguito viene riportato lo stato <b>handlerobotstopped</b>:
+                 <pre>
+<key2>State</key2> handlerobotstopped{
+  		<key2>println</key2>("$name |handle robot stopped") color green
+  		[#
+  			savedState = tTState.getCurrState()
+  			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
+
+  			if ((m1+MINT).hasPassedNow()){
+  				m1 = ts.markNow()
+  		#]
+
+			updateResource[#tTState.toJsonString()#]
+  		[#
+  			}else{
+  		#]
+  				<key2>println</key2>("ignored alarm signal") color red
+  				[#tTState.setCurrState(savedState)#]
+				updateResource[#tTState.toJsonString()#]
+				<key2>emit</key2> robotmoving: robotmoving(_)
+				[# 	when {
+							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)[#
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] request basicrobot -m moverobot:moverobot($CRX,$CRY)[#
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
+							[#}}#]
+  		[#	}#]
+
+
+
+  	}<key2>Transition</key2> t0  <key2>whenEvent</key2> resume -> resumerobot
+  					<key2>whenReply</key2> moverobotdone -> goahead
+  	  				<key2>whenReply</key2> moverobotfailed -> handlerobotstopped
+                 </pre>
+                 Lo stato <b>resumerobot</b> serve per far ripartire il robot dopo averlo fermato, invece lo stato <b>goahead</b> &egrave; necessario per andare negli stati successivi a quello salvato.
+                 All'interno dello stato <b>goahead</b> il trasporttrolley si autoinvia delle <b>Dispatch</b> per scegliere lo stato da dove proseguire:
+                 <pre>
+//Messaggi autoinviati transporttrolley
+<key2>Dispatch</key2> gotomovetoport : gotomovetoport(_)
+<key2>Dispatch</key2> gotodepositactionended : gotodepositactionended(_)
+<key2>Dispatch</key2> gotorobottohome : gotorobottohome(_)
+                 </pre>
+                 Di seguito vengono riportati i nuovi stati:
+                 <pre>
+<key2>State</key2> resumerobot{
+    <key2>println</key2>("$name | resume robot") color green
+            onMsg(resume: resume(_)){
+            <key2>emit</key2> robotmoving: robotmoving(_)
+            [#tTState.setCurrState(savedState)#]
+                    [# 	when {
+                        tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)[#
+                        tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] request basicrobot -m moverobot:moverobot($CRX,$CRY)[#
+                        tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
+
+                        [#}}#]
+            }
+}<key2>Transition</key2> t0 <key2>whenReply</key2> moverobotdone -> goahead
+    <key2>whenReply</key2> moverobotfailed -> handlerobotstopped
+
+<key2>State</key2> goahead{
+    <key2>println</key2>("$name | go ahead with next state") color green
+    [# 	when {
+                        tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] forward transporttrolley -m gotomovetoport : gotomovetoport(_)[#
+                        tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] forward transporttrolley -m gotodepositactionended : gotodepositactionended(_)[#
+                        tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] 	delay 6300
+                        forward basicrobot -m cmd : cmd ( l )
+                        <key2>emit</key2> robotathome : robotathome(_)
+                        forward transporttrolley -m gotorobottohome : gotorobottohome(_)
+
+    [#
+        }}#]
+}<key2>Transition</key2> t0 <key2>whenMsg</key2> gotomovetoport -> movetoport
+                <key2>whenMsg</key2> gotodepositactionended -> depositactionended
+                <key2>whenMsg</key2> gotorobottohome -> idle
+                 </pre>
+                 <h3>Led</h3>
+                 Prendendo spunto dal progetto fornitoci dal cliente l'interazione con il led avviene in <b>due fasi</b> e tramite <b>due attori</b>.<br>
+                 Gli eventi emessi dal <b>Sonar</b> e dal <b>TransportTrolley</b> vengono gestiti tramite l'attore <b>Controller23</b> che poi invia delle <b>Dispactch</b> al led con i comandi.<br>
+                 Viene introdotto quindi il seguente messaggio:
+                 <pre>
+//Led
+<key2>Dispatch</key2> ledCmd : ledCmd ( CMD )
+                 </pre>
+                 Di seguito viene riportato <b>Controller23</b> opportunamente modficiato per rispettare i requisiti:
+                 <pre>
+<key2>QActor</key2> controller23 <key2>context</key2> ctxprototipo1{ //ctxpc{
+[# <key>val</key> DLIMIT = 30 #] //valore casuale
+	<key2>State</key2> s0 <key2>initial</key2>{
+		<key2>println</key2>("${name} STARTS - Activates the sonar") color magenta
+		forward sonar23 -m sonaractivate : info($DLIMIT)
+	}
+	<key2>Transition</key2> t0 <key2>whenEvent</key2> robotmoving -> blinkled
+	<key2>whenEvent</key2> robotathome -> stayoff
+	<key2>whenEvent</key2> sonardata -> doBusinessWork
+
+	<key2>State</key2> doBusinessWork{
+		<key2>println</key2>("${name} BUSINESS WORK") color magenta
+		//printCurrentMessage
+		onMsg( sonardata : distance(D)){
+			[# <key>var</key> D = payloadArg(0).toInt() #]
+			<key2>println</key2>("$D") color red
+			//Interact with the Led
+			if [# D <= DLIMIT #]{
+ 				//<key2>println</key2>("${name} - Turn the Led on")
+				forward ledqakactor -m ledCmd : ledCmd(ON)
+			}
+		}
+
+	}
+	<key2>Transition</key2> t0 <key2>whenEvent</key2> robotmoving -> blinkled
+	<key2>whenEvent</key2> robotathome -> stayoff
+	 <key2>whenEvent</key2> sonardata -> doBusinessWork
+
+	 <key2>State</key2> stayoff{
+ 				//<key2>println</key2>("${name} - Turn the Led off")
+				forward ledqakactor -m ledCmd : ledCmd(OFF)
+	 }<key2>Transition</key2> t0 <key2>whenEvent</key2> robotmoving -> blinkled
+
+	 <key2>State</key2> blinkled{
+			forward ledqakactor -m ledCmd : ledCmd(BLINK)
+	 }<key2>Transition</key2> t0 <key2>whenEvent</key2> robotmoving -> blinkled
+	 				<key2>whenEvent</key2> robotathome -> stayoff
+	 				<key2>whenEvent</key2> sonardata -> doBusinessWork
+
+                 </pre>
+                 Per la gestione del Led &egrave; stato introdotto una classe di utilit&agrave che rappresenta lo stato del led <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/c6d592a38af81701a2b6f8e19466733fb75afeb0/Sprint2/unibo.prototipo1/resources/state/LedState.kt" target="_blank">LedState.kt</a> che viene utilizzato all'interno dell'attore del led:
+                 <pre>
+<key2>QActor</key2> ledqakactor <key2>context</key2> ctxprototipo1 {
+	[#
+		<key><key>val</key></key> ledState = state.LedState()
+		ledState.setState(state.LState.OFF)
+		<key>var</key> current = ledState.getCurrState()
+	#]
+
+  <key2>State</key2> s0 <key2>initial</key2>{
+		<key2>println</key2>("${name} STARTS")
+	}
+	<key2>Transition</key2> t0 <key2>whenMsg</key2> ledCmd -> doCmd
+
+	<key2>State</key2> doCmd{ //da codificare i comandi del raspberry sprint4
+		onMsg( ledCmd : ledCmd(CMD) ){
+			[# <key>var</key> Cmd = payloadArg(0) #]
+			if [# Cmd=="ON" #]{
+				//[# CommUtils.outyellow( "${name} - on") #]
+				[#
+					ledState.setState(state.LState.ON)
+					current = ledState.getCurrState()
+				#]
+				updateResource[#ledState.toJsonString()#]
+				<key2>println</key2>("${name} - $current") color magenta
+			} if [# Cmd=="OFF" #]{
+				//[# CommUtils.outyellow( "${name} - off")#]
+				[#
+					ledState.setState(state.LState.OFF)
+					current = ledState.getCurrState()
+				#]
+				updateResource[#ledState.toJsonString()#]
+				<key2>println</key2>("${name} - $current") color magenta
+			}if [# Cmd=="BLINK" #] {
+				//[# CommUtils.outyellow( "${name} - off")#]
+				[#
+					ledState.setState(state.LState.BLINKS)
+					current = ledState.getCurrState()
+				#]
+				updateResource[#ledState.toJsonString()#]
+				<key2>println</key2>("${name} - $current") color magenta
+			}
+		}
+	}
+	<key2>Transition</key2> t0 <key2>whenMsg</key2> ledCmd -> doCmd
+                 </pre>
+             </div>
+
+            <h2>Testing</h2>
+            <div class="remark">
+                Al fine di eseguire un test esaustivo del sistema, si &egrave; deciso di creare un apposito file qak, in cui sono stati inseriti tutti i componenti
+                interagenti come sono nel <b>prototipo1</b> (quindi invariati nella forma), a meno del truck, sostituito da un mock per inviare le richieste a nostro piacimento
+                (come gi&agrave; fatto nel precedente sprint), e del sonar simulator, il
+                quale viene rimpiazzato da delle forward con il valore desiderato al momento opportuno.<br/><br/>
+                Di seguito si riporta come viene simulato il sonar nei test:
+<pre>
+<key>var</key> sonarE= "msg(sonardistance, event, testunit, transporttrolley, distance(19), 1)"
+<key>try</key> {
+    connTT.forward(sonarE)
+} <key>catch</key> (e: Exception) {
+    CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
+}
+
+</pre>
+                <br/><br/>
+                Al fine di osservare correttamente il comportamento di <kc>TransportTrolley</kc> e <ks>Led</ks> sono risultati fondamentali
+                i rispettivi stati e la loro gestione.<br/><br/>
+                I test sono stati sviluppati creando una connessione con il <kc>TransportTrolley</kc>, <kc>BasicRobot</kc> e <kc>ColdStoragService</kc> e grazie all'uso di due
+                observer, uno per lo stato del <kc>TransportTrolley</kc> e uno per lo stato del <ks>Led</ks> &egrave; stato possibile verificare la correttezza delle operazioni.
+                <br/><br/>
+                La prima parte dei test, ovvero la creazione degli attori, delle connessioni con essi e la configurazione degli observer, &egrave; molto simile a ci&ograve;
+                fatto nello <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/userDocs/sprint1.html">Sprint1 </a>.
+                Per tale motivo di seguito si riporta la funzione che esegue il test del funzionamento dei nuovi componenti inseriti, in tutte le loro sfaccettature.
+<pre>
+    <key>fun</key> testLedSonar(){
+        CommUtils.outmagenta("Test led & sonar | Led state & sonar events ...")
+        ...
+        Assert.assertEquals("OFF", obsLS.currState.toString().substringAfterLast(":").substring(1,4))
+
+        GlobalScope.launch {
+            <key>try</key> {
+                rep = connTT.request(pickup)
+            } <key>catch</key> (e: Exception) {
+                CommUtils.outmagenta("TestColdStorageService  |   some err in request: $e")
+            }
+        }
+        <key>var</key> newState= obsTT.getNext()
+        <key>var</key> newStateLed = obsLS.getNext()
+        ...
+        Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
+
+        <key>try</key>{
+            connTT.forward(sonarIng)
+        }<key>catch</key> (e: Exception) {
+            CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
+        }
+        Assert.assertNotSame("STOPPED", obsTT.currState.toString().substringAfter(":").substring(1,10))
+        newState= obsTT.getNext()
+        newStateLed = obsLS.getNext()
+        newStateLed = obsLS.getNext()
+        ...
+        Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
+
+        newState = obsTT.getNext()
+        newStateLed = obsLS.getNext()
+        ...
+        Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
+        sonarE= "msg(sonardistance, event, testunit, transporttrolley, distance(19), 1)"
+        <key>try</key>{
+            connTT.forward(sonarE)
+            connTT.forward(sonarIng)
+        }<key>catch</key> (e: Exception) {
+            CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
+        }
+        ...
+        newState = obsTT.getNext()
+        newStateLed = obsLS.getNext()
+        Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
+        Assert.assertEquals("STOPPED", newState.getCurrState().toString())
+        Assert.assertEquals("ON", newStateLed.getCurrState().toString())
+        ...
+        sonarE = "msg(sonardistance, event, testunit, transporttrolley, distance(42), 1)"
+        <key>try</key>{
+            connTT.forward(sonarE)
+        }<key>catch</key> (e: Exception) {
+            CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
+        }
+        ...
+        <key>try</key>{
+            connTT.forward(sonarE)
+        }<key>catch</key> (e: Exception) {
+            CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
+        }
+        Assert.assertNotSame("STOPPED", obsTT.currState.toString().substringAfter(":").substring(1,4))
+        ...
+        Assert.assertEquals("OFF",obsLS.currState.toString().substringAfterLast(":").substring(1,4))
+        Assert.assertTrue(rep.contains("pickupdone"))
+    }
+</pre>
+                Come ultima nota sui test si precisa che il valore di <b>MINT</b> &egrave; stato posto pari a <i>2 secondi</i> (2000 millisecondi) al fine di riuscire ad
+                osservare correttamente gli effetti provocati sul sistema.
+
+            </div>
+
+    <h2>Piano di lavoro</h2>
+    <div class="remark">
+        Tutti gli sprint sotto intendono delle migliorie e delle eventuali modifiche del lavoro fatto negli sprint precedenti
+<!--        <h3>Sprint 1 (Tempo stimato per lo sviluppo : 1 settimana circa)</h3>-->
+<!--        Core business dell'applicazione:-->
+<!--        <ul>-->
+<!--            <li>Transport trolley e interfacciamento con il basic robot</li>-->
+<!--            <li>Cold storage service</li>-->
+<!--            <li>Simulatore dei driver</li>-->
+<!--        </ul>-->
+<!--        <h3>Sprint 2</h3>-->
+<!--        Aggiunta specifiche di movimento del transport trolley:-->
+<!--        <ul>-->
+<!--            <li>Led</li>-->
+<!--            <li>Controller</li>-->
+<!--            <li>Sonar</li>-->
+<!--        </ul>-->
+        <h3>Sprint 3</h3>
+        Sviluppo inteerfacce grafiche:
+        <ul>
+            <li>ServiceStatusGui</li>
+            <li>ServiceAccessGui</li>
+        </ul>
+        <h3>Sprint 4</h3>
+        Deploy sul raspberry:
+        <ul>
+            <li>Creazione del supporto per led fisico</li>
+            <li>Deploy del sonar</li>
+            <li>Deploy del basic robot</li>
+        </ul>
+
+    </div>
+
+            <h2>Avviare il sistema</h2>
+            <div class="remark">
+                <h5>Avvio automatizzato</h5>
+
+                Scaricare l'ultima release da <b>Github</b>, utilizzare lo script adeguato per il proprio sistema:
+                <ul>
+                    <li>Linux: <b>startPrototype-linux.sh</b></li>
+                    <li>MacOS: <b>startPrototype-mac.sh</b></li>
+                    <li>Windows: <b>startPrototype-win.bat</b></li>
+                </ul>
+
+                <h5>Avvio manuale</h5>
+
+                <ol >
+                    <li style="font-size: 25px">
+                        <em style="font-size: 25px">Avviare il <bc>WebRobot23</bc></em>
+                        <p style="font-size: 16px">In tal modo si avviano il <i>basicrobot23</i> ed il <i>wenv</i></p>
+                        <pre style="font-size: 16px">
+cd ColdStorageService-Project/Sprint1/unibo.basicrobot23
+docker-compose -f webbasicrobot23.yaml up</pre>
+                    </li>
+                    <li style="font-size: 25px">
+                        <em style="font-size: 25px">Avviare il <bc>ColdStorageService</bc>,<bc>MockTruck</bc> e <bc>Trasporttrolley</bc></em>
+                        <p style="font-size: 16px">In tal modo si avviano le varie componenti</p>
+                        <pre style="font-size: 16px">
+cd ColdStorageService-Project/Sprint2/unibo.prototipo1
+./gradlew run</pre>
+                    </li>
+                </ol>
+            </div>
+
+    <!--
+                <h2>Maintenance</h2>
+                -->
+    <!-- USEFUL
+    <table style="width:100%" border="1">
+    <tr>
+    <td style="width:40%">
+    </td>
+    <td></td>
+    </tr>
+    </table>
+    -->
+
+    <br/><br/>
+</div>
+
+<div class="stud">
+    By Students: <br/>
+    <div class="studentCardRow">
+        <div class="studentCard">
+            <div class="studentName">Leonardo Focardi</div>
+            <div class="studentEmail"><a href= "mailto:leonardo.focardi@studio.unibo.it">leonardo.focardi@studio.unibo.it</a>
+            </div>
+            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/leo.jpg"></div>
+        </div>
+        <div class="studentCard">
+            <div class="studentName">Christian Galeone</div>
+            <div class="studentEmail"><a href= "mailto:christian.galeone@studio.unibo.it">christian.galeone@studio.unibo.it</a></div>
+            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/christian.jpg"></div>
+        </div>
+        <div class="studentCard">
+            <div class="studentName">Gianmiriano Porrazzo</div>
+            <div class="studentEmail"><a href= "mailto:gianmiriano.porrazzo@studio.unibo.it">gianmiriano.porrazzo@studio.unibo.it</a></div>
+            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/gian.jpg"></div>
+        </div>
+    </div>
+
+    <div class="repo">
+        GIT repo: <a href="https://github.com/LEOB3TA/ColdStorageService-Project">https://github.com/LEOB3TA/ColdStorageService-Project</a>
+    </div>
+</div>
+</body>
+</html>

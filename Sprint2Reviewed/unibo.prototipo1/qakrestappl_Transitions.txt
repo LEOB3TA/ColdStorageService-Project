@@ -1,0 +1,6 @@
+{"actor":"transporttrolley", "msgType":"dispatch", "curstate":"goahead", "nextstate":"movetoport", "msgId":"gotomovetoport"}
+{"actor":"transporttrolley", "msgType":"dispatch", "curstate":"goahead", "nextstate":"depositactionended", "msgId":"gotodepositactionended"}
+{"actor":"transporttrolley", "msgType":"dispatch", "curstate":"goahead", "nextstate":"idle", "msgId":"gotorobottohome"}
+{"actor":"sonar23", "msgType":"dispatch", "curstate":"s0", "nextstate":"work", "msgId":"sonaractivate"}
+{"actor":"ledqakactor", "msgType":"dispatch", "curstate":"s0", "nextstate":"doCmd", "msgId":"ledCmd"}
+{"actor":"ledqakactor", "msgType":"dispatch", "curstate":"doCmd", "nextstate":"doCmd", "msgId":"ledCmd"}
