@@ -29,7 +29,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t034",targetState="work",cond=whenDispatch("sonaractivate"))
+					 transition( edgeName="goto",targetState="work", cond=doswitch() )
 				}	 
 				state("work") { //this:State
 					action { //it:State
@@ -40,8 +40,8 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t035",targetState="handlesonardata",cond=whenEvent("sonardata"))
-					transition(edgeName="t036",targetState="handleobstacle",cond=whenEvent("obstacle"))
+					 transition(edgeName="t039",targetState="handlesonardata",cond=whenEvent("sonardata"))
+					transition(edgeName="t040",targetState="handleobstacle",cond=whenEvent("obstacle"))
 				}	 
 				state("handlesonardata") { //this:State
 					action { //it:State
@@ -61,30 +61,21 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="work", cond=doswitch() )
+					 transition(edgeName="t041",targetState="handleobstacle",cond=whenEvent("obstacle"))
 				}	 
 				state("handleobstacle") { //this:State
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("obstacle(D)"), Term.createTerm("obstacle(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								CommUtils.outmagenta("$name handleobstacle ALARM ${payloadArg(0)}")
-								emit("alarm", "alarm(_)" ) 
+								emit("stop", "stop(_)" ) 
 						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="work", cond=doswitch() )
-				}	 
-				state("sonar23") { //this:State
-					action { //it:State
-						CommUtils.outblack("$name BYE")
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
+					 transition(edgeName="t042",targetState="handlesonardata",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}

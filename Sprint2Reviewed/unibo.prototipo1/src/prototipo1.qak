@@ -42,6 +42,7 @@ Event obstacle : obstacle(D)	//distancefilter
 Event alarm		: alarm(X)		//per tt TODO: l'argomento � utile?
 Event robotmoving : robotmoving(_)  
 Event robotathome : robotathome(_)
+Event stop : stop(_)
 Event resume:resume(_)
 Dispatch sonaractivate: info(D) //D = DLIMIT
 
@@ -280,7 +281,7 @@ QActor coldstorageservice context ctxprototipo1 {
    }
 }
 
-QActor transporttrolley context ctxprototipo1{
+QActor transporttrolley context ctxprototipo1{ //TODO  controllare cosa succede se arriva una stop e quindi avviene moverobotfailed per alarm
 	[#
 		var CRX = 4
 		var CRY = 3
@@ -352,11 +353,12 @@ QActor transporttrolley context ctxprototipo1{
 		emit robotmoving: robotmoving(_)
 		
  	} 
- 	Transition t0 
+ 	Transition t0 whenEvent stop -> handlerobotstopped
  				  whenReply moverobotdone -> movetoport
- 				 whenReply moverobotfailed -> handlerobotstopped 
+ 				 whenReply moverobotfailed -> robotmovefailed 
  				  
-  	State handlerobotstopped{ 
+  	State handlerobotstopped{  //TODO controllare se else va bene o è scrivibile in un modo più easy
+  		emit alarm : alarm(_) //to stop basic robot
   		println("$name |handle robot stopped") color green
   		[#
   			savedState = tTState.getCurrState()
@@ -383,9 +385,10 @@ QActor transporttrolley context ctxprototipo1{
   		
 		
   			
-  	}Transition t0  whenEvent resume -> resumerobot
+  	}Transition t0  whenEvent stop -> handlerobotstopped
+  					whenEvent resume -> resumerobot
   					whenReply moverobotdone -> goahead
-  	  				whenReply moverobotfailed -> handlerobotstopped 
+  	  				whenReply moverobotfailed -> robotmovefailed 
   					
 	State resumerobot{
 		println("$name | resume robot") color green
@@ -399,8 +402,9 @@ QActor transporttrolley context ctxprototipo1{
 						
 							[#}}#]
 				}
-	}Transition t0 whenReply moverobotdone -> goahead
-		whenReply moverobotfailed -> handlerobotstopped 
+	}Transition t0  whenEvent stop -> handlerobotstopped
+					whenReply moverobotdone -> goahead
+					whenReply moverobotfailed -> robotmovefailed 
   					
 	State goahead{
 		println("$name | go ahead with next state") color green
@@ -437,9 +441,9 @@ QActor transporttrolley context ctxprototipo1{
 		emit robotmoving: robotmoving(_)
 		
 	}
-	Transition t0 //whenEvent alarm -> handlerobotstopped 
+	Transition t0  whenEvent stop -> handlerobotstopped
  				  whenReply moverobotdone -> depositactionended
- 				 whenReply moverobotfailed -> handlerobotstopped //TODO controllare cosa accade in caso di emissione dell'evento alarm perchè non è da escludere che non funzioni
+ 				 whenReply moverobotfailed -> robotmovefailed //TODO controllare cosa accade in caso di emissione dell'evento alarm perchè non è da escludere che non funzioni
 
 	State depositactionended{
 		[#
@@ -481,9 +485,9 @@ QActor transporttrolley context ctxprototipo1{
 		forward basicrobot -m setdirection : dir( DOWN )
 		forward basicrobot -m setrobotstate : setpos (0,0,d) // d= down	*/
 	}
-	Transition t0 //whenEvent alarm -> handlerobotstopped
+	Transition t0  whenEvent stop -> handlerobotstopped
 	  			  whenReply moverobotdone -> idle
- 				  whenReply moverobotfailed -> handlerobotstopped
+ 				  whenReply moverobotfailed -> robotmovefailed
 
 
  	//control failed robot moves
@@ -499,13 +503,12 @@ QActor transporttrolley context ctxprototipo1{
 // Implementazione sonar 
 //contesto: nello stesso contensto fino a quando non si mette nel rasp
 
-QActor sonar23 context ctxprototipo1{ 
+QActor sonar23 context ctxprototipo1{ //TODO mandare eventi condizionati dallo stato
 	[#var DLIMIT = 30 
 	var Appl = sysUtil.getActor("transporttrolley") != null #]
 	State s0 initial{
 		println("sonar | start with appl: $Appl")
-	}Transition t0 whenMsg sonaractivate -> work
-				 //whenMsg sonardeactivate -> end
+	}Goto work
 	
 	State work{
 		updateResource[# "Sonar waiting"#]
@@ -522,20 +525,22 @@ QActor sonar23 context ctxprototipo1{
 				emit resume: resume(_)
 			}
 			}
-	}Goto work
+	}Transition t0 whenEvent obstacle  -> handleobstacle
+
 
 	State handleobstacle{
 		onMsg( obstacle : obstacle(D)){			
 			println("$name handleobstacle ALARM ${payloadArg(0)}") color magenta
-			emit alarm : alarm(_)			
+			emit stop : stop(_)			
 		}
 
-	}
-	Goto /*sonar23 if [# Appl == true #]  else*/ work  
+	} Transition t0 whenEvent sonardata -> handlesonardata
+	              
 
-	State sonar23{
+
+	/*State sonar23{
 		println("$name BYE")
-	}
+	}*/
 	
 }
 
@@ -590,7 +595,7 @@ QActor controller23 context ctxprototipo1{ //ctxpc{
 [# val DLIMIT = 30 #] //valore casuale
 	State s0 initial{
 		println("${name} STARTS - Activates the sonar") color magenta
-		forward sonar23 -m sonaractivate : info($DLIMIT) 
+		//forward sonar23 -m sonaractivate : info($DLIMIT) 
 	}
 	Transition t0 whenEvent robotmoving -> blinkled
 	whenEvent robotathome -> stayoff
