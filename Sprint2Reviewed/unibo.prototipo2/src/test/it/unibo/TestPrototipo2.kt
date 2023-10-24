@@ -1,6 +1,6 @@
 package test.it.unibo
 
-import it.unibo.ctxprototipo1.main
+import it.unibo.ctxprototipo2.main
 import it.unibo.kactor.QakContext
 import it.unibo.kactor.sysUtil
 import kotlinx.coroutines.GlobalScope
@@ -17,7 +17,7 @@ import unibo.basicomm23.tcp.TcpClientSupport
 import unibo.basicomm23.utils.CommUtils
 import java.util.concurrent.ArrayBlockingQueue
 
-class TestPrototipo1{
+class TestPrototipo2{
     companion object {
         private var setup = false
         private lateinit var connTT: Interaction2021

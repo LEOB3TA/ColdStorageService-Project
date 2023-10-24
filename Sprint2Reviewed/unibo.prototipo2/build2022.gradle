@@ -9,8 +9,7 @@ plugins {
     id 'application'
     id 'java'
     id 'eclipse'
-    //Per release
-    id 'com.github.johnrengelman.shadow' version "8.1.1"
+
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
     id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
 }
@@ -39,8 +38,6 @@ dependencies {
 
     // Use the Kotlin JUnit integration.
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
-
-    implementation 'com.google.code.gson:gson:2.8.6'
 
     /* COROUTINES ********************************************************************************************************** */
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
@@ -120,19 +117,13 @@ eclipse {
 
 application {
     // Define the main class for the application.
-    mainClass = 'it.unibo.ctxprototipo1.MainCtxprototipo1Kt'
-}
-
-shadowJar {
-    manifest {
-        attributes 'Main-Class': 'it.unibo.ctxprototipo1.MainCtxprototipo1Kt'
-    }
+    mainClass = 'it.unibo.ctxprototipo2.MainCtxprototipo2Kt'
 }
 
  jar {
     println("building jar")
     from sourceSets.main.allSource
     manifest {
-        attributes 'Main-Class': 'it.unibo.ctxprototipo1.MainCtxprototipo1Kt' //'Main-Class': "$mainClassName"
+        attributes 'Main-Class': "$mainClassName"
     }
 }
