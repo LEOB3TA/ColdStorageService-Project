@@ -37,7 +37,6 @@ with Diagram('prototipo2Arch', show=False, outformat='png', graph_attr=graphattr
      transporttrolley >> Edge( label='robotathome', **eventedgeattr, fontcolor='red') >> sys
      transporttrolley >> Edge( label='robotmoving', **eventedgeattr, fontcolor='red') >> sys
      transporttrolley >> Edge( label='alarm', **eventedgeattr, fontcolor='red') >> sys
-     transporttrolley >> Edge( label='local_movef', **eventedgeattr, fontcolor='red') >> sys
      sonar23 >> Edge( label='resume', **eventedgeattr, fontcolor='red') >> sys
      sonar23 >> Edge( label='stop', **eventedgeattr, fontcolor='red') >> sys
      coldstorageservice >> Edge(color='magenta', style='solid', decorate='true', label='<pickup<font color="darkgreen"> pickupdone</font> &nbsp; >',  fontcolor='magenta') >> transporttrolley
