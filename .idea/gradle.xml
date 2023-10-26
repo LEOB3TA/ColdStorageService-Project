@@ -31,15 +31,6 @@
         </option>
       </GradleProjectSettings>
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint2/unibo.prototipo1" />
-        <option name="gradleJvm" value="19" />
-        <option name="modules">
-          <set>
-            <option value="$PROJECT_DIR$/Sprint2/unibo.prototipo1" />
-          </set>
-        </option>
-      </GradleProjectSettings>
-      <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint2Reviewed/unibo.prototipo2" />
         <option name="gradleJvm" value="19" />
         <option name="modules">

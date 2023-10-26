@@ -355,7 +355,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
  	} 
  	Transition t0 whenEvent stop -> handlerobotstopped
  				  whenReply moverobotdone -> movetoport
- 				 whenReply moverobotfailed -> robotmovefailed 
+ 				// whenReply moverobotfailed -> robotmovefailed 
  				  
   	State handlerobotstopped{  //TODO controllare se else va bene o è scrivibile in un modo più easy
   		emit alarm : alarm(_) //to stop basic robot
@@ -388,7 +388,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
   	}Transition t0  whenEvent stop -> handlerobotstopped
   					whenEvent resume -> resumerobot
   					whenReply moverobotdone -> goahead
-  	  				whenReply moverobotfailed -> robotmovefailed 
+  	  				//whenReply moverobotfailed -> robotmovefailed 
   					
 	State resumerobot{
 		println("$name | resume robot") color green
@@ -404,7 +404,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 				}
 	}Transition t0  whenEvent stop -> handlerobotstopped
 					whenReply moverobotdone -> goahead
-					whenReply moverobotfailed -> robotmovefailed 
+					//whenReply moverobotfailed -> robotmovefailed
   					
 	State goahead{
 		println("$name | go ahead with next state") color green
@@ -443,7 +443,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 	}
 	Transition t0  whenEvent stop -> handlerobotstopped
  				  whenReply moverobotdone -> depositactionended
- 				 whenReply moverobotfailed -> robotmovefailed //TODO controllare cosa accade in caso di emissione dell'evento alarm perchè non è da escludere che non funzioni
+ 				// whenReply moverobotfailed -> robotmovefailed //TODO controllare cosa accade in caso di emissione dell'evento alarm perchè non è da escludere che non funzioni
 
 	State depositactionended{
 		[#
@@ -487,7 +487,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 	}
 	Transition t0  whenEvent stop -> handlerobotstopped
 	  			  whenReply moverobotdone -> idle
- 				  whenReply moverobotfailed -> robotmovefailed
+ 				 // whenReply moverobotfailed -> robotmovefailed
 
 
  	//control failed robot moves

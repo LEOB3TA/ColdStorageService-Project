@@ -37,7 +37,7 @@ class Stateobs ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, s
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t039",targetState="doObserve",cond=whenDispatch("coapUpdate"))
+					 transition(edgeName="t034",targetState="doObserve",cond=whenDispatch("coapUpdate"))
 				}	 
 				state("doObserve") { //this:State
 					action { //it:State
