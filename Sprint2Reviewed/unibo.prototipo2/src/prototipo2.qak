@@ -507,7 +507,7 @@ QActor stateobs context ctxprototipo2{
 	}Goto obs
 	
 	State obs{
-		
+	
 	}Transition t0 whenMsg coapUpdate -> doObserve
 	
 	State doObserve{
