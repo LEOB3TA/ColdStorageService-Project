@@ -324,7 +324,7 @@ class _HomePageViewState extends State<HomePageView> {
                         ),
                       )),
                       Expanded(
-                          flex: 2,
+                          flex: 1,
                           child: SizedBox(
                             height: double.maxFinite,
                             width: double.maxFinite,
@@ -334,15 +334,18 @@ class _HomePageViewState extends State<HomePageView> {
                                 color: Colors.grey.shade200,
                               ),
                               child: Padding(
-                                  padding: EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(16),
                                   child: SpacedColumn(spacing: 16, children: [
                                     Expanded(
-                                      child: Text(
-                                        'Grid',
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.inter(
-                                            textStyle: const TextStyle(
-                                                fontWeight: FontWeight.w800, fontSize: 32, color: Colors.black54)),
+                                      child: FittedBox(
+                                        fit: BoxFit.contain,
+                                        child: Text(
+                                          'Grid',
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.inter(
+                                              textStyle: const TextStyle(
+                                                  fontWeight: FontWeight.w800, color: Colors.blueAccent)),
+                                        ),
                                       ),
                                     ),
                                     const Expanded(flex: 11, child: MapGrid())
