@@ -499,10 +499,13 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
  	}
 
 }
-
+/*
 QActor stateobs context ctxprototipo2{
+	[# var TTState = state.TransportTrolleyState().getCurrState().toString()#]
+	
 	State s0 initial {
-		println("starting ttState observer") color yellow
+		
+		println("observer $TTState") color yellow
 		observeResource transporttrolley
 	}Goto obs
 	
@@ -511,10 +514,10 @@ QActor stateobs context ctxprototipo2{
 	}Transition t0 whenMsg coapUpdate -> doObserve
 	
 	State doObserve{
-		//TODO: updates
-		printCurrentMessage
+	    		[#var msg = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}" #] 
+	    		println("$msg") color red
 	}Goto obs
-}
+}*/
 
 // Implementazione sonar 
 //contesto: nello stesso contensto fino a quando non si mette nel rasp
@@ -608,14 +611,36 @@ QActor ledqakactor context ctxprototipo2 {
 }
 
 QActor controller23 context ctxprototipo2{ //ctxpc{
-[# val DLIMIT = 30 #] //valore casuale
+[# 
+	val DLIMIT = 30 //valore casuale
+	var state = ""	
+	var pos= ""
+#] 
 	State s0 initial{
-		println("${name} STARTS - Activates the sonar") color magenta
+		//println("${name} STARTS - Activates the sonar") color magenta
 		//forward sonar23 -m sonaractivate : info($DLIMIT) 
+		observeResource transporttrolley
 	}
-	Transition t0 whenEvent robotmoving -> blinkled
-	whenEvent robotathome -> stayoff
+	Transition t0 /*whenEvent robotmoving -> blinkled
+	whenEvent robotathome -> stayoff*/
 	whenEvent sonardata -> doBusinessWork
+	whenMsg coapUpdate -> upds
+	
+	State upds{
+		[#
+			state = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"
+			pos = "${currentMsg.toString().substringAfter("currPosition\":\"").substringBefore("\"")}"
+		#]
+		[#
+			when{
+				pos == "HOME" -> #] forward ledqakactor -m ledCmd : ledCmd(ON)
+				[#state == "MOVINGTOPORT" || state == "MOVINGTOHOME" ->#] forward ledqakactor -m ledCmd : ledCmd(BLINK)
+				[#state == "STOPPED" ->#] forward ledqakactor -m ledCmd : ledCmd(OFF)
+			[#}#]
+	}Transition t0 /*whenEvent robotmoving -> blinkled
+	whenEvent robotathome -> stayoff*/
+	whenEvent sonardata -> doBusinessWork
+	whenMsg coapUpdate -> upds
 
 	State doBusinessWork{
 		println("${name} BUSINESS WORK") color magenta
@@ -631,21 +656,19 @@ QActor controller23 context ctxprototipo2{ //ctxpc{
 		}
 	
 	}
-	Transition t0 whenEvent robotmoving -> blinkled
-	whenEvent robotathome -> stayoff
+	Transition t0 whenMsg coapUpdate -> upds
 	 whenEvent sonardata -> doBusinessWork
 	 
-	 State stayoff{
+	 /*State stayoff{
  				//println("${name} - Turn the Led off")
 				forward ledqakactor -m ledCmd : ledCmd(OFF)
 	 }Transition t0 whenEvent robotmoving -> blinkled
 	 
 	 State blinkled{
 			forward ledqakactor -m ledCmd : ledCmd(BLINK)
-	 }Transition t0 whenEvent robotmoving -> blinkled
-	 				whenEvent robotathome -> stayoff
+	 }Transition t0 whenMsg coapUpdate -> upds
 	 				whenEvent sonardata -> doBusinessWork
-
+*/
 }
 
 

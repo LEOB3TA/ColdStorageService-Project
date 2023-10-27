@@ -18,10 +18,12 @@ class Stateobs ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, s
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
+		 var TTState = state.TransportTrolleyState().getCurrState().toString() 
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outyellow("starting ttState observer")
+						delay(15000) 
+						CommUtils.outyellow("observer $TTState")
 						CoapObserverSupport(myself, "localhost","8099","ctxprototipo2","transporttrolley")
 						//genTimer( actor, state )
 					}
@@ -41,8 +43,8 @@ class Stateobs ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, s
 				}	 
 				state("doObserve") { //this:State
 					action { //it:State
-						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
-						 	   
+						var msg = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"  
+						CommUtils.outred("$msg")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

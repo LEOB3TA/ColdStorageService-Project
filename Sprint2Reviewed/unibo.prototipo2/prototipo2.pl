@@ -49,7 +49,6 @@ context(ctxprototipo2, "localhost",  "TCP", "8099").
   qactor( mocktruck, ctxprototipo2, "it.unibo.mocktruck.Mocktruck").
   qactor( coldstorageservice, ctxprototipo2, "it.unibo.coldstorageservice.Coldstorageservice").
   qactor( transporttrolley, ctxprototipo2, "it.unibo.transporttrolley.Transporttrolley").
-  qactor( stateobs, ctxprototipo2, "it.unibo.stateobs.Stateobs").
   qactor( sonar23, ctxprototipo2, "it.unibo.sonar23.Sonar23").
   qactor( ledqakactor, ctxprototipo2, "it.unibo.ledqakactor.Ledqakactor").
   qactor( controller23, ctxprototipo2, "it.unibo.controller23.Controller23").

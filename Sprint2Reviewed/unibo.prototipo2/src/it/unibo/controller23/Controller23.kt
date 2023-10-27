@@ -18,19 +18,43 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
-		 val DLIMIT = 30  
+		 
+			val DLIMIT = 30 //valore casuale
+			var state = ""	
+			var pos= ""
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outmagenta("${name} STARTS - Activates the sonar")
+						CoapObserverSupport(myself, "localhost","8099","ctxprototipo2","transporttrolley")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t041",targetState="blinkled",cond=whenEvent("robotmoving"))
-					transition(edgeName="t042",targetState="stayoff",cond=whenEvent("robotathome"))
-					transition(edgeName="t043",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t040",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					transition(edgeName="t041",targetState="upds",cond=whenDispatch("coapUpdate"))
+				}	 
+				state("upds") { //this:State
+					action { //it:State
+						
+									state = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"
+									pos = "${currentMsg.toString().substringAfter("currPosition\":\"").substringBefore("\"")}"
+						
+									when{
+										pos == "HOME" ->  
+						forward("ledCmd", "ledCmd(ON)" ,"ledqakactor" ) 
+						state == "MOVINGTOPORT" || state == "MOVINGTOHOME" -> 
+						forward("ledCmd", "ledCmd(BLINK)" ,"ledqakactor" ) 
+						state == "STOPPED" -> 
+						forward("ledCmd", "ledCmd(OFF)" ,"ledqakactor" ) 
+						} 
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t042",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					transition(edgeName="t043",targetState="upds",cond=whenDispatch("coapUpdate"))
 				}	 
 				state("doBusinessWork") { //this:State
 					action { //it:State
@@ -48,31 +72,8 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t044",targetState="blinkled",cond=whenEvent("robotmoving"))
-					transition(edgeName="t045",targetState="stayoff",cond=whenEvent("robotathome"))
-					transition(edgeName="t046",targetState="doBusinessWork",cond=whenEvent("sonardata"))
-				}	 
-				state("stayoff") { //this:State
-					action { //it:State
-						forward("ledCmd", "ledCmd(OFF)" ,"ledqakactor" ) 
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t047",targetState="blinkled",cond=whenEvent("robotmoving"))
-				}	 
-				state("blinkled") { //this:State
-					action { //it:State
-						forward("ledCmd", "ledCmd(BLINK)" ,"ledqakactor" ) 
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t048",targetState="blinkled",cond=whenEvent("robotmoving"))
-					transition(edgeName="t049",targetState="stayoff",cond=whenEvent("robotathome"))
-					transition(edgeName="t050",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t044",targetState="upds",cond=whenDispatch("coapUpdate"))
+					transition(edgeName="t045",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}

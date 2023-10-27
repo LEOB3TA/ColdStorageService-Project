@@ -272,6 +272,18 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					 transition(edgeName="t032",targetState="handlerobotstopped",cond=whenEvent("stop"))
 					transition(edgeName="t033",targetState="idle",cond=whenReply("moverobotdone"))
 				}	 
+				state("robotmovefailed") { //this:State
+					action { //it:State
+						CommUtils.outred("$name | robot failed to move")
+						emit("local_movef", "local_movef(_)" ) 
+						CommUtils.outred("$name | close")
+						 System.exit(0)  
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+				}	 
 			}
 		}
 }
