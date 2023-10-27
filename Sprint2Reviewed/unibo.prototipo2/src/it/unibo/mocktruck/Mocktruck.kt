@@ -71,8 +71,6 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("rejected") { //this:State
 					action { //it:State
-						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
-						 	   
 						CommUtils.outgreen("$name |	request rejected")
 						//genTimer( actor, state )
 					}
@@ -83,8 +81,6 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("accepted") { //this:State
 					action { //it:State
-						CommUtils.outcyan("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
-						 	   
 						if( checkMsgContent( Term.createTerm("storeAccepted(TICKETID)"), Term.createTerm("storeAccepted(TICKETID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								

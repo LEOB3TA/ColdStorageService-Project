@@ -13,6 +13,7 @@
       <module name="Sprint1.unibo.coldstorageservice" target="11" />
       <module name="Sprint1.unibo.coldstorageservice.main" target="11" />
       <module name="Sprint1.unibo.coldstorageservice.test" target="11" />
+      <module name="Sprint2Reviewed-unibo.prototipo1" target="11" />
       <module name="truck.unibo.coldstorageservice" target="11" />
       <module name="truck.unibo.coldstorageservice.main" target="11" />
       <module name="truck.unibo.coldstorageservice.test" target="11" />

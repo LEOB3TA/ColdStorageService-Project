@@ -27,10 +27,7 @@ dispatch( setdirection, dir(D) ).
 dispatch( cmd, cmd(MOVE) ).
 event( local_movef, movef(_) ).
 event( sonardata, distance(D) ).
-event( obstacle, obstacle(D) ).
 event( alarm, alarm(X) ).
-event( robotmoving, robotmoving(_) ).
-event( robotathome, robotathome(_) ).
 event( stop, stop(_) ).
 event( resume, resume(_) ).
 dispatch( sonaractivate, info(D) ).
@@ -51,4 +48,4 @@ context(ctxprototipo2, "localhost",  "TCP", "8099").
   qactor( transporttrolley, ctxprototipo2, "it.unibo.transporttrolley.Transporttrolley").
   qactor( sonar23, ctxprototipo2, "it.unibo.sonar23.Sonar23").
   qactor( ledqakactor, ctxprototipo2, "it.unibo.ledqakactor.Ledqakactor").
-  qactor( controller23, ctxprototipo2, "it.unibo.controller23.Controller23").
+  qactor( stateobservercontroller, ctxprototipo2, "it.unibo.stateobservercontroller.Stateobservercontroller").

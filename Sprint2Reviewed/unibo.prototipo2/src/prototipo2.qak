@@ -38,10 +38,8 @@ Event local_movef : movef(_)
 
 //Sonar e movimenti robot
 Event sonardata : distance(D) //dataclenaer
-Event obstacle : obstacle(D)	//distancefilter
+//Event obstacle : obstacle(D)	//distancefilter
 Event alarm		: alarm(X)		//per tt TODO: l'argomento � utile?
-Event robotmoving : robotmoving(_)  
-Event robotathome : robotathome(_)
 Event stop : stop(_)
 Event resume:resume(_)
 Dispatch sonaractivate: info(D) //D = DLIMIT
@@ -108,12 +106,10 @@ QActor mocktruck context ctxprototipo2{
                     whenReply storeRejected -> rejected
 
    State rejected{
-   		printCurrentMessage
    		println("$name |	request rejected") color green
    }Goto idle
 
     State accepted{
-   		printCurrentMessage
    		onMsg (storeAccepted : storeAccepted(TICKETID)){
    		[#
    			TICKETID = payloadArg(0).toInt()
@@ -303,9 +299,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 		// engage
 		println("$name | request engage") color green
 		request basicrobot -m engage : engage ($MyName, 320)
-		updateResource[#tTState.toJsonString()#]
 		//printCurrentMessage color black
-			emit robotathome : robotathome(_)
 	}Transition t0 //whenTime 10000 -> error
 				   whenReply engagedone -> idle
 				   whenReply engagerefused -> waitforfree
@@ -350,7 +344,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
  		println("$name | moving robot to indoor.") color green
  		request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)
 		
-		emit robotmoving: robotmoving(_)
+		
 		
  	} 
  	Transition t0 whenEvent stop -> handlerobotstopped
@@ -375,7 +369,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
   				println("ignored alarm signal") color red
   				[#tTState.setCurrState(savedState)#]
 				updateResource[#tTState.toJsonString()#]
-				emit robotmoving: robotmoving(_)
+				
 				[# 	when {
 							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)[#
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] request basicrobot -m moverobot:moverobot($CRX,$CRY)[#
@@ -393,8 +387,9 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 	State resumerobot{
 		println("$name | resume robot") color green
 		  		onMsg(resume: resume(_)){
-		  		emit robotmoving: robotmoving(_)
+		  		
   				[#tTState.setCurrState(savedState)#]
+  				updateResource[#tTState.toJsonString()#]
   						[# 	when {
 							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)[#
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] request basicrobot -m moverobot:moverobot($CRX,$CRY)[#
@@ -413,7 +408,6 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] forward transporttrolley -m gotodepositactionended : gotodepositactionended(_)[#
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] 	delay 6300
 							forward basicrobot -m cmd : cmd ( l )
-							emit robotathome : robotathome(_)
 							forward transporttrolley -m gotorobottohome : gotorobottohome(_)
 								
 		[#
@@ -438,7 +432,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 		// da usare col css
 		replyTo pickup with pickupdone:pickupdone(_)
 		request basicrobot -m moverobot:moverobot($CRX,$CRY)
-		emit robotmoving: robotmoving(_)
+		
 		
 	}
 	Transition t0  whenEvent stop -> handlerobotstopped
@@ -476,11 +470,10 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 		//send event "robot is in home"
 		request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
 		
-		emit robotmoving: robotmoving(_)
+		
 		
 		delay 6300
 		forward basicrobot -m cmd : cmd ( l )
-			emit robotathome : robotathome(_)
 		/*delay 6500
 		forward basicrobot -m setdirection : dir( DOWN )
 		forward basicrobot -m setrobotstate : setpos (0,0,d) // d= down	*/
@@ -524,6 +517,8 @@ QActor stateobs context ctxprototipo2{
 
 QActor sonar23 context ctxprototipo2{ //TODO mandare eventi condizionati dallo stato
 	[#var DLIMIT = 30 
+		var D = 0
+		var handled=false
 	var Appl = sysUtil.getActor("transporttrolley") != null #]
 	State s0 initial{
 		println("sonar | start with appl: $Appl")
@@ -532,28 +527,36 @@ QActor sonar23 context ctxprototipo2{ //TODO mandare eventi condizionati dallo s
 	State work{
 		updateResource[# "Sonar waiting"#]
 	}Transition t0 whenEvent sonardata -> handlesonardata
-	              whenEvent obstacle  -> handleobstacle
 
 	State handlesonardata{
-		printCurrentMessage
 		updateResource [# "sonar23 handles $currentMsg" #]
 		onMsg(sonardata : distance(D)){
-			[#var D = payloadArg(0).toInt()#]
-			//println("$name distance ${payloadArg(0)}") color magenta
-			if [#D>DLIMIT#]{
+			[#D = payloadArg(0).toInt()#]
+			if [#D<DLIMIT && handled==false#]{
+				[#handled=true#]
+				println("$name handleobstacle STOP ${payloadArg(0)}") color magenta
+				emit stop : stop(_)	
+			}
+			if[#D>=DLIMIT && handled==true#]{
+				[#handled=false#]
+				println("$name sonardata RESUME ${payloadArg(0)}") color magenta
 				emit resume: resume(_)
 			}
-			}
-	}Transition t0 whenEvent obstacle  -> handleobstacle
+		}
+	}Goto work
+	/*Goto handleobstacle if [#D<DLIMIT && handled=false#] else sendresume
+	
+	State sendresume{
+			println("$name sonardata RESUME ${payloadArg(0)}") color magenta
+			emit resume: resume(_)
+	}Goto work
 
 
 	State handleobstacle{
-		onMsg( obstacle : obstacle(D)){			
-			println("$name handleobstacle ALARM ${payloadArg(0)}") color magenta
+			[#handled=true#]
+			println("$name handleobstacle STOP ${payloadArg(0)}") color magenta
 			emit stop : stop(_)			
-		}
-
-	} Transition t0 whenEvent sonardata -> handlesonardata
+	} Goto work*/
 	              
 
 
@@ -610,20 +613,15 @@ QActor ledqakactor context ctxprototipo2 {
 	Transition t0 whenMsg ledCmd -> doCmd
 }
 
-QActor controller23 context ctxprototipo2{ //ctxpc{
+QActor stateobservercontroller context ctxprototipo2{ //ctxpc{
 [# 
-	val DLIMIT = 30 //valore casuale
 	var state = ""	
 	var pos= ""
 #] 
 	State s0 initial{
-		//println("${name} STARTS - Activates the sonar") color magenta
-		//forward sonar23 -m sonaractivate : info($DLIMIT) 
 		observeResource transporttrolley
 	}
-	Transition t0 /*whenEvent robotmoving -> blinkled
-	whenEvent robotathome -> stayoff*/
-	whenEvent sonardata -> doBusinessWork
+	Transition t0
 	whenMsg coapUpdate -> upds
 	
 	State upds{
@@ -633,42 +631,13 @@ QActor controller23 context ctxprototipo2{ //ctxpc{
 		#]
 		[#
 			when{
-				pos == "HOME" -> #] forward ledqakactor -m ledCmd : ledCmd(ON)
-				[#state == "MOVINGTOPORT" || state == "MOVINGTOHOME" ->#] forward ledqakactor -m ledCmd : ledCmd(BLINK)
-				[#state == "STOPPED" ->#] forward ledqakactor -m ledCmd : ledCmd(OFF)
+				pos == "HOME" -> #] forward ledqakactor -m ledCmd : ledCmd(OFF)
+				[#state == "PICKINGUP" || state == "MOVINGTOPORT" || state == "MOVINGTOHOME" ->#] forward ledqakactor -m ledCmd : ledCmd(BLINK)
+				[#state == "STOPPED" ->#] forward ledqakactor -m ledCmd : ledCmd(ON)
 			[#}#]
-	}Transition t0 /*whenEvent robotmoving -> blinkled
-	whenEvent robotathome -> stayoff*/
-	whenEvent sonardata -> doBusinessWork
+	}Transition t0 
 	whenMsg coapUpdate -> upds
 
-	State doBusinessWork{
-		println("${name} BUSINESS WORK") color magenta
-		//printCurrentMessage
-		onMsg( sonardata : distance(D)){
-			[# var D = payloadArg(0).toInt() #]
-			println("$D") color red
-			//Interact with the Led
-			if [# D <= DLIMIT #]{
- 				//println("${name} - Turn the Led on")
-				forward ledqakactor -m ledCmd : ledCmd(ON)
-			}
-		}
-	
-	}
-	Transition t0 whenMsg coapUpdate -> upds
-	 whenEvent sonardata -> doBusinessWork
-	 
-	 /*State stayoff{
- 				//println("${name} - Turn the Led off")
-				forward ledqakactor -m ledCmd : ledCmd(OFF)
-	 }Transition t0 whenEvent robotmoving -> blinkled
-	 
-	 State blinkled{
-			forward ledqakactor -m ledCmd : ledCmd(BLINK)
-	 }Transition t0 whenMsg coapUpdate -> upds
-	 				whenEvent sonardata -> doBusinessWork
-*/
 }
 
 
