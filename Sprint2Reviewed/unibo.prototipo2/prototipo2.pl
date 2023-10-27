@@ -42,7 +42,6 @@ context(ctxprototipo2, "localhost",  "TCP", "8099").
  qactor( basicrobot, ctxbasicrobot, "external").
   qactor( sonar, ctxprototipo2, "rx.sonarSimulator").
   qactor( datacleaner, ctxprototipo2, "rx.dataCleaner").
-  qactor( distancefilter, ctxprototipo2, "rx.distanceFilter").
   qactor( mocktruck, ctxprototipo2, "it.unibo.mocktruck.Mocktruck").
   qactor( coldstorageservice, ctxprototipo2, "it.unibo.coldstorageservice.Coldstorageservice").
   qactor( transporttrolley, ctxprototipo2, "it.unibo.transporttrolley.Transporttrolley").

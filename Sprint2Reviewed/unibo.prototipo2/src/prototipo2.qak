@@ -67,7 +67,7 @@ ExternalQActor basicrobot context ctxbasicrobot
 //CodedQActor sonar  context ctxrasp className "rx.sonarHCSR04Support23"   //SU RASP
 CodedQActor sonar context ctxprototipo2 className "rx.sonarSimulator" //in LOCALE
 CodedQActor datacleaner    context ctxprototipo2 className "rx.dataCleaner"
-CodedQActor distancefilter context ctxprototipo2 className "rx.distanceFilter"
+//CodedQActor distancefilter context ctxprototipo2 className "rx.distanceFilter"
 
 
 QActor mocktruck context ctxprototipo2{

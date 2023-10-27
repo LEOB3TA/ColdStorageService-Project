@@ -32,7 +32,6 @@ with Diagram('prototipo2Arch', show=False, outformat='png', graph_attr=graphattr
           stateobservercontroller=Custom('stateobservercontroller','./qakicons/symActorSmall.png')
           sonar=Custom('sonar(coded)','./qakicons/codedQActor.png')
           datacleaner=Custom('datacleaner(coded)','./qakicons/codedQActor.png')
-          distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
      transporttrolley >> Edge( label='alarm', **eventedgeattr, fontcolor='red') >> sys
      transporttrolley >> Edge( label='local_movef', **eventedgeattr, fontcolor='red') >> sys
      sonar23 >> Edge( label='stop', **eventedgeattr, fontcolor='red') >> sys
