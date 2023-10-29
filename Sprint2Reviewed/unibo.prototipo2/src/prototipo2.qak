@@ -39,7 +39,7 @@ Event local_movef : movef(_)
 //Sonar e movimenti robot
 Event sonardata : distance(D) //dataclenaer
 //Event obstacle : obstacle(D)	//distancefilter
-Event alarm		: alarm(X)		//per tt TODO: l'argomento � utile?
+Event alarm		: alarm(X)		//per tt
 Event stop : stop(_)
 Event resume:resume(_)
 Dispatch sonaractivate: info(D) //D = DLIMIT
@@ -351,7 +351,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
  				  whenReply moverobotdone -> movetoport
  				// whenReply moverobotfailed -> robotmovefailed 
  				  
-  	State handlerobotstopped{  //TODO controllare se else va bene o è scrivibile in un modo più easy
+  	State handlerobotstopped{
   		emit alarm : alarm(_) //to stop basic robot
   		println("$name |handle robot stopped") color green
   		[#
@@ -385,7 +385,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
   	  				//whenReply moverobotfailed -> robotmovefailed 
   					
 	State resumerobot{
-		println("$name | resume robot") color green
+		//println("$name | resume robot") color green
 		  		onMsg(resume: resume(_)){
 		  		
   				[#tTState.setCurrState(savedState)#]
@@ -437,7 +437,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 	}
 	Transition t0  whenEvent stop -> handlerobotstopped
  				  whenReply moverobotdone -> depositactionended
- 				// whenReply moverobotfailed -> robotmovefailed //TODO controllare cosa accade in caso di emissione dell'evento alarm perchè non è da escludere che non funzioni
+ 				// whenReply moverobotfailed -> robotmovefailed
 
 	State depositactionended{
 		[#
@@ -515,7 +515,7 @@ QActor stateobs context ctxprototipo2{
 // Implementazione sonar 
 //contesto: nello stesso contensto fino a quando non si mette nel rasp
 
-QActor sonar23 context ctxprototipo2{ //TODO mandare eventi condizionati dallo stato
+QActor sonar23 context ctxprototipo2{
 	[#var DLIMIT = 30 
 		var D = 0
 		var handled=false

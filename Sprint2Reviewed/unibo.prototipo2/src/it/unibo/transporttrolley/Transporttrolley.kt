@@ -151,7 +151,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("resumerobot") { //this:State
 					action { //it:State
-						CommUtils.outgreen("$name | resume robot")
 						if( checkMsgContent( Term.createTerm("resume(_)"), Term.createTerm("resume(_)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								tTState.setCurrState(savedState) 

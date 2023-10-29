@@ -31,9 +31,11 @@
         <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/TemaFinale23.html">Tema Finale </a>
     </div>
 
-    <h3>Work plan</h3>
+    <h3>Obiettivi</h3>
     <div class="remark">
-        Riutilizzando e adattando i componenti software precedentemente forniti dal cliente e analizzati nello <b>sprint0</b> per la gestione del sonar e del led (<a href="https://github.com/anatali/issLab23/tree/main/unibo.radarsystemqak23">it.unibo.radarSystem23</a>, <a href="https://github.com/anatali/issLab23/tree/main/unibo.sonarqak23">unibo.sonarqak23</a>):
+        Partendo da quelli che sono i requisiti, si vuole creare un dispositivo che simuli il Sonar ed
+        uno che simuli il comportamento del Led secondo quelli che sono gli <i>Alarm Requirements</i>.<br>
+        A tal fine sono stati realizzati dei componenti per:
         <ul>
             <li>Far interagire il <b>TrasportTrolley</b> con il <b>Sonar</b></li>
             <li>Simulare il comportamento del <b>Led</b> nei confronti del <b>Sonar</b></li>
@@ -83,7 +85,7 @@
     </div>
         <h2>Architettura Logica</h2>
     <br>
-    Modello prototipo: <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2/unibo.prototipo1/src/prototipo1.qak" target="_blank">protipo1.qak</a>
+    Modello prototipo: <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2/unibo.prototipo2/src/prototipo2.qak" target="_blank">protipo2.qak</a>
     <br>
     <img height="100%" width="100%" src="./resources/images/sprint2arch.png" alt="architettura logica"> <br>
         </div>
@@ -99,9 +101,9 @@
                  Quindi &egrave; utilizzabile all'interno del prototipo come <b>CodedQakActor</b> nelle due implementazioni disponibili: <b>sonarSimulator</b> nel nostro caso o <b>sonarHCSR04Support23</b> quando avremo un sonar fisico. &egrave; inoltre necessario utilizzare <b>dataCleaner</b> e <b>distanceFilter</b> per filtrare i valori forniti dal sonar.<br>
                  <pre>
  //CodedQActor sonar  <key2>context</key2> ctxrasp className "rx.sonarHCSR04Support23"   //SU RASP
-<key2>CodedQActor</key2> sonar <key2>context</key2> ctxprototipo1 className "rx.sonarSimulator" //in LOCALE
-<key2>CodedQActor</key2> datacleaner    <key2>context</key2> ctxprototipo1 className "rx.dataCleaner"
-<key2>CodedQActor</key2> distancefilter <key2>context</key2> ctxprototipo1 className "rx.distanceFilter"
+<key2>CodedQActor</key2> sonar <key2>context</key2> ctxprototipo2 className "rx.sonarSimulator" //in LOCALE
+<key2>CodedQActor</key2> datacleaner    <key2>context</key2> ctxprototipo2 className "rx.dataCleaner"
+<key2>CodedQActor</key2> distancefilter <key2>context</key2> ctxprototipo2 className "rx.distanceFilter"
                  </pre>
                  Devono essere introdotti dei <b>nuovi messaggi</b>:
                  <pre>
@@ -133,7 +135,7 @@
                  Inoltre &egrave; stato necessario modificare il <b>distancefilter</b> inserendo il nostro valore <b>DLIMIT</b>.<br>
                  Per sfruttare i messaggi emessi dalle varie comonenti &egrave stato necessario utilizzare il seguente attore:
                  <pre>
-<key2>QActor</key2> sonar23 <key2>context</key2> ctxprototipo1{
+<key2>QActor</key2> sonar23 <key2>context</key2> ctxprototipo2{
 [#<key>var</key> DLIMIT = 30
 <key>var</key> Appl = sysUtil.getActor("transporttrolley") != null #]
 <key2>State</key2> s0 <key2>initial</key2>{
@@ -272,7 +274,7 @@
                  </pre>
                  Di seguito viene riportato <b>Controller23</b> opportunamente modficiato per rispettare i requisiti:
                  <pre>
-<key2>QActor</key2> controller23 <key2>context</key2> ctxprototipo1{ //ctxpc{
+<key2>QActor</key2> controller23 <key2>context</key2> ctxprototipo2{ //ctxpc{
 [# <key>val</key> DLIMIT = 30 #] //valore casuale
 	<key2>State</key2> s0 <key2>initial</key2>{
 		<key2>println</key2>("${name} STARTS - Activates the sonar") color magenta
@@ -312,9 +314,9 @@
 	 				<key2>whenEvent</key2> sonardata -> doBusinessWork
 
                  </pre>
-                 Per la gestione del Led &egrave; stato introdotto una classe di utilit&agrave che rappresenta lo stato del led <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/c6d592a38af81701a2b6f8e19466733fb75afeb0/Sprint2/unibo.prototipo1/resources/state/LedState.kt" target="_blank">LedState.kt</a> che viene utilizzato all'interno dell'attore del led:
+                 Per la gestione del Led &egrave; stato introdotto una classe di utilit&agrave che rappresenta lo stato del led <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/c6d592a38af81701a2b6f8e19466733fb75afeb0/Sprint2/unibo.prototipo2/resources/state/LedState.kt" target="_blank">LedState.kt</a> che viene utilizzato all'interno dell'attore del led:
                  <pre>
-<key2>QActor</key2> ledqakactor <key2>context</key2> ctxprototipo1 {
+<key2>QActor</key2> ledqakactor <key2>context</key2> ctxprototipo2 {
 	[#
 		<key><key>val</key></key> ledState = state.LedState()
 		ledState.setState(state.LState.OFF)
@@ -363,7 +365,7 @@
             <h2>Testing</h2>
             <div class="remark">
                 Al fine di eseguire un test esaustivo del sistema, si &egrave; deciso di creare un apposito file qak, in cui sono stati inseriti tutti i componenti
-                interagenti come sono nel <b>prototipo1</b> (quindi invariati nella forma), a meno del truck, sostituito da un mock per inviare le richieste a nostro piacimento
+                interagenti come sono nel <b>prototipo2</b> (quindi invariati nella forma), a meno del truck, sostituito da un mock per inviare le richieste a nostro piacimento
                 (come gi&agrave; fatto nel precedente sprint), e del sonar simulator, il
                 quale viene rimpiazzato da delle forward con il valore desiderato al momento opportuno.<br/><br/>
                 Di seguito si riporta come viene simulato il sonar nei test:
@@ -514,7 +516,7 @@ docker-compose -f webbasicrobot23.yaml up</pre>
                         <em style="font-size: 25px">Avviare il <bc>ColdStorageService</bc>,<bc>MockTruck</bc> e <bc>Trasporttrolley</bc></em>
                         <p style="font-size: 16px">In tal modo si avviano le varie componenti</p>
                         <pre style="font-size: 16px">
-cd ColdStorageService-Project/Sprint2/unibo.prototipo1
+cd ColdStorageService-Project/Sprint2/unibo.prototipo2
 ./gradlew run</pre>
                     </li>
                 </ol>
