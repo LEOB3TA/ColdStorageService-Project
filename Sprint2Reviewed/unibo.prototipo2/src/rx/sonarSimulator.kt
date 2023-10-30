@@ -23,7 +23,7 @@ class sonarSimulator ( name : String ) : ActorBasic( name ) {
 
     override suspend fun actorBody(msg : IApplMessage){
   		println("$tt $name | received  $msg "  )
-		delay(10000)
+		//delay(10000)
 		if( msg.msgId() == "simulatorstart") startDataReadSimulation(   )
      }
   	
@@ -39,7 +39,7 @@ class sonarSimulator ( name : String ) : ActorBasic( name ) {
 			}
 		}*/
 		var i = 0
-			while( i < 20 ){
+			while( i < 30 ){
  	 			//val m1 = "distance( ${data.elementAt(i)} )"
 				val m1= "distance( ${Random.nextInt(0,80)} )"
 				i++

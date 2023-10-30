@@ -10,15 +10,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
-
+	
 class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
 		return "init"
 	}
-	@OptIn(ExperimentalTime::class)
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		

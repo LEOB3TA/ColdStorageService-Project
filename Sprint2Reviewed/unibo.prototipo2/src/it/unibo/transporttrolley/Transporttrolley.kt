@@ -113,19 +113,18 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				}	 
 				state("handlerobotstopped") { //this:State
 					action { //it:State
-						emit("alarm", "alarm(_)" ) 
 						CommUtils.outgreen("$name |handle robot stopped")
-						
-						  			savedState = tTState.getCurrState()
-						  			tTState.setCurrState(state.CurrStateTrolley.STOPPED)
 						
 						  			if ((m1+MINT).hasPassedNow()){	
 						  				m1 = ts.markNow()
+						  				savedState = tTState.getCurrState()
+						  				tTState.setCurrState(state.CurrStateTrolley.STOPPED)
+						emit("alarm", "alarm(_)" ) 
 						updateResourceRep(tTState.toJsonString() 
 						)
 							
-						  			}else{ 
-						CommUtils.outred("ignored alarm signal")
+						  			 }/*else{ 
+						CommUtils.outred("ignored stop signal")
 						tTState.setCurrState(savedState) 
 						updateResourceRep(tTState.toJsonString() 
 						)
@@ -139,18 +138,19 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 													tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{  
 						request("moverobot", "moverobot($HOMEX,$HOMEY)" ,"basicrobot" )  
 						}} 
-							} 
+							}*/ 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t020",targetState="handlerobotstopped",cond=whenEvent("stop"))
-					transition(edgeName="t021",targetState="resumerobot",cond=whenEvent("resume"))
-					transition(edgeName="t022",targetState="goahead",cond=whenReply("moverobotdone"))
+					 transition(edgeName="t020",targetState="goahead",cond=whenReply("moverobotdone"))
+					transition(edgeName="t021",targetState="handlerobotstopped",cond=whenEvent("stop"))
+					transition(edgeName="t022",targetState="resumerobot",cond=whenEvent("resume"))
 				}	 
 				state("resumerobot") { //this:State
 					action { //it:State
+						CommUtils.outgreen("$name | resume robot")
 						if( checkMsgContent( Term.createTerm("resume(_)"), Term.createTerm("resume(_)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								tTState.setCurrState(savedState) 
@@ -186,9 +186,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						forward("gotodepositactionended", "gotodepositactionended(_)" ,"transporttrolley" ) 
 						
 													tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{  
+						forward("gotorobottohome", "gotorobottohome(_)" ,"transporttrolley" ) 
 						delay(6300) 
 						forward("cmd", "cmd(l)" ,"basicrobot" ) 
-						forward("gotorobottohome", "gotorobottohome(_)" ,"transporttrolley" ) 
 						
 									}} 
 						//genTimer( actor, state )
