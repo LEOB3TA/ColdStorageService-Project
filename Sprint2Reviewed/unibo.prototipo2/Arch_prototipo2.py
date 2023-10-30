@@ -40,7 +40,7 @@ with Diagram('prototipo2Arch', show=False, outformat='png', graph_attr=graphattr
      mocktruck >> Edge(color='magenta', style='solid', decorate='true', label='<storeFood<font color="darkgreen"> storeAccepted storeRejected</font> &nbsp; sendTicket<font color="darkgreen"> ticketValid ticketNotValid ticketExpired</font> &nbsp; deposit<font color="darkgreen"> chargeTaken</font> &nbsp; >',  fontcolor='magenta') >> coldstorageservice
      transporttrolley >> Edge(color='magenta', style='solid', decorate='true', label='<engage<font color="darkgreen"> engagedone engagerefused</font> &nbsp; moverobot<font color="darkgreen"> moverobotdone moverobotfailed</font> &nbsp; >',  fontcolor='magenta') >> basicrobot
      stateobservercontroller >> Edge(color='blue', style='solid',  label='<ledCmd &nbsp; >',  fontcolor='blue') >> ledqakactor
-     transporttrolley >> Edge(color='blue', style='solid',  label='<disengage &nbsp; setrobotstate &nbsp; cmd &nbsp; >',  fontcolor='blue') >> basicrobot
+     transporttrolley >> Edge(color='blue', style='solid',  label='<disengage &nbsp; setrobotstate &nbsp; >',  fontcolor='blue') >> basicrobot
      transporttrolley >> Edge(color='blue', style='solid',  label='<gotomovetoport &nbsp; gotodepositactionended &nbsp; gotorobottohome &nbsp; >',  fontcolor='blue') >> transporttrolley
      transporttrolley >> Edge(color='blue', style='solid',  label='<coapUpdate &nbsp; >',  fontcolor='blue') >> stateobservercontroller
 diag

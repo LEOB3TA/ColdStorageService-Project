@@ -187,8 +187,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						
 													tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{  
 						forward("gotorobottohome", "gotorobottohome(_)" ,"transporttrolley" ) 
-						delay(6300) 
-						forward("cmd", "cmd(l)" ,"basicrobot" ) 
 						
 									}} 
 						//genTimer( actor, state )
@@ -253,8 +251,6 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						)
 						CommUtils.outgreen("$name | back to home")
 						request("moverobot", "moverobot($HOMEX,$HOMEY)" ,"basicrobot" )  
-						delay(6300) 
-						forward("cmd", "cmd(l)" ,"basicrobot" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
