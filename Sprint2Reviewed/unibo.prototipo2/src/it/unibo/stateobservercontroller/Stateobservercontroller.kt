@@ -30,7 +30,7 @@ class Stateobservercontroller ( name: String, scope: CoroutineScope  ) : ActorBa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t037",targetState="upds",cond=whenDispatch("coapUpdate"))
+					 transition(edgeName="t028",targetState="upds",cond=whenDispatch("coapUpdate"))
 				}	 
 				state("upds") { //this:State
 					action { //it:State
@@ -51,7 +51,7 @@ class Stateobservercontroller ( name: String, scope: CoroutineScope  ) : ActorBa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t038",targetState="upds",cond=whenDispatch("coapUpdate"))
+					 transition(edgeName="t029",targetState="upds",cond=whenDispatch("coapUpdate"))
 				}	 
 			}
 		}
