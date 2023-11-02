@@ -467,8 +467,8 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 			println("$name | back to home" ) color green
 		//send event "robot is in home"
 		request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
-		delay 6300
-		forward basicrobot -m cmd:cmd(l)
+		/*delay 6300
+		forward basicrobot -m cmd:cmd(l)*/
 	}
 	Transition t0  whenEvent stop -> handlerobotstopped
 	  			  whenReply moverobotdone -> idle

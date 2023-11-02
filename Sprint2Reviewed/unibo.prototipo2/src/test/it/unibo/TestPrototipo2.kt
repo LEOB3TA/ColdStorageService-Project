@@ -110,11 +110,10 @@ class TestPrototipo2{
         CommUtils.outmagenta("Test led & sonar | Led state & sonar events ...")
         val pickup = "msg(pickup, request, testunit, transporttrolley, pickup(_) ,1)"
         var rep = ""
-        //var sonarE =""
+
         val sonarStop = "msg(sonardistance, event, testunit, transporttrolley, distance(13), 1)"
         val sonarRes = "msg(sonardistance, event, testunit, transporttrolley, distance(42), 1)"
-        /*println(obsTT.currState.toString().substringAfterLast(":").substring(1,5))
-        println(obsLS.currState.toString().substringAfterLast(":").substring(1,4))*/
+
         Assert.assertEquals("OFF", obsLS.currState.toString().substringAfterLast(":").substring(1,4))
 
         GlobalScope.launch {
@@ -129,13 +128,13 @@ class TestPrototipo2{
         Assert.assertEquals("INDOOR", newState.getCurrPosition().toString())
         Assert.assertEquals("PICKINGUP", newState.getCurrState().toString())
         Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
-        Thread.sleep(2000)
+        Thread.sleep(2000)// per evitare che lo ignori subito
         try{
             connTT.forward(sonarStop)
         }catch (e: Exception) {
             CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
         }
-        //Thread.sleep(2000)
+
         newState= obsTT.getNext()
         newStateLed = obsLS.getNext()
         Assert.assertEquals("ON", obsLS.currState.toString().substringAfterLast(":").substring(1,3))
@@ -146,8 +145,6 @@ class TestPrototipo2{
         }catch (e: Exception) {
             CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
         }
-       // println("DEBUGSTATES: ${obsTT.currState.toString().substringAfter(":").substring(1,8)}")
-        //Assert.assertNotSame("STOPPED", obsTT.currState.toString().substringAfter(":").substring(1,10))
         newState= obsTT.getNext()
         newStateLed = obsLS.getNext()
         Assert.assertEquals("INDOOR", newState.getCurrPosition().toString())
@@ -166,46 +163,42 @@ class TestPrototipo2{
         Assert.assertEquals("DROPPINGOUT", newState.getCurrState().toString())
         Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
         newState = obsTT.getNext()
+
         Assert.assertEquals("PORT", newState.getCurrPosition().toString())
         Assert.assertEquals("IDLE", newState.getCurrState().toString())
         Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
+        try{
+            connTT.forward(sonarStop)
+        }catch (e: Exception) {
+            CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
+        }
 
-        try{
-            connTT.forward(sonarStop)
-        }catch (e: Exception) {
-            CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
-        }
-        Thread.sleep(1000)
-        try{
-            connTT.forward(sonarStop)
-        }catch (e: Exception) {
-            CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
-        }
-        Thread.sleep(1000)
         newState = obsTT.getNext()
         newStateLed = obsLS.getNext()
         Assert.assertEquals("ON", obsLS.currState.toString().substringAfterLast(":").substring(1,3))
         Assert.assertEquals("STOPPED", obsTT.currState.toString().substringAfter(":").substring(1,8))
-        Thread.sleep(1000)
+        //Thread.sleep(1000)
         try{
+            connTT.forward(sonarRes)
+            connTT.forward(sonarStop)
             connTT.forward(sonarRes)
         }catch (e: Exception) {
             CommUtils.outmagenta("Sonardata error	|	 some err in request: $e")
         }
-
-//        println("DEBUGSTATES _ ora: ${obsTT.currState.toString()}")
-        newState= obsTT.getNext()
+        newState = obsTT.getNext()
+        newState = obsTT.getNext()
         newStateLed = obsLS.getNext()
-//        println("DEBUGSTATES _ ora: ${obsTT.currState.toString()}")
+
         Assert.assertEquals("ONTHEROAD", newState.getCurrPosition().toString())
-        Assert.assertEquals("STOPPED", newState.getCurrState().toString())
+        Assert.assertEquals("MOVINGTOHOME", newState.getCurrState().toString())
         Assert.assertEquals("BLINKS", newStateLed.getCurrState().toString())
         newState= obsTT.getNext()
-        newState = obsTT.getNext()
+        newState= obsTT.getNext()
+
         Assert.assertEquals("HOME", newState.getCurrPosition().toString())
         Assert.assertEquals("IDLE", newState.getCurrState().toString())
 
-        println("DEBUGSTATES _ ora: ${obsTT.currState.toString()}")
+        //println("DEBUGSTATES _ ora: ${obsTT.currState.toString()}")
         Thread.sleep(1000)
         Assert.assertEquals("OFF",obsLS.currState.toString().substringAfterLast(":").substring(1,4))
         //println("DEBUGSTATES: ${newState}, ${newStateLed}, ${obsLS.currState.toString()}")

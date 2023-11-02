@@ -238,6 +238,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 						)
 						CommUtils.outgreen("$name | back to home")
 						request("moverobot", "moverobot($HOMEX,$HOMEY)" ,"basicrobot" )  
+						delay(5700) 
+						forward("cmd", "cmd(l)" ,"basicrobot" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
