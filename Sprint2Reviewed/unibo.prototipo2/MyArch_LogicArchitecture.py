@@ -31,7 +31,6 @@ with Diagram('Sprint2Arch', show=False, outformat='png', graph_attr=graphattr) a
             sonar=Custom('sonar(coded)','./qakicons/codedQActor.png')
             ledqakactor=Custom('ledqakactor','./qakicons/symActorSmall.png')
             datacleaner=Custom('datacleaner(coded)','./qakicons/codedQActor.png')
-            distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
         with Cluster('ctxstorageserviece', graph_attr=nodeattr):
             coldstorageservice=Custom('coldstorageservice','./qakicons/symActorSmall.png')
             transporttrolley=Custom('transporttrolley','./qakicons/symActorSmall.png')
@@ -44,9 +43,7 @@ with Diagram('Sprint2Arch', show=False, outformat='png', graph_attr=graphattr) a
     #sys >> Edge( label='stop', **eventedgeattr, fontcolor='red') >> transporttrolley
     ##
     sonar >>  Edge(color='blue', style='solid',  fontcolor='blue') >> datacleaner
-    datacleaner >>  Edge(color='blue', style='solid',  fontcolor='blue') >> distancefilter
     datacleaner >> Edge(color='blue', style='solid',  label='<sonardata &nbsp;>',  fontcolor='blue') >> sonar23
-    distancefilter >> Edge(color='blue', style='solid',  label='<obstacle &nbsp;>',  fontcolor='blue') >> sonar23
     sonar23 >> Edge( label='<resume &nbsp;>', **eventedgeattr, fontcolor='red') >> sys
     sonar23 >> Edge( label='<stop &nbsp;>', **eventedgeattr, fontcolor='red') >> sys
     coldstorageservice >> Edge(color='magenta', style='solid', decorate='false', label='<pickup<font color="darkgreen"> pickupdone</font> &nbsp; >',  fontcolor='magenta') >> transporttrolley
