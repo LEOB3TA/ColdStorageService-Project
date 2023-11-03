@@ -1,0 +1,40 @@
+digraph Sprint2Arch {
+	graph [fontcolor="#2D3436" fontname="Sans-Serif" fontsize=22 label=Sprint2Arch nodesep=0.60 pad=2.0 rankdir=LR ranksep=0.75 splines=ortho]
+	node [fixedsize=true fontcolor="#2D3436" fontname="Sans-Serif" fontsize=13 height=1.4 imagescale=true labelloc=b shape=box style=rounded width=1.4]
+	edge [color="#7B8894"]
+	subgraph cluster_ctxtruck {
+		graph [bgcolor=lightyellow fontname="Sans-Serif" fontsize=22 label=ctxtruck labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		cb5fb57ad98943949938e963411aa944 [label=mocktruck height=1.9 image="./qakicons/symActorSmall.png" shape=none]
+	}
+	subgraph cluster_env {
+		graph [bgcolor="#E5F5FD" fontname="Sans-Serif" fontsize=12 label=env labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+		"603a07facc584aa9992ac30099565eb3" [label="" height=1.9 image="./qakicons/system.png" shape=none]
+		subgraph cluster_ctxbasicrobot {
+			graph [bgcolor=lightyellow fontname="Sans-Serif" fontsize=22 label=ctxbasicrobot labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+			ccf7c6f3f55e4dd281f2d0779ae22663 [label="basicrobot(ext)" height=1.9 image="./qakicons/externalQActor.png" shape=none]
+		}
+		subgraph cluster_ctxsonar {
+			graph [bgcolor=lightyellow fontname="Sans-Serif" fontsize=22 label=ctxsonar labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+			"5002d78d84d9401182257315a1f2b599" [label=sonar23 height=1.9 image="./qakicons/symActorSmall.png" shape=none]
+			"227d1a08e3574537845d55f429b63246" [label="sonar(coded)" height=1.9 image="./qakicons/codedQActor.png" shape=none]
+			"1f8bc811158140c69cb911b495cb0029" [label=ledqakactor height=1.9 image="./qakicons/symActorSmall.png" shape=none]
+			"353dd896cc514fd8aa85ae308ff9c2a4" [label="datacleaner(coded)" height=1.9 image="./qakicons/codedQActor.png" shape=none]
+		}
+		subgraph cluster_ctxstorageservice {
+			graph [bgcolor=lightyellow fontname="Sans-Serif" fontsize=22 label=ctxstorageservice labeljust=l pencolor="#AEB6BE" rankdir=LR shape=box style=rounded]
+			"2f56ec99ca4545b2816c883e7dba5839" [label=coldstorageservice height=1.9 image="./qakicons/symActorSmall.png" shape=none]
+			"86036aa9bf5d4a79ad87e9077b0714ae" [label=transporttrolley height=1.9 image="./qakicons/symActorSmall.png" shape=none]
+			"8a5f2734dbe144bd8a009eb4b9d1a43e" [label=stateobservercontroller height=1.9 image="./qakicons/symActorSmall.png" shape=none]
+		}
+	}
+	"86036aa9bf5d4a79ad87e9077b0714ae" -> "603a07facc584aa9992ac30099565eb3" [label=<alarm &nbsp;> color=red decorate=false dir=forward fontcolor=red fontname="Sans-Serif" fontsize=13 style=dotted]
+	"227d1a08e3574537845d55f429b63246" -> "353dd896cc514fd8aa85ae308ff9c2a4" [color=blue dir=forward fontcolor=blue fontname="Sans-Serif" fontsize=13 style=solid]
+	"353dd896cc514fd8aa85ae308ff9c2a4" -> "5002d78d84d9401182257315a1f2b599" [label=<sonardata &nbsp;> color=blue dir=forward fontcolor=blue fontname="Sans-Serif" fontsize=13 style=solid]
+	"5002d78d84d9401182257315a1f2b599" -> "603a07facc584aa9992ac30099565eb3" [label=<resume &nbsp;> color=red decorate=false dir=forward fontcolor=red fontname="Sans-Serif" fontsize=13 style=dotted]
+	"5002d78d84d9401182257315a1f2b599" -> "603a07facc584aa9992ac30099565eb3" [label=<stop &nbsp;> color=red decorate=false dir=forward fontcolor=red fontname="Sans-Serif" fontsize=13 style=dotted]
+	"2f56ec99ca4545b2816c883e7dba5839" -> "86036aa9bf5d4a79ad87e9077b0714ae" [label=<pickup<font color="darkgreen"> pickupdone</font> &nbsp; > color=magenta decorate=false dir=forward fontcolor=magenta fontname="Sans-Serif" fontsize=13 style=solid]
+	cb5fb57ad98943949938e963411aa944 -> "2f56ec99ca4545b2816c883e7dba5839" [label=<storeFood<font color="darkgreen"> storeAccepted storeRejected</font> &nbsp; sendTicket<font color="darkgreen"> ticketValid ticketNotValid ticketExpired</font> &nbsp; deposit<font color="darkgreen"> chargeTaken</font> &nbsp; > color=magenta decorate=false dir=forward fontcolor=magenta fontname="Sans-Serif" fontsize=13 style=solid]
+	"86036aa9bf5d4a79ad87e9077b0714ae" -> ccf7c6f3f55e4dd281f2d0779ae22663 [label=<engage<font color="darkgreen"> engagedone engagerefused</font> &nbsp; moverobot<font color="darkgreen"> moverobotdone moverobotfailed</font> &nbsp; > color=magenta decorate=false dir=forward fontcolor=magenta fontname="Sans-Serif" fontsize=13 style=solid]
+	"8a5f2734dbe144bd8a009eb4b9d1a43e" -> "1f8bc811158140c69cb911b495cb0029" [label=<ledCmd &nbsp;> color=blue dir=forward fontcolor=blue fontname="Sans-Serif" fontsize=13 style=solid]
+	"86036aa9bf5d4a79ad87e9077b0714ae" -> ccf7c6f3f55e4dd281f2d0779ae22663 [label=<disengage &nbsp; setrobotstate &nbsp; cmd &nbsp; > color=blue dir=forward fontcolor=blue fontname="Sans-Serif" fontsize=13 style=solid]
+}

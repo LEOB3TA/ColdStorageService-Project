@@ -31,7 +31,7 @@ with Diagram('Sprint2Arch', show=False, outformat='png', graph_attr=graphattr) a
             sonar=Custom('sonar(coded)','./qakicons/codedQActor.png')
             ledqakactor=Custom('ledqakactor','./qakicons/symActorSmall.png')
             datacleaner=Custom('datacleaner(coded)','./qakicons/codedQActor.png')
-        with Cluster('ctxstorageserviece', graph_attr=nodeattr):
+        with Cluster('ctxstorageservice', graph_attr=nodeattr):
             coldstorageservice=Custom('coldstorageservice','./qakicons/symActorSmall.png')
             transporttrolley=Custom('transporttrolley','./qakicons/symActorSmall.png')
             stateobservercontroller=Custom('stateobservercontroller','./qakicons/symActorSmall.png')
