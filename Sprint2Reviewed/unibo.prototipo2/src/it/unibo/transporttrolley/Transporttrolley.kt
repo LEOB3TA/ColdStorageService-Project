@@ -255,10 +255,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
-				 	 		stateTimer = TimerActor("timer_robottohome", 
-				 	 					  scope, context!!, "local_tout_transporttrolley_robottohome", 6300.toLong() )
 					}	 	 
-					 transition(edgeName="t032",targetState="corrDir",cond=whenTimeout("local_tout_transporttrolley_robottohome"))   
+					 transition(edgeName="t032",targetState="corrDir",cond=whenReply("moverobotdone"))
 					transition(edgeName="t033",targetState="handlerobotstopped",cond=whenEvent("stop"))
 				}	 
 				state("corrDir") { //this:State

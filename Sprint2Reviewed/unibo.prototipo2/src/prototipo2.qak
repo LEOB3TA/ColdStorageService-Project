@@ -470,7 +470,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 		/*delay 6300
 		forward basicrobot -m cmd:cmd(l)*/
 	}
-	Transition t0  whenTime 6300 -> corrDir
+	Transition t0  whenReply moverobotdone -> corrDir
 					whenEvent stop -> handlerobotstopped
 	  			  //whenReply moverobotdone -> idle
  				 // whenReply moverobotfailed -> robotmovefailed
