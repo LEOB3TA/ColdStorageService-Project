@@ -9,8 +9,8 @@ timeout /t 5
 REM Open the default browser to localhost:8090
 start "" "http://localhost:8090"
 
-REM Start the unibo.prototipo1-1.0-all.jar file in the background
-start "" java -jar unibo.prototipo1-1.0-all.jar
+REM Start the unibo.prototipo2-1.0-all.jar file in the background
+start "" java -jar unibo.prototipo2-1.0-all.jar
 
 REM Wait for the user to press Ctrl+C to stop the container
 pause

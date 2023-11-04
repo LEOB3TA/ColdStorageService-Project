@@ -44,11 +44,11 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t00",targetState="requestEvaluation",cond=whenRequest("storeFood"))
-					transition(edgeName="t01",targetState="ticketEvaluation",cond=whenRequest("sendTicket"))
-					transition(edgeName="t02",targetState="charged",cond=whenRequest("deposit"))
-					transition(edgeName="t03",targetState="taken",cond=whenReply("pickupdone"))
-					transition(edgeName="t04",targetState="error",cond=whenEvent("local_movef"))
+					 transition(edgeName="t09",targetState="requestEvaluation",cond=whenRequest("storeFood"))
+					transition(edgeName="t010",targetState="ticketEvaluation",cond=whenRequest("sendTicket"))
+					transition(edgeName="t011",targetState="charged",cond=whenRequest("deposit"))
+					transition(edgeName="t012",targetState="taken",cond=whenReply("pickupdone"))
+					transition(edgeName="t013",targetState="error",cond=whenEvent("local_movef"))
 				}	 
 				state("requestEvaluation") { //this:State
 					action { //it:State

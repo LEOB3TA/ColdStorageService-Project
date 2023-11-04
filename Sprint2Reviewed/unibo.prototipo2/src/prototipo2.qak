@@ -17,6 +17,7 @@ Reply  pickupdone:  pickupdone(_) for pickup
 
 // Messaggi scambiati col basicrobot23
 
+
 Request engage        : engage(ARG)
 Reply   engagedone    : engagedone(ARG) for engage
 Reply   engagerefused : engagerefused(ARG) for engage
@@ -298,7 +299,7 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 		discardMsg Off
 		// engage
 		println("$name | request engage") color green
-		request basicrobot -m engage : engage ($MyName, 320)
+		request basicrobot -m engage : engage ($MyName, 305)
 		//printCurrentMessage color black
 	}Transition t0 //whenTime 10000 -> error
 				   whenReply engagedone -> idle
@@ -405,14 +406,13 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] forward transporttrolley -m gotomovetoport : gotomovetoport(_)[#
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] forward transporttrolley -m gotodepositactionended : gotodepositactionended(_)[#
 							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] 
-							forward transporttrolley -m gotorobottohome : gotorobottohome(_)		delay 6300
-		forward basicrobot -m cmd:cmd(l)
+							forward transporttrolley -m gotorobottohome : gotorobottohome(_)
 								
 		[#
 			}}#]
 	}Transition t0 whenMsg gotomovetoport -> movetoport
 					whenMsg gotodepositactionended -> depositactionended
-					whenMsg gotorobottohome -> idle
+					whenMsg gotorobottohome -> corrDir
   					
   	
 
@@ -467,13 +467,18 @@ QActor transporttrolley context ctxprototipo2{ //TODO  controllare cosa succede 
 			println("$name | back to home" ) color green
 		//send event "robot is in home"
 		request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
-		delay 6300
-		forward basicrobot -m cmd:cmd(l)*
+		/*delay 6300
+		forward basicrobot -m cmd:cmd(l)*/
 	}
-	Transition t0  whenEvent stop -> handlerobotstopped
-	  			  whenReply moverobotdone -> idle
+	Transition t0  whenTime 6300 -> corrDir
+					whenEvent stop -> handlerobotstopped
+	  			  //whenReply moverobotdone -> idle
  				 // whenReply moverobotfailed -> robotmovefailed
 
+
+	State corrDir{
+		forward basicrobot -m cmd:cmd(l)
+	}Goto idle
 
  	//control failed robot moves
  	State robotmovefailed{
@@ -517,27 +522,7 @@ QActor sonar23 context ctxprototipo2{ //TODO mandare eventi condizionati dallo s
 				emit resume: resume(_)
 			}
 		}
-	}Goto work
-	/*Goto handleobstacle if [#D<DLIMIT && handled=false#] else sendresume
-	
-	State sendresume{
-			println("$name sonardata RESUME ${payloadArg(0)}") color magenta
-			emit resume: resume(_)
-	}Goto work
-
-
-	State handleobstacle{
-			[#handled=true#]
-			println("$name handleobstacle STOP ${payloadArg(0)}") color magenta
-			emit stop : stop(_)			
-	} Goto work*/
-	              
-
-
-	/*State sonar23{
-		println("$name BYE")
-	}*/
-	
+	}Goto work	              
 }
 
 

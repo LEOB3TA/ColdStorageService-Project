@@ -40,7 +40,9 @@ dispatch( gotorobottohome, gotorobottohome(_) ).
 context(ctxbasicrobot, "127.0.0.1",  "TCP", "8020").
 context(ctxprototipo2, "localhost",  "TCP", "8099").
  qactor( basicrobot, ctxbasicrobot, "external").
+  qactor( sonar, ctxprototipo2, "rx.sonarSimulator").
   qactor( datacleaner, ctxprototipo2, "rx.dataCleaner").
+  qactor( mocktruck, ctxprototipo2, "it.unibo.mocktruck.Mocktruck").
   qactor( coldstorageservice, ctxprototipo2, "it.unibo.coldstorageservice.Coldstorageservice").
   qactor( transporttrolley, ctxprototipo2, "it.unibo.transporttrolley.Transporttrolley").
   qactor( sonar23, ctxprototipo2, "it.unibo.sonar23.Sonar23").

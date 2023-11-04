@@ -21,8 +21,8 @@ sleep 3
 open http://localhost:8090
 sleep 15
 
-# Start the unibo.prototipo1-1.0-all.jar file (assuming it's in the current directory)
-java -jar unibo.prototipo1-1.0-all.jar
+# Start the unibo.prototipo2-1.0-all.jar file (assuming it's in the current directory)
+java -jar unibo.prototipo2-1.0-all.jar
 
 
 # Keep the script running in the background
