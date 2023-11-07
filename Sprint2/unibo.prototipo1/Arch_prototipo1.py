@@ -33,12 +33,16 @@ with Diagram('prototipo1Arch', show=False, outformat='png', graph_attr=graphattr
           sonar=Custom('sonar(coded)','./qakicons/codedQActor.png')
           datacleaner=Custom('datacleaner(coded)','./qakicons/codedQActor.png')
           distancefilter=Custom('distancefilter(coded)','./qakicons/codedQActor.png')
-     coldstorageservice >> Edge( label='local_movef', **eventedgeattr, fontcolor='red') >> sys
+     transporttrolley >> Edge( label='robotathome', **eventedgeattr, fontcolor='red') >> sys
+     transporttrolley >> Edge( label='robotmoving', **eventedgeattr, fontcolor='red') >> sys
      transporttrolley >> Edge( label='local_movef', **eventedgeattr, fontcolor='red') >> sys
+     sonar23 >> Edge( label='resume', **eventedgeattr, fontcolor='red') >> sys
      sonar23 >> Edge( label='alarm', **eventedgeattr, fontcolor='red') >> sys
-     coldstorageservice >> Edge(color='magenta', style='solid', decorate='true', label='<pickup &nbsp; >',  fontcolor='magenta') >> transporttrolley
-     mocktruck >> Edge(color='magenta', style='solid', decorate='true', label='<storeFood &nbsp; sendTicket &nbsp; deposit &nbsp; >',  fontcolor='magenta') >> coldstorageservice
-     transporttrolley >> Edge(color='magenta', style='solid', decorate='true', label='<engage &nbsp; moverobot &nbsp; >',  fontcolor='magenta') >> basicrobot
+     coldstorageservice >> Edge(color='magenta', style='solid', decorate='true', label='<pickup<font color="darkgreen"> pickupdone</font> &nbsp; >',  fontcolor='magenta') >> transporttrolley
+     mocktruck >> Edge(color='magenta', style='solid', decorate='true', label='<storeFood<font color="darkgreen"> storeAccepted storeRejected</font> &nbsp; sendTicket<font color="darkgreen"> ticketValid ticketNotValid ticketExpired</font> &nbsp; deposit<font color="darkgreen"> chargeTaken</font> &nbsp; >',  fontcolor='magenta') >> coldstorageservice
+     transporttrolley >> Edge(color='magenta', style='solid', decorate='true', label='<engage<font color="darkgreen"> engagedone engagerefused</font> &nbsp; moverobot<font color="darkgreen"> moverobotdone moverobotfailed</font> &nbsp; >',  fontcolor='magenta') >> basicrobot
      controller23 >> Edge(color='blue', style='solid',  label='<ledCmd &nbsp; >',  fontcolor='blue') >> ledqakactor
      transporttrolley >> Edge(color='blue', style='solid',  label='<disengage &nbsp; setrobotstate &nbsp; cmd &nbsp; >',  fontcolor='blue') >> basicrobot
+     transporttrolley >> Edge(color='blue', style='solid',  label='<gotomovetoport &nbsp; gotodepositactionended &nbsp; gotorobottohome &nbsp; >',  fontcolor='blue') >> transporttrolley
+     controller23 >> Edge(color='blue', style='solid',  label='<sonaractivate &nbsp; >',  fontcolor='blue') >> sonar23
 diag

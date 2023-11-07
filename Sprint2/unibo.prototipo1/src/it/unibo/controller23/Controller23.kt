@@ -22,37 +22,58 @@ class Controller23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outblack("${name} STARTS - Activates the sonar")
+						CommUtils.outmagenta("${name} STARTS - Activates the sonar")
+						forward("sonaractivate", "info($DLIMIT)" ,"sonar23" ) 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t030",targetState="doBusinessWork",cond=whenEvent("sonardata"))
-					transition(edgeName="t031",targetState="doBusinessWork",cond=whenEvent("robotmoving"))
+					 transition(edgeName="t039",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t040",targetState="stayoff",cond=whenEvent("robotathome"))
+					transition(edgeName="t041",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 				state("doBusinessWork") { //this:State
 					action { //it:State
+						CommUtils.outmagenta("${name} BUSINESS WORK")
 						if( checkMsgContent( Term.createTerm("distance(D)"), Term.createTerm("distance(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 var D = payloadArg(0).toInt()  
+								CommUtils.outred("$D")
 								if(  D <= DLIMIT  
-								 ){forward("ledCmd", "ledCmd(on)" ,"ledqakactor" ) 
+								 ){forward("ledCmd", "ledCmd(ON)" ,"ledqakactor" ) 
 								}
-								else
-								 {forward("ledCmd", "ledCmd(off)" ,"ledqakactor" ) 
-								 }
-						}
-						if( checkMsgContent( Term.createTerm("robotmoving(_)"), Term.createTerm("robotmoving(_)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								forward("ledCmd", "ledCmd(blink)" ,"ledqakactor" ) 
 						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t032",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+					 transition(edgeName="t042",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t043",targetState="stayoff",cond=whenEvent("robotathome"))
+					transition(edgeName="t044",targetState="doBusinessWork",cond=whenEvent("sonardata"))
+				}	 
+				state("stayoff") { //this:State
+					action { //it:State
+						forward("ledCmd", "ledCmd(OFF)" ,"ledqakactor" ) 
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t045",targetState="blinkled",cond=whenEvent("robotmoving"))
+				}	 
+				state("blinkled") { //this:State
+					action { //it:State
+						forward("ledCmd", "ledCmd(BLINK)" ,"ledqakactor" ) 
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition(edgeName="t046",targetState="blinkled",cond=whenEvent("robotmoving"))
+					transition(edgeName="t047",targetState="stayoff",cond=whenEvent("robotathome"))
+					transition(edgeName="t048",targetState="doBusinessWork",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}

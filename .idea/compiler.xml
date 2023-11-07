@@ -13,18 +13,19 @@
       <module name="Sprint1.unibo.coldstorageservice" target="11" />
       <module name="Sprint1.unibo.coldstorageservice.main" target="11" />
       <module name="Sprint1.unibo.coldstorageservice.test" target="11" />
+      <module name="Sprint2Reviewed-unibo.prototipo1" target="11" />
       <module name="truck.unibo.coldstorageservice" target="11" />
       <module name="truck.unibo.coldstorageservice.main" target="11" />
       <module name="truck.unibo.coldstorageservice.test" target="11" />
-      <module name="unibo.basicrobot23" target="1.8" />
-      <module name="unibo.basicrobot23.main" target="1.8" />
-      <module name="unibo.basicrobot23.test" target="1.8" />
       <module name="unibo.old_css" target="11" />
       <module name="unibo.old_css.main" target="11" />
       <module name="unibo.old_css.test" target="11" />
       <module name="unibo.prototipo0.unibo.coldstorageservice" target="11" />
       <module name="unibo.prototipo0.unibo.coldstorageservice.main" target="11" />
       <module name="unibo.prototipo0.unibo.coldstorageservice.test" target="11" />
+      <module name="unibo.prototipo1" target="11" />
+      <module name="unibo.prototipo1.main" target="11" />
+      <module name="unibo.prototipo1.test" target="11" />
       <module name="unibo.transporttrolley" target="11" />
       <module name="unibo.transporttrolley.main" target="11" />
       <module name="unibo.transportTrolley.main" target="11" />

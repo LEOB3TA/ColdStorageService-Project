@@ -154,7 +154,6 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				state("error") { //this:State
 					action { //it:State
 						CommUtils.outred("$name | robot failed to move")
-						emit("local_movef", "local_movef(_)" ) 
 						CommUtils.outred("$name | close")
 						 System.exit(0)  
 						//genTimer( actor, state )

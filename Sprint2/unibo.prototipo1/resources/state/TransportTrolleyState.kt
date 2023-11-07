@@ -3,7 +3,7 @@ package state
 import com.google.gson.Gson
 
 enum class CurrStateTrolley  {
-    IDLE,STOPPED,MOVING,PICKINGUP,DROPPINGOUT
+    IDLE,STOPPED,MOVINGTOPORT,MOVINGTOHOME,PICKINGUP,DROPPINGOUT
 }
 
 enum class TTPosition{
@@ -12,7 +12,8 @@ enum class TTPosition{
 
 data class TransportTrolleyState(
     private var currState: CurrStateTrolley = CurrStateTrolley.IDLE,
-    private var currPosition: TTPosition = TTPosition.HOME
+    private var currPosition: TTPosition = TTPosition.HOME,
+
 ){
     fun setCurrState(state: CurrStateTrolley){
         currState = state
@@ -26,6 +27,7 @@ data class TransportTrolleyState(
     fun getCurrPosition() : TTPosition{
         return currPosition
     }
+
 
     companion object{
         private val gson = Gson()

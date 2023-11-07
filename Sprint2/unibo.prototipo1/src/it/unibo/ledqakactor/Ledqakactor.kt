@@ -18,6 +18,10 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
+		
+				val ledState = state.LedState()
+				ledState.setState(state.LState.OFF)
+				var current = ledState.getCurrState()
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -27,29 +31,44 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t028",targetState="doCmd",cond=whenDispatch("ledCmd"))
+					 transition(edgeName="t037",targetState="doCmd",cond=whenDispatch("ledCmd"))
 				}	 
 				state("doCmd") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("ledCmd(ON,OFF,BLINK)"), Term.createTerm("ledCmd(V)"), 
+						if( checkMsgContent( Term.createTerm("ledCmd(CMD)"), Term.createTerm("ledCmd(CMD)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 var Cmd = payloadArg(0)  
-								if(  Cmd=="on"  
-								 ){CommUtils.outmagenta("${name} - on")
+								if(  Cmd=="ON"  
+								 ){ 
+													ledState.setState(state.LState.ON)
+													current = ledState.getCurrState()
+								updateResourceRep(ledState.toJsonString() 
+								)
+								CommUtils.outmagenta("${name} - $current")
 								}
-								if(  Cmd=="off"  
-								 ){CommUtils.outmagenta("${name} - off")
+								if(  Cmd=="OFF"  
+								 ){ 
+													ledState.setState(state.LState.OFF)
+													current = ledState.getCurrState()	
+								updateResourceRep(ledState.toJsonString() 
+								)
+								CommUtils.outmagenta("${name} - $current")
 								}
-								else
-								 {CommUtils.outmagenta("${name} - blink")
-								 }
+								if(  Cmd=="BLINK"  
+								 ){ 
+													ledState.setState(state.LState.BLINKS)
+													current = ledState.getCurrState()
+								updateResourceRep(ledState.toJsonString() 
+								)
+								CommUtils.outmagenta("${name} - $current")
+								}
 						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t029",targetState="doCmd",cond=whenDispatch("ledCmd"))
+					 transition(edgeName="t038",targetState="doCmd",cond=whenDispatch("ledCmd"))
 				}	 
 			}
 		}

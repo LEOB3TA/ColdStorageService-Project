@@ -1,0 +1,7 @@
+{"actor":"transporttrolley", "msgType":"dispatch", "curstate":"goahead", "nextstate":"movetoport", "msgId":"gotomovetoport"}
+{"actor":"transporttrolley", "msgType":"dispatch", "curstate":"goahead", "nextstate":"depositactionended", "msgId":"gotodepositactionended"}
+{"actor":"transporttrolley", "msgType":"dispatch", "curstate":"goahead", "nextstate":"corrDir", "msgId":"gotorobottohome"}
+{"actor":"ledqakactor", "msgType":"dispatch", "curstate":"s0", "nextstate":"doCmd", "msgId":"ledCmd"}
+{"actor":"ledqakactor", "msgType":"dispatch", "curstate":"doCmd", "nextstate":"doCmd", "msgId":"ledCmd"}
+{"actor":"stateobservercontroller", "msgType":"dispatch", "curstate":"s0", "nextstate":"upds", "msgId":"coapUpdate"}
+{"actor":"stateobservercontroller", "msgType":"dispatch", "curstate":"upds", "nextstate":"upds", "msgId":"coapUpdate"}
