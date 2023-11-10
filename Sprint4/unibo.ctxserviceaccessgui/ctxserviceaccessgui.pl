@@ -1,5 +1,5 @@
 %====================================================================================
-% serviceaccessgui description   
+% ctxserviceaccessgui description   
 %====================================================================================
 request( deposit, deposit(_) ).
 request( sendTicket, sendTicket(TICKETID) ).

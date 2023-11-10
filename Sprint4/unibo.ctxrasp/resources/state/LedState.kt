@@ -1,7 +1,6 @@
 package state
 
 import com.google.gson.Gson
-import state.TransportTrolleyState
 
 enum class LState{
     ON, OFF, BLINKS

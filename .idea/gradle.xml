@@ -4,20 +4,20 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint4/unibo.ctxSAG" />
-        <option name="gradleJvm" value="19" />
-        <option name="modules">
-          <set>
-            <option value="$PROJECT_DIR$/Sprint4/unibo.ctxSAG" />
-          </set>
-        </option>
-      </GradleProjectSettings>
-      <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint4/unibo.ctxrasp" />
         <option name="gradleJvm" value="19" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/Sprint4/unibo.ctxrasp" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint4/unibo.ctxserviceaccessgui" />
+        <option name="gradleJvm" value="19" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/Sprint4/unibo.ctxserviceaccessgui" />
           </set>
         </option>
       </GradleProjectSettings>

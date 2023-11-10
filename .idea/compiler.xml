@@ -43,6 +43,9 @@
       <module name="unibo.prototipo3.unibo.prototipo2" target="11" />
       <module name="unibo.prototipo3.unibo.prototipo2.main" target="11" />
       <module name="unibo.prototipo3.unibo.prototipo2.test" target="11" />
+      <module name="unibo.serviceaccessgui" target="11" />
+      <module name="unibo.serviceaccessgui.main" target="11" />
+      <module name="unibo.serviceaccessgui.test" target="11" />
       <module name="unibo.transporttrolley" target="11" />
       <module name="unibo.transporttrolley.main" target="11" />
       <module name="unibo.transportTrolley.main" target="11" />
