@@ -28,4 +28,5 @@ with Diagram('ctxraspArch', show=False, outformat='png', graph_attr=graphattr) a
           datacleaner=Custom('datacleaner(coded)','./qakicons/codedQActor.png')
      sonar23 >> Edge( label='stop', **eventedgeattr, fontcolor='red') >> sys
      sonar23 >> Edge( label='resume', **eventedgeattr, fontcolor='red') >> sys
+     ledqakactor >> Edge(color='blue', style='solid',  label='<gotoblink &nbsp; >',  fontcolor='blue') >> ledqakactor
 diag

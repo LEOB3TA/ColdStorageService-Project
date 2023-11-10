@@ -20,6 +20,7 @@ event( stop, stop(_) ).
 event( resume, resume(_) ).
 dispatch( sonaractivate, info(D) ).
 dispatch( ledCmd, ledCmd(CMD) ).
+dispatch( gotoblink, gotoblink(_) ).
 dispatch( coapUpdate, coapUpdate(RES,VAL) ).
 %====================================================================================
 context(ctxrasp, "localhost",  "TCP", "8099").

@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/issProject2023.iml" filepath="$PROJECT_DIR$/.idea/issProject2023.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/unibo.ctxrasp.main.iml" filepath="$PROJECT_DIR$/.idea/modules/unibo.ctxrasp.main.iml" />
     </modules>
   </component>
 </project>
