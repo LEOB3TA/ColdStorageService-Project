@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/widgets/spaced_column.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../widgets/spaced_row.dart';
 
@@ -14,6 +13,8 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  int _index = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,12 +35,18 @@ class _HomeViewState extends State<HomeView> {
                     Text(
                       'SERVICEACCESSGUI',
                       style: GoogleFonts.vt323(
-                          textStyle: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.blue)),
+                          textStyle: const TextStyle(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue)),
                     ),
                     Text(
                       'Dashboard',
                       style: GoogleFonts.vt323(
-                          textStyle: TextStyle(fontSize: 32, fontWeight: FontWeight.w400, color: Colors.grey[500])),
+                          textStyle: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.grey[500])),
                     )
                   ],
                 ),
@@ -55,7 +62,7 @@ class _HomeViewState extends State<HomeView> {
                       height: double.maxFinite,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
+                          color: Colors.blue.shade100,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Padding(
@@ -64,96 +71,83 @@ class _HomeViewState extends State<HomeView> {
                             spacing: 8,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(
-                                  flex: 1,
-                                  child: SpacedColumn(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    spacing: 2,
-                                    children: [
-                                      Expanded(
-                                        child: SpacedColumn(
-                                          spacing: 2,
-                                          children: [
-                                            Text(
-                                              'Current Weight',
-                                              style: GoogleFonts.inter(
-                                                  textStyle: const TextStyle(
-                                                      fontWeight: FontWeight.w800,
-                                                      fontSize: 32,
-                                                      color: Colors.black54)),
-                                            ),
-                                            const Text(
-                                              'Stored in ColdRoom',
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.w500, fontSize: 20, color: Colors.black45),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  )),
+                              Text(
+                                'Ticket Request',
+                                style: GoogleFonts.inter(
+                                    textStyle: TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 32,
+                                        color: Colors.blue.shade900)),
+                              ),
+                              Text('Procedure - What to do',
+                                  style: GoogleFonts.inter(
+                                      textStyle: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.blue.shade900))),
                               const Spacer(),
-                              Expanded(
-                                  flex: 4,
-                                  child: SizedBox.square(
-                                      dimension: 128,
-                                      child: CircularPercentIndicator(
-                                        radius: 136,
-                                        animation: true,
-                                        lineWidth: 16,
-                                        percent: 0.75,
-                                        center: RichText(
-                                          textAlign: TextAlign.center,
-                                          text: const TextSpan(
-                                            text: 'KG\n',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w600, fontSize: 16, color: Colors.black26),
-                                            children: <TextSpan>[
-                                              TextSpan(
-                                                  text: '7.5\n',
-                                                  style: TextStyle(
-                                                      letterSpacing: -5,
-                                                      fontWeight: FontWeight.w600,
-                                                      fontSize: 96,
-                                                      color: Colors.redAccent)),
-                                              TextSpan(
-                                                  text: 'Out of 10',
-                                                  style: TextStyle(
-                                                      fontWeight: FontWeight.w400,
-                                                      fontSize: 16,
-                                                      color: Colors.black38)),
-                                            ],
-                                          ),
-                                        ),
-                                        progressColor: Colors.redAccent,
-                                        backgroundColor: Colors.redAccent.shade100,
-                                        circularStrokeCap: CircularStrokeCap.round,
-                                      ))),
-                              const Expanded(
-                                child: Spacer(),
-                              ),
-                              /*
-                              Expanded(
-                                flex: 4,
-                                child: SpacedColumn(
-                                  spacing: 2,
-                                  children: [
-                                    Text(
-                                      '7.5kg',
-                                      style: GoogleFonts.inter(
-                                          textStyle: const TextStyle(
-                                              fontWeight: FontWeight.w600, fontSize: 48, color: Colors.redAccent)),
-                                    ),
-                                    Text(
-                                      'Out of 10kg',
-                                      style: GoogleFonts.inter(
-                                          textStyle: const TextStyle(
-                                              fontWeight: FontWeight.w400, fontSize: 16, color: Colors.black38)),
-                                    )
-                                  ],
+                              Stepper(
+                                currentStep: _index,
+                                onStepCancel: () {
+                                  if (_index > 0) {
+                                    setState(() {
+                                      _index -= 1;
+                                    });
+                                  }
+                                },
+                                onStepContinue: () {
+                                  if (_index <= 0) {
+                                    setState(() {
+                                      _index += 1;
+                                    });
+                                  }
+                                },
+                                onStepTapped: (int index) {
+                                  setState(() {
+                                    _index = index;
+                                  });
+                                },
+                                controlsBuilder: (context, details) =>
+                                    const Padding(
+                                  padding: EdgeInsets.only(top: 16),
+                                  child: SpacedRow(
+                                    spacing: 8,
+                                  ),
                                 ),
+                                steps: <Step>[
+                                  Step(
+                                    title: Text('Store Food Request',
+                                        style: TextStyle(
+                                            color: Colors.blue.shade900,
+                                            fontWeight: FontWeight.bold)),
+                                    content: Text(
+                                      'Insert the amount of kg you want to deposit.',
+                                      style: TextStyle(
+                                          color: Colors.blue.shade900),
+                                    ),
+                                  ),
+                                  Step(
+                                    title: Text('Rescue Ticket',
+                                        style: TextStyle(
+                                            color: Colors.blue.shade900,
+                                            fontWeight: FontWeight.bold)),
+                                    content: Text(
+                                        'Save your ticket number to deposit food.',
+                                        style: TextStyle(
+                                            color: Colors.blue.shade900)),
+                                  ),
+                                  Step(
+                                    title: Text('Ticket Request',
+                                        style: TextStyle(
+                                            color: Colors.blue.shade900,
+                                            fontWeight: FontWeight.bold)),
+                                    content: Text(
+                                        'Insert your ticket to deposit food.',
+                                        style: TextStyle(
+                                            color: Colors.blue.shade900)),
+                                  ),
+                                ],
                               ),
-                              */
+                              const Spacer(),
                             ],
                           ),
                         ),
@@ -182,34 +176,47 @@ class _HomeViewState extends State<HomeView> {
                                         child: DecoratedBox(
                                           decoration: BoxDecoration(
                                             color: Colors.grey.shade100,
-                                            borderRadius: BorderRadius.circular(16),
+                                            borderRadius:
+                                                BorderRadius.circular(16),
                                           ),
                                           child: Padding(
                                             padding: const EdgeInsets.all(16),
                                             child: SpacedColumn(
                                               mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               spacing: 8,
                                               children: [
                                                 Text(
                                                   'Ticket Request',
                                                   style: GoogleFonts.inter(
-                                                      textStyle: const TextStyle(
-                                                          fontWeight: FontWeight.w800,
-                                                          fontSize: 32,
-                                                          color: Colors.black54)),
+                                                      textStyle:
+                                                          const TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w800,
+                                                              fontSize: 32,
+                                                              color: Colors
+                                                                  .black54)),
                                                 ),
                                                 const TextField(
                                                   decoration: InputDecoration(
                                                       fillColor: Colors.white,
-                                                      prefixIcon: Icon(Icons.scale),
+                                                      prefixIcon:
+                                                          Icon(Icons.scale),
                                                       border: OutlineInputBorder(
-                                                          borderRadius: BorderRadius.all(Radius.circular(32))),
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          32))),
                                                       //labelText: 'Ticket Request',
                                                       hintText: 'How many kg?'),
                                                 ),
                                                 FilledButton(
-                                                    onPressed: () => get(Uri.parse("http://localhost:8080/users")),
+                                                    onPressed: () => get(Uri.parse(
+                                                        "http://localhost:8080/users")),
                                                     child: const Text('Submit'))
                                               ],
                                             ),
@@ -223,7 +230,8 @@ class _HomeViewState extends State<HomeView> {
                                         child: DecoratedBox(
                                           decoration: BoxDecoration(
                                             color: Colors.grey.shade100,
-                                            borderRadius: BorderRadius.circular(16),
+                                            borderRadius:
+                                                BorderRadius.circular(16),
                                           ),
                                           child: Padding(
                                             padding: const EdgeInsets.all(16),
@@ -233,10 +241,14 @@ class _HomeViewState extends State<HomeView> {
                                                 Text(
                                                   'Ticket Response',
                                                   style: GoogleFonts.inter(
-                                                      textStyle: const TextStyle(
-                                                          fontWeight: FontWeight.w800,
-                                                          fontSize: 32,
-                                                          color: Colors.black54)),
+                                                      textStyle:
+                                                          const TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w800,
+                                                              fontSize: 32,
+                                                              color: Colors
+                                                                  .black54)),
                                                 ),
                                                 Stack(
                                                   alignment: Alignment.center,
@@ -245,9 +257,13 @@ class _HomeViewState extends State<HomeView> {
                                                       height: 200,
                                                       width: 300,
                                                       child: DecoratedBox(
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.amber.shade200,
-                                                          borderRadius: BorderRadius.circular(4),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors
+                                                              .amber.shade200,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(4),
                                                         ),
                                                       ),
                                                     ),
@@ -255,11 +271,16 @@ class _HomeViewState extends State<HomeView> {
                                                       height: 184,
                                                       width: 284,
                                                       child: DecoratedBox(
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.amber.shade200,
-                                                          borderRadius: BorderRadius.circular(8),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors
+                                                              .amber.shade200,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
                                                           border: Border.all(
-                                                            color: Colors.amber.shade400,
+                                                            color: Colors
+                                                                .amber.shade400,
                                                             width: 4,
                                                           ),
                                                         ),
@@ -271,7 +292,10 @@ class _HomeViewState extends State<HomeView> {
                                                         dimension: 64,
                                                         child: DecoratedBox(
                                                           decoration: BoxDecoration(
-                                                              color: Colors.grey.shade100, shape: BoxShape.circle),
+                                                              color: Colors.grey
+                                                                  .shade100,
+                                                              shape: BoxShape
+                                                                  .circle),
                                                         ),
                                                       ),
                                                     ),
@@ -281,30 +305,43 @@ class _HomeViewState extends State<HomeView> {
                                                         dimension: 64,
                                                         child: DecoratedBox(
                                                           decoration: BoxDecoration(
-                                                              color: Colors.grey.shade100, shape: BoxShape.circle),
+                                                              color: Colors.grey
+                                                                  .shade100,
+                                                              shape: BoxShape
+                                                                  .circle),
                                                         ),
                                                       ),
                                                     ),
                                                     Positioned.fill(
                                                       top: 36,
                                                       child: Align(
-                                                        alignment: Alignment.bottomCenter,
+                                                        alignment: Alignment
+                                                            .bottomCenter,
                                                         child: SpacedColumn(
                                                           spacing: 0,
                                                           children: [
                                                             const Text(
                                                               'Your Ticket is',
                                                               style: TextStyle(
-                                                                  fontWeight: FontWeight.w300,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w300,
                                                                   fontSize: 12,
-                                                                  color: Colors.black45),
+                                                                  color: Colors
+                                                                      .black45),
                                                             ),
                                                             Text('12',
                                                                 style: TextStyle(
-                                                                    letterSpacing: -5,
-                                                                    fontWeight: FontWeight.w900,
-                                                                    fontSize: 96,
-                                                                    color: Colors.lime.shade900)),
+                                                                    letterSpacing:
+                                                                        -5,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w900,
+                                                                    fontSize:
+                                                                        96,
+                                                                    color: Colors
+                                                                        .lime
+                                                                        .shade900)),
                                                           ],
                                                         ),
                                                       ),
@@ -328,8 +365,41 @@ class _HomeViewState extends State<HomeView> {
                             width: double.maxFinite,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.secondaryContainer,
+                                color: Colors.grey.shade200,
                                 borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: SpacedColumn(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  spacing: 8,
+                                  children: [
+                                    Text(
+                                      'Deposit Ticket',
+                                      style: GoogleFonts.inter(
+                                          textStyle: const TextStyle(
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 32,
+                                              color: Colors.black54)),
+                                    ),
+                                    const TextField(
+                                      decoration: InputDecoration(
+                                          fillColor: Colors.white,
+                                          prefixIcon: Icon(Icons.numbers),
+                                          border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(32))),
+                                          //labelText: 'Ticket Request',
+                                          hintText: 'Ticket Id'),
+                                    ),
+                                    FilledButton(
+                                        onPressed: () => get(Uri.parse(
+                                            "http://localhost:8080/deposit")),
+                                        child: const Text('Submit'))
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -339,17 +409,6 @@ class _HomeViewState extends State<HomeView> {
               ],
             ),
           ),
-          Expanded(
-              flex: 1,
-              child: SizedBox(
-                width: double.maxFinite,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-              ))
         ],
       ),
     ));

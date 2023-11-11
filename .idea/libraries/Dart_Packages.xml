@@ -68,7 +68,7 @@
         <entry key="flutter">
           <value>
             <list>
-              <option value="/opt/flutter/packages/flutter/lib" />
+              <option value="/opt/homebrew/Caskroom/flutter/3.10.2/flutter/packages/flutter/lib" />
             </list>
           </value>
         </entry>
@@ -89,7 +89,7 @@
         <entry key="flutter_test">
           <value>
             <list>
-              <option value="/opt/flutter/packages/flutter_test/lib" />
+              <option value="/opt/homebrew/Caskroom/flutter/3.10.2/flutter/packages/flutter_test/lib" />
             </list>
           </value>
         </entry>
@@ -159,8 +159,8 @@
         <entry key="path_provider_android">
           <value>
             <list>
-              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/path_provider_android-2.2.1/lib" />
               <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/path_provider_android-2.2.0/lib" />
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/path_provider_android-2.2.1/lib" />
             </list>
           </value>
         </entry>
@@ -216,7 +216,7 @@
         <entry key="sky_engine">
           <value>
             <list>
-              <option value="/opt/flutter/bin/cache/pkg/sky_engine/lib" />
+              <option value="/opt/homebrew/Caskroom/flutter/3.10.2/flutter/bin/cache/pkg/sky_engine/lib" />
             </list>
           </value>
         </entry>
@@ -340,9 +340,9 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/web-0.1.4-beta/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/win32-5.0.9/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/xdg_directories-1.0.3/lib" />
-      <root url="file:///opt/flutter/bin/cache/pkg/sky_engine/lib" />
-      <root url="file:///opt/flutter/packages/flutter/lib" />
-      <root url="file:///opt/flutter/packages/flutter_test/lib" />
+      <root url="file:///opt/homebrew/Caskroom/flutter/3.10.2/flutter/bin/cache/pkg/sky_engine/lib" />
+      <root url="file:///opt/homebrew/Caskroom/flutter/3.10.2/flutter/packages/flutter/lib" />
+      <root url="file:///opt/homebrew/Caskroom/flutter/3.10.2/flutter/packages/flutter_test/lib" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
