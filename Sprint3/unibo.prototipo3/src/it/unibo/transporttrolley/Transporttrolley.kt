@@ -112,15 +112,15 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					action { //it:State
 						CommUtils.outgreen("$name |handle robot stopped")
 						
-						  			if ((m1+MINT).hasPassedNow()){	
+						  			if ((m1+MINT).hasPassedNow()){
 						  				m1 = ts.markNow()
 						  				savedState = tTState.getCurrState()
 						  				tTState.setCurrState(state.CurrStateTrolley.STOPPED)
 						emit("alarm", "alarm(_)" ) 
 						updateResourceRep(tTState.toJsonString() 
 						)
-							
-						  			 }/*else{ 
+						
+						  			 }/*else{
 						CommUtils.outred("ignored stop signal")
 						tTState.setCurrState(savedState) 
 						updateResourceRep(tTState.toJsonString() 
