@@ -34,6 +34,9 @@
       <module name="unibo.prototipo0.unibo.coldstorageservice" target="11" />
       <module name="unibo.prototipo0.unibo.coldstorageservice.main" target="11" />
       <module name="unibo.prototipo0.unibo.coldstorageservice.test" target="11" />
+      <module name="unibo.prototipo1" target="11" />
+      <module name="unibo.prototipo1.main" target="11" />
+      <module name="unibo.prototipo1.test" target="11" />
       <module name="unibo.prototipo2" target="11" />
       <module name="unibo.prototipo2.main" target="11" />
       <module name="unibo.prototipo2.test" target="11" />
