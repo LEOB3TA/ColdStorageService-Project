@@ -10,8 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-	
-class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
+import it.unibo.kactor.sysUtil.createActor   //Sept2023
+class Coldstorageservice ( name: String, scope: CoroutineScope, isconfined: Boolean=false  ) : ActorBasicFsm( name, scope, confined=isconfined ){
 
 	override fun getInitialState() : String{
 		return "setup"
@@ -24,7 +24,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				   	var currentWeightStorage = resources.ColdStorageService.getCurrentWeightStorage()
 				   	var requestWeightToStore = 0.0
 				   	var TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
-		return { //this:ActionBasciFsm
+				return { //this:ActionBasciFsm
 				state("setup") { //this:State
 					action { //it:State
 						CommUtils.outblue("$name |	setup")
@@ -44,11 +44,11 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t09",targetState="requestEvaluation",cond=whenRequest("storeFood"))
-					transition(edgeName="t010",targetState="ticketEvaluation",cond=whenRequest("sendTicket"))
-					transition(edgeName="t011",targetState="charged",cond=whenRequest("deposit"))
-					transition(edgeName="t012",targetState="taken",cond=whenReply("pickupdone"))
-					transition(edgeName="t013",targetState="error",cond=whenEvent("local_movef"))
+					 transition(edgeName="t03",targetState="requestEvaluation",cond=whenRequest("storeFood"))
+					transition(edgeName="t04",targetState="ticketEvaluation",cond=whenRequest("sendTicket"))
+					transition(edgeName="t05",targetState="charged",cond=whenRequest("deposit"))
+					transition(edgeName="t06",targetState="taken",cond=whenReply("pickupdone"))
+					transition(edgeName="t07",targetState="error",cond=whenEvent("local_movef"))
 				}	 
 				state("requestEvaluation") { //this:State
 					action { //it:State
@@ -164,4 +164,4 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				}	 
 			}
 		}
-}
+} 

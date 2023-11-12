@@ -10,8 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-	
-class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
+import it.unibo.kactor.sysUtil.createActor   //Sept2023
+class Ledqakactor ( name: String, scope: CoroutineScope, isconfined: Boolean=false  ) : ActorBasicFsm( name, scope, confined=isconfined ){
 
 	override fun getInitialState() : String{
 		return "s0"
@@ -22,7 +22,7 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 				val ledState = state.LedState()
 				ledState.setState(state.LState.OFF)
 				var current = ledState.getCurrState()
-		return { //this:ActionBasciFsm
+				return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outblack("${name} STARTS")
@@ -31,7 +31,7 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t035",targetState="doCmd",cond=whenDispatch("ledCmd"))
+					 transition(edgeName="t029",targetState="doCmd",cond=whenDispatch("ledCmd"))
 				}	 
 				state("doCmd") { //this:State
 					action { //it:State
@@ -68,8 +68,8 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t036",targetState="doCmd",cond=whenDispatch("ledCmd"))
+					 transition(edgeName="t030",targetState="doCmd",cond=whenDispatch("ledCmd"))
 				}	 
 			}
 		}
-}
+} 

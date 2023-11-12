@@ -23,7 +23,7 @@ public class ServiceAccessController {
             logger.info("storeFood request received of quantity: " + quantity);
 
             // TODO: send request to an Actor through sendDataDispatcher via Qak
-            final String msg = "msg(storeFood, request, ws_gui, status_controller, storeFood(" + quantity + "), 1)"; // TODO: cambiare ws_gui con il nome del nuovo attore QAK
+            final String msg = "msg(storeFood, request, ws_gui, guicontroller, storeFood(" + quantity + "), 1)"; // TODO: cambiare ws_gui con il nome del nuovo attore QAK
             UtilsStatus.connTCP.request(msg);
 
         } else {
@@ -42,7 +42,7 @@ public class ServiceAccessController {
     public void ticketEvalutation(@RequestParam(value = "id") int ticketId) throws Exception {
         logger.info("sendTicket request received");
         if (ticketId > 0) { // TODO: CHECK IF 0 IS ACCEPTED
-        final String msg = "msg(sendTicket, request, ws_gui, status_controller, sendTicket(" + ticketId + "), 1)"; // TODO: cambiare ws_gui con il nome del nuovo attore QAK
+        final String msg = "msg(sendTicket, request, ws_gui, guicontroller, sendTicket(" + ticketId + "), 1)"; // TODO: cambiare ws_gui con il nome del nuovo attore QAK
             UtilsStatus.connTCP.request(msg);
         }
     }
@@ -51,8 +51,24 @@ public class ServiceAccessController {
     public void deposit(@RequestParam(value = "id") int ticketId) throws Exception {
         logger.info("deposit request received");
         if (ticketId > 0) { // TODO: CHECK IF 0 IS ACCEPTED
-            final String msg = "msg(deposit, request, ws_gui, status_controller, deposit(" + ticketId + "), 1)"; // TODO: cambiare ws_gui con il nome del nuovo attore QAK
+            final String msg = "msg(deposit, request, ws_gui, guicontroller, deposit(" + ticketId + "), 1)"; // TODO: cambiare ws_gui con il nome del nuovo attore QAK
             UtilsStatus.connTCP.request(msg);
         }
     }
+    /*
+    Alternativa unico mapping + observers
+    @GetMapping("/")
+    public String entry(Model viewmodel){
+        return buildThePage(viewmodel);
+    }
+
+    @PostMapping("/getData")
+    public String update(Model viewmodel, @RequestParam String ipaddr){
+        logger.info("deposit request received");
+        final String msg = "msg(getData, dispatch, ws_gui, guicontroller, getData(), 1)"; // TODO: cambiare ws_gui con il nome del nuovo attore QAK
+        UtilsStatus.connTCP.forward(msg);
+
+    }
+
+     */
 }

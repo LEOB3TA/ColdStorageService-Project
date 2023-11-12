@@ -10,8 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-	
-class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
+import it.unibo.kactor.sysUtil.createActor   //Sept2023
+class Mocktruck ( name: String, scope: CoroutineScope, isconfined: Boolean=false  ) : ActorBasicFsm( name, scope, confined=isconfined ){
 
 	override fun getInitialState() : String{
 		return "s0"
@@ -28,7 +28,7 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 		        	FW =  kotlin.random.Random.nextInt(1, 101)
 		        	DT = kotlin.random.Random.nextLong(1, 5001)
 		        }
-		return { //this:ActionBasciFsm
+				return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outgreen("$name |	started")
@@ -157,4 +157,4 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 			}
 		}
-}
+} 
