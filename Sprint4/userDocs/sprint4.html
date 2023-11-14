@@ -97,7 +97,7 @@
                             <td>Necessit&agrave; di fare il <kc>deploy di un ulteriore file</kc></td>
                         </tr>
                         <tr>
-                            <td>Possibilit&agrave; di <kc>facilitare la configurazione</kc> del led fisico o del led simulato (creando un file di configurazione)</td>
+                            <td><kc>Facilit&agrave;</kc> di configurazione tra led reale e led simulato</td>
                             <td><kc>Frammentazione</kc> del codice su pi&ugrave; componenti</td>
                         </tr>
                     </table></li>
@@ -111,47 +111,37 @@
                     </tr>
                     <tr>
                         <td><kc>Riutilizzo</kc> dello stesso codice</td>
-                        <td>Necessit&agrave; di fare il <kc>deploy di un ulteriore file</kc></td>
+                        <td><kc>Peggiore</kc> manutenzione del codice</td>
+                    </tr>
+                    <tr>
+                        <td><kc>Facilit&agrave;</kc> di deploy</td>
+                        <td><kc>Difficile</kc> cambiamento tra led reale e led simulato</td>
+                    </tr>
+                </table>
+                <li>Creare un <kc>oggetto</kc> <i>Kotlin</i>, utilizzando la libreria <i>pi4j</i> che risponda ai comandi inviati dall'attore</li>
+                <table style="width:100%" border="1">
+                    <tr>
+                        <td style="width:40%" align="center"><i>PROS</i>
+                        </td>
+                        <td style="width:40%" align="center"><i>CONS</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><kc>Facilit&agrave;</kc> di configurazione tra led reale e led simulato</td>
+                        <td><kc>Necessit&agrave;</kc> di manutenere pi&ugrave; di un file</td>
+                    </tr>
+                    <tr>
+                        <td><kc>Integrit&agrave;</kc> del linguaggio usato</td>
+                        <td></td>
                     </tr>
                     <tr>
                         <td><kc>Facilit&agrave;</kc> di deploy</td>
                         <td></td>
                     </tr>
-                </table></li>
-                <h1>TODO RIPENSARE BENE E CONTINUARE</h1>
-            </ul></li>
+                </table>
+            </ul>
+            Analizzando i pro e i contro &egrave; stato deciso di utiilizzare la <b>terza opzione</b></li>
         </ol>
-        <h4>Interazione tra componenti</h4>
-        Essendo che il <i>Led</i> deve accendersi, spegnersi o lampeggiare in base alla posizione del
-        <kc>TransportTrolley</kc>, ed essendo il <i>Led</i> progettato come un attuatore, si necessita della
-        presenza di un componente di sistema che lo controlli.<br>
-        Potrebbe risultare evidente, dal fatto che lo stato del <i>Led</i> dipenda da quello del <kc>TransportTrolley</kc>,
-        che sia quest'ultimo a controllare il <i>Led</i>. In alternativa, si potrebbe pensare ad usare un nuovo componente,
-        il quale ha la sola responsabilit&agrave; di comandare il <i>Led</i>. Al fine di evitare che il TransportTrolley si
-        occupi anche della gestione dello stato del Led, si consiglia di usare questo nuovo componente.<br>
-        Per far s&igrave; che il Led cambi stato si usa il seguente messaggio:
-        <pre><key2>Dispatch</key2> ledCmd : ledCmd(CMD)</pre>
-        In cui CMD indica lo stato futuro del Led.
-        <h4>Stato del Led</h4>
-        Dall'analisi emerge anche la necessit&agrave; di uno<kc> stato delLed</kc>, in modo da mantenere lo stato
-        salvato. Per fare ci&ograve;, lo stato viene rappresentato mediante il seguente enumerativo:
-        <pre><key>enum class</key> LState{
-           ON,
-           OFF,
-           BLINKS
-}</pre>
-        Ora bisogna capire come mantenere tale stato, sono possibili due soluzioni:
-        <ul>
-            <li>Cablare lo stato del led nel componente Led (sconsigliato)</li>
-            <li>Mantenere lo stato usando una <ks>data class Kotlin</ks> (consigliato)</li>
-        </ul>
-        Si consiglia la seconda opzione poich&egrave; in linea con le scelte fatte nei precedenti sprint ed
-        inoltre toglie tale responsabilit&agrave; al Led.
-        Sebbene questa soluzione sia pi&ugrave; complessa da implementare, &egrave; quella che
-        consigliamo agli sviluppatori in quanto permette di disaccoppiare la gestione dello stato
-        dalle funzionalit&agrave; del Led. Il codice della data class viene riportato mediante il link:
-        <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/unibo.prototipo2/resources/state/LedState.kt">dataClass</a>.
-
         <h3>Sonar</h3>
         Dall'analisi dei requisiti si evince che il <kc>Sonar</kc> &egrave; un componente fisico, connesso ad un
         RaspberryPi, il quale genera delle informazioni relative alla distanza da un ostacolo. Per tale motivo
