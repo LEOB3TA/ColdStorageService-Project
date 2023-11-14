@@ -22,11 +22,6 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 				val ledState = state.LedState()
 				ledState.setState(state.LState.OFF)
 				var current = ledState.getCurrState()
-				// Crea un'istanza del factory GPIO
-		    val gpio = com.pi4j.io.gpio.GpioFactory.getInstance()
-		
-		    // Specifica la GPIO da controllare (GPIO 25 in questo caso)
-		    val gpioPin: com.pi4j.io.gpio.GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(com.pi4j.io.gpio.RaspiPin.GPIO_25, "MyLED", com.pi4j.io.gpio.PinState.LOW)
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -46,29 +41,23 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 								if(  Cmd=="ON"  
 								 ){
 													ledState.setState(state.LState.ON)
-													current = ledState.getCurrState()
-													gpioPin.high()
+													resources.ledSupport.on()
 								updateResourceRep(ledState.toJsonString() 
 								)
-								CommUtils.outmagenta("${name} - $current")
 								}
 								if(  Cmd=="OFF"  
 								 ){
 													ledState.setState(state.LState.OFF)
-													current = ledState.getCurrState()
-													gpioPin.low()
+													resources.ledSupport.off()
 								updateResourceRep(ledState.toJsonString() 
 								)
-								CommUtils.outmagenta("${name} - $current")
 								}
 								if(  Cmd=="BLINK"  
 								 ){
 													ledState.setState(state.LState.BLINKS)
-													current = ledState.getCurrState()
+													resources.ledSupport.blink()
 								updateResourceRep(ledState.toJsonString() 
 								)
-								CommUtils.outmagenta("${name} - $current")
-								forward("gotoblink", "gotoblink(_)" ,"ledqakactor" ) 
 								}
 						}
 						//genTimer( actor, state )
@@ -77,22 +66,6 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 					sysaction { //it:State
 					}	 	 
 					 transition(edgeName="t02",targetState="doCmd",cond=whenDispatch("ledCmd"))
-					transition(edgeName="t03",targetState="blinkLed",cond=whenDispatch("gotoblink"))
-				}	 
-				state("blinkLed") { //this:State
-					action { //it:State
-						gpioPin.high() 
-						delay(500) 
-						gpioPin.low() 
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-				 	 		stateTimer = TimerActor("timer_blinkLed", 
-				 	 					  scope, context!!, "local_tout_ledqakactor_blinkLed", 500.toLong() )
-					}	 	 
-					 transition(edgeName="t04",targetState="blinkLed",cond=whenTimeout("local_tout_ledqakactor_blinkLed"))   
-					transition(edgeName="t05",targetState="doCmd",cond=whenDispatch("ledCmd"))
 				}	 
 			}
 		}
