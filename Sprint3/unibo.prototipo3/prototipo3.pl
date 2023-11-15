@@ -39,6 +39,8 @@ dispatch( gotorobottohome, gotorobottohome(_) ).
 dispatch( updateS, updateS(W) ).
 dispatch( getData, getData(_) ).
 dispatch( updateR, updateR(_) ).
+request( getrobotstate, getrobotstate(ARG) ).
+reply( robotstate, robotstate(POS,DIR) ).  %%for getrobotstate
 %====================================================================================
 context(ctxbasicrobot, "127.0.0.1",  "TCP", "8020").
 context(ctxprototipo3, "localhost",  "TCP", "8099").

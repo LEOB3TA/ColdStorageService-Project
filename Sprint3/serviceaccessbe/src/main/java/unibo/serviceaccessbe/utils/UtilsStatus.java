@@ -7,8 +7,8 @@ import unibo.basicomm23.utils.ColorsOut;
 import unibo.basicomm23.utils.CommSystemConfig;
 
 public class UtilsStatus {
-    private static String ctxName = "ctx_wasteservice";
-    private static String actorName = "status_controller";
+    private static final String ctxName = "ctx_wasteservice";
+    private static final String actorName = "status_controller";
 
     private static Interaction2021 conn;
     public static Interaction2021 connTCP;

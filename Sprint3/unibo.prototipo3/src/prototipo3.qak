@@ -35,6 +35,7 @@ Dispatch setrobotstate: setpos(X,Y,D)
 Dispatch setdirection : dir( D )  	  //D =up|down!left|right
 Dispatch cmd       	: cmd(MOVE)		 //MOVE=w|s|d|a|r|l|h
 
+
 Event local_movef : movef(_)
 
 //Sonar e movimenti robot
@@ -60,8 +61,12 @@ Dispatch gotorobottohome : gotorobottohome(_)
 
 Dispatch updateS : updateS(W) // W = peso
 Dispatch getData : getData(_)
+//Dispatch updateTp : updateTp(X,Y)
 Dispatch updateR : updateR(_)
-// TODO : check for position
+// TODO : check for position in particular if it can work in different ctx
+// basicrobot pos -> gestita dal basicrobot
+Request getrobotstate : getrobotstate(ARG)
+Reply robotstate      : robotstate(POS,DIR)  for getrobotstate
 
 Context ctxbasicrobot ip [host="127.0.0.1" port=8020]
 Context ctxprototipo3 ip [host="localhost" port=8099]
@@ -78,84 +83,6 @@ CodedQActor sonar context ctxprototipo3 className "rx.sonarSimulator" //in LOCAL
 CodedQActor datacleaner    context ctxprototipo3 className "rx.dataCleaner"
 //CodedQActor distancefilter context ctxprototipo3 className "rx.distanceFilter"
 
-/*
-QActor mocktruck context ctxprototipo3{
-    [#
-       	var FW = 0
-        var DT = 1000L  //DT= driver time tempo che ci mette il driver dopo aver ricevuto la richiesta per arrivare alla INDOOR
-        var TICKETID = 0
-        val truckstate = state.TruckState()
-
-        fun initDriver(){
-        	FW =  kotlin.random.Random.nextInt(1, 101)
-        	DT = kotlin.random.Random.nextLong(1, 5001)
-        }
-    #]
-    State s0 initial{
-		println("$name |	started") color green
-		println("this is an infinite loop, you need to kill the program to stop this") color red
-		discardMsg Off
-
-    }Goto idle
-
-    State idle {
-        println("$name |	in idle") color green
-        [#
-        	initDriver()
-        	delay(kotlin.random.Random.nextLong(1, 15001))
-        #]
-    }Goto sendStore
-
-    State sendStore {
-    	 println("$name |	sendStore") color green
-        request coldstorageservice -m storeFood : storeFood($FW)
-
-    } Transition t0 whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'è un errore interno al sistema, il driver abbandona
-    whenReply storeAccepted -> accepted
-                    whenReply storeRejected -> rejected
-
-   State rejected{
-   		println("$name |	request rejected") color green
-   }Goto idle
-
-    State accepted{
-   		onMsg (storeAccepted : storeAccepted(TICKETID)){
-   		[#
-   			TICKETID = payloadArg(0).toInt()
-   		#]
-   		}
-
-   		println("$name |	request accepted") color green
-   }Transition t0 whenTimeVar DT -> sendTicket
-
-   State sendTicket{
-   		 request coldstorageservice -m sendTicket : sendTicket($TICKETID)
-   		 println("$name |	send ticket") color green
-   } Transition t0 whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'� un errore interno al sistema, il driver abbandona
-   					whenReply ticketValid -> sendDeposit
-    				whenReply ticketExpired -> handleTicketExpired
-
-
-    State sendDeposit{
-        request coldstorageservice -m deposit : deposit(_)
-        println("$name |	send deposit") color green
-    } Transition t0  whenTime 60000 -> handleError //se non arriva una risposta entro 60 secondi c'� un errore interno al sistema, il driver abbandona
-    					whenReply chargeTaken -> idle
-
-    State handleError{
-    	println("$name |	COLD STORAGE SERVICE ERROR") color red
-    } Goto idle
-
-	State handleTicketExpired{
-		println("$name |	ticket expired") color green
-	} Goto idle
-
-	State handleTicketNotValid{
-		println("$name |	ticket Not valid retry") color green
-	} Goto sendTicket
-
-}
-*/
 // si occupa di osservare i componenti e modificare le GUI secondo tali cambiamenti
 QActor guicontroller context ctxprototipo3{
 	[#
@@ -169,6 +96,7 @@ QActor guicontroller context ctxprototipo3{
 		
 	}Transition t0 whenMsg updateS -> updatestorage
 				   whenMsg updateR -> updaterejected
+				   whenReply robotstate -> updateposition
 				   whenMsg getData -> updategui
 				   // TODO: check how to manage TT state/position
 				   //
@@ -191,6 +119,28 @@ QActor guicontroller context ctxprototipo3{
 			println("$name |	rejected")
 			[#
 				stato.setRejected()	
+			#]
+		}
+	}Goto updategui
+	
+	State updateposition{
+		//onMsg(updateTp: updateTp(X, Y)){ TODO check
+		onMsg(robotstate:robotstate(Pos,Dir)){
+			[#
+				val P = payloadArg(0).toInt()
+				val D = payloadArg(1).toInt()
+				var X = 0
+ 				var Y = 0
+ 				val regex = """pos\((\d+),(\d+)\)""".toRegex()
+				val matchResult = regex.find(Pos)
+				if (matchResult != null) {
+				    val (yStr, xStr) = matchResult.destructured
+				    X = xStr.toInt()
+				    Y = yStr.toInt()
+				}
+				stato.setTTP(intArrayOf(X,Y))
+				//var prova = stato.getTTP()
+				//for (i in 0..1) println( prova[i])	
 			#]
 		}
 	}Goto updategui
@@ -238,7 +188,14 @@ QActor coldstorageservice context ctxprototipo3 {
     State requestEvaluation {
     	        onMsg(storeFood : storeFood(FW)){
            println("Request evaluation to store ${payloadArg(0)} kg") color blue
-           [#requestWeightToStore=payloadArg(0).toDouble()#]
+           [#
+           	requestWeightToStore=payloadArg(0).toDouble()
+           	if(requestWeightToStore + currentWeightStorage < MAXW ){
+           		#]
+           			forward guicontroller -m updateS : updateS(requestWeightToStore) 
+           		[#
+           	}
+           	#]
 
        }
     } Goto acceptRequest if[# resources.ColdStorageService.canStore(requestWeightToStore) #]
@@ -311,6 +268,7 @@ QActor coldstorageservice context ctxprototipo3 {
     	        		#]
     	        		   println("Ticket of id ${payloadArg(0)} is expired - Reject Request") color blue
     						replyTo sendTicket with ticketExpired : ticketExpired(_)
+    						forward guicontroller -m updateR : updateR(_)
     	        	}
 
 					if [#TICKETEVALUATION == resources.TicketEvaluationResponse.INVALID #] {
@@ -320,6 +278,7 @@ QActor coldstorageservice context ctxprototipo3 {
     	        		#]
     	        			println("Inserted ticket id is not valid") color red
     					replyTo sendTicket with ticketNotValid : ticketNotValid(_)
+    					forward guicontroller -m updateR : updateR(_)
     	        	}
 
        				}

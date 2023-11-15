@@ -40,7 +40,8 @@ class Guicontroller ( name: String, scope: CoroutineScope, isconfined: Boolean=f
 					}	 	 
 					 transition(edgeName="t00",targetState="updatestorage",cond=whenDispatch("updateS"))
 					transition(edgeName="t01",targetState="updaterejected",cond=whenDispatch("updateR"))
-					transition(edgeName="t02",targetState="updategui",cond=whenDispatch("getData"))
+					transition(edgeName="t02",targetState="updateposition",cond=whenReply("robotstate"))
+					transition(edgeName="t03",targetState="updategui",cond=whenDispatch("getData"))
 				}	 
 				state("updatestorage") { //this:State
 					action { //it:State
@@ -67,6 +68,33 @@ class Guicontroller ( name: String, scope: CoroutineScope, isconfined: Boolean=f
 								CommUtils.outblack("$name |	rejected")
 								
 												stato.setRejected()	
+						}
+						//genTimer( actor, state )
+					}
+					//After Lenzi Aug2002
+					sysaction { //it:State
+					}	 	 
+					 transition( edgeName="goto",targetState="updategui", cond=doswitch() )
+				}	 
+				state("updateposition") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("robotstate(POS,DIR)"), Term.createTerm("robotstate(Pos,Dir)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								
+												val P = payloadArg(0).toInt()
+												val D = payloadArg(1).toInt()
+												var X = 0
+								 				var Y = 0
+								 				val regex = """pos\((\d+),(\d+)\)""".toRegex()
+												val matchResult = regex.find(Pos)
+												if (matchResult != null) {
+												    val (yStr, xStr) = matchResult.destructured
+												    X = xStr.toInt()
+												    Y = yStr.toInt()
+												}
+												stato.setTTP(intArrayOf(X,Y))
+												//var prova = stato.getTTP()
+												//for (i in 0..1) println( prova[i])	
 						}
 						//genTimer( actor, state )
 					}

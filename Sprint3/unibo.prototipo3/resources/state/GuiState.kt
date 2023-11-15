@@ -16,6 +16,9 @@ data class GuiState(
 
     private var pos : TTPosition = state.TTPosition.HOME ,
     private var ticketN: Int = 0, // 0 is accepted
+
+    //precise position
+    private var ttPos : IntArray = intArrayOf(0, 0)
 ){
     fun setCurrW(weight: Double){
         CurrW += weight
@@ -49,6 +52,14 @@ data class GuiState(
     }
     fun getTN():Int{
         return ticketN
+    }
+
+    fun getTTP(): IntArray{
+        return ttPos
+    }
+
+    fun setTTP( newp: IntArray ){
+        ttPos = newp
     }
 
     companion object{

@@ -44,18 +44,23 @@ class Coldstorageservice ( name: String, scope: CoroutineScope, isconfined: Bool
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t03",targetState="requestEvaluation",cond=whenRequest("storeFood"))
-					transition(edgeName="t04",targetState="ticketEvaluation",cond=whenRequest("sendTicket"))
-					transition(edgeName="t05",targetState="charged",cond=whenRequest("deposit"))
-					transition(edgeName="t06",targetState="taken",cond=whenReply("pickupdone"))
-					transition(edgeName="t07",targetState="error",cond=whenEvent("local_movef"))
+					 transition(edgeName="t04",targetState="requestEvaluation",cond=whenRequest("storeFood"))
+					transition(edgeName="t05",targetState="ticketEvaluation",cond=whenRequest("sendTicket"))
+					transition(edgeName="t06",targetState="charged",cond=whenRequest("deposit"))
+					transition(edgeName="t07",targetState="taken",cond=whenReply("pickupdone"))
+					transition(edgeName="t08",targetState="error",cond=whenEvent("local_movef"))
 				}	 
 				state("requestEvaluation") { //this:State
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("storeFood(FW)"), Term.createTerm("storeFood(FW)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								CommUtils.outblue("Request evaluation to store ${payloadArg(0)} kg")
-								requestWeightToStore=payloadArg(0).toDouble() 
+								
+								           	requestWeightToStore=payloadArg(0).toDouble()
+								           	if(requestWeightToStore + currentWeightStorage < MAXW ){
+								forward("updateS", "updateS(requestWeightToStore)" ,"guicontroller" ) 
+								
+								           	}
 						}
 						//genTimer( actor, state )
 					}
@@ -135,6 +140,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope, isconfined: Bool
 															resources.ColdStorageService.getTicketList().remove(TICKET)
 								CommUtils.outblue("Ticket of id ${payloadArg(0)} is expired - Reject Request")
 								answer("sendTicket", "ticketExpired", "ticketExpired(_)"   )  
+								forward("updateR", "updateR(_)" ,"guicontroller" ) 
 								}
 								if( TICKETEVALUATION == resources.TicketEvaluationResponse.INVALID  
 								 ){
@@ -142,6 +148,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope, isconfined: Bool
 															resources.ColdStorageService.getTicketList().remove(TICKET)
 								CommUtils.outred("Inserted ticket id is not valid")
 								answer("sendTicket", "ticketNotValid", "ticketNotValid(_)"   )  
+								forward("updateR", "updateR(_)" ,"guicontroller" ) 
 								}
 						}
 						//genTimer( actor, state )
