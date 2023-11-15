@@ -11,50 +11,6 @@ Reply ticketValid : ticketValid(_) for sendTicket
 Reply ticketNotValid : ticketNotValid(_) for sendTicket
 Reply ticketExpired : ticketExpired(_) for sendTicket
 
-// Messaggi scambiati con transporttrolley
-Request pickup:    pickup(_) 
-Reply  pickupdone:  pickupdone(_) for pickup
-
-// Messaggi scambiati col basicrobot23
-
-
-Request engage        : engage(ARG)
-Reply   engagedone    : engagedone(ARG) for engage
-Reply   engagerefused : engagerefused(ARG) for engage
-Dispatch disengage    : disengage(ARG)
-
-Request  doplan     : doplan( PATH, OWNER, STEPTIME )
-Reply doplandone    : doplandone( ARG ) for doplan
-Reply doplanfailed  : doplanfailed( ARG ) for doplan
-
-Request moverobot    :  moverobot(TARGETX, TARGETY)
-Reply moverobotdone  :  moverobotok(ARG) for moverobot
-Reply moverobotfailed:  moverobotfailed(PLANDONE, PLANTODO) for moverobot
-
-Dispatch setrobotstate: setpos(X,Y,D)
-Dispatch setdirection : dir( D )  	  //D =up|down!left|right
-Dispatch cmd       	: cmd(MOVE)		 //MOVE=w|s|d|a|r|l|h
-
-Event local_movef : movef(_)
-
-//Sonar e movimenti robot
-Event sonardata : distance(D) //dataclenaer
-//Event obstacle : obstacle(D)	//distancefilter
-Event alarm		: alarm(X)		//per tt TODO: l'argomento � utile?
-Event stop : stop(_)
-Event resume:resume(_)
-Dispatch sonaractivate: info(D) //D = DLIMIT
-
-//Led 
-Dispatch ledCmd : ledCmd ( CMD )
-
-Dispatch coapUpdate: coapUpdate(RES,VAL)
-
-//Messaggi autoinviati transporttrolley
-Dispatch gotomovetoport : gotomovetoport(_)
-Dispatch gotodepositactionended : gotodepositactionended(_)
-Dispatch gotorobottohome : gotorobottohome(_)
-
 Context ctxcoldstorageservice ip [host="localhost" port=8099]//TODO inserire l'indirizzo corretto
 Context ctxserviceaccessgui ip [host="localhost" port=8099] //TODO inserire ip corretto
 //Context ctxtruck ip[host="127.0.0.1" port=8092] //indirizzo interno alla rete
