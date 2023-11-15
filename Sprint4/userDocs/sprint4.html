@@ -271,11 +271,60 @@
         <ol>
             <li>Creare l'<kc>architettura hardware</kc> su cui fare il deploy del basicrobot</li>
             <li>Conversione dei comandi al <i>wenv</i> in comandi per il robot fisico</li>
+            <li>Come fare il <kc>deploy</kc></li>
         </ol>
         <h4>Possibili soluzioni</h4>
         <ol>
-            <li>Per la creazione dell'architettura &egrave; necessario analizzare la documentazione fornita insieme al <i>basicrobot</i> che specifica quali componenti avere e come collegarli al <b>RaspberryPi</b> per creare un robot denominato <kc>realnano</kc>.</li>
-            <h1>TODO contiunare capire se la parte di architettura hw va nella parte di progetto o problema</h1>
+            <li>Per la creazione dell'architettura &egrave; necessario analizzare la documentazione fornita insieme al <i>basicrobot</i> che specifica quali componenti avere e come collegarli al <b>RaspberryPi</b> per creare un robot denominato <kc>realnano</kc>.<br> Tale robot contiene anche il supporto hardware per il <i>sonar</i> e per il <i>led</i></li>
+            <li>Analizzando la documentazione fornita insieme al <i>basicrobot</i> si evince che il supporto per i movimenti pu&ograve; essere implementato in 3 modi: <b>virtual</b>,<b>realnano</b>,<b>realmbot</b>.<br>
+            L'implementazione che interessa a noi &egrave; <kc>realnano</kc>, quindi &egrave; necessario modificare il file di configurazione (<i>basicrobotconfig.json</i>) nel seguente modo:
+            <pre>
+{"type":"realnano", "port":"8090", "iprobot":"[robotip]", "commtrace": "false"}
+            </pre></li>
+            <li>Dopo il colloquio con il committente, ci &egrave; stato consegnato il codice sorgente, suggerendoci l'utilizzo del target <kc>Gradle</kc> <i>distZip</i>. Il file ZIP generato deve successivamente essere estratto nell'ambiente <kc>RaspberryPi</kc>, e l'esecuzione del programma deve avvenire mediante il file contenuto nella cartella <i>bin</i>. In aggiunta, &egrave; richiesto il trasferimento di tutti i file di configurazione indispensabili.</li>
+        </ol>
+        <h3>Modifica dei contesti</h3>
+        Tutte le componenti presenti all'interno del <kc>RaspberryPi</kc> devono eseguire in un contesto indipendente dagli altri componenti del sistema.
+        <h4>Problemi</h4>
+        <ol>
+            <li>Come <kc>modificare</kc> il software preesistente in modo che esegua su un <b>RaspberryPi</b>, senza influenzare il comportamento gi&agrave; sperimentato</li>
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+            <li>Avendo utilizzato il linguaggio <b>Qak</b> per la precedente implementazione &egrave; sufficiente<ul>
+                <li>Creare un progetto <i>Gradle</i> a se stante</li>
+                <li>Specificare il nuovo contesto su cui eseguir&agrave; il software (<i>ctxrasp</i>) </li>
+                <li>Fare il deploy sul computer attraverso un jar</li>
+            </ul></li>
+        </ol>
+        <b>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</b>
+        <h3>ServiceAccessGUI</h3>
+        Dall'analisi dei requisiti si evince che la <kc>ServiceStatusGUI</kc> deve essere eseguita su una computer <b>esterno</b> rispetto all'intero sistema.
+        <h4>Problemi</h4>
+        <ol>
+            <li>Come <kc>modificare</kc> il software preesistente in modo che esegua su un computer esterno al sistema, senza influenzare il comportamento gi&agrave; sperimentato</li>
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+            <li>Avendo utilizzato il linguaggio <b>Qak</b> per la precedente implementazione &egrave; sufficiente<ul>
+                <li>Creare un progetto <i>Gradle</i> a se stante</li>
+                <li>Specificare i nuovi contesti, in particolare: un nuovo contesto per la <b>ServiceAccessGUI</b> (<i>ctxserviceaccessgui</i>) e un contesto per il <b>ColdStorageService</b> (<i>ctxstorageservice</i>) con la definizione dell'attore <i>external</i> </li>
+                <li>Fare il deploy sul computer attraverso un jar</li>
+            </ul></li>
+        </ol>
+        <h3>ColdStorageService,ServiceStatusGUI,TrasportTrolley</h3>
+        Dall'analisi dei requisiti si evince che questi componenti devon essere eseguiti su un computer a se stante.
+        <h4>Problemi</h4>
+        <ol>
+            <li>Come <kc>modificare</kc> il software preesistente in modo che esegua su un computer esterno al sistema, senza influenzare il comportamento gi&agrave; sperimentato</li>
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+            <li>Avendo utilizzato il linguaggio <b>Qak</b> per la precedente implementazione &egrave; sufficiente<ul>
+                <li>Creare un progetto <i>Gradle</i> a se stante</li>
+                <li>Specificare i nuovi contesti, in particolare: un nuovo contesto per le tre componenti (<i>ctxstorageservice</i>), un contesto per il <b>basicrobot</b> (<i>ctxbasicrobot</i>) e uno per il <b>Raspberry</b> (<i>ctxrasp</i>) con la definizione degli attori <i>external</i></li>
+                <li>Fare il deploy sul computer attraverso un jar</li>
+            </ul></li>
         </ol>
     </div>
     <h2>Architettura Logica</h2>
