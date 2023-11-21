@@ -46,7 +46,6 @@ class Mocktruck ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						CommUtils.outgreen("$name |	in idle")
 						
 						        	initDriver()
-						        	delay(kotlin.random.Random.nextLong(1, 15001))
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

@@ -25,7 +25,8 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outblack("${name} STARTS")
+						CommUtils.outgreen("${name} STARTS")
+						resources.ledSupport.create() 
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

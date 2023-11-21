@@ -25,7 +25,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CommUtils.outblack("sonar | start with appl: $Appl")
+						CommUtils.outgreen("sonar | start with appl: $Appl")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

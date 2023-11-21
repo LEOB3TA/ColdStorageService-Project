@@ -24,7 +24,7 @@ class Stateobservercontroller ( name: String, scope: CoroutineScope  ) : ActorBa
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CoapObserverSupport(myself, "localhost","8099","ctxcoldstorageservice","transporttrolley")
+						CoapObserverSupport(myself, "192.168.178.21","8099","ctxcoldstorageservice","transporttrolley")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

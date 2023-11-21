@@ -11,7 +11,7 @@ reply( ticketValid, ticketValid(_) ).  %%for sendTicket
 reply( ticketNotValid, ticketNotValid(_) ).  %%for sendTicket
 reply( ticketExpired, ticketExpired(_) ).  %%for sendTicket
 %====================================================================================
-context(ctxcoldstorageservice, "localhost",  "TCP", "8099").
-context(ctxserviceaccessgui, "localhost",  "TCP", "8099").
+context(ctxcoldstorageservice, "192.168.178.21",  "TCP", "8099").
+context(ctxserviceaccessgui, "192.168.178.81",  "TCP", "8099").
  qactor( coldstorageservice, ctxcoldstorageservice, "external").
   qactor( mocktruck, ctxserviceaccessgui, "it.unibo.mocktruck.Mocktruck").

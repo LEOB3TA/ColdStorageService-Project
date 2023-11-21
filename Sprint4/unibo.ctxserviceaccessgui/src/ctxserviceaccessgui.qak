@@ -11,8 +11,8 @@ Reply ticketValid : ticketValid(_) for sendTicket
 Reply ticketNotValid : ticketNotValid(_) for sendTicket
 Reply ticketExpired : ticketExpired(_) for sendTicket
 
-Context ctxcoldstorageservice ip [host="localhost" port=8099]//TODO inserire l'indirizzo corretto
-Context ctxserviceaccessgui ip [host="localhost" port=8099] //TODO inserire ip corretto
+Context ctxcoldstorageservice ip [host="192.168.178.21" port=8099]//TODO inserire l'indirizzo corretto
+Context ctxserviceaccessgui ip [host="192.168.178.81" port=8099] //TODO inserire ip corretto
 //Context ctxtruck ip[host="127.0.0.1" port=8092] //indirizzo interno alla rete
 
 // Attori Esterni
@@ -41,7 +41,6 @@ QActor mocktruck context ctxserviceaccessgui{
         println("$name |	in idle") color green
         [#
         	initDriver()
-        	delay(kotlin.random.Random.nextLong(1, 15001))
         #]
     }Goto sendStore
 
