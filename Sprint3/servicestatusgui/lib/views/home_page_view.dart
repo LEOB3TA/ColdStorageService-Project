@@ -1,9 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logger/logger.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:servicestatusgui/model/service_status_dto.dart';
 import 'package:servicestatusgui/widgets/map_grid.dart';
 import 'package:servicestatusgui/widgets/spaced_column.dart';
 import 'package:servicestatusgui/widgets/spaced_row.dart';
+import 'package:stomp_dart_client/stomp.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
+
+const socketUrl = 'ws://localhost:8080/ws-message';
+
+var logger = Logger(printer: PrettyPrinter());
 
 class HomePageView extends StatefulWidget {
   const HomePageView({super.key});
@@ -13,6 +24,45 @@ class HomePageView extends StatefulWidget {
 }
 
 class _HomePageViewState extends State<HomePageView> {
+  late StompClient stompClient;
+  ServiceStatusDTO serviceStatusDTO = ServiceStatusDTO();
+
+  @override
+  void initState() {
+    super.initState();
+
+    stompClient = StompClient(
+        config: StompConfig(
+      url: socketUrl,
+      onConnect: onConnect,
+      onWebSocketError: (dynamic error) => logger.e("WebSocket Error: ${error.jsify.toString()}"),
+      beforeConnect: () async {
+        logger.i('WebSocket Info: Waiting to connect...');
+        await Future.delayed(const Duration(milliseconds: 200));
+        logger.i('WebSocket Info: Connecting...');
+      },
+      onDisconnect: (dynamic frame) {
+        logger.i('WebSocket Info: Disconnected.');
+      },
+    ));
+
+    stompClient.activate();
+  }
+
+  void onConnect(StompFrame frame) {
+    logger.i('WebSocket Info: Connected.');
+    stompClient.subscribe(
+        destination: '/topic/message',
+        callback: (StompFrame frame) {
+          if (frame.body != null) {
+            Map<String, dynamic> result = json.decode(frame.body!);
+            //print(result['message']);
+            setState(() => serviceStatusDTO = ServiceStatusDTO.fromJson(result));
+            print(serviceStatusDTO.toString());
+          }
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,26 +192,26 @@ class _HomePageViewState extends State<HomePageView> {
                                                   radius: 96,
                                                   animation: true,
                                                   lineWidth: 16,
-                                                  percent: 0.75,
+                                                  percent: serviceStatusDTO.currentWeight / serviceStatusDTO.maxWeight,
                                                   center: RichText(
                                                     textAlign: TextAlign.center,
-                                                    text: const TextSpan(
+                                                    text: TextSpan(
                                                       text: 'KG\n',
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                           fontWeight: FontWeight.w600,
                                                           fontSize: 16,
                                                           color: Colors.black26),
                                                       children: <TextSpan>[
                                                         TextSpan(
-                                                            text: '7.5\n',
-                                                            style: TextStyle(
+                                                            text: '${serviceStatusDTO.currentWeight}\n',
+                                                            style: const TextStyle(
                                                                 letterSpacing: 0,
                                                                 fontWeight: FontWeight.w600,
                                                                 fontSize: 32,
                                                                 color: Colors.redAccent)),
                                                         TextSpan(
-                                                            text: 'Out of 10',
-                                                            style: TextStyle(
+                                                            text: 'Out of ${serviceStatusDTO.maxWeight} kg',
+                                                            style: const TextStyle(
                                                                 fontWeight: FontWeight.w400,
                                                                 fontSize: 16,
                                                                 color: Colors.black38)),
@@ -212,13 +262,13 @@ class _HomePageViewState extends State<HomePageView> {
                                                       ),
                                                     ),
                                                   ),
-                                                  const Expanded(
+                                                  Expanded(
                                                     flex: 2,
                                                     child: SpacedColumn(
                                                         spacing: 0,
                                                         mainAxisAlignment: MainAxisAlignment.center,
                                                         children: [
-                                                          Expanded(
+                                                          const Expanded(
                                                             child: FittedBox(
                                                               fit: BoxFit.cover,
                                                               child: Text(
@@ -233,20 +283,21 @@ class _HomePageViewState extends State<HomePageView> {
                                                             child: FittedBox(
                                                               fit: BoxFit.cover,
                                                               child: Text(
-                                                                'Home',
-                                                                style: TextStyle(fontSize: 36, color: Colors.black54),
+                                                                serviceStatusDTO.status,
+                                                                style: const TextStyle(
+                                                                    fontSize: 36, color: Colors.black54),
                                                               ),
                                                             ),
                                                           ),
                                                         ]),
                                                   ),
-                                                  const Expanded(
+                                                  Expanded(
                                                     flex: 2,
                                                     child: SpacedColumn(
                                                         spacing: 0,
                                                         mainAxisAlignment: MainAxisAlignment.center,
                                                         children: [
-                                                          Expanded(
+                                                          const Expanded(
                                                             child: FittedBox(
                                                               fit: BoxFit.cover,
                                                               child: Text(
@@ -261,8 +312,9 @@ class _HomePageViewState extends State<HomePageView> {
                                                             child: FittedBox(
                                                               fit: BoxFit.cover,
                                                               child: Text(
-                                                                '(X,Y)',
-                                                                style: TextStyle(fontSize: 36, color: Colors.black54),
+                                                                '(${serviceStatusDTO.position.getX}, ${serviceStatusDTO.position.getY})',
+                                                                style: const TextStyle(
+                                                                    fontSize: 36, color: Colors.black54),
                                                               ),
                                                             ),
                                                           ),
@@ -301,13 +353,13 @@ class _HomePageViewState extends State<HomePageView> {
                                                       ),
                                                     ),
                                                   ),
-                                                  const Expanded(
+                                                  Expanded(
                                                     flex: 4,
                                                     child: FittedBox(
                                                       fit: BoxFit.cover,
                                                       child: Text(
-                                                        '0',
-                                                        style: TextStyle(fontSize: 96, color: Colors.black54),
+                                                        serviceStatusDTO.rejectedRequests.toString(),
+                                                        style: const TextStyle(fontSize: 96, color: Colors.black54),
                                                       ),
                                                     ),
                                                   ),
@@ -348,7 +400,11 @@ class _HomePageViewState extends State<HomePageView> {
                                         ),
                                       ),
                                     ),
-                                    const Expanded(flex: 11, child: MapGrid())
+                                    Expanded(
+                                        flex: 11,
+                                        child: MapGrid(
+                                          currentPosition: serviceStatusDTO.position,
+                                        ))
                                   ])),
                             ),
                           )),

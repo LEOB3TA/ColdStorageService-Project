@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class Pixel extends StatelessWidget {
   final MaterialColor color;
   final String value;
-  const Pixel({super.key, required this.color, required this.value});
+  final bool robot;
+  const Pixel({super.key, required this.color, required this.value, this.robot = false});
 
   @override
   Widget build(BuildContext context) {
@@ -20,11 +21,16 @@ class Pixel extends StatelessWidget {
             padding: const EdgeInsets.all(2),
             child: FittedBox(
               fit: BoxFit.contain,
-              child: Center(
-                  child: Text(
-                value,
-                style: TextStyle(fontSize: 64, fontWeight: FontWeight.bold, color: color.shade400.withOpacity(0.5)),
-              )),
+              child: Stack(
+                children: [
+                  Center(
+                      child: Text(
+                    value,
+                    style: TextStyle(fontSize: 64, fontWeight: FontWeight.bold, color: color.shade400.withOpacity(0.5)),
+                  )),
+                  if (robot) const Image(image: AssetImage('assets/images/robot.png'))
+                ],
+              ),
             ),
           ),
         ),

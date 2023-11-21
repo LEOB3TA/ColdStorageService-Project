@@ -26,8 +26,8 @@
       <module name="unibo.transporttrolley" target="11" />
       <module name="unibo.transporttrolley.main" target="11" />
       <module name="unibo.transportTrolley.main" target="11" />
-      <module name="unibo.transportTrolley.test" target="11" />
       <module name="unibo.transporttrolley.test" target="11" />
+      <module name="unibo.transportTrolley.test" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>
