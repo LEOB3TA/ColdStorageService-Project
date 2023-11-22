@@ -29,7 +29,7 @@ public class WebSocketController {
         this.template = template;
         this.env = env;
         this.serviceConfigDTO = serviceConfigDTO;
-        System.out.println(serviceConfigDTO);
+        System.out.println(serviceConfigDTO.toJson());
     }
 
     @SubscribeMapping("/topic/message")

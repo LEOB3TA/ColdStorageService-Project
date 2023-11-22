@@ -1,6 +1,9 @@
 package com.unibo.servicestatusbe.model;
 
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonArrayFormatVisitor;
 import lombok.Data;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -52,35 +55,48 @@ public class ServiceConfigDTO {
                 ", \"currentWeight\":" + currentWeight +
                 ", \"rows\":" + rows +
                 ", \"cols\":" + cols +
-                ", \"roomHome\":" + Arrays.stream(roomHome) +
-                ", \"roomIndoor\":" + roomIndoor +
-                ", \"roomColdroom\":" + roomColdroom +
+                ", \"roomHome\":" + fromIntArrayToJson(roomHome) +
+                ", \"roomIndoor\":" + fromIntArrayToJson(roomIndoor) +
+                ", \"roomColdroom\":" + fromIntArrayToJson(roomColdroom) +
                 "}";
     }
 
-    public void fromIntArrayToJson(int[] array) {
-        int chunk = 2; // chunk size to divide
+    public String fromIntArrayToJson(int[] array) {
+       /* int chunk = 2; // chunk size to divide
         int[][] result = new int[array.length / chunk][chunk];
         for(int i=0;i<array.length;i+=chunk){
             System.out.println(Arrays.toString(Arrays.copyOfRange(array, i, Math.min(array.length,i+chunk))));
             result[i / chunk] = Arrays.copyOfRange(array, i, Math.min(array.length,i+chunk));
+        }*/
+        JSONArray jsonArray =  new JSONArray();
+        JSONObject positionObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
+        for (int i = 0; i < array.length; i += 2) {
+            jsonObject.put("x", array[i]);
+            if (i + 1 < array.length) {
+                jsonObject.put("y", array[i + 1]);
+            }
+            positionObject.put("position", jsonObject);
+            jsonArray.add(positionObject);
         }
+        return jsonArray.toString();
+
 
         /*
         Result
         "[
-            "position": {
+            {"position": {
                 "x": 1,
                 "y": 2
-            },
-            "position": {
+            }},
+            {"position": {
                 "x": 3,
                 "y": 4
-            },
-            "position": {
+            }},
+            {"position": {
                 "x": 5,
                 "y": 6
-            }
+            }}
         ]"
          */
     }
