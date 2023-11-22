@@ -12,7 +12,7 @@ import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 
-const socketUrl = 'ws://localhost:8080/ws-message';
+const socketUrl = 'ws://localhost:11804/ws-message';
 
 var logger = Logger(printer: PrettyPrinter());
 
@@ -35,7 +35,7 @@ class _HomePageViewState extends State<HomePageView> {
         config: StompConfig(
       url: socketUrl,
       onConnect: onConnect,
-      onWebSocketError: (dynamic error) => logger.e("WebSocket Error: ${error.jsify.toString()}"),
+      onWebSocketError: (dynamic error) => logger.e("WebSocket Error: ${error.toString()}"),
       beforeConnect: () async {
         logger.i('WebSocket Info: Waiting to connect...');
         await Future.delayed(const Duration(milliseconds: 200));
@@ -50,17 +50,19 @@ class _HomePageViewState extends State<HomePageView> {
   }
 
   void onConnect(StompFrame frame) {
-    logger.i('WebSocket Info: Connected.');
+    //stompClient.subscribe(destination: '/subscribe', callback: (StompFrame frame) => logger.i(frame.body!));
     stompClient.subscribe(
         destination: '/topic/message',
         callback: (StompFrame frame) {
+          print(frame.body!);
           if (frame.body != null) {
             Map<String, dynamic> result = json.decode(frame.body!);
-            //print(result['message']);
+            print(result['message']);
             setState(() => serviceStatusDTO = ServiceStatusDTO.fromJson(result));
             print(serviceStatusDTO.toString());
           }
         });
+    logger.i('WebSocket Info: Connected.');
   }
 
   @override
