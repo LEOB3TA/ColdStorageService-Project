@@ -11,7 +11,7 @@ class SpacedRow extends StatelessWidget {
   final double spacing;
 
   const SpacedRow({
-    Key? key,
+    super.key,
     this.mainAxisAlignment = MainAxisAlignment.start,
     this.mainAxisSize = MainAxisSize.max,
     this.crossAxisAlignment = CrossAxisAlignment.center,
@@ -20,7 +20,7 @@ class SpacedRow extends StatelessWidget {
     this.textBaseline,
     this.children = const [],
     required this.spacing,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

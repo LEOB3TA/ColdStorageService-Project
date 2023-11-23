@@ -5,6 +5,7 @@ class Position {
   const Position({this.x = 0, this.y = 0});
 
   int get getX => x;
+
   int get getY => y;
 
   @override
@@ -25,4 +26,8 @@ class Position {
         "x": x,
         "y": y,
       };
+
+  @override
+  bool operator ==(Object other) =>
+      other is Position && runtimeType == other.runtimeType && x == other.x && y == other.y;
 }

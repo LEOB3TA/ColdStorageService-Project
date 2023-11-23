@@ -29,7 +29,8 @@ public class WebSocketController {
         this.template = template;
         this.env = env;
         this.serviceConfigDTO = serviceConfigDTO;
-        System.out.println(serviceConfigDTO.toJson());
+        System.out.println("INITIAL SERVICE CONFIG -----------------------\n " + serviceConfigDTO.toJson());
+
     }
 
     @SubscribeMapping("/topic/message")
@@ -43,6 +44,12 @@ public class WebSocketController {
 
     @PostMapping(value = "/send", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> sendMessage(@RequestBody ServiceStatusDTO serviceStatusDTO) {
+        if (serviceStatusDTO.getCurrentWeight() > serviceConfigDTO.getMaxWeight()) {
+            return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if (serviceStatusDTO.getCurrentWeight() < 0) {
+            return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
+        }
         template.convertAndSend("/topic/message", serviceStatusDTO);
         return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
     }
