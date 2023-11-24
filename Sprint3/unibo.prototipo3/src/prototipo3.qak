@@ -80,7 +80,7 @@ ExternalQActor basicrobot context ctxbasicrobot
 
 //CodedQActor sonar  context ctxrasp className "rx.sonarHCSR04Support23"   //SU RASP
 CodedQActor sonar context ctxprototipo3 className "rx.sonarSimulator" //in LOCALE
-CodedQActor datacleaner    context ctxprototipo3 className "rx.dataCleaner"
+CodedQActor datacleaner context ctxprototipo3 className "rx.dataCleaner"
 //CodedQActor distancefilter context ctxprototipo3 className "rx.distanceFilter"
 
 // si occupa di osservare i componenti e modificare le GUI secondo tali cambiamenti
@@ -132,7 +132,7 @@ QActor guicontroller context ctxprototipo3{
 				var X = 0
  				var Y = 0
  				val regex = """pos\((\d+),(\d+)\)""".toRegex()
-				val matchResult = regex.find(Pos)
+				val matchResult = regex.find(P.toString())
 				if (matchResult != null) {
 				    val (yStr, xStr) = matchResult.destructured
 				    X = xStr.toInt()

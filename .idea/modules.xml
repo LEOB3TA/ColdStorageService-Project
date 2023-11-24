@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/issProject2023.iml" filepath="$PROJECT_DIR$/.idea/issProject2023.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/serviceaccessbe.main.iml" filepath="$PROJECT_DIR$/.idea/modules/serviceaccessbe.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/serviceaccessbe.test.iml" filepath="$PROJECT_DIR$/.idea/modules/serviceaccessbe.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/servicestatusbe.main.iml" filepath="$PROJECT_DIR$/.idea/modules/servicestatusbe.main.iml" />
     </modules>
   </component>

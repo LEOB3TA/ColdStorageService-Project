@@ -3,6 +3,8 @@ package com.unibo.servicestatusbe.controller;
 import com.unibo.servicestatusbe.model.ServiceConfigDTO;
 import com.unibo.servicestatusbe.model.ServiceStatusDTO;
 import com.unibo.servicestatusbe.model.TextMessageDTO;
+import com.unibo.servicestatusbe.utils.UtilsCoapObserver;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
@@ -17,13 +19,62 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+import unibo.basicomm23.coap.CoapConnection;
+import unibo.basicomm23.interfaces.Interaction2021;
+import unibo.basicomm23.tcp.TcpClientSupport;
+import unibo.basicomm23.utils.ColorsOut;
+import unibo.basicomm23.utils.CommSystemConfig;
 
 @RestController
 public class WebSocketController {
+
+    // Observer connection
+    private static final String ctxName = "ctx_prototipo3";
+    private static final String actorName = "transporttrolley";//"guicontroller"
+    private static Interaction2021 conn;
+    public static Interaction2021 connTCP;
+    // end Observer conf
     final SimpMessagingTemplate template;
     final Environment env;
     final ServiceConfigDTO serviceConfigDTO;
+    // *********************************Observer connection
+    public static CoapConnection connectCoap(String ip, int port){
+        try{
+            CommSystemConfig.tracing = true;
+            String path = ctxName + "/" + actorName;
+            conn = new CoapConnection(ip + ":" + port, path);
+            ColorsOut.out("[UtilsStatusGUI] connect Tcp conn:" + conn );
+            ColorsOut.outappl("[UtilsStatusGUI] connect Coap conn:" + conn , ColorsOut.CYAN);
+        }catch(Exception e){
+            ColorsOut.outerr("[UtilsStatusGUI] connect with GUIupdater ERROR:"+e.getMessage());
+        }
+        return (CoapConnection) conn;
+    }
+
+    public static void connectTCP(String ip, int port){
+        try {
+            CommSystemConfig.tracing = true;
+            connTCP = TcpClientSupport.connect(ip, port, 10);
+            ColorsOut.out("[UtilsStatusGUI] connect Tcp conn:" + conn );
+            ColorsOut.outappl("[UtilsStatusGUI] connect Tcp conn:" + conn , ColorsOut.CYAN);
+        }catch(Exception e){
+            ColorsOut.outerr("[UtilsStatusGUI] connect with GUIupdater ERROR:"+e.getMessage());
+        }
+    }
+
+    public static void sendMsg() {
+        try {
+            String msg = "msg(get_data, dispatch, ws_gui, " + actorName + ", get_data(_), 1)";
+            ColorsOut.outappl("[UtilsStatusGUI] sendMsg msg:" + msg + " conn=" + conn, ColorsOut.BLUE);
+            connTCP.forward(msg);
+        } catch (Exception e) {
+            ColorsOut.outerr("[UtilsStatusGUI] sendMsg on:" + conn + " ERROR:" + e.getMessage());
+        }
+    }
+
+    // ********************************************end Observer conf
 
     public WebSocketController(SimpMessagingTemplate template, Environment env, ServiceConfigDTO serviceConfigDTO) {
         this.template = template;
@@ -35,6 +86,10 @@ public class WebSocketController {
 
     @SubscribeMapping("/topic/message")
     public TextMessageDTO subscribe() {
+        connectCoap("localhost", 8099).observeResource(new UtilsCoapObserver());
+        connectTCP("localhost",8099);
+        sendMsg();
+
         System.out.println("Subscribed to /topic/message");
 
         TextMessageDTO message =  new TextMessageDTO("Subscribed to /topic/message");
@@ -69,6 +124,35 @@ public class WebSocketController {
         System.out.println("Subscribed to /topic/message");
         template.convertAndSend("/topic/message", serviceConfigDTO.toJson());
 
+    }
+    public static void sendToAll(String message){
+        try{
+            ColorsOut.outappl("WebSocketController | sendToAll String: " + message, ColorsOut.CYAN);
+            sendToAll( new TextMessage(message)) ;
+        }catch( Exception e ){
+            ColorsOut.outerr("WebSocketController | sendToAll String ERROR:"+e.getMessage());
+        }
+    }
+
+    public static void sendToAll(TextMessage message){
+        /*
+        TODO: To send to all
+        Iterator<WebSocketSession> iter =session.iterator();
+        while( iter.hasNext() ){
+            try{
+                WebSocketSession session = iter.next();
+                ColorsOut.outappl("WebSocketHandler | sendToAll " +
+                        message.getPayload() + " for session " + session.getRemoteAddress() , ColorsOut.MAGENTA);
+                //synchronized(session){
+                session.sendMessage(message);
+                //}
+            }catch(Exception e){
+                ColorsOut.outerr("WebSocketHandler | TextMessage ERROR:"+e.getMessage());
+            }
+        }
+         */
+
+        System.out.println(message.getPayload());
     }
 
 }
