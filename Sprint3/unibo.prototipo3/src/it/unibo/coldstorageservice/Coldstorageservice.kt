@@ -10,8 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import it.unibo.kactor.sysUtil.createActor   //Sept2023
-class Coldstorageservice ( name: String, scope: CoroutineScope, isconfined: Boolean=false  ) : ActorBasicFsm( name, scope, confined=isconfined ){
+	
+class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
 		return "setup"
@@ -24,7 +24,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope, isconfined: Bool
 				   	var currentWeightStorage = resources.ColdStorageService.getCurrentWeightStorage()
 				   	var requestWeightToStore = 0.0
 				   	var TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
-				return { //this:ActionBasciFsm
+		return { //this:ActionBasciFsm
 				state("setup") { //this:State
 					action { //it:State
 						CommUtils.outblue("$name |	setup")
@@ -171,4 +171,4 @@ class Coldstorageservice ( name: String, scope: CoroutineScope, isconfined: Bool
 				}	 
 			}
 		}
-} 
+}

@@ -10,8 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import it.unibo.kactor.sysUtil.createActor   //Sept2023
-class Ledqakactor ( name: String, scope: CoroutineScope, isconfined: Boolean=false  ) : ActorBasicFsm( name, scope, confined=isconfined ){
+	
+class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
 		return "s0"
@@ -22,7 +22,7 @@ class Ledqakactor ( name: String, scope: CoroutineScope, isconfined: Boolean=fal
 				val ledState = state.LedState()
 				ledState.setState(state.LState.OFF)
 				var current = ledState.getCurrState()
-				return { //this:ActionBasciFsm
+		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outblack("${name} STARTS")
@@ -72,4 +72,4 @@ class Ledqakactor ( name: String, scope: CoroutineScope, isconfined: Boolean=fal
 				}	 
 			}
 		}
-} 
+}
