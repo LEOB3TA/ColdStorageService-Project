@@ -55,9 +55,9 @@ Dispatch gotomovetoport : gotomovetoport(_)
 Dispatch gotodepositactionended : gotodepositactionended(_)
 Dispatch gotorobottohome : gotorobottohome(_)
 
-Context ctxbasicrobot ip [host="192.168.178.63" port=8020] //TODO indirizzo ip del raspberry ma con porta diversa
-Context ctxrasp ip [host="192.168.178.63" port=8099] //TODO inserire l'indirizzo del raspberry
-Context ctxcoldstorageservice ip [host="192.168.178.21" port=8099]//TODO inserire l'indirizzo corretto
+Context ctxbasicrobot ip [host="192.168.178.64" port=8020] //TODO indirizzo ip del raspberry ma con porta diversa
+Context ctxrasp ip [host="192.168.178.64" port=8099] //TODO inserire l'indirizzo del raspberry
+Context ctxcoldstorageservice ip [host="localhost" port=8099]//TODO inserire l'indirizzo corretto
 
 
 // Attori Esterni

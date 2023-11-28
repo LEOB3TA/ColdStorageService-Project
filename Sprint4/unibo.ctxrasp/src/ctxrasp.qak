@@ -11,7 +11,7 @@ Dispatch sonaractivate: info(D) //D = DLIMIT
 Dispatch ledCmd : ledCmd ( CMD )
 
 //Context ctxbasicrobot ip [host="127.0.0.1" port=8020] //TODO indirizzo ip del raspberry ma con porta diversa
-Context ctxrasp ip [host="192.168.178.63" port=8099] //TODO inserire l'indirizzo del raspberry
+Context ctxrasp ip [host="localhost" port=8099] //TODO inserire l'indirizzo del raspberry
 //Context  ctxstorageservice ip [host="localhost" port=8099] //TODO inserire l'indirizzo del raspberry
 //Context ctxtruck ip[host="127.0.0.1" port=8092] //indirizzo interno alla rete
 //Context ctxrasp ip [host="localhost" port=8099]

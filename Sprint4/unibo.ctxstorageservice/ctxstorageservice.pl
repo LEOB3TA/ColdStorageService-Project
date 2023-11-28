@@ -37,9 +37,9 @@ dispatch( gotomovetoport, gotomovetoport(_) ).
 dispatch( gotodepositactionended, gotodepositactionended(_) ).
 dispatch( gotorobottohome, gotorobottohome(_) ).
 %====================================================================================
-context(ctxbasicrobot, "192.168.178.63",  "TCP", "8020").
-context(ctxrasp, "192.168.178.63",  "TCP", "8099").
-context(ctxcoldstorageservice, "192.168.178.21",  "TCP", "8099").
+context(ctxbasicrobot, "192.168.178.64",  "TCP", "8020").
+context(ctxrasp, "192.168.178.64",  "TCP", "8099").
+context(ctxcoldstorageservice, "localhost",  "TCP", "8099").
  qactor( basicrobot, ctxbasicrobot, "external").
   qactor( ledqakactor, ctxrasp, "external").
   qactor( coldstorageservice, ctxcoldstorageservice, "it.unibo.coldstorageservice.Coldstorageservice").
