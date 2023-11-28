@@ -11,6 +11,7 @@ object ledSupport {
     lateinit var ledType : String
     lateinit var gpio: GpioController
     lateinit var gpioPin: GpioPinDigitalOutput
+    lateinit var pulseState: GpioPin
     val configFileName="ledConfig.json"
     val jsonParser = JSONParser()
 
@@ -23,24 +24,24 @@ object ledSupport {
         //creazione support gpio
         if(ledType == "real"){
             gpio=GpioFactory.getInstance()
-            gpioPin= gpio.provisionDigitalOutputPin(RaspiPin.GPIO_25, "realLed", PinState.LOW)
-            gpioPin.high()
+            gpioPin= gpio.provisionDigitalOutputPin(RaspiPin.GPIO_06, "realLed", PinState.LOW)
+            gpioPin.mode= PinMode.DIGITAL_OUTPUT
+            gpioPin.blink(500,2000)
             CommUtils.outred("-- ledSupport | CREATED support for real led")
-            gpioPin.low()
         }
     }
     //TODO controllare che i gpio low all'inizio vanno bene o no
     fun on(){
         when(ledType){
             "simulated" -> CommUtils.outmagenta("LED ON")
-            "real" -> gpioPin.high()
+            "real" -> {gpioPin.blink(500);gpioPin.high()}
         }
     }
 
     fun off(){
         when(ledType){
             "simulated" -> CommUtils.outmagenta("LED OFF")
-            "real" -> gpioPin.low()
+            "real" ->{gpioPin.blink(0); gpioPin.low()}
         }
     }
     //TODO controllare che esca di qui o perlomeno che si interrompa
