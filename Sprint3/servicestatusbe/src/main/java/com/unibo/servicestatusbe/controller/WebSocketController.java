@@ -2,10 +2,9 @@ package com.unibo.servicestatusbe.controller;
 
 import com.unibo.servicestatusbe.model.ServiceConfigDTO;
 import com.unibo.servicestatusbe.model.ServiceStatusDTO;
+import com.unibo.servicestatusbe.model.StoreFoodRequestDTO;
 import com.unibo.servicestatusbe.model.TextMessageDTO;
 import com.unibo.servicestatusbe.utils.UtilsCoapObserver;
-import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -14,8 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.GenericMessage;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +28,12 @@ import unibo.basicomm23.interfaces.Interaction2021;
 import unibo.basicomm23.tcp.TcpClientSupport;
 import unibo.basicomm23.utils.ColorsOut;
 import unibo.basicomm23.utils.CommSystemConfig;
+
+import java.util.List;
+import java.util.Objects;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @RestController
 public class WebSocketController {
@@ -39,28 +47,29 @@ public class WebSocketController {
     final SimpMessagingTemplate template;
     final Environment env;
     final ServiceConfigDTO serviceConfigDTO;
+
     // *********************************Observer connection
-    public static CoapConnection connectCoap(String ip, int port){
-        try{
+    public static CoapConnection connectCoap(String ip, int port) {
+        try {
             CommSystemConfig.tracing = true;
             String path = ctxName + "/" + actorName;
             conn = new CoapConnection(ip + ":" + port, path);
-            ColorsOut.out("[UtilsStatusGUI] connect Tcp conn:" + conn );
-            ColorsOut.outappl("[UtilsStatusGUI] connect Coap conn:" + conn , ColorsOut.CYAN);
-        }catch(Exception e){
-            ColorsOut.outerr("[UtilsStatusGUI] connect with GUIupdater ERROR:"+e.getMessage());
+            ColorsOut.out("[UtilsStatusGUI] connect Tcp conn:" + conn);
+            ColorsOut.outappl("[UtilsStatusGUI] connect Coap conn:" + conn, ColorsOut.CYAN);
+        } catch (Exception e) {
+            ColorsOut.outerr("[UtilsStatusGUI] connect with GUIupdater ERROR:" + e.getMessage());
         }
         return (CoapConnection) conn;
     }
 
-    public static void connectTCP(String ip, int port){
+    public static void connectTCP(String ip, int port) {
         try {
             CommSystemConfig.tracing = true;
             connTCP = TcpClientSupport.connect(ip, port, 10);
-            ColorsOut.out("[UtilsStatusGUI] connect Tcp conn:" + conn );
-            ColorsOut.outappl("[UtilsStatusGUI] connect Tcp conn:" + conn , ColorsOut.CYAN);
-        }catch(Exception e){
-            ColorsOut.outerr("[UtilsStatusGUI] connect with GUIupdater ERROR:"+e.getMessage());
+            ColorsOut.out("[UtilsStatusGUI] connect Tcp conn:" + conn);
+            ColorsOut.outappl("[UtilsStatusGUI] connect Tcp conn:" + conn, ColorsOut.CYAN);
+        } catch (Exception e) {
+            ColorsOut.outerr("[UtilsStatusGUI] connect with GUIupdater ERROR:" + e.getMessage());
         }
     }
 
@@ -87,12 +96,12 @@ public class WebSocketController {
     @SubscribeMapping("/topic/message")
     public TextMessageDTO subscribe() {
         connectCoap("localhost", 8099).observeResource(new UtilsCoapObserver());
-        connectTCP("localhost",8099);
+        connectTCP("localhost", 8099);
         sendMsg();
 
         System.out.println("Subscribed to /topic/message");
 
-        TextMessageDTO message =  new TextMessageDTO("Subscribed to /topic/message");
+        TextMessageDTO message = new TextMessageDTO("Subscribed to /topic/message");
         template.convertAndSend("/topic/message", message);
         return message;
     }
@@ -119,22 +128,61 @@ public class WebSocketController {
         return textMessageDTO;
     }
 
+    @PostMapping(value = "/store-food", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> storeFood(@RequestBody StoreFoodRequestDTO storeFoodRequestDTO) {
+        if (storeFoodRequestDTO.getQuantity() > serviceConfigDTO.getMaxWeight()) {
+            return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if (storeFoodRequestDTO.getQuantity() < 0) {
+            return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
+        }
+        //template.convertAndSend("/secured/user", true);
+        return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
+    }
+
     @EventListener
     public void handleSubscribeEvent(SessionSubscribeEvent event) {
-        System.out.println("Subscribed to /topic/message");
-        template.convertAndSend("/topic/message", serviceConfigDTO.toJson());
+        String destination = (String) event.getMessage().getHeaders().get("simpDestination");
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
+        String sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
 
-    }
-    public static void sendToAll(String message){
-        try{
-            ColorsOut.outappl("WebSocketController | sendToAll String: " + message, ColorsOut.CYAN);
-            sendToAll( new TextMessage(message)) ;
-        }catch( Exception e ){
-            ColorsOut.outerr("WebSocketController | sendToAll String ERROR:"+e.getMessage());
+        System.out.println("Session Id" + sessionId + " subscribed to " + destination);
+
+        switch (Objects.requireNonNull(destination)) {
+            case "/topic/message":
+                template.convertAndSend("/topic/message", serviceConfigDTO.toJson());
+                break;
+            case "/secured/user":
+                template.convertAndSend("/secured/user", serviceConfigDTO.toJson());
+                break;
+            default:
+                System.out.println("Error");
+                break;
         }
     }
 
-    public static void sendToAll(TextMessage message){
+    public static void sendToAll(String message) {
+        try {
+            ColorsOut.outappl("WebSocketController | sendToAll String: " + message, ColorsOut.CYAN);
+            sendToAll(new TextMessage(message));
+        } catch (Exception e) {
+            ColorsOut.outerr("WebSocketController | sendToAll String ERROR:" + e.getMessage());
+        }
+    }
+
+    private String getUserId(StompHeaderAccessor accessor) {
+        GenericMessage<?> generic = (GenericMessage<?>) accessor.getHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER);
+        if (nonNull(generic)) {
+            SimpMessageHeaderAccessor nativeAccessor = SimpMessageHeaderAccessor.wrap(generic);
+            List<String> userIdValue = nativeAccessor.getNativeHeader("user-id");
+
+            return isNull(userIdValue) ? null : userIdValue.stream().findFirst().orElse(null);
+        }
+
+        return null;
+    }
+
+    public static void sendToAll(TextMessage message) {
         /*
         TODO: To send to all
         Iterator<WebSocketSession> iter =session.iterator();

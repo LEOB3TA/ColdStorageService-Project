@@ -81,6 +81,12 @@ class _HomePageViewState extends ConsumerState<HomePageView> {
           }
         });
     logger.i('WebSocket Info: Connected.');
+    const snackBar = SnackBar(
+      content: Text("Connected to Server"),
+      backgroundColor: Colors.green,
+      behavior: SnackBarBehavior.floating,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
     setState(() {
       isLoading = false;
     });

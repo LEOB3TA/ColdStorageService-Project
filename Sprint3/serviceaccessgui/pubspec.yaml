@@ -1,4 +1,4 @@
-name: frontend
+name: ServiceAccessGUI
 description: ISS Project - ServiceAccessGUI
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -39,6 +39,11 @@ dependencies:
   flutter_emoji: ^2.5.1
   percent_indicator: ^4.2.3
   http: ^1.1.0
+  logger: ^2.0.2+1
+  stomp_dart_client: ^1.0.0
+  flutter_riverpod: ^2.4.8
+  flutter_form_builder: ^9.1.1
+  form_builder_validators: ^9.1.0
 
 dev_dependencies:
   flutter_test:
