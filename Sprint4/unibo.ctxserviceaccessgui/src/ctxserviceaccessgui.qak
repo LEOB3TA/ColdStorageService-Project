@@ -1,4 +1,4 @@
-System/* -trace*/ctxserviceaccessgui
+System /*-trace*/ ctxserviceaccessgui
 
 // Messaggi scambiati con mocktruck
 Request deposit : deposit(_)

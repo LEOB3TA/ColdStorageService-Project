@@ -10,15 +10,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
-
+	
 class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
 		return "init"
 	}
-	@OptIn(ExperimentalTime::class)
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		
@@ -256,8 +253,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t023",targetState="corrDir",cond=whenReply("moverobotdone"))
-					transition(edgeName="t024",targetState="handlerobotstopped",cond=whenEvent("stop"))
+					 transition(edgeName="t023",targetState="handlerobotstopped",cond=whenEvent("stop"))
+					transition(edgeName="t024",targetState="corrDir",cond=whenReply("moverobotdone"))
 				}	 
 				state("corrDir") { //this:State
 					action { //it:State

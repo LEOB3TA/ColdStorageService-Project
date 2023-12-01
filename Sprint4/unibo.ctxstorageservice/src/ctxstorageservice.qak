@@ -1,4 +1,4 @@
-System/* -trace*/ctxstorageservice
+System /*-trace*/ ctxstorageservice
 
 // Messaggi scambiati con SAG
 Request deposit : deposit(_)
@@ -387,8 +387,8 @@ QActor transporttrolley context ctxcoldstorageservice{ //TODO  controllare cosa 
 		/*delay 6300
 		forward basicrobot -m cmd:cmd(l)*/
 	}
-	Transition t0  whenReply moverobotdone -> corrDir
-					whenEvent stop -> handlerobotstopped
+	Transition t0  whenEvent stop -> handlerobotstopped
+					whenReply moverobotdone -> corrDir
 	  			  //whenReply moverobotdone -> idle
  				 // whenReply moverobotfailed -> robotmovefailed
 
