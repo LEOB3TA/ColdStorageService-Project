@@ -18,7 +18,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
-		var DLIMIT = 30
+		var DLIMIT = 5
 				var D = 0
 				var handled=false
 			var Appl = sysUtil.getActor("transporttrolley") != null  
@@ -56,7 +56,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 								CommUtils.outmagenta("$name handleobstacle STOP ${payloadArg(0)}")
 								emit("stop", "stop(_)" ) 
 								}
-								if( D>=DLIMIT && handled==true 
+								if( D>DLIMIT+5 && handled==true 
 								 ){handled=false 
 								CommUtils.outmagenta("$name sonardata RESUME ${payloadArg(0)}")
 								emit("resume", "resume(_)" ) 

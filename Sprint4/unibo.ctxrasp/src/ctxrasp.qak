@@ -31,7 +31,7 @@ CodedQActor datacleaner context ctxrasp className "rx.dataCleaner"
 //contesto: nello stesso contensto fino a quando non si mette nel rasp
 
 QActor sonar23 context ctxrasp{ //TODO mandare eventi condizionati dallo stato
-	[#var DLIMIT = 30
+	[#var DLIMIT = 5
 		var D = 0
 		var handled=false
 	var Appl = sysUtil.getActor("transporttrolley") != null #]
@@ -52,7 +52,7 @@ QActor sonar23 context ctxrasp{ //TODO mandare eventi condizionati dallo stato
 				println("$name handleobstacle STOP ${payloadArg(0)}") color magenta
 				emit stop : stop(_)
 			}
-			if[#D>=DLIMIT && handled==true#]{
+			if[#D>DLIMIT+5 && handled==true#]{
 				[#handled=false#]
 				println("$name sonardata RESUME ${payloadArg(0)}") color magenta
 				emit resume: resume(_)
