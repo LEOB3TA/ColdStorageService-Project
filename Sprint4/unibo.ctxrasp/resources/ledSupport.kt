@@ -34,7 +34,7 @@ object ledSupport {
     fun on(){
         when(ledType){
             "simulated" -> CommUtils.outmagenta("LED ON")
-            "real" -> {gpioPin.blink(500);gpioPin.high()}
+            "real" -> {gpioPin.blink(0);gpioPin.high()}
         }
     }
 
