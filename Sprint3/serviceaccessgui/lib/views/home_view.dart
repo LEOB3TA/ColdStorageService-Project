@@ -15,6 +15,7 @@ import 'package:logger/logger.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
+import 'package:uuid/uuid.dart';
 
 // const socketUrl = 'ws://localhost:11804/ws-message'; // if in local
 const socketUrl = 'ws://192.168.1.2:11804/ws-message'; // if in another pc
@@ -31,6 +32,7 @@ class HomeView extends ConsumerStatefulWidget {
 class _HomeViewState extends ConsumerState<HomeView> {
   late StompClient stompClient;
   int ticketNumber = -1;
+  String id = const Uuid().v4();
   //static const storeFoodKey = GlobalKey<storeFoodKey>();
   //static const depositTicketKey = Key('depositTicket');
 
@@ -68,6 +70,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   void socketConnection(StompFrame frame) {
+    print(frame.headers);
     stompClient.subscribe(
         destination: '/topic/message',
         callback: (StompFrame frame) {
@@ -79,14 +82,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
         });
 
     stompClient.subscribe(
-        destination: '/queue/store-food',
+        destination: '/user/queue/store-food/$id',
         callback: (StompFrame frame) {
+          print(frame.toString());
           if (frame.body != null) {
-            print("RESULT: ${frame.body!}");
+            print("RESULT: ${frame.headers!}");
             TicketResponseDTO result = TicketResponseDTO.fromJson(json.decode(frame.body!));
             setState(() {
               ticketNumber = result.ticketNumber;
             });
+            ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketResponse;
           }
         });
 
@@ -665,10 +670,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
       print('Store Food Request: $quantity');
     }
     stompClient.send(
-      destination: '/app/store-food',
+      destination: '/app/store-food/$id',
       body: json.encode(StoreFoodRequestDTO(quantity: quantity).toJson()),
     );
-
-    ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketResponse;
   }
 }
