@@ -1,10 +1,8 @@
 package com.unibo.servicestatusbe.controller;
 
 import com.unibo.servicestatusbe.dto.ResponseMessage;
-import com.unibo.servicestatusbe.model.ServiceConfigDTO;
+import com.unibo.servicestatusbe.model.*;
 import com.unibo.servicestatusbe.model.ServiceStatusDTO;
-import com.unibo.servicestatusbe.model.StoreFoodRequestDTO;
-import com.unibo.servicestatusbe.model.TextMessageDTO;
 import com.unibo.servicestatusbe.service.WebSocketService;
 import com.unibo.servicestatusbe.utils.UtilsCoapObserver;
 import org.springframework.context.event.EventListener;
@@ -49,7 +47,7 @@ public class WebSocketController {
     final SimpMessagingTemplate template;
     final Environment env;
     final ServiceConfigDTO serviceConfigDTO;
-    private WebSocketStompClient stompClient;
+    final ServiceStatusDTO serviceStatusDTO = new ServiceStatusDTO();
     private final List<String> sessionList;
     private final WebSocketService service;
 
@@ -163,7 +161,7 @@ public class WebSocketController {
     public void handleSubscribeEvent(SessionSubscribeEvent event) {
         String destination = (String) Objects.requireNonNull(event.getMessage().getHeaders().get("simpDestination"));
         switch (destination) {
-            case "/queue/responses":
+            case "/user/queue/store-food":
                 StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
                 String sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
                 sessionList.add(sessionId);
@@ -187,28 +185,28 @@ public class WebSocketController {
         }
     }
 
-
-
-
-    @MessageMapping("/app/store-food")
-    @SendToUser("queue/responses")
-    public void storeFoodRequest(@Payload StoreFoodRequestDTO request, Principal user) {
-        System.out.println("StoreFood Request");
-        System.out.println(request);
-        //template.convertAndSend("/topic/news", request);
-    }
-
     @MessageMapping("/greetings")
     @SendTo("/queue/greetings")
     public void reply(@Payload String message, Principal user){
         template.convertAndSendToUser(user.getName(), "/queue/greetings", message);
     }
 
-    @MessageMapping("/store-food")
-    @SendTo("/queue/responses")
-    public String handleMessageWithResponse(String message, @Header("simpSessionId") String sessionId, Principal user) {
-        System.out.println(message);
-        return message;
+    @MessageMapping("/store-food/{sessionId}")
+    @SendTo("/user/queue/store-food/{sessionId}")
+    public TicketResponseDTO handleStoreFoodRequest(StoreFoodRequestDTO requestDTO, @PathVariable("sessionId") String sessionId) {
+        if (requestDTO.getQuantity() < 0) {
+            // return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
+        }
+        if (requestDTO.getQuantity() > serviceConfigDTO.getMaxWeight() || serviceStatusDTO.getCurrentWeight() + requestDTO.getQuantity() > serviceConfigDTO.getMaxWeight()) {
+            // return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        // UPDATE STATUS
+        serviceConfigDTO.setCurrentWeight(serviceStatusDTO.getCurrentWeight()+requestDTO.getQuantity());
+        TicketResponseDTO result = new TicketResponseDTO();
+        result.setTicketNumber( serviceStatusDTO.getCurrentTicket());
+        serviceStatusDTO.setCurrentTicket(serviceStatusDTO.getCurrentTicket()+1);
+        template.convertAndSendToUser(sessionId, "/user/queue/store-food", result);
+        return result;
     }
 
     @EventListener

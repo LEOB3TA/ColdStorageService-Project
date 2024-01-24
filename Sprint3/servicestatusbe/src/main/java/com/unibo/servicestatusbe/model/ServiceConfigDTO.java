@@ -12,8 +12,8 @@ import org.springframework.context.annotation.Configuration;
 public class ServiceConfigDTO {
     @Value("${container.max_weight}")
     private double maxWeight;
-    //@Value("${container.current_weight}")
-    //private double currentWeight;
+    @Value("${container.current_weight}")
+    private double currentWeight;
     @Value("${room.rows}")
     private int rows;
     @Value("${room.cols}")

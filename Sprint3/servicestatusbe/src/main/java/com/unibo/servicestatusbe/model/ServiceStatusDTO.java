@@ -8,4 +8,5 @@ public class ServiceStatusDTO {
     private String status;
     private Position position;
     private int rejectedRequests;
+    private int currentTicket;
 }
