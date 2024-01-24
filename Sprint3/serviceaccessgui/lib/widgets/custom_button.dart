@@ -10,7 +10,7 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 48,
-      child: FilledButton(onPressed: () => onPressed, child: Text(label)),
+      child: FilledButton(onPressed: onPressed, child: Text(label)),
     );
   }
 }

@@ -4,6 +4,8 @@ import 'package:ServiceAccessGUI/model/store_food_request_dto.dart';
 import 'package:ServiceAccessGUI/providers/status_provider.dart';
 import 'package:ServiceAccessGUI/widgets/custom_button.dart';
 import 'package:ServiceAccessGUI/widgets/spaced_column.dart';
+import 'package:ServiceAccessGUI/widgets/spaced_row.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,9 +15,8 @@ import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 
-import '../widgets/spaced_row.dart';
-
-const socketUrl = 'ws://localhost:11804/ws-message';
+// const socketUrl = 'ws://localhost:11804/ws-message'; // if in local
+const socketUrl = 'ws://192.168.1.2:11804/ws-message'; // if in another pc
 
 var logger = Logger(printer: PrettyPrinter());
 
@@ -66,8 +67,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   void socketConnection(StompFrame frame) {
     stompClient.subscribe(
-        destination: '/secured/user',
-        headers: {'user-id': 'giampaolo'},
+        destination: '/topic/message',
         callback: (StompFrame frame) {
           if (frame.body != null) {
             print("RESULT: ${frame.body!}");
@@ -75,6 +75,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
             logger.t('WebSocket Connection Result: $result');
           }
         });
+
+    stompClient.subscribe(
+        destination: '/queue/responses',
+        callback: (StompFrame frame) {
+          if (frame.body != null) {
+            print("RESULT: ${frame.body!}");
+            Map<String, dynamic> result = json.decode(frame.body!);
+            logger.t('WebSocket Connection Result: $result');
+          }
+        });
+
     logger.i('WebSocket Info: Connected.');
     ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketRequest;
     const snackBar = SnackBar(
@@ -83,16 +94,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
       behavior: SnackBarBehavior.floating,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
-  void storeFoodRequest(double quantity) {
-    print('Store Food Request: $quantity');
-    stompClient.send(
-      destination: '/store-food',
-      body: json.encode(StoreFoodRequestDTO(quantity: quantity).toJson()),
-    );
-
-    ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketResponse;
   }
 
   @override
@@ -653,5 +654,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ],
       ),
     ));
+  }
+
+  void storeFoodRequest(double quantity) {
+    if (kDebugMode) {
+      print('Store Food Request: $quantity');
+    }
+    stompClient.send(
+      destination: '/app/store-food',
+      body: json.encode(StoreFoodRequestDTO(quantity: quantity).toJson()),
+    );
+
+    // ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketResponse;
   }
 }

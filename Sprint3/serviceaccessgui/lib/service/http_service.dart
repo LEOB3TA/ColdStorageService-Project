@@ -1,14 +1,17 @@
-import 'package:http/http.dart';
-
 class HttpService {
   final String stockURL = "http://localhost:8080/getList";
-
+/*
   Future<void> sampleFunction() async {
     Response res = await get(Uri.parse(stockURL));
     return;
   }
 
-  /*
+  Future<void> storeFood(double quantity) async {
+    Response res = await get(Uri.parse(stockURL));
+    return;
+  }
+
+
   Future<List<Stock>> getStocks() async {
     Response res = await get(Uri.parse(stockURL));
 
