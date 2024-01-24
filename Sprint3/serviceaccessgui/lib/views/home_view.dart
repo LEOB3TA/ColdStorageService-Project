@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ServiceAccessGUI/model/store_food_request_dto.dart';
+import 'package:ServiceAccessGUI/model/ticket_response_dto.dart';
 import 'package:ServiceAccessGUI/providers/status_provider.dart';
 import 'package:ServiceAccessGUI/widgets/custom_button.dart';
 import 'package:ServiceAccessGUI/widgets/spaced_column.dart';
@@ -29,6 +30,7 @@ class HomeView extends ConsumerStatefulWidget {
 
 class _HomeViewState extends ConsumerState<HomeView> {
   late StompClient stompClient;
+  int ticketNumber = -1;
   //static const storeFoodKey = GlobalKey<storeFoodKey>();
   //static const depositTicketKey = Key('depositTicket');
 
@@ -77,12 +79,14 @@ class _HomeViewState extends ConsumerState<HomeView> {
         });
 
     stompClient.subscribe(
-        destination: '/queue/responses',
+        destination: '/queue/store-food',
         callback: (StompFrame frame) {
           if (frame.body != null) {
             print("RESULT: ${frame.body!}");
-            Map<String, dynamic> result = json.decode(frame.body!);
-            logger.t('WebSocket Connection Result: $result');
+            TicketResponseDTO result = TicketResponseDTO.fromJson(json.decode(frame.body!));
+            setState(() {
+              ticketNumber = result.ticketNumber;
+            });
           }
         });
 
@@ -381,7 +385,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                                               fontSize: 12,
                                                               color: Colors.black45),
                                                         ),
-                                                        Text('12',
+                                                        Text(ticketNumber.toString(),
                                                             style: TextStyle(
                                                                 letterSpacing: -5,
                                                                 fontWeight: FontWeight.w900,
@@ -665,6 +669,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
       body: json.encode(StoreFoodRequestDTO(quantity: quantity).toJson()),
     );
 
-    // ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketResponse;
+    ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketResponse;
   }
 }
