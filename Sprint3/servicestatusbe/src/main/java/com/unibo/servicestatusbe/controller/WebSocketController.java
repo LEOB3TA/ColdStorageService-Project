@@ -1,39 +1,41 @@
 package com.unibo.servicestatusbe.controller;
 
+import com.unibo.servicestatusbe.dto.ResponseMessage;
 import com.unibo.servicestatusbe.model.ServiceConfigDTO;
 import com.unibo.servicestatusbe.model.ServiceStatusDTO;
 import com.unibo.servicestatusbe.model.StoreFoodRequestDTO;
 import com.unibo.servicestatusbe.model.TextMessageDTO;
+import com.unibo.servicestatusbe.service.WebSocketService;
 import com.unibo.servicestatusbe.utils.UtilsCoapObserver;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.support.GenericMessage;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+import org.springframework.web.socket.messaging.WebSocketStompClient;
 import unibo.basicomm23.coap.CoapConnection;
 import unibo.basicomm23.interfaces.Interaction2021;
 import unibo.basicomm23.tcp.TcpClientSupport;
 import unibo.basicomm23.utils.ColorsOut;
 import unibo.basicomm23.utils.CommSystemConfig;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @RestController
 public class WebSocketController {
@@ -47,6 +49,9 @@ public class WebSocketController {
     final SimpMessagingTemplate template;
     final Environment env;
     final ServiceConfigDTO serviceConfigDTO;
+    private WebSocketStompClient stompClient;
+    private final List<String> sessionList;
+    private final WebSocketService service;
 
     // *********************************Observer connection
     public static CoapConnection connectCoap(String ip, int port) {
@@ -85,12 +90,13 @@ public class WebSocketController {
 
     // ********************************************end Observer conf
 
-    public WebSocketController(SimpMessagingTemplate template, Environment env, ServiceConfigDTO serviceConfigDTO) {
+    public WebSocketController(SimpMessagingTemplate template, Environment env, ServiceConfigDTO serviceConfigDTO, List<String> sessionList, WebSocketService service) {
         this.template = template;
         this.env = env;
         this.serviceConfigDTO = serviceConfigDTO;
+        this.sessionList = sessionList;
+        this.service = service;
         System.out.println("INITIAL SERVICE CONFIG -----------------------\n " + serviceConfigDTO.toJson());
-
     }
 
     @SubscribeMapping("/topic/message")
@@ -118,6 +124,18 @@ public class WebSocketController {
         return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
     }
 
+    @PostMapping(value = "/send-private", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> sendMessage(@RequestParam("id") String id, @RequestBody ServiceStatusDTO serviceStatusDTO) {
+        if (serviceStatusDTO.getCurrentWeight() > serviceConfigDTO.getMaxWeight()) {
+            return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if (serviceStatusDTO.getCurrentWeight() < 0) {
+            return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
+        }
+        template.convertAndSendToUser(id, "/queue/greetings", "CIAOOOOO");
+        return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
+    }
+
     @MessageMapping("/sendMessage")
     public void receiveMessage(@Payload TextMessageDTO textMessageDTO) {
         // receive message from client
@@ -136,71 +154,74 @@ public class WebSocketController {
         if (storeFoodRequestDTO.getQuantity() < 0) {
             return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
         }
-        //template.convertAndSend("/secured/user", true);
         return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
     }
 
+
+
     @EventListener
     public void handleSubscribeEvent(SessionSubscribeEvent event) {
-        String destination = (String) event.getMessage().getHeaders().get("simpDestination");
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        String sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
-
-        System.out.println("Session Id" + sessionId + " subscribed to " + destination);
-
-        switch (Objects.requireNonNull(destination)) {
-            case "/topic/message":
-                template.convertAndSend("/topic/message", serviceConfigDTO.toJson());
+        String destination = (String) Objects.requireNonNull(event.getMessage().getHeaders().get("simpDestination"));
+        switch (destination) {
+            case "/queue/responses":
+                StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
+                String sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
+                sessionList.add(sessionId);
+                System.out.println("Session Id" + sessionId + " subscribed to " + destination);
+                assert sessionId != null;
+                template.convertAndSendToUser(sessionId, "/queue/responses", "CIAOOOO");
                 break;
-            case "/secured/user":
-                template.convertAndSend("/secured/user", serviceConfigDTO.toJson());
+            case "/topic/message":
                 break;
             default:
-                System.out.println("Error");
-                break;
+                System.out.println("Mammt");
         }
     }
 
     public static void sendToAll(String message) {
         try {
             ColorsOut.outappl("WebSocketController | sendToAll String: " + message, ColorsOut.CYAN);
-            sendToAll(new TextMessage(message));
+            sendToAll(String.valueOf(new TextMessage(message)));
         } catch (Exception e) {
             ColorsOut.outerr("WebSocketController | sendToAll String ERROR:" + e.getMessage());
         }
     }
 
-    private String getUserId(StompHeaderAccessor accessor) {
-        GenericMessage<?> generic = (GenericMessage<?>) accessor.getHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER);
-        if (nonNull(generic)) {
-            SimpMessageHeaderAccessor nativeAccessor = SimpMessageHeaderAccessor.wrap(generic);
-            List<String> userIdValue = nativeAccessor.getNativeHeader("user-id");
 
-            return isNull(userIdValue) ? null : userIdValue.stream().findFirst().orElse(null);
-        }
 
-        return null;
+
+    @MessageMapping("/app/store-food")
+    @SendToUser("queue/responses")
+    public void storeFoodRequest(@Payload StoreFoodRequestDTO request, Principal user) {
+        System.out.println("StoreFood Request");
+        System.out.println(request);
+        //template.convertAndSend("/topic/news", request);
     }
 
-    public static void sendToAll(TextMessage message) {
-        /*
-        TODO: To send to all
-        Iterator<WebSocketSession> iter =session.iterator();
-        while( iter.hasNext() ){
-            try{
-                WebSocketSession session = iter.next();
-                ColorsOut.outappl("WebSocketHandler | sendToAll " +
-                        message.getPayload() + " for session " + session.getRemoteAddress() , ColorsOut.MAGENTA);
-                //synchronized(session){
-                session.sendMessage(message);
-                //}
-            }catch(Exception e){
-                ColorsOut.outerr("WebSocketHandler | TextMessage ERROR:"+e.getMessage());
-            }
-        }
-         */
-
-        System.out.println(message.getPayload());
+    @MessageMapping("/greetings")
+    @SendTo("/queue/greetings")
+    public void reply(@Payload String message, Principal user){
+        template.convertAndSendToUser(user.getName(), "/queue/greetings", message);
     }
+
+    @MessageMapping("/store-food")
+    @SendTo("/queue/responses")
+    public String handleMessageWithResponse(String message, @Header("simpSessionId") String sessionId, Principal user) {
+        System.out.println(message);
+        return message;
+    }
+
+    @EventListener
+    public void onDisconnectEvent(SessionDisconnectEvent event) {
+        System.out.println("Session disconnected");
+        System.out.println(event.getMessage());
+        sessionList.remove(event.getSessionId());
+    }
+
+    @PostMapping("/send-private-message/{id}")
+    public void sendPrivateMessage(@PathVariable("id") String id, @RequestBody ResponseMessage message) {
+        service.sendNotificationToSpecificUser(id, message.getContent());
+    }
+
 
 }
