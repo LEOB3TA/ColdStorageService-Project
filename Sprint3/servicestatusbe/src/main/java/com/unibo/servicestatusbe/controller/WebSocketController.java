@@ -41,6 +41,8 @@ public class WebSocketController {
     // Observer connection
     private static final String ctxName = "ctx_prototipo3";
     private static final String actorName = "transporttrolley";//"guicontroller"
+    private static final String actorGui = "guicontroller";
+    private static final String actorService = "coldstorageservice";
     private static Interaction2021 conn;
     public static Interaction2021 connTCP;
     // end Observer conf
@@ -78,7 +80,26 @@ public class WebSocketController {
 
     public static void sendMsg() {
         try {
-            String msg = "msg(get_data, dispatch, ws_gui, " + actorName + ", get_data(_), 1)";
+            String msg = "msg(get_data, dispatch, ws_gui, " + actorGui + ", get_data(_), 1)";
+            ColorsOut.outappl("[UtilsStatusGUI] sendMsg msg:" + msg + " conn=" + conn, ColorsOut.BLUE);
+            connTCP.forward(msg);
+        } catch (Exception e) {
+            ColorsOut.outerr("[UtilsStatusGUI] sendMsg on:" + conn + " ERROR:" + e.getMessage());
+        }
+    }
+    // TODO: finish modifications
+    public static void sendStore(double w){
+        try {
+            String msg = "msg(storeFood, dispatch, coldstorageservice, " + actorService + ", storeFood("+w+"), 1)";
+            ColorsOut.outappl("[UtilsStatusGUI] sendMsg msg:" + msg + " conn=" + conn, ColorsOut.BLUE);
+            connTCP.forward(msg);
+        } catch (Exception e) {
+            ColorsOut.outerr("[UtilsStatusGUI] sendMsg on:" + conn + " ERROR:" + e.getMessage());
+        }
+    }
+    public static void sendDeposit(int t){
+        try {
+            String msg = "msg(deposit, dispatch, coldstorageservice, " + actorService + ", deposit("+t+"), 1)";
             ColorsOut.outappl("[UtilsStatusGUI] sendMsg msg:" + msg + " conn=" + conn, ColorsOut.BLUE);
             connTCP.forward(msg);
         } catch (Exception e) {
@@ -160,11 +181,28 @@ public class WebSocketController {
     @EventListener
     public void handleSubscribeEvent(SessionSubscribeEvent event) {
         String destination = (String) Objects.requireNonNull(event.getMessage().getHeaders().get("simpDestination"));
+        StompHeaderAccessor accessor;
+        String sessionId;
         switch (destination) {
             case "/user/queue/store-food":
-                StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-                String sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
+                accessor = StompHeaderAccessor.wrap(event.getMessage());
+                sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
                 sessionList.add(sessionId);
+                System.out.println("Session Id" + sessionId + " subscribed to " + destination);
+                assert sessionId != null;
+                /* TODO:
+                conn.sendMsg();
+                conn.sendStore();
+                * */
+                template.convertAndSendToUser(sessionId, "/queue/responses", "CIAOOOO");
+                break;
+            case "/user/queue/deposit":
+                accessor = StompHeaderAccessor.wrap(event.getMessage());
+                sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
+                /* TODO:
+                conn.sendMsg();
+                conn.sendDeposit();
+                * */
                 System.out.println("Session Id" + sessionId + " subscribed to " + destination);
                 assert sessionId != null;
                 template.convertAndSendToUser(sessionId, "/queue/responses", "CIAOOOO");
@@ -207,6 +245,18 @@ public class WebSocketController {
         serviceStatusDTO.setCurrentTicket(serviceStatusDTO.getCurrentTicket()+1);
         template.convertAndSendToUser(sessionId, "/user/queue/store-food", result);
         return result;
+    }
+
+    @MessageMapping("/deposit/{sessionId}")
+    @SendTo("/usr/queue/deposit/{sessionId}")
+    public String HandleDeposit(TicketResponseDTO depositDTO, @PathVariable("sessionId") String sessionId){
+        if (depositDTO.getTicketNumber() <0){
+            return "invalid";
+        }
+        //update
+        TicketResponseDTO result = new TicketResponseDTO();
+        result.setTicketNumber( serviceStatusDTO.getCurrentTicket());
+        return result.toString();
     }
 
     @EventListener

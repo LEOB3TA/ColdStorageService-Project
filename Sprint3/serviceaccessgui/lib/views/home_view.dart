@@ -17,8 +17,8 @@ import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:uuid/uuid.dart';
 
-// const socketUrl = 'ws://localhost:11804/ws-message'; // if in local
-const socketUrl = 'ws://192.168.1.2:11804/ws-message'; // if in another pc
+const socketUrl = 'ws://localhost:11804/ws-message'; // if in local
+//const socketUrl = 'ws://192.168.1.2:11804/ws-message'; // if in another pc
 
 var logger = Logger(printer: PrettyPrinter());
 
@@ -33,6 +33,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   late StompClient stompClient;
   int ticketNumber = -1;
   String id = const Uuid().v4();
+
   //static const storeFoodKey = GlobalKey<storeFoodKey>();
   //static const depositTicketKey = Key('depositTicket');
 
@@ -94,6 +95,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
             ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketResponse;
           }
         });
+    stompClient.subscribe(
+      destination:'/user/queue/deposit/$id',
+      callback: (StompFrame frame){
+        if(frame.body!= null){
+          print("RESULT: ${frame.headers!}");
+          //String result = String.fromJson
+          print("SS");
+        }
+      }
+    );
 
     logger.i('WebSocket Info: Connected.');
     ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketRequest;
@@ -109,6 +120,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   Widget build(BuildContext context) {
     final status = ref.watch(statusEnumProvider);
     final TextEditingController storeFoodController = TextEditingController();
+    final TextEditingController depositController = TextEditingController();
     final TextEditingController _depositTicketController = TextEditingController();
 
     return Scaffold(
@@ -414,8 +426,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                           children: [
                                             Text('Insert your ticket to deposit food.',
                                                 style: TextStyle(color: Colors.blue.shade900)),
-                                            const TextField(
-                                              decoration: InputDecoration(
+                                            TextField(
+                                              controller: depositController,
+                                              decoration: const InputDecoration(
                                                   fillColor: Colors.white,
                                                   prefixIcon: Icon(Icons.numbers),
                                                   border: OutlineInputBorder(
@@ -424,9 +437,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                                   hintText: 'Ticket Id'),
                                             ),
                                             CustomButton(
-                                                onPressed: () {
-                                                  ref.read(statusEnumProvider.notifier).state = StatusEnum.result;
-                                                },
+                                                onPressed: () =>
+                                                  depositRequest(int.parse(depositController.text)),
+                                                  //ref.read(statusEnumProvider.notifier).state = StatusEnum.result
                                                 label: 'Submit')
                                           ],
                                         ),
@@ -434,7 +447,14 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                       Step(
                                         title: Text('Result',
                                             style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.bold)),
-                                        content: Text('Result.', style: TextStyle(color: Colors.blue.shade900)),
+                                        content: SpacedColumn(
+                                          spacing: 0,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children:[
+                                          Text('Congratulazioni ce l\'hai fatta !',
+                                              style: TextStyle(color: Colors.blue.shade900)),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -672,6 +692,15 @@ class _HomeViewState extends ConsumerState<HomeView> {
     stompClient.send(
       destination: '/app/store-food/$id',
       body: json.encode(StoreFoodRequestDTO(quantity: quantity).toJson()),
+    );
+  }
+  void depositRequest(int ticket) {
+    if (kDebugMode) {
+      print('Deposit - Ticket id: $ticket');
+    }
+    stompClient.send(
+      destination: '/app/deposit/$id',
+      body: json.encode(TicketResponseDTO(ticketNumber: ticket).toJson()),
     );
   }
 }
