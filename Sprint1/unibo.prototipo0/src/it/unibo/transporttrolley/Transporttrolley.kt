@@ -11,7 +11,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import it.unibo.kactor.sysUtil.createActor   //Sept2023
-class Transporttrolley ( name: String, scope: CoroutineScope, isconfined: Boolean=false  ) : ActorBasicFsm( name, scope, confined=isconfined ){
+	
+class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
 		return "init"
@@ -183,4 +184,4 @@ class Transporttrolley ( name: String, scope: CoroutineScope, isconfined: Boolea
 				}	 
 			}
 		}
-} 
+}

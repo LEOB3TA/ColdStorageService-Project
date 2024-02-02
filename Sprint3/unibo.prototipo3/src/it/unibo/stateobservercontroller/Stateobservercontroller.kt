@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import it.unibo.kactor.sysUtil.createActor   //Sept2023
 	
 class Stateobservercontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
@@ -21,7 +22,7 @@ class Stateobservercontroller ( name: String, scope: CoroutineScope  ) : ActorBa
 		
 			var state = ""
 			var pos= ""
-		return { //this:ActionBasciFsm
+				return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						CoapObserverSupport(myself, "localhost","8099","ctxprototipo3","transporttrolley")

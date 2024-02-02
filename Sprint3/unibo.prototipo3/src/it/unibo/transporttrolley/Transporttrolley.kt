@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import it.unibo.kactor.sysUtil.createActor   //Sept2023
 	
 class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
@@ -35,7 +36,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				var end : Long = 0
 				val MINT : Long= 1000 //(1 second)
 				var savedState = tTState.getCurrState()
-		return { //this:ActionBasciFsm
+				//var Position = arrayOf(HOMEX, HOMEY)
+				return { //this:ActionBasciFsm
 				state("init") { //this:State
 					action { //it:State
 						discardMessages = false

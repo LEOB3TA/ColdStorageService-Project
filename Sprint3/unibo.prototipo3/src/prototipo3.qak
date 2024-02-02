@@ -65,8 +65,8 @@ Dispatch getData : getData(_)
 Dispatch updateR : updateR(_)
 // TODO : check for position in particular if it can work in different ctx
 // basicrobot pos -> gestita dal basicrobot
-Request getrobotstate : getrobotstate(ARG)
-Reply robotstate      : robotstate(POS,DIR)  for getrobotstate
+//Request getrobotstate : getrobotstate(ARG)
+//Dispatch robotstate      : robotstate(POS,DIR)  //for getrobotstate
 
 Context ctxbasicrobot ip [host="127.0.0.1" port=8020]
 Context ctxprototipo3 ip [host="localhost" port=8099]
@@ -79,37 +79,47 @@ ExternalQActor basicrobot context ctxbasicrobot
 //Sonar
 
 //CodedQActor sonar  context ctxrasp className "rx.sonarHCSR04Support23"   //SU RASP
-CodedQActor sonar context ctxprototipo3 className "rx.sonarSimulator" //in LOCALE
-CodedQActor datacleaner context ctxprototipo3 className "rx.dataCleaner"
+//CodedQActor sonar context ctxprototipo3 className "rx.sonarSimulator" //in LOCALE
+//CodedQActor datacleaner context ctxprototipo3 className "rx.dataCleaner"
 //CodedQActor distancefilter context ctxprototipo3 className "rx.distanceFilter"
 
 // si occupa di osservare i componenti e modificare le GUI secondo tali cambiamenti
 QActor guicontroller context ctxprototipo3{
 	[#
-		var stato = state.GuiState()
+		var Stato = state.GuiState()
+		//var tt = state.TransportTrolleyState()
+		var posStr = ""
+		var staStr = ""
+		var currPos = state.TTPosition.HOME
+		var currSta = state.CurrStateTrolley.IDLE
+		var X = 0
+		var Y = 0
+		//var arrPos = intArrayOf(X,Y)
 	#]
 	State init initial{
 		println("$name | 	started") color green
+		observeResource transporttrolley
 	}
 	Goto idle
 	State idle{
 		
 	}Transition t0 whenMsg updateS -> updatestorage
 				   whenMsg updateR -> updaterejected
-				   whenReply robotstate -> updateposition
+				   whenMsg coapUpdate -> updateposition
 				   whenMsg getData -> updategui
 				   // TODO: check how to manage TT state/position
 				   //
 				   
 	State updatestorage{
 		onMsg(updateS : updateS(W)){
+			println("$name | ${payloadArg(0)}")
 			[#
-				val weight = payloadArg(0).toDouble() // it should be already double
+				val weight = payloadArg(0).toDouble()  //conversion beetwen strings and weights
 			#]
 			println("$name |	aggiunta peso pari a $weight")
 			[#
 			// update state	
-			stato.setCurrW(weight)
+			Stato.setCurrW(weight)
 			#]
 		}
 	}Goto updategui
@@ -118,14 +128,14 @@ QActor guicontroller context ctxprototipo3{
 		onMsg(updateR: updateR(_)){
 			println("$name |	rejected")
 			[#
-				stato.setRejected()	
+				Stato.setRejected()	
 			#]
 		}
 	}Goto updategui
 	
 	State updateposition{
 		//onMsg(updateTp: updateTp(X, Y)){ TODO check
-		onMsg(robotstate:robotstate(Pos,Dir)){
+		/*onMsg(robotstate:robotstate(Pos,Dir)){
 			[#
 				val P = payloadArg(0).toInt()
 				val D = payloadArg(1).toInt()
@@ -138,17 +148,43 @@ QActor guicontroller context ctxprototipo3{
 				    X = xStr.toInt()
 				    Y = yStr.toInt()
 				}
-				stato.setTTP(intArrayOf(X,Y))
-				//var prova = stato.getTTP()
+				Stato.setTTP(intArrayOf(X,Y))
+				//var prova = Stato.getTTP()
 				//for (i in 0..1) println( prova[i])	
 			#]
-		}
+			
+		}*/
+		[#
+			staStr = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"
+			posStr = "${currentMsg.toString().substringAfter("currPosition\":\"").substringBefore("\"")}"
+			currPos = state.TTPosition.valueOf(posStr)
+			currSta = state.CurrStateTrolley.valueOf(staStr)
+			Stato.setPos(currPos)
+			Stato.setAct(currSta)
+			//Arrays HOME, INDOOR, ONTHEROAD, PORT
+			when (Stato.getPos()){
+				state.TTPosition.HOME-> {
+					X=0
+					Y=0
+				}
+				state.TTPosition.INDOOR->{
+					X=4
+					Y=0
+				}
+				state.TTPosition.PORT->{
+					X=1
+					Y=4
+				}
+			}
+			Stato.setTTP(intArrayOf(X,Y))
+		#]
+		println("${Stato}") color yellow
 	}Goto updategui
 	
 	State updategui{
-		println("$name |	new update for GUI")
-		
-		updateResource[#stato.toString()#]
+		println("$name |	new update for GUI") color yellow
+		//delay 1000
+		updateResource[#Stato.toString()#]
 	}Goto idle
 }
 
@@ -158,7 +194,7 @@ QActor coldstorageservice context ctxprototipo3 {
         	val MAXW = resources.ColdStorageService.getMAXW()
 			val TICKETTIME = resources.ColdStorageService.getTICKETTIME()
 		   	var currentWeightStorage = resources.ColdStorageService.getCurrentWeightStorage()
-		   	var requestWeightToStore = 0.0
+		   	var RequestWeightToStore = 0.0
 		   	var TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
 		   	#]
 
@@ -186,19 +222,20 @@ QActor coldstorageservice context ctxprototipo3 {
      * 	2b. Altrimenti va in stato rejectRequest
      */
     State requestEvaluation {
-    	        onMsg(storeFood : storeFood(FW)){
-           println("Request evaluation to store ${payloadArg(0)} kg") color blue
+    	        onMsg(storeFood : storeFood(FW)){      
+    	        println("Request evaluation to store ${payloadArg(0)} kg") color blue     
            [#
-           	requestWeightToStore=payloadArg(0).toDouble()
-           	if(requestWeightToStore + currentWeightStorage < MAXW ){
+           	RequestWeightToStore = payloadArg(0).toDouble()
+           	
+           	if(RequestWeightToStore + currentWeightStorage < MAXW ){
            		#]
-           			forward guicontroller -m updateS : updateS(requestWeightToStore) 
+           			forward guicontroller -m updateS : updateS( $RequestWeightToStore )//${requestWeightToStore}
            		[#
            	}
            	#]
 
        }
-    } Goto acceptRequest if[# resources.ColdStorageService.canStore(requestWeightToStore) #]
+    } Goto acceptRequest if[# resources.ColdStorageService.canStore(RequestWeightToStore) #]
                             else rejectRequest
 
      /*
@@ -212,7 +249,9 @@ QActor coldstorageservice context ctxprototipo3 {
     		resources.ColdStorageService.incrementTicketNumber()
     		resources.ColdStorageService.getTicketList().add(TICKET)
     	#]
-        replyTo storeFood with storeAccepted : storeAccepted($TICKETNUMBER)
+    	replyTo storeFood with storeAccepted : storeAccepted($TICKETNUMBER)  //TODO:check
+    	println("Request accepted | ticket = ${TICKETNUMBER}")
+    	
     }Goto idle
 
 	/*
@@ -259,6 +298,7 @@ QActor coldstorageservice context ctxprototipo3 {
 							resources.ColdStorageService.getTicketList().remove(TICKET)
     	        		#]
     	        		replyTo sendTicket with ticketValid : ticketValid(_)
+    	        		request transporttrolley -m pickup:pickup(_)
     	        	}
 					if [#TICKETEVALUATION == resources.TicketEvaluationResponse.EXPIRED #] {
     	        		[#
@@ -309,6 +349,7 @@ QActor transporttrolley context ctxprototipo3{ //TODO  controllare cosa succede 
 		var end : Long = 0
 		val MINT : Long= 1000 //(1 second)
 		var savedState = tTState.getCurrState()
+		//var Position = arrayOf(HOMEX, HOMEY)
 	#]
 	State init initial{
 		discardMsg Off
@@ -359,8 +400,11 @@ QActor transporttrolley context ctxprototipo3{ //TODO  controllare cosa succede 
 		updateResource[#tTState.toJsonString()#]
  		println("$name | moving robot to indoor.") color green
  		request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)
-
-
+ 		/*[#
+ 			Position=arrayOf(INDOORX, INDOORY)
+ 		#] 		
+		forward guicontroller -m robotstate:robotstate( $Position, INDOOR)
+		*/
 
  	}
  	Transition t0 whenEvent stop -> handlerobotstopped

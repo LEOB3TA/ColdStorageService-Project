@@ -11,7 +11,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import it.unibo.kactor.sysUtil.createActor   //Sept2023
-class Stateobservercontroller ( name: String, scope: CoroutineScope, isconfined: Boolean=false  ) : ActorBasicFsm( name, scope, confined=isconfined ){
+	
+class Stateobservercontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
 		return "s0"
@@ -55,4 +56,4 @@ class Stateobservercontroller ( name: String, scope: CoroutineScope, isconfined:
 				}	 
 			}
 		}
-} 
+}

@@ -39,14 +39,10 @@ dispatch( gotorobottohome, gotorobottohome(_) ).
 dispatch( updateS, updateS(W) ).
 dispatch( getData, getData(_) ).
 dispatch( updateR, updateR(_) ).
-request( getrobotstate, getrobotstate(ARG) ).
-reply( robotstate, robotstate(POS,DIR) ).  %%for getrobotstate
 %====================================================================================
 context(ctxbasicrobot, "127.0.0.1",  "TCP", "8020").
 context(ctxprototipo3, "localhost",  "TCP", "8099").
  qactor( basicrobot, ctxbasicrobot, "external").
-  qactor( sonar, ctxprototipo3, "rx.sonarSimulator").
-  qactor( datacleaner, ctxprototipo3, "rx.dataCleaner").
   qactor( guicontroller, ctxprototipo3, "it.unibo.guicontroller.Guicontroller").
   qactor( coldstorageservice, ctxprototipo3, "it.unibo.coldstorageservice.Coldstorageservice").
   qactor( transporttrolley, ctxprototipo3, "it.unibo.transporttrolley.Transporttrolley").

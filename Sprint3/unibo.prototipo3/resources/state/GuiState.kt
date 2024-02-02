@@ -1,9 +1,6 @@
 package state
 import com.google.gson.Gson
 import resources.TicketEvaluationResponse
-import resources.model.Ticket
-import state.TTPosition
-import state.TransportTrolleyState
 
 // Tutti i dati necessari per update delle gui
 data class GuiState(
@@ -15,6 +12,7 @@ data class GuiState(
     private var rejected : Int = 0,
 
     private var pos : TTPosition = state.TTPosition.HOME ,
+    private var act : CurrStateTrolley = state.CurrStateTrolley.IDLE,
     private var ticketN: Int = 0, // 0 is accepted
 
     //precise position
@@ -46,6 +44,12 @@ data class GuiState(
     }
     fun getPos():TTPosition{
         return pos
+    }
+    fun setAct(newA : CurrStateTrolley){
+        act = newA
+    }
+    fun getAct():CurrStateTrolley{
+        return act
     }
     fun setTN(TN:Int){
         ticketN = TN

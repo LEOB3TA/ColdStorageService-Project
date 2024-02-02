@@ -30,8 +30,6 @@ with Diagram('prototipo3Arch', show=False, outformat='png', graph_attr=graphattr
           sonar23=Custom('sonar23','./qakicons/symActorSmall.png')
           ledqakactor=Custom('ledqakactor','./qakicons/symActorSmall.png')
           stateobservercontroller=Custom('stateobservercontroller','./qakicons/symActorSmall.png')
-          sonar=Custom('sonar(coded)','./qakicons/codedQActor.png')
-          datacleaner=Custom('datacleaner(coded)','./qakicons/codedQActor.png')
      transporttrolley >> Edge( label='alarm', **eventedgeattr, fontcolor='red') >> sys
      transporttrolley >> Edge( label='local_movef', **eventedgeattr, fontcolor='red') >> sys
      sonar23 >> Edge( label='stop', **eventedgeattr, fontcolor='red') >> sys
@@ -42,5 +40,6 @@ with Diagram('prototipo3Arch', show=False, outformat='png', graph_attr=graphattr
      transporttrolley >> Edge(color='blue', style='solid',  label='<disengage &nbsp; setrobotstate &nbsp; cmd &nbsp; >',  fontcolor='blue') >> basicrobot
      transporttrolley >> Edge(color='blue', style='solid',  label='<gotomovetoport &nbsp; gotodepositactionended &nbsp; gotorobottohome &nbsp; >',  fontcolor='blue') >> transporttrolley
      coldstorageservice >> Edge(color='blue', style='solid',  label='<updateS &nbsp; updateR &nbsp; >',  fontcolor='blue') >> guicontroller
+     transporttrolley >> Edge(color='blue', style='solid',  label='<coapUpdate &nbsp; >',  fontcolor='blue') >> guicontroller
      transporttrolley >> Edge(color='blue', style='solid',  label='<coapUpdate &nbsp; >',  fontcolor='blue') >> stateobservercontroller
 diag

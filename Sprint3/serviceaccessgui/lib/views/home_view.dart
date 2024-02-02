@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:ServiceAccessGUI/model/stepper_model.dart';
 import 'package:ServiceAccessGUI/model/store_food_request_dto.dart';
+import 'package:ServiceAccessGUI/model/ticket_response_dto.dart';
+import 'package:ServiceAccessGUI/model/weight_dto.dart';
+import 'package:ServiceAccessGUI/providers/service_weight_provider.dart';
 import 'package:ServiceAccessGUI/providers/status_provider.dart';
 import 'package:ServiceAccessGUI/widgets/custom_button.dart';
 import 'package:ServiceAccessGUI/widgets/spaced_column.dart';
@@ -10,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
 import 'package:stomp_dart_client/stomp.dart';
@@ -33,6 +37,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
   late StompClient stompClient;
   int ticketNumber = -1;
   String id = const Uuid().v4();
+  double curr = 0.0;
+  double max = 0.0;
 
   final storeFoodFormKey = const Key('storeFoodRequest');
   //static const depositTicketKey = Key('depositTicket');
@@ -48,7 +54,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       config: StompConfig(
         url: socketUrl,
         onConnect: socketConnection,
-        /*
+        //comment
       onWebSocketError: (dynamic error) {
         logger.e("WebSocket Error: ${error.toString()}");
         const snackBar = SnackBar(
@@ -65,7 +71,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       },
       onDisconnect: (dynamic frame) {
         logger.i('WebSocket Info: Disconnected.');
-      },*/
+      },
       ),
     );
 
@@ -73,8 +79,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   void socketConnection(StompFrame frame) {
+
     print(frame.headers);
-    /*
+    //comment
     stompClient.subscribe(
         destination: '/topic/message',
         callback: (StompFrame frame) {
@@ -84,7 +91,23 @@ class _HomeViewState extends ConsumerState<HomeView> {
             logger.t('WebSocket Connection Result: $result');
           }
         });
-
+    stompClient.subscribe(
+      destination:'/topic/updates',
+      callback: (StompFrame frame){
+        if (frame.body != null){
+          print("UPDATE :${frame.body!}");
+          WeightDTO update = WeightDTO.fromJson(json.decode(frame.body!));
+          print(update);
+          setState(() {
+            curr = update.getCurr;
+            max = update.getMaxWeight;
+          });
+          ref.read(serviceWeightProvider).curr = update.getCurr;
+          ref.read(serviceWeightProvider).maxWeight = update.maxWeight;
+          print(ref.read(serviceWeightProvider).toString());
+        }
+      }
+    );
     stompClient.subscribe(
         destination: '/user/queue/store-food/$id',
         callback: (StompFrame frame) {
@@ -116,19 +139,28 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
-     */
+    updates();
   }
 
   final formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+
     final status = ref.watch(statusEnumProvider);
+    //final config = ref.watch(serviceWeightProvider); unused
     final TextEditingController storeFoodController = TextEditingController();
     final TextEditingController depositController = TextEditingController();
     bool storeFoodValid = false;
     final TextEditingController _depositTicketController = TextEditingController();
     final model = ref.watch(stepperProvider(false));
+
+    final percent = curr / max;
+    final progressColor = percent < 0.5
+        ? Colors.green
+        : percent < 0.8
+        ? Colors.orange
+        : Colors.red;
 
     return Scaffold(
         body: Padding(
@@ -178,6 +210,94 @@ class _HomeViewState extends ConsumerState<HomeView> {
             child: SpacedRow(
               spacing: 8,
               children: [
+                // current weight start
+                Expanded(
+                    child: SizedBox(
+                      height: double.maxFinite,
+                      width: double.maxFinite,
+                      child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.all(Radius.circular(8)),
+                            color: Colors.grey.shade200,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: SpacedColumn(
+                              spacing: 16,
+                              children: [
+                                Expanded(
+                                  child: SpacedColumn(
+                                    spacing: 0,
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: FittedBox(
+                                          fit: BoxFit.contain,
+                                          child: Text(
+                                            'Current Weight',
+                                            style: GoogleFonts.roboto(
+                                                textStyle: const TextStyle(
+                                                    fontWeight: FontWeight.w800, color: Colors.blueAccent)),
+                                          ),
+                                        ),
+                                      ),
+                                      const Expanded(
+                                        child: FittedBox(
+                                          fit: BoxFit.contain,
+                                          child: Text(
+                                            'Stored in ColdRoom',
+                                            style:
+                                            TextStyle(fontWeight: FontWeight.w500, color: Colors.black45),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                    flex: 3,
+                                    child: FittedBox(
+                                      fit: BoxFit.contain,
+                                      child: CircularPercentIndicator(
+                                        radius: 96,
+                                        animation: true,
+                                        lineWidth: 16,
+                                        percent: percent,
+                                        center: RichText(
+                                          textAlign: TextAlign.center,
+                                          text: TextSpan(
+                                            text: 'KG\n',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16,
+                                                color: Colors.black26),
+                                            children: <TextSpan>[
+                                              TextSpan(
+                                                  text: '${curr}\n',
+                                                  style: TextStyle(
+                                                      letterSpacing: 0,
+                                                      fontWeight: FontWeight.w600,
+                                                      fontSize: 32,
+                                                      color: progressColor)),
+                                              TextSpan(
+                                                  text: 'Out of ${max} kg',
+                                                  style: const TextStyle(
+                                                      fontWeight: FontWeight.w400,
+                                                      fontSize: 16,
+                                                      color: Colors.black38)),
+                                            ],
+                                          ),
+                                        ),
+                                        progressColor: progressColor,
+                                        backgroundColor: progressColor.shade100,
+                                        circularStrokeCap: CircularStrokeCap.round,
+                                      ),
+                                    )),
+                              ],
+                            ),
+                          )),
+                    )),
+                //current weight end
                 Expanded(
                     flex: 1,
                     child: SizedBox(
@@ -415,9 +535,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                       ),
                                     ],
                                   ),
-                                ),
+                                //), TODO: check
                               ),
-                              //const Spacer(),
+                              //const Spacer()
                             ],
                           ),
                         ),
@@ -654,6 +774,15 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   bool _getActive(StepperModel model, int index) => _getState(model, index) != StepState.disabled;
 
+// quandoo mi connetto chiedo l'update
+  void updates(){
+    if(kDebugMode){
+      print("Update-------");
+    }
+    stompClient.send(
+      destination:'/topic/updates',
+    );
+  }
   void storeFoodRequest(double quantity) {
     if (kDebugMode) {
       print('Store Food Request: $quantity');

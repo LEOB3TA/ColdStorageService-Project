@@ -5,6 +5,8 @@ import com.unibo.servicestatusbe.model.*;
 import com.unibo.servicestatusbe.model.ServiceStatusDTO;
 import com.unibo.servicestatusbe.service.WebSocketService;
 import com.unibo.servicestatusbe.utils.UtilsCoapObserver;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
@@ -31,6 +34,8 @@ import unibo.basicomm23.utils.ColorsOut;
 import unibo.basicomm23.utils.CommSystemConfig;
 
 import java.security.Principal;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,25 +44,26 @@ import java.util.Objects;
 public class WebSocketController {
 
     // Observer connection
-    private static final String ctxName = "ctx_prototipo3";
+    private static final String ctxName = "ctxprototipo3";
     private static final String actorName = "transporttrolley";//"guicontroller"
     private static final String actorGui = "guicontroller";
     private static final String actorService = "coldstorageservice";
     private static Interaction2021 conn;
     public static Interaction2021 connTCP;
+    private static String upd ="";
     // end Observer conf
-    final SimpMessagingTemplate template;
+    static SimpMessagingTemplate template;
     final Environment env;
     final ServiceConfigDTO serviceConfigDTO;
     final ServiceStatusDTO serviceStatusDTO = new ServiceStatusDTO();
-    private final List<String> sessionList;
+    private static List<String> sessionList = Collections.emptyList() ;
     private final WebSocketService service;
 
     // *********************************Observer connection
-    public static CoapConnection connectCoap(String ip, int port) {
+    public CoapConnection connectCoap(String ip, int port) {
         try {
             CommSystemConfig.tracing = true;
-            String path = ctxName + "/" + actorName;
+            String path = ctxName + "/" + actorGui;
             conn = new CoapConnection(ip + ":" + port, path);
             ColorsOut.out("[UtilsStatusGUI] connect Tcp conn:" + conn);
             ColorsOut.outappl("[UtilsStatusGUI] connect Coap conn:" + conn, ColorsOut.CYAN);
@@ -67,7 +73,7 @@ public class WebSocketController {
         return (CoapConnection) conn;
     }
 
-    public static void connectTCP(String ip, int port) {
+    public void connectTCP(String ip, int port) {
         try {
             CommSystemConfig.tracing = true;
             connTCP = TcpClientSupport.connect(ip, port, 10);
@@ -78,32 +84,51 @@ public class WebSocketController {
         }
     }
 
-    public static void sendMsg() {
+    public static void getData() {
         try {
-            String msg = "msg(get_data, dispatch, ws_gui, " + actorGui + ", get_data(_), 1)";
-            ColorsOut.outappl("[UtilsStatusGUI] sendMsg msg:" + msg + " conn=" + conn, ColorsOut.BLUE);
+            String res = "";
+            String msg = "msg(getData, dispatch, beckend, " + actorGui + ", getData(_), 1)";
+            ColorsOut.outappl("[UtilsStatusGUI] getData msg:" + msg + " conn=" + conn, ColorsOut.BLUE);
+            //String coap = conn.receiveMsg();
             connTCP.forward(msg);
+            //res = connTCP.receiveMsg();
+            //ColorsOut.outappl("[UtilsStatusGui] update response"  +res, ColorsOut.YELLOW);
+            //return res;
         } catch (Exception e) {
             ColorsOut.outerr("[UtilsStatusGUI] sendMsg on:" + conn + " ERROR:" + e.getMessage());
+            //return "Error";
         }
     }
     // TODO: finish modifications
-    public static void sendStore(double w){
+    public int sendStore(double w){
         try {
-            String msg = "msg(storeFood, dispatch, coldstorageservice, " + actorService + ", storeFood("+w+"), 1)";
-            ColorsOut.outappl("[UtilsStatusGUI] sendMsg msg:" + msg + " conn=" + conn, ColorsOut.BLUE);
-            connTCP.forward(msg);
+            String res = "";
+            String msg = "msg(storeFood, request, backend, " + actorService + ", storeFood("+w+"), 1)";
+            ColorsOut.outappl("[UtilsStatusGUI] sendStore msg:" + msg + " conn=" + conn, ColorsOut.BLUE);
+            res = connTCP.request(msg);
+            int start = res.lastIndexOf("(")+1;
+            int end =  res.indexOf(")");
+            //ColorsOut.outappl("[UtilsStatusGui] sendStore start: "  +start +" end " +end, ColorsOut.YELLOW);
+            //getting the ticket
+            int tic = Integer.parseInt(res.substring(start,end));
+            ColorsOut.outappl("[UtilsStatusGui] sendStore ticket: "  +tic, ColorsOut.YELLOW);
+            //update status
+            return tic;
         } catch (Exception e) {
-            ColorsOut.outerr("[UtilsStatusGUI] sendMsg on:" + conn + " ERROR:" + e.getMessage());
+            ColorsOut.outerr("[UtilsStatusGUI] sendStore on:" + conn + " ERROR:" + e.getMessage());
+            return -1;
         }
     }
-    public static void sendDeposit(int t){
+    public String sendDeposit(int t){
         try {
-            String msg = "msg(deposit, dispatch, coldstorageservice, " + actorService + ", deposit("+t+"), 1)";
-            ColorsOut.outappl("[UtilsStatusGUI] sendMsg msg:" + msg + " conn=" + conn, ColorsOut.BLUE);
-            connTCP.forward(msg);
+            String res = "";
+            String msg = "msg(sendTicket, request, backend, " + actorService + ", sendTicket("+t+"), 1)";
+            ColorsOut.outappl("[UtilsStatusGUI] sendDeposit msg:" + msg + " conn=" + conn, ColorsOut.BLUE);
+            res = connTCP.request(msg);
+            return res;
         } catch (Exception e) {
-            ColorsOut.outerr("[UtilsStatusGUI] sendMsg on:" + conn + " ERROR:" + e.getMessage());
+            ColorsOut.outerr("[UtilsStatusGUI] sendDeposit on:" + conn + " ERROR:" + e.getMessage());
+            return "errore";
         }
     }
 
@@ -115,66 +140,74 @@ public class WebSocketController {
         this.serviceConfigDTO = serviceConfigDTO;
         this.sessionList = sessionList;
         this.service = service;
+        connectCoap("localhost", 8099).observeResource(new UtilsCoapObserver());
+        connectTCP("localhost", 8099);
+        // define observer
+        //kotlinObs obs = new kotlinObs();
+        //conn.observeResource(obs);
+
         System.out.println("INITIAL SERVICE CONFIG -----------------------\n " + serviceConfigDTO.toJson());
     }
 
-    @SubscribeMapping("/topic/message")
-    public TextMessageDTO subscribe() {
-        connectCoap("localhost", 8099).observeResource(new UtilsCoapObserver());
-        connectTCP("localhost", 8099);
-        sendMsg();
+//    @SubscribeMapping("/topic/message")
+//    public TextMessageDTO subscribe() {
+//        connectCoap("localhost", 8099).observeResource(new UtilsCoapObserver());
+//        connectTCP("localhost", 8099);
+//        sendMsg();
+//
+//        System.out.println("Subscribed to /topic/message");
+//
+//        TextMessageDTO message = new TextMessageDTO("Subscribed to /topic/message");
+//        template.convertAndSend("/topic/message", message);
+//        return message;
+//    }
 
-        System.out.println("Subscribed to /topic/message");
+//    @PostMapping(value = "/send", consumes = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<String> sendMessage(@RequestBody ServiceStatusDTO serviceStatusDTO) {
+//        if (serviceStatusDTO.getCurrentWeight() > serviceConfigDTO.getMaxWeight()) {
+//
+//            return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//        if (serviceStatusDTO.getCurrentWeight() < 0) {
+//            return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
+//        }
+//        template.convertAndSend("/topic/message", serviceStatusDTO);
+//        return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
+//    }
 
-        TextMessageDTO message = new TextMessageDTO("Subscribed to /topic/message");
-        template.convertAndSend("/topic/message", message);
-        return message;
-    }
+//    @PostMapping(value = "/send-private", consumes = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<String> sendMessage(@RequestParam("id") String id, @RequestBody ServiceStatusDTO serviceStatusDTO) {
+//        sendMsg();
+//        if (serviceStatusDTO.getCurrentWeight() > serviceConfigDTO.getMaxWeight()) {
+//            return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//        if (serviceStatusDTO.getCurrentWeight() < 0) {
+//            return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
+//        }
+//        template.convertAndSendToUser(id, "/queue/greetings", "CIAOOOOO");
+//        return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
+//    }
 
-    @PostMapping(value = "/send", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> sendMessage(@RequestBody ServiceStatusDTO serviceStatusDTO) {
-        if (serviceStatusDTO.getCurrentWeight() > serviceConfigDTO.getMaxWeight()) {
-            return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        if (serviceStatusDTO.getCurrentWeight() < 0) {
-            return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
-        }
-        template.convertAndSend("/topic/message", serviceStatusDTO);
-        return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
-    }
+//    @MessageMapping("/sendMessage")
+//    public void receiveMessage(@Payload TextMessageDTO textMessageDTO) {
+//        // receive message from client
+//    }
+//
+//    @SendTo("/topic/message")
+//    public TextMessageDTO broadcastMessage(@Payload TextMessageDTO textMessageDTO) {
+//        return textMessageDTO;
+//    }
 
-    @PostMapping(value = "/send-private", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> sendMessage(@RequestParam("id") String id, @RequestBody ServiceStatusDTO serviceStatusDTO) {
-        if (serviceStatusDTO.getCurrentWeight() > serviceConfigDTO.getMaxWeight()) {
-            return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        if (serviceStatusDTO.getCurrentWeight() < 0) {
-            return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
-        }
-        template.convertAndSendToUser(id, "/queue/greetings", "CIAOOOOO");
-        return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
-    }
-
-    @MessageMapping("/sendMessage")
-    public void receiveMessage(@Payload TextMessageDTO textMessageDTO) {
-        // receive message from client
-    }
-
-    @SendTo("/topic/message")
-    public TextMessageDTO broadcastMessage(@Payload TextMessageDTO textMessageDTO) {
-        return textMessageDTO;
-    }
-
-    @PostMapping(value = "/store-food", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> storeFood(@RequestBody StoreFoodRequestDTO storeFoodRequestDTO) {
-        if (storeFoodRequestDTO.getQuantity() > serviceConfigDTO.getMaxWeight()) {
-            return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        if (storeFoodRequestDTO.getQuantity() < 0) {
-            return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
-    }
+//    @PostMapping(value = "/store-food", consumes = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<String> storeFood(@RequestBody StoreFoodRequestDTO storeFoodRequestDTO) {
+//        if (storeFoodRequestDTO.getQuantity() > serviceConfigDTO.getMaxWeight()) {
+//            return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//        if (storeFoodRequestDTO.getQuantity() < 0) {
+//            return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
+//        }
+//        return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
+//    }
 
 
 
@@ -183,26 +216,30 @@ public class WebSocketController {
         String destination = (String) Objects.requireNonNull(event.getMessage().getHeaders().get("simpDestination"));
         StompHeaderAccessor accessor;
         String sessionId;
+
+
         switch (destination) {
-            case "/user/queue/store-food":
+            case "/topic/updates":
                 accessor = StompHeaderAccessor.wrap(event.getMessage());
                 sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
                 sessionList.add(sessionId);
                 System.out.println("Session Id" + sessionId + " subscribed to " + destination);
                 assert sessionId != null;
-                /* TODO:
-                conn.sendMsg();
-                conn.sendStore();
-                * */
-                template.convertAndSendToUser(sessionId, "/queue/responses", "CIAOOOO");
+
+                template.convertAndSendToUser(sessionId, "/topic/updates", "update");
+                break;
+            case "/user/queue/store-food":
+                accessor = StompHeaderAccessor.wrap(event.getMessage());
+                sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
+                //sessionList.add(sessionId);
+                System.out.println("Session Id" + sessionId + " subscribed to " + destination);
+                assert sessionId != null;
+
+                template.convertAndSendToUser(sessionId, "/queue/responses", "ticket");
                 break;
             case "/user/queue/deposit":
                 accessor = StompHeaderAccessor.wrap(event.getMessage());
                 sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
-                /* TODO:
-                conn.sendMsg();
-                conn.sendDeposit();
-                * */
                 System.out.println("Session Id" + sessionId + " subscribed to " + destination);
                 assert sessionId != null;
                 template.convertAndSendToUser(sessionId, "/queue/responses", "CIAOOOO");
@@ -216,18 +253,107 @@ public class WebSocketController {
 
     public static void sendToAll(String message) {
         try {
+            upd = message;
             ColorsOut.outappl("WebSocketController | sendToAll String: " + message, ColorsOut.CYAN);
-            sendToAll(String.valueOf(new TextMessage(message)));
+            //sendToAll();
+            handleUpdates();
         } catch (Exception e) {
             ColorsOut.outerr("WebSocketController | sendToAll String ERROR:" + e.getMessage());
         }
     }
+
+//    public static void sendToAll(String message) {
+//        upd = message;
+//        Iterator<String> iter = sessionList.iterator();
+//        while( iter.hasNext() ){
+//            try{
+//                String session = iter.next();
+//                ColorsOut.outappl("[WebSocketHandler] sendToAll " +
+//                        message + " for session " + session , ColorsOut.MAGENTA);
+//                //synchronized(session){
+//                handleUpdates();
+//                //}
+//            }catch(Exception e){
+//                ColorsOut.outerr("[WebSocketHandler] TextMessage ERROR:"+e.getMessage());
+//            }
+//        }
+//    }
 
     @MessageMapping("/greetings")
     @SendTo("/queue/greetings")
     public void reply(@Payload String message, Principal user){
         template.convertAndSendToUser(user.getName(), "/queue/greetings", message);
     }
+
+    @MessageMapping("/updates")
+    @SendTo("/topic/updates")
+    public static void handleUpdates(){
+        //getData();
+        System.out.println("Debug updates "+upd);
+        String cleaned = upd.replace("GuiState(","").replace(")","");
+        int arr = cleaned.lastIndexOf("=");
+        String first = cleaned.substring(0, arr - 5);
+        String pos = cleaned.substring(arr-5);
+        //System.out.println(first+" co "+pos);
+        String[] kvp = first.split(", ");
+        String[] ttpos = pos.split("=");
+
+        JSONObject obj = new JSONObject();
+
+        for (String pair : kvp) {
+            // Split the pair into key and value
+            String[] kv = pair.split("=");
+            //System.out.println(pair);
+            String key = kv[0];
+            String value = kv[1];
+
+            if(key.equals("MAXW") || key.equals("CurrW")){
+                Double val = Double.parseDouble(value);
+                obj.put(key, val);
+            }else if (key.startsWith("x")|| key.startsWith("y")||key.equals("rejected") || key.equals("ticketN")){
+                int v = Integer.parseInt(value);
+                obj.put(key, v);
+            }else{
+                obj.put(key, value);
+            }
+            // If the value is an array, parse it as such
+//            if (value.startsWith("[") && value.endsWith("]")) {
+//                value = value.substring(1, value.length() - 1); // remove brackets
+//                String[] arrayValues = value.split(", "); // split by comma
+//                JSONArray array = new JSONArray();
+//                for (String v : arrayValues) {
+//                    array.add(Double.valueOf(v)); // parse as double
+//                }
+//                obj.put(key, array);
+//            } else {
+//                // Otherwise, just put the value in the JSONObject
+//                obj.put(key, value);
+//            }
+
+        }
+
+        JSONArray positions = new JSONArray();
+        String ttposArr = ttpos[1].substring(ttpos[1].indexOf("[")+1, ttpos[1].indexOf("]"));
+        String[] ttposel = ttposArr.split(",");
+        for (String el : ttposel){
+            positions.add(Integer.parseInt(el.trim()));
+        }
+        obj.put(ttpos[0], positions);
+
+        String res = obj.toString();
+        System.out.println("Update json "+ res);
+        template.convertAndSend("/topic/updates", res);
+    }
+//    @MessageMapping("/update/{sessionId}")
+//    @SendTo("/user/queue/update/{sessionId}")
+//    public ServiceConfigDTO handleUpdate(@PathVariable("sessionId")String sessionId){
+//        getData();
+//        //System.out.println(res);
+//        ServiceConfigDTO result = new ServiceConfigDTO();
+//        // set
+//        template.convertAndSendToUser(sessionId, "/user/queue/update", result);
+//        return result;
+//    }
 
     @MessageMapping("/store-food/{sessionId}")
     @SendTo("/user/queue/store-food/{sessionId}")
@@ -238,12 +364,15 @@ public class WebSocketController {
         if (requestDTO.getQuantity() > serviceConfigDTO.getMaxWeight() || serviceStatusDTO.getCurrentWeight() + requestDTO.getQuantity() > serviceConfigDTO.getMaxWeight()) {
             // return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        // quantity ok sending deposit
+        int Ticket = sendStore(requestDTO.getQuantity());
         // UPDATE STATUS
         serviceConfigDTO.setCurrentWeight(serviceStatusDTO.getCurrentWeight()+requestDTO.getQuantity());
         TicketResponseDTO result = new TicketResponseDTO();
-        result.setTicketNumber( serviceStatusDTO.getCurrentTicket());
-        serviceStatusDTO.setCurrentTicket(serviceStatusDTO.getCurrentTicket()+1);
+        result.setTicketNumber(Ticket);
+        serviceStatusDTO.setCurrentTicket(Ticket);
         template.convertAndSendToUser(sessionId, "/user/queue/store-food", result);
+        System.out.println(result);
         return result;
     }
 
@@ -253,6 +382,9 @@ public class WebSocketController {
         if (depositDTO.getTicketNumber() <0){
             return "invalid";
         }
+        String res=sendDeposit(depositDTO.getTicketNumber());
+        System.out.print("Risultato deposit "+res); // ritorna ticket valid/invalid
+        //TODO: check on valid/invalid ticket
         //update
         TicketResponseDTO result = new TicketResponseDTO();
         result.setTicketNumber( serviceStatusDTO.getCurrentTicket());

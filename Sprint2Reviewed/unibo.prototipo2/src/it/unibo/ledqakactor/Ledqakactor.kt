@@ -11,7 +11,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import it.unibo.kactor.sysUtil.createActor   //Sept2023
-class Ledqakactor ( name: String, scope: CoroutineScope, isconfined: Boolean=false  ) : ActorBasicFsm( name, scope, confined=isconfined ){
+	
+class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
 		return "s0"
@@ -72,4 +73,4 @@ class Ledqakactor ( name: String, scope: CoroutineScope, isconfined: Boolean=fal
 				}	 
 			}
 		}
-} 
+}

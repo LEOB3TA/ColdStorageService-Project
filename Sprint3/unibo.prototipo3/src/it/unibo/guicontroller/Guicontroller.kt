@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import it.unibo.kactor.sysUtil.createActor   //Sept2023
 	
 class Guicontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
@@ -19,11 +20,20 @@ class Guicontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		
-				var stato = state.GuiState()
-		return { //this:ActionBasciFsm
+				var Stato = state.GuiState()
+				//var tt = state.TransportTrolleyState()
+				var posStr = ""
+				var staStr = ""
+				var currPos = state.TTPosition.HOME
+				var currSta = state.CurrStateTrolley.IDLE
+				var X = 0
+				var Y = 0
+				//var arrPos = intArrayOf(X,Y)
+				return { //this:ActionBasciFsm
 				state("init") { //this:State
 					action { //it:State
 						CommUtils.outgreen("$name | 	started")
+						CoapObserverSupport(myself, "localhost","8099","ctxprototipo3","transporttrolley")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -40,19 +50,20 @@ class Guicontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 					}	 	 
 					 transition(edgeName="t00",targetState="updatestorage",cond=whenDispatch("updateS"))
 					transition(edgeName="t01",targetState="updaterejected",cond=whenDispatch("updateR"))
-					transition(edgeName="t02",targetState="updateposition",cond=whenReply("robotstate"))
+					transition(edgeName="t02",targetState="updateposition",cond=whenDispatch("coapUpdate"))
 					transition(edgeName="t03",targetState="updategui",cond=whenDispatch("getData"))
 				}	 
 				state("updatestorage") { //this:State
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("updateS(W)"), Term.createTerm("updateS(W)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
+								CommUtils.outblack("$name | ${payloadArg(0)}")
 								
-												val weight = payloadArg(0).toDouble() // it should be already double
+												val weight = payloadArg(0).toDouble()  //conversion beetwen strings and weights
 								CommUtils.outblack("$name |	aggiunta peso pari a $weight")
 								
 											// update state	
-											stato.setCurrW(weight)
+											Stato.setCurrW(weight)
 						}
 						//genTimer( actor, state )
 					}
@@ -67,7 +78,7 @@ class Guicontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								CommUtils.outblack("$name |	rejected")
 								
-												stato.setRejected()	
+												Stato.setRejected()	
 						}
 						//genTimer( actor, state )
 					}
@@ -78,24 +89,30 @@ class Guicontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("updateposition") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("robotstate(POS,DIR)"), Term.createTerm("robotstate(Pos,Dir)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								
-												val P = payloadArg(0).toInt()
-												val D = payloadArg(1).toInt()
-												var X = 0
-								 				var Y = 0
-								 				val regex = """pos\((\d+),(\d+)\)""".toRegex()
-												val matchResult = regex.find(P.toString())
-												if (matchResult != null) {
-												    val (yStr, xStr) = matchResult.destructured
-												    X = xStr.toInt()
-												    Y = yStr.toInt()
-												}
-												stato.setTTP(intArrayOf(X,Y))
-												//var prova = stato.getTTP()
-												//for (i in 0..1) println( prova[i])	
-						}
+						
+									staStr = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"
+									posStr = "${currentMsg.toString().substringAfter("currPosition\":\"").substringBefore("\"")}"
+									currPos = state.TTPosition.valueOf(posStr)
+									currSta = state.CurrStateTrolley.valueOf(staStr)
+									Stato.setPos(currPos)
+									Stato.setAct(currSta)
+									//Arrays HOME, INDOOR, ONTHEROAD, PORT
+									when (Stato.getPos()){
+										state.TTPosition.HOME-> {
+											X=0
+											Y=0
+										}
+										state.TTPosition.INDOOR->{
+											X=4
+											Y=0
+										}
+										state.TTPosition.PORT->{
+											X=1
+											Y=4
+										}
+									}
+									Stato.setTTP(intArrayOf(X,Y))
+						CommUtils.outyellow("${Stato}")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -105,8 +122,8 @@ class Guicontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("updategui") { //this:State
 					action { //it:State
-						CommUtils.outblack("$name |	new update for GUI")
-						updateResourceRep(stato.toString() 
+						CommUtils.outyellow("$name |	new update for GUI")
+						updateResourceRep(Stato.toString() 
 						)
 						//genTimer( actor, state )
 					}
