@@ -332,14 +332,23 @@ public class WebSocketController {
 
         }
 
-        JSONArray positions = new JSONArray();
+        JSONObject positions = new JSONObject();
         String ttposArr = ttpos[1].substring(ttpos[1].indexOf("[")+1, ttpos[1].indexOf("]"));
         String[] ttposel = ttposArr.split(",");
-        for (String el : ttposel){
-            positions.add(Integer.parseInt(el.trim()));
+//        for (String el : ttposel){
+//            positions.add(Integer.parseInt(el.trim()));
+//            System.out.println(el);
+//        }
+        for (int i=0; i<2;i++){
+            if (i==0) {
+                positions.put("x", Integer.parseInt(ttposel[i].trim()));
+            }else{
+                positions.put("y", Integer.parseInt(ttposel[i].trim()));
+            }
         }
-        obj.put(ttpos[0], positions);
 
+        obj.put(ttpos[0], positions);
+        //System.out.println("Positions " +positions);
         String res = obj.toString();
         System.out.println("Update json "+ res);
         template.convertAndSend("/topic/updates", res);

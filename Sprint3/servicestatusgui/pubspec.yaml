@@ -43,6 +43,7 @@ dependencies:
   flutter_riverpod: ^2.4.8
   riverpod_annotation: ^2.3.2
   skeletonizer: ^0.8.0
+  uuid: 4.2.2
 
 dev_dependencies:
   flutter_test:

@@ -1,19 +1,22 @@
 import 'package:servicestatusgui/model/position.dart';
 
 class ServiceStatusDTO {
-  final double currentWeight;
-  final String status;
-  final Position position;
-  final int rejectedRequests;
+  double currentWeight;
+  double maxW;
+  String status;
+  Position position;
+  int rejectedRequests;
 
   ServiceStatusDTO({
     this.currentWeight = 0.0,
-    this.status = 'Stopped',
+    this.maxW = 0.0,
+    this.status = 'STOPPED',
     this.position = const Position(x: 0, y: 0),
     this.rejectedRequests = 0,
   });
 
   double get getCurrentWeight => currentWeight;
+  double get getMaxWeigth =>maxW;
   String get getStatus => status;
   Position get getPosition => position;
   int get getRejectedRequests => rejectedRequests;
@@ -25,17 +28,18 @@ class ServiceStatusDTO {
 
   factory ServiceStatusDTO.fromJson(Map<String, dynamic> json) {
     return ServiceStatusDTO(
-      currentWeight: json["currentWeight"],
-      status: json["status"],
-      position: Position.fromJson(json["position"]),
-      rejectedRequests: json["rejectedRequests"],
+      currentWeight: json["CurrW"],
+      maxW : json["MAXW"],
+      status: json["act"],
+      position: Position.fromJson(json["ttPos"]),
+      rejectedRequests: json["rejected"],
     );
   }
 
   Map<String, dynamic> toJson() => {
-        "currentWeight": currentWeight,
-        "status": status,
-        "position": position,
-        "rejectedRequests": rejectedRequests,
+        "CurrW": currentWeight,
+        "act": status,
+        "ttPos": position,
+        "rejected": rejectedRequests,
       };
 }
