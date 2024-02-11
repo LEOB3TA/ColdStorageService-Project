@@ -14,7 +14,7 @@ class Position {
   }
 
   // fromJson function
-  factory Position.fromJson(Map<String, dynamic> json) {
+  factory Position.fromJson(Map<String,dynamic> json) {
     return Position(
       x: json["x"],
       y: json["y"],

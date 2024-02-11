@@ -1,13 +1,16 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:servicestatusgui/model/position.dart';
 import 'package:servicestatusgui/model/service_config_dto.dart';
 import 'package:servicestatusgui/model/service_status_dto.dart';
 import 'package:servicestatusgui/provider/service_config_provider.dart';
+import 'package:servicestatusgui/provider/service_status_provider.dart';
 import 'package:servicestatusgui/widgets/map_grid.dart';
 import 'package:servicestatusgui/widgets/spaced_column.dart';
 import 'package:servicestatusgui/widgets/spaced_row.dart';
@@ -15,10 +18,10 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
+import 'package:uuid/uuid.dart';
 
-import '../provider/service_status_provider.dart';
-
-const socketUrl = 'ws://localhost:11804/ws-message';
+const socketUrl = 'ws://localhost:11804/ws-message';//local
+// const socketUrl = 'ws://192.168.1.2/ws-message'
 
 var logger = Logger(printer: PrettyPrinter());
 
@@ -33,6 +36,12 @@ class _HomePageViewState extends ConsumerState<HomePageView> {
   late StompClient stompClient;
   final ServiceStatusDTO serviceStatusDTO = ServiceStatusDTO();
   bool isLoading = false;
+  String id = const Uuid().v4();
+  double curr = 0.0;
+  double max = 0.0;
+  int rejected = 0;
+  String state = "IDLE";
+  Position pos = Position(x:0, y:0);
 
   @override
   void initState() {
@@ -80,6 +89,31 @@ class _HomePageViewState extends ConsumerState<HomePageView> {
             }
           }
         });
+    stompClient.subscribe(
+      destination: '/topic/updates',
+      callback: (StompFrame frame){
+        if(frame.body != null){
+          print("Update : ${frame.body!}");
+          ServiceStatusDTO update = ServiceStatusDTO.fromJson(json.decode(frame.body!));
+          print(update);
+          setState((){
+            curr = update.getCurrentWeight;
+            max = update.getMaxWeigth;
+            rejected = update.getRejectedRequests;
+            state = update.getStatus;
+            pos = update.getPosition;
+
+          });
+          ref.read(serviceStatusProvider).currentWeight = update.getCurrentWeight;
+          ref.read(serviceStatusProvider).maxW = update.getMaxWeigth;
+          ref.read(serviceStatusProvider).rejectedRequests = update.getRejectedRequests;
+          ref.read(serviceStatusProvider).status = update.getStatus;
+          ref.read(serviceStatusProvider).position = update.getPosition;
+
+          print(ref.read(serviceStatusProvider).toString());
+        }
+      }
+    );
     logger.i('WebSocket Info: Connected.');
     const snackBar = SnackBar(
       content: Text("Connected to Server"),
@@ -90,13 +124,15 @@ class _HomePageViewState extends ConsumerState<HomePageView> {
     setState(() {
       isLoading = false;
     });
+
+    updates();
   }
 
   @override
   Widget build(BuildContext context) {
     final config = ref.watch(serviceConfigProvider);
     final status = ref.watch(serviceStatusProvider);
-    final percent = status.currentWeight / config.maxWeight;
+    final percent = status.currentWeight / status.maxW;
     final progressColor = percent < 0.5
         ? Colors.green
         : percent < 0.8
@@ -252,7 +288,7 @@ class _HomePageViewState extends ConsumerState<HomePageView> {
                                                                 fontSize: 32,
                                                                 color: progressColor)),
                                                         TextSpan(
-                                                            text: 'Out of ${config.maxWeight} kg',
+                                                            text: 'Out of ${status.maxW} kg',
                                                             style: const TextStyle(
                                                                 fontWeight: FontWeight.w400,
                                                                 fontSize: 16,
@@ -325,7 +361,7 @@ class _HomePageViewState extends ConsumerState<HomePageView> {
                                                             child: FittedBox(
                                                               fit: BoxFit.cover,
                                                               child: Text(
-                                                                status.status,
+                                                                status.getStatus,
                                                                 style: const TextStyle(
                                                                     fontSize: 36, color: Colors.black54),
                                                               ),
@@ -354,7 +390,7 @@ class _HomePageViewState extends ConsumerState<HomePageView> {
                                                             child: FittedBox(
                                                               fit: BoxFit.cover,
                                                               child: Text(
-                                                                '(${status.position.getX}, ${status.position.getY})',
+                                                                '(${status.getPosition.getX}, ${status.getPosition.getY})',
                                                                 style: const TextStyle(
                                                                     fontSize: 36, color: Colors.black54),
                                                               ),
@@ -400,7 +436,7 @@ class _HomePageViewState extends ConsumerState<HomePageView> {
                                                     child: FittedBox(
                                                       fit: BoxFit.cover,
                                                       child: Text(
-                                                        status.rejectedRequests.toString(),
+                                                        status.getRejectedRequests.toString(),
                                                         style: const TextStyle(fontSize: 96, color: Colors.black54),
                                                       ),
                                                     ),
@@ -489,4 +525,13 @@ class _HomePageViewState extends ConsumerState<HomePageView> {
       ),
     )));
   }
+  void updates(){
+    if(kDebugMode){
+      print("Update-------");
+    }
+    stompClient.send(
+      destination:'/topic/updates',
+    );
+  }
 }
+
