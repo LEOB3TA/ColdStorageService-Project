@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:servicestatusgui/globals.dart';
 
-import '../model/position.dart';
-import '../provider/service_config_provider.dart';
-import '../provider/service_status_provider.dart';
+import '../../model/position.dart';
+import '../../provider/service_config_provider.dart';
+import '../../provider/service_status_provider.dart';
 
 class Pixel extends StatelessWidget {
   final bool robot;
@@ -39,7 +40,7 @@ class Pixel extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(Radius.circular(4)),
-              color: color != null ? color!.shade100 : Colors.grey.shade100,
+              color: color != null ? color!.shade100 : Globals.backgroundColor,
             ),
             child: Padding(
               padding: const EdgeInsets.all(2),

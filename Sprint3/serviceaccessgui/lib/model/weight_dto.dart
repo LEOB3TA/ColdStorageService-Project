@@ -1,30 +1,30 @@
-import 'package:ServiceAccessGUI/model/weight_dto.dart';
-
 class WeightDTO {
   double maxWeight;
-  double curr;
+  double currentWeight;
 
   WeightDTO({
     this.maxWeight = 10.0,
-    this.curr = 0.0,
+    this.currentWeight = 0.0,
   });
 
   double get getMaxWeight => maxWeight;
-  double get getCurr => curr;
+  double get getCurrentWeight => currentWeight;
+  double get percent => (currentWeight / maxWeight);
+
    @override
   String toString() {
-    return 'ServiceConfigDTO{maxWeight: $maxWeight, current: $curr}';
+    return 'ServiceConfigDTO{maxWeight: $maxWeight, currentWeight: $currentWeight}';
   }
 
   factory WeightDTO.fromJson(Map<String, dynamic> json) {
     return WeightDTO(
-      maxWeight: json["MAXW"],
-      curr: json['CurrW'],
+      maxWeight: json["currentWeight"],
+      currentWeight: json['maxWeight'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-    "maxWeight": maxWeight,
-    "curr":curr,
+    "MAXW": maxWeight,
+    "CurrW":currentWeight,
   };
 }

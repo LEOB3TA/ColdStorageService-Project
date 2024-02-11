@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:servicestatusgui/widgets/pixel.dart';
+import 'package:servicestatusgui/widgets/layout/pixel.dart';
 
-import '../model/position.dart';
-import '../provider/service_config_provider.dart';
+import '../../model/position.dart';
+import '../../provider/service_config_provider.dart';
 
 class MapGrid extends StatelessWidget {
   const MapGrid(
