@@ -63,10 +63,11 @@ Dispatch updateS : updateS(W) // W = peso
 Dispatch getData : getData(_)
 //Dispatch updateTp : updateTp(X,Y)
 Dispatch updateR : updateR(_)
-// TODO : check for position in particular if it can work in different ctx
+
 // basicrobot pos -> gestita dal basicrobot
+//get info from basicrobot
 //Request getrobotstate : getrobotstate(ARG)
-//Dispatch robotstate      : robotstate(POS,DIR)  //for getrobotstate
+//Reply robotstate      : robotstate(POS,DIR)  //for getrobotstate
 
 Context ctxbasicrobot ip [host="127.0.0.1" port=8020]
 Context ctxprototipo3 ip [host="localhost" port=8099]
@@ -99,6 +100,7 @@ QActor guicontroller context ctxprototipo3{
 	State init initial{
 		println("$name | 	started") color green
 		observeResource transporttrolley
+		observeResource basicrobot
 	}
 	Goto idle
 	State idle{
@@ -107,6 +109,7 @@ QActor guicontroller context ctxprototipo3{
 				   whenMsg updateR -> updaterejected
 				   whenMsg coapUpdate -> updateposition
 				   whenMsg getData -> updategui
+				   //whenReply robotstate ->getpos
 				   // TODO: check how to manage TT state/position
 				   //
 				   
@@ -125,6 +128,7 @@ QActor guicontroller context ctxprototipo3{
 	}Goto updategui
 	
 	State updaterejected{
+		
 		onMsg(updateR: updateR(_)){
 			println("$name |	rejected")
 			[#
@@ -132,11 +136,11 @@ QActor guicontroller context ctxprototipo3{
 			#]
 		}
 	}Goto updategui
-	
+		
 	State updateposition{
 		//onMsg(updateTp: updateTp(X, Y)){ TODO check
-		/*onMsg(robotstate:robotstate(Pos,Dir)){
-			[#
+		
+		/*	[#
 				val P = payloadArg(0).toInt()
 				val D = payloadArg(1).toInt()
 				var X = 0
@@ -155,28 +159,35 @@ QActor guicontroller context ctxprototipo3{
 			
 		}*/
 		[#
-			staStr = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"
-			posStr = "${currentMsg.toString().substringAfter("currPosition\":\"").substringBefore("\"")}"
-			currPos = state.TTPosition.valueOf(posStr)
-			currSta = state.CurrStateTrolley.valueOf(staStr)
-			Stato.setPos(currPos)
-			Stato.setAct(currSta)
-			//Arrays HOME, INDOOR, ONTHEROAD, PORT
-			when (Stato.getPos()){
-				state.TTPosition.HOME-> {
-					X=0
-					Y=0
+			if(currentMsg.toString().contains("currState")){
+				staStr = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"
+				posStr = "${currentMsg.toString().substringAfter("currPosition\":\"").substringBefore("\"")}"
+				currPos = state.TTPosition.valueOf(posStr)
+				currSta = state.CurrStateTrolley.valueOf(staStr)
+				Stato.setPos(currPos)
+				Stato.setAct(currSta)
+				//Arrays HOME, INDOOR, ONTHEROAD, PORT
+				when (Stato.getPos()){
+					state.TTPosition.HOME-> {
+						X=0
+						Y=0
+					}
+					state.TTPosition.INDOOR->{
+						X=4
+						Y=0
+					}
+					state.TTPosition.PORT->{
+						X=1
+						Y=4
+					}
 				}
-				state.TTPosition.INDOOR->{
-					X=4
-					Y=0
-				}
-				state.TTPosition.PORT->{
-					X=1
-					Y=4
-				}
+				Stato.setTTP(intArrayOf(X,Y))
+				
+			//}else if(currentMsg.toString().contains("basicrobot")){
+				//println(currentMsg)
+			}else{
+				//println("scartato ${currentMsg}")
 			}
-			Stato.setTTP(intArrayOf(X,Y))
 		#]
 		println("${Stato}") color yellow
 	}Goto updategui
@@ -405,7 +416,6 @@ QActor transporttrolley context ctxprototipo3{ //TODO  controllare cosa succede 
  		#] 		
 		forward guicontroller -m robotstate:robotstate( $Position, INDOOR)
 		*/
-
  	}
  	Transition t0 whenEvent stop -> handlerobotstopped
  				  whenReply moverobotdone -> movetoport

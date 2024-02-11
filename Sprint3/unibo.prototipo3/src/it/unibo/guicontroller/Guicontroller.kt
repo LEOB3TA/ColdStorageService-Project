@@ -34,6 +34,7 @@ class Guicontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 					action { //it:State
 						CommUtils.outgreen("$name | 	started")
 						CoapObserverSupport(myself, "localhost","8099","ctxprototipo3","transporttrolley")
+						CoapObserverSupport(myself, "127.0.0.1","8020","ctxbasicrobot","basicrobot")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -90,28 +91,35 @@ class Guicontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				state("updateposition") { //this:State
 					action { //it:State
 						
-									staStr = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"
-									posStr = "${currentMsg.toString().substringAfter("currPosition\":\"").substringBefore("\"")}"
-									currPos = state.TTPosition.valueOf(posStr)
-									currSta = state.CurrStateTrolley.valueOf(staStr)
-									Stato.setPos(currPos)
-									Stato.setAct(currSta)
-									//Arrays HOME, INDOOR, ONTHEROAD, PORT
-									when (Stato.getPos()){
-										state.TTPosition.HOME-> {
-											X=0
-											Y=0
+									if(currentMsg.toString().contains("currState")){
+										staStr = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"
+										posStr = "${currentMsg.toString().substringAfter("currPosition\":\"").substringBefore("\"")}"
+										currPos = state.TTPosition.valueOf(posStr)
+										currSta = state.CurrStateTrolley.valueOf(staStr)
+										Stato.setPos(currPos)
+										Stato.setAct(currSta)
+										//Arrays HOME, INDOOR, ONTHEROAD, PORT
+										when (Stato.getPos()){
+											state.TTPosition.HOME-> {
+												X=0
+												Y=0
+											}
+											state.TTPosition.INDOOR->{
+												X=4
+												Y=0
+											}
+											state.TTPosition.PORT->{
+												X=1
+												Y=4
+											}
 										}
-										state.TTPosition.INDOOR->{
-											X=4
-											Y=0
-										}
-										state.TTPosition.PORT->{
-											X=1
-											Y=4
-										}
+										Stato.setTTP(intArrayOf(X,Y))
+										
+									//}else if(currentMsg.toString().contains("basicrobot")){
+										//println(currentMsg)
+									}else{
+										//println("scartato ${currentMsg}")
 									}
-									Stato.setTTP(intArrayOf(X,Y))
 						CommUtils.outyellow("${Stato}")
 						//genTimer( actor, state )
 					}
