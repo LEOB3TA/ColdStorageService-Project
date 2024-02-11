@@ -26,15 +26,12 @@ class GridWidget extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: SpacedColumn(spacing: 16, children: [
               Expanded(
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: Text(
-                    'Grid',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                        textStyle: const TextStyle(
-                            fontWeight: FontWeight.w800, color: Colors.blueAccent)),
-                  ),
+                child: Text(
+                  'GRID',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                      textStyle: TextStyle(
+                          fontWeight: FontWeight.w600, color: Globals.headerColor, fontSize: 24)),
                 ),
               ),
               Expanded(

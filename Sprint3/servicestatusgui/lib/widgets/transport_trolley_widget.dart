@@ -26,15 +26,12 @@ class TransportTrolleyWidget extends ConsumerWidget {
             children: [
               Expanded(
                 flex: 1,
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Text(
-                    'Transport Trolley',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.roboto(
-                        textStyle: const TextStyle(
-                            fontWeight: FontWeight.w800, color: Colors.blueAccent)),
-                  ),
+                child: Text(
+                  'TRANSPORT TROLLEY',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.roboto(
+                      textStyle: TextStyle(
+                          fontWeight: FontWeight.w800, color: Globals.headerColor, fontSize: 24)),
                 ),
               ),
               Expanded(
@@ -55,13 +52,10 @@ class TransportTrolleyWidget extends ConsumerWidget {
                       ),
                       Expanded(
                         flex: 2,
-                        child: FittedBox(
-                          fit: BoxFit.cover,
-                          child: Text(
-                            status.getStatus,
-                            style: const TextStyle(
-                                fontSize: 36, color: Colors.black54),
-                          ),
+                        child: Text(
+                          status.getStatus,
+                          style: const TextStyle(
+                              fontSize: 20, color: Colors.black54),
                         ),
                       ),
                     ]),

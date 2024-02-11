@@ -79,32 +79,41 @@ class _HomePageViewState extends ConsumerState<HomePageView> {
       isLoading = true;
     });
     stompClient.subscribe(
-        destination: '/topic/message',
-        callback: (StompFrame frame) {
-          if (frame.body != null) {
-            Map<String, dynamic> result = json.decode(frame.body!);
-            if (result.containsKey('currentWeight')) {
-              ref.read(serviceStatusProvider.notifier).state = ServiceStatusDTO.fromJson(result);
-            } else {
-              ref.read(serviceConfigProvider.notifier).state = ServiceConfigDTO.fromJson(result);
-            }
-          }
-        });
-    stompClient.subscribe(
-      destination: '/topic/updates',
+      destination: '/queue/status',
       callback: (StompFrame frame){
+        if (frame.body == null) {
+          return;
+        }
+        if (json.decode(frame.body!)['currW'] != null) {
+          // Service Config
+          final configProvider = ref.read(serviceConfigProvider);
+          ServiceConfigDTO config = ServiceConfigDTO.fromJson(json.decode(frame.body!));
+          configProvider.maxWeight = config.getMaxWeight;
+          configProvider.maxWeight = config.getMaxWeight;
+          configProvider.home = config.getHome;
+          configProvider.indoor = config.getIndoor;
+          configProvider.coldRoom = config.getColdRoom;
+          configProvider.rows = config.getRows;
+          configProvider.cols = config.getCols;
+        } else {
+          // Service Status Update
+          ServiceStatusDTO status = ServiceStatusDTO.fromJson(json.decode(frame.body!));
+
+        }
         if(frame.body != null){
           print("Update : ${frame.body!}");
-          ServiceStatusDTO update = ServiceStatusDTO.fromJson(json.decode(frame.body!));
+          ServiceConfigDTO update = ServiceConfigDTO.fromJson(json.decode(frame.body!));
           print(update);
-
-          ref.read(serviceStatusProvider).currentWeight = update.getCurrentWeight;
+        /*
+          ref.read(serviceStatusProvider).currentWeight = update.getMaxWeight;
           ref.read(serviceStatusProvider).maxWeight = update.getMaxWeight;
           ref.read(serviceStatusProvider).rejectedRequests = update.getRejectedRequests;
           ref.read(serviceStatusProvider).status = update.getStatus;
           ref.read(serviceStatusProvider).position = update.getPosition;
 
           print(ref.read(serviceStatusProvider).toString());
+
+         */
         }
       }
     );
@@ -118,8 +127,6 @@ class _HomePageViewState extends ConsumerState<HomePageView> {
     setState(() {
       isLoading = false;
     });
-
-    updates();
   }
 
   void updates(){

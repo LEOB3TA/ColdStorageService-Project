@@ -26,16 +26,13 @@ class RejectedRequestsWidget extends ConsumerWidget {
             children: [
               Expanded(
                 flex: 1,
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Text(
-                    'Rejected Requests',
-                    maxLines: 2,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.roboto(
-                        textStyle: const TextStyle(
-                            fontWeight: FontWeight.w800, color: Colors.blueAccent)),
-                  ),
+                child: Text(
+                  'REJECTED REQUESTS',
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.roboto(
+                      textStyle: TextStyle(
+                          fontWeight: FontWeight.w800, color: Globals.headerColor, fontSize: 24)),
                 ),
               ),
               Expanded(
