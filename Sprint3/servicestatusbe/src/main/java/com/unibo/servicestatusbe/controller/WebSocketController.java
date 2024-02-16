@@ -1,41 +1,28 @@
 package com.unibo.servicestatusbe.controller;
-
-import com.unibo.servicestatusbe.dto.ResponseMessage;
 import com.unibo.servicestatusbe.model.*;
-import com.unibo.servicestatusbe.model.ServiceStatusDTO;
 import com.unibo.servicestatusbe.service.WebSocketService;
 import com.unibo.servicestatusbe.utils.UtilsCoapObserver;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SendToUser;
-import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.socket.TextMessage;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
-import org.springframework.web.socket.messaging.WebSocketStompClient;
 import unibo.basicomm23.coap.CoapConnection;
 import unibo.basicomm23.interfaces.Interaction2021;
 import unibo.basicomm23.tcp.TcpClientSupport;
 import unibo.basicomm23.utils.ColorsOut;
 import unibo.basicomm23.utils.CommSystemConfig;
 
-import java.security.Principal;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -213,38 +200,33 @@ public class WebSocketController {
 
     @EventListener
     public void handleSubscribeEvent(SessionSubscribeEvent event) {
-        String destination = (String) Objects.requireNonNull(event.getMessage().getHeaders().get("simpDestination"));
-        StompHeaderAccessor accessor;
-        String sessionId;
-
+        String destination = Objects.requireNonNull(event.getMessage().getHeaders().get("simpDestination")).toString();
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
+        String sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
 
         switch (destination) {
             case "/topic/updates":
-                accessor = StompHeaderAccessor.wrap(event.getMessage());
-                sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
                 sessionList.add(sessionId);
                 System.out.println("Session Id" + sessionId + " subscribed to " + destination);
                 assert sessionId != null;
-
-                template.convertAndSendToUser(sessionId, "/topic/updates", "update");
+                WeightDTO weightDTO = new WeightDTO(serviceStatusDTO.getCurrentWeight(), serviceConfigDTO.getMaxWeight());
+                template.convertAndSend("/topic/updates", weightDTO);
                 break;
             case "/user/queue/store-food":
-                accessor = StompHeaderAccessor.wrap(event.getMessage());
-                sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
                 //sessionList.add(sessionId);
                 System.out.println("Session Id" + sessionId + " subscribed to " + destination);
                 assert sessionId != null;
-
                 template.convertAndSendToUser(sessionId, "/queue/responses", "ticket");
                 break;
             case "/user/queue/deposit":
-                accessor = StompHeaderAccessor.wrap(event.getMessage());
-                sessionId = accessor.getMessageHeaders().get(SimpMessageHeaderAccessor.SESSION_ID_HEADER, String.class);
                 System.out.println("Session Id" + sessionId + " subscribed to " + destination);
                 assert sessionId != null;
                 template.convertAndSendToUser(sessionId, "/queue/responses", "CIAOOOO");
                 break;
-            case "/topic/message":
+            case "/topic/status":
+                System.out.println("Session subscribed to " + destination);
+                assert sessionId != null;
+                template.convertAndSend("/topic/status", serviceConfigDTO.toJson());
                 break;
             default:
                 System.out.println("Mammt");
@@ -278,12 +260,6 @@ public class WebSocketController {
 //            }
 //        }
 //    }
-
-    @MessageMapping("/greetings")
-    @SendTo("/queue/greetings")
-    public void reply(@Payload String message, Principal user){
-        template.convertAndSendToUser(user.getName(), "/queue/greetings", message);
-    }
 
     @MessageMapping("/updates")
     @SendTo("/topic/updates")
@@ -351,7 +327,7 @@ public class WebSocketController {
         //System.out.println("Positions " +positions);
         String res = obj.toString();
         System.out.println("Update json "+ res);
-        template.convertAndSend("/topic/updates", res);
+        // template.convertAndSend("/topic/updates", res);
     }
 //    @MessageMapping("/update/{sessionId}")
 //    @SendTo("/user/queue/update/{sessionId}")
@@ -406,11 +382,4 @@ public class WebSocketController {
         System.out.println(event.getMessage());
         sessionList.remove(event.getSessionId());
     }
-
-    @PostMapping("/send-private-message/{id}")
-    public void sendPrivateMessage(@PathVariable("id") String id, @RequestBody ResponseMessage message) {
-        service.sendNotificationToSpecificUser(id, message.getContent());
-    }
-
-
 }

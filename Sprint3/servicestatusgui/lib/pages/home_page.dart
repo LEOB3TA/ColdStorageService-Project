@@ -5,9 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:servicestatusgui/globals.dart';
-import 'package:servicestatusgui/model/position.dart';
 import 'package:servicestatusgui/model/service_config_dto.dart';
 import 'package:servicestatusgui/model/service_status_dto.dart';
 import 'package:servicestatusgui/provider/service_config_provider.dart';
@@ -15,37 +13,30 @@ import 'package:servicestatusgui/provider/service_status_provider.dart';
 import 'package:servicestatusgui/responsive/desktop_body.dart';
 import 'package:servicestatusgui/responsive/mobile_body.dart';
 import 'package:servicestatusgui/responsive/responsive_layout.dart';
-import 'package:servicestatusgui/widgets/current_weight_widget.dart';
-import 'package:servicestatusgui/widgets/grid_widget.dart';
-import 'package:servicestatusgui/widgets/layout/map_grid.dart';
-import 'package:servicestatusgui/widgets/layout/spaced_column.dart';
-import 'package:servicestatusgui/widgets/layout/spaced_row.dart';
-import 'package:servicestatusgui/widgets/rejected_requests_widget.dart';
-import 'package:servicestatusgui/widgets/transport_trolley_widget.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
-import 'package:uuid/uuid.dart';
 
 var logger = Logger(printer: PrettyPrinter());
 
-class HomePageView extends ConsumerStatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   final String url;
-  const HomePageView({super.key, required this.url});
+  const HomePage({super.key, required this.url});
 
   @override
-  ConsumerState<HomePageView> createState() => _HomePageViewState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageViewState extends ConsumerState<HomePageView> {
+class _HomePageState extends ConsumerState<HomePage> {
   late StompClient stompClient;
   final ServiceStatusDTO serviceStatusDTO = ServiceStatusDTO();
-  bool isLoading = false;
-
+  late bool isLoading;
 
   @override
   void initState() {
+    setState(() {
+      isLoading = true;
+    });
     super.initState();
     stompClient = StompClient(
         config: StompConfig(
@@ -74,47 +65,26 @@ class _HomePageViewState extends ConsumerState<HomePageView> {
   }
 
   void onConnect(StompFrame frame) {
-    //stompClient.subscribe(destination: '/subscribe', callback: (StompFrame frame) => logger.i(frame.body!));
-    setState(() {
-      isLoading = true;
-    });
     stompClient.subscribe(
-      destination: '/queue/status',
+      destination: '/topic/status',
       callback: (StompFrame frame){
+        debugPrint("Frame: ${frame.body}");
         if (frame.body == null) {
           return;
         }
-        if (json.decode(frame.body!)['currW'] != null) {
+        if (json.decode(frame.body!)['currW'] == null) {
           // Service Config
-          final configProvider = ref.read(serviceConfigProvider);
           ServiceConfigDTO config = ServiceConfigDTO.fromJson(json.decode(frame.body!));
-          configProvider.maxWeight = config.getMaxWeight;
-          configProvider.maxWeight = config.getMaxWeight;
-          configProvider.home = config.getHome;
-          configProvider.indoor = config.getIndoor;
-          configProvider.coldRoom = config.getColdRoom;
-          configProvider.rows = config.getRows;
-          configProvider.cols = config.getCols;
+          ref.read(serviceConfigProvider.notifier).state = config;
+          ref.read(serviceStatusProvider.notifier).state.maxWeight = config.getMaxWeight;
         } else {
           // Service Status Update
           ServiceStatusDTO status = ServiceStatusDTO.fromJson(json.decode(frame.body!));
 
         }
-        if(frame.body != null){
-          print("Update : ${frame.body!}");
-          ServiceConfigDTO update = ServiceConfigDTO.fromJson(json.decode(frame.body!));
-          print(update);
-        /*
-          ref.read(serviceStatusProvider).currentWeight = update.getMaxWeight;
-          ref.read(serviceStatusProvider).maxWeight = update.getMaxWeight;
-          ref.read(serviceStatusProvider).rejectedRequests = update.getRejectedRequests;
-          ref.read(serviceStatusProvider).status = update.getStatus;
-          ref.read(serviceStatusProvider).position = update.getPosition;
-
-          print(ref.read(serviceStatusProvider).toString());
-
-         */
-        }
+        setState(() {
+          isLoading = false;
+        });
       }
     );
     logger.i('WebSocket Info: Connected.');

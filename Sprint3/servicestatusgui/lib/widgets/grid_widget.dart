@@ -5,6 +5,7 @@ import 'package:servicestatusgui/globals.dart';
 import 'package:servicestatusgui/provider/service_config_provider.dart';
 
 import 'package:servicestatusgui/widgets/layout/spaced_column.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import 'layout/map_grid.dart';
 
