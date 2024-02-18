@@ -18,8 +18,8 @@ class WeightDTO {
 
   factory WeightDTO.fromJson(Map<String, dynamic> json) {
     return WeightDTO(
-      maxWeight: json["currentWeight"],
-      currentWeight: json['maxWeight'],
+      maxWeight: json["maxWeight"],
+      currentWeight: json['currentWeight'],
     );
   }
 

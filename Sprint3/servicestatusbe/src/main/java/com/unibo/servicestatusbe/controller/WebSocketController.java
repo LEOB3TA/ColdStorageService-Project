@@ -229,7 +229,8 @@ public class WebSocketController {
                 template.convertAndSend("/topic/status", serviceConfigDTO.toJson());
                 break;
             default:
-                System.out.println("Mammt");
+                System.out.println(destination);
+                // System.out.println("Mammt");
         }
     }
 

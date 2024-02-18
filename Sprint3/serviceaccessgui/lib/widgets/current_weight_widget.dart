@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-import '../../widgets/spaced_column.dart';
+import 'layout/spaced_column.dart';
 import '../providers/weight_status_provider.dart';
 
 class CurrentWeightWidget extends ConsumerWidget {

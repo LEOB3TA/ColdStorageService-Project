@@ -1,7 +1,7 @@
 import 'package:ServiceAccessGUI/widgets/authors_widget.dart';
 import 'package:ServiceAccessGUI/widgets/current_weight_widget.dart';
-import 'package:ServiceAccessGUI/widgets/spaced_column.dart';
-import 'package:ServiceAccessGUI/widgets/spaced_row.dart';
+import 'package:ServiceAccessGUI/widgets/layout/spaced_column.dart';
+import 'package:ServiceAccessGUI/widgets/layout/spaced_row.dart';
 import 'package:ServiceAccessGUI/widgets/stepper_widget.dart';
 import 'package:flutter/material.dart';
 

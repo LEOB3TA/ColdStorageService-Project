@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:ServiceAccessGUI/globals.dart';
-import 'package:ServiceAccessGUI/widgets/spaced_column.dart';
+import 'package:ServiceAccessGUI/widgets/layout/spaced_column.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,13 +13,13 @@ import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:uuid/uuid.dart';
 
-import '../model/stepper_model.dart';
-import '../model/store_food_request_dto.dart';
-import '../model/ticket_response_dto.dart';
-import '../model/weight_dto.dart';
-import '../providers/status_provider.dart';
-import '../providers/weight_status_provider.dart';
-import 'custom_button.dart';
+import 'package:ServiceAccessGUI/model/stepper_model.dart';
+import 'package:ServiceAccessGUI/model/store_food_request_dto.dart';
+import 'package:ServiceAccessGUI/model/ticket_response_dto.dart';
+import 'package:ServiceAccessGUI/model/weight_dto.dart';
+import 'package:ServiceAccessGUI/providers/status_provider.dart';
+import 'package:ServiceAccessGUI/providers/weight_status_provider.dart';
+import 'package:ServiceAccessGUI/widgets/custom_button.dart';
 
 var logger = Logger(printer: PrettyPrinter());
 
@@ -82,6 +82,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
     //comment
     stompClient.subscribe(
         destination: '/topic/message',
+        headers: {'id': id},
         callback: (StompFrame frame) {
           if (frame.body != null) {
             print("RESULT: ${frame.body!}");
@@ -95,9 +96,8 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
           if (frame.body != null) {
             print("Weight Status Update received");
             WeightDTO update = WeightDTO.fromJson(json.decode(frame.body!));
-            ref.read(weightStatusProvider).currentWeight = update.getCurrentWeight;
-            ref.read(weightStatusProvider).maxWeight = update.maxWeight;
-            debugPrint(ref.read(weightStatusProvider).toString());
+            ref.read(weightStatusProvider.notifier).state = update;
+            debugPrint("Weight Status Update: ${ref.read(weightStatusProvider)}");
           }
         });
     stompClient.subscribe(
@@ -136,8 +136,6 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
   @override
   Widget build(BuildContext context) {
     final status = ref.watch(statusEnumProvider);
-
-    bool storeFoodValid = false;
     final model = ref.watch(stepperProvider(false));
 
     return DecoratedBox(
