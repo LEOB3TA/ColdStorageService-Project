@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/spaced_column.dart';
+import '../widgets/layout/spaced_column.dart';
 
 class StoreFoodRequestStep extends StatelessWidget {
   static const index = 0;

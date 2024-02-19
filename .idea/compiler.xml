@@ -5,6 +5,7 @@
       <profile default="true" name="Default" enabled="true" />
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="serviceaccessbe" target="11" />
       <module name="Sprint0-unibo.coldstorageservice" target="11" />
       <module name="Sprint0-unibo.coldstorageservice.main" target="11" />
       <module name="Sprint0Reviewed-unibo.coldstorageservice" target="11" />
@@ -29,8 +30,8 @@
       <module name="unibo.transporttrolley" target="11" />
       <module name="unibo.transporttrolley.main" target="11" />
       <module name="unibo.transportTrolley.main" target="11" />
-      <module name="unibo.transportTrolley.test" target="11" />
       <module name="unibo.transporttrolley.test" target="11" />
+      <module name="unibo.transportTrolley.test" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

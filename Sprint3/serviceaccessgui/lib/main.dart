@@ -3,17 +3,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const ProviderScope(child: MyApp()));
+  String url = setupUrl();
+  runApp(ProviderScope(child: MyApp(url: url)));
+}
+
+String setupUrl() {
+  const ip = String.fromEnvironment("IP", defaultValue: "localhost");
+  const port = int.fromEnvironment("PORT", defaultValue: 11804);
+  debugPrint("IP: $ip");
+  return "ws://$ip:$port/ws-message";
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String url;
+  const MyApp({super.key, required this.url});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ServiceAccessGUI',
+      title: 'ServiceAccess',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // This is the theme of your application.
@@ -31,10 +40,10 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const HomeView(),
+      home: HomeView(url: url),
     );
   }
 }

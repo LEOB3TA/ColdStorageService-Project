@@ -1,21 +1,21 @@
-import 'package:ServiceAccessGUI/globals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:servicestatusgui/provider/service_status_provider.dart';
 
+import '../globals.dart';
 import 'layout/spaced_column.dart';
-import '../providers/weight_status_provider.dart';
 
 class CurrentWeightWidget extends ConsumerWidget {
   const CurrentWeightWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final weightStatus = ref.watch(weightStatusProvider);
-    final progressColor = weightStatus.percent < 0.5
+    final serviceStatus = ref.watch(serviceStatusProvider);
+    final progressColor = serviceStatus.percentage < 0.5
         ? Colors.green
-        : weightStatus.percent < 0.8
+        : serviceStatus.percentage < 0.8
         ? Colors.orange
         : Colors.red;
 
@@ -38,7 +38,7 @@ class CurrentWeightWidget extends ConsumerWidget {
                     'CURRENT WEIGHT',
                     style: GoogleFonts.inter(
                         textStyle: TextStyle(
-                            fontWeight: FontWeight.w600, color: Colors.blue.shade900, fontSize: Globals.headerWidgetFontSize)),
+                            fontWeight: FontWeight.w600, color: Colors.blue.shade900, fontSize: 24)),
                   ),
                 ),
                 Expanded(
@@ -49,7 +49,7 @@ class CurrentWeightWidget extends ConsumerWidget {
                         radius: 96,
                         animation: true,
                         lineWidth: 16,
-                        percent: weightStatus.percent,
+                        percent: serviceStatus.percentage,
                         center: RichText(
                           textAlign: TextAlign.center,
                           text: TextSpan(
@@ -58,14 +58,14 @@ class CurrentWeightWidget extends ConsumerWidget {
                                 fontWeight: FontWeight.w600, fontSize: 16, color: Colors.black26),
                             children: <TextSpan>[
                               TextSpan(
-                                  text: '${weightStatus.getCurrentWeight}\n',
+                                  text: '${serviceStatus.getCurrentWeight}\n',
                                   style: TextStyle(
                                       letterSpacing: 0,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 32,
                                       color: progressColor)),
                               TextSpan(
-                                  text: 'Out of ${weightStatus.getMaxWeight} kg',
+                                  text: 'Out of ${serviceStatus.getMaxWeight} kg',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.w400,
                                       fontSize: 16,
@@ -74,7 +74,7 @@ class CurrentWeightWidget extends ConsumerWidget {
                           ),
                         ),
                         progressColor: progressColor,
-                        backgroundColor: Colors.blue.shade200,
+                        backgroundColor: Colors.grey.shade200,
                         circularStrokeCap: CircularStrokeCap.round,
                       ),
                     )),
