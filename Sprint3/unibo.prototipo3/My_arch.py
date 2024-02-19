@@ -7,7 +7,6 @@ os.environ['PATH'] += os.pathsep + 'C:/Program Files/Graphviz/bin/'
 graphattr = {     #https://www.graphviz.org/doc/info/attrs.html
     'fontsize': '22',
 }
-
 nodeattr = {   
     'fontsize': '22',
     'bgcolor': 'lightyellow'
@@ -37,9 +36,9 @@ with Diagram('prototipo3Arch', show=False, outformat='png', graph_attr=graphattr
      coldstorageservice >> Edge(color='magenta', style='solid', decorate='true', label='<pickup<font color="darkgreen"> pickupdone</font> &nbsp; >',  fontcolor='magenta') >> transporttrolley
      transporttrolley >> Edge(color='magenta', style='solid', decorate='true', label='<engage<font color="darkgreen"> engagedone engagerefused</font> &nbsp; moverobot<font color="darkgreen"> moverobotdone moverobotfailed</font> &nbsp; >',  fontcolor='magenta') >> basicrobot
      stateobservercontroller >> Edge(color='blue', style='solid',  label='<ledCmd &nbsp; >',  fontcolor='blue') >> ledqakactor
-     transporttrolley >> Edge(color='blue', style='solid',  label='<disengage &nbsp; setrobotstate &nbsp; cmd &nbsp; >',  fontcolor='blue') >> basicrobot
-     transporttrolley >> Edge(color='blue', style='solid',  label='<gotomovetoport &nbsp; gotodepositactionended &nbsp; gotorobottohome &nbsp; >',  fontcolor='blue') >> transporttrolley
-     coldstorageservice >> Edge(color='blue', style='solid',  label='<updateS &nbsp; updateR &nbsp; >',  fontcolor='blue') >> guicontroller
+     #transporttrolley >> Edge(color='blue', style='solid',  label='<disengage &nbsp; setrobotstate &nbsp; cmd &nbsp; >',  fontcolor='blue') >> basicrobot
+     #transporttrolley >> Edge(color='blue', style='solid',  label='<gotomovetoport &nbsp; gotodepositactionended &nbsp; gotorobottohome &nbsp; >',  fontcolor='blue') >> transporttrolley
+     coldstorageservice >> Edge(color='blue', style='solid',  label='                                                updateS &nbsp; updateR &nbsp; ',  fontcolor='blue') >> guicontroller
      transporttrolley >> Edge(color='blue', style='solid',  label='<coapUpdate &nbsp; >',  fontcolor='blue') >> guicontroller
-     transporttrolley >> Edge(color='blue', style='solid',  label='<coapUpdate &nbsp; >',  fontcolor='blue') >> stateobservercontroller
+     transporttrolley >> Edge(color='blue', style='solid',  label='<coapUpdate>',  fontcolor='blue') >> stateobservercontroller
 diag

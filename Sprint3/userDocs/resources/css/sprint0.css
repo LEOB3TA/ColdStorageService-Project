@@ -111,11 +111,13 @@ pre {
 key{
     font-family:monospace;
     font-weight: 500;
+    font-size: 14px;
     color: #304ceb;
 }
 key2{
     font-family:monospace;
     font-weight: 500;
+    font-size: 14px;
     color: #ad0d0f;
 }
 
@@ -199,6 +201,14 @@ div.req {
 div.remark {
     background-color: #E3F2FD;
     border: 1.5px solid #d5f2ed;
+    padding: 15px;
+    margin: 10px;
+    border-radius: 25px;
+}
+
+div.remarkTest {
+    background-color: #d4fbd7;
+    border: 1.5px solid #d4fbd7;
     padding: 15px;
     margin: 10px;
     border-radius: 25px;

@@ -14,6 +14,7 @@ Reply ticketExpired : ticketExpired(_) for sendTicket
 // Messaggi scambiati con transporttrolley
 Request pickup:    pickup(_)
 Reply  pickupdone:  pickupdone(_) for pickup
+Dispatch mind: mind(_)
 
 // Messaggi scambiati col basicrobot23
 
@@ -103,8 +104,9 @@ QActor guicontroller context ctxprototipo3{
 		//observeResource basicrobot
 	}
 	Goto idle
+
 	State idle{
-		
+
 	}Transition t0 whenMsg updateS -> updatestorage
 				   whenMsg updateR -> updaterejected
 				   whenMsg coapUpdate -> updateposition
@@ -112,7 +114,7 @@ QActor guicontroller context ctxprototipo3{
 				   //whenReply robotstate ->getpos
 				   // TODO: check how to manage TT state/position
 				   //
-				   
+
 	State updatestorage{
 		onMsg(updateS : updateS(W)){
 			println("$name | ${payloadArg(0)}")
@@ -121,25 +123,25 @@ QActor guicontroller context ctxprototipo3{
 			#]
 			println("$name |	aggiunta peso pari a $weight")
 			[#
-			// update state	
+			// update state
 			Stato.setCurrW(weight)
 			#]
 		}
 	}Goto updategui
-	
+
 	State updaterejected{
-		
+
 		onMsg(updateR: updateR(_)){
 			println("$name |	rejected")
 			[#
-				Stato.setRejected()	
+				Stato.setRejected()
 			#]
 		}
 	}Goto updategui
-		
+
 	State updateposition{
 		//onMsg(updateTp: updateTp(X, Y)){ TODO check
-		
+
 		/*	[#
 				val P = payloadArg(0).toInt()
 				val D = payloadArg(1).toInt()
@@ -154,9 +156,9 @@ QActor guicontroller context ctxprototipo3{
 				}
 				Stato.setTTP(intArrayOf(X,Y))
 				//var prova = Stato.getTTP()
-				//for (i in 0..1) println( prova[i])	
+				//for (i in 0..1) println( prova[i])
 			#]
-			
+
 		}*/
 		[#
 			if(currentMsg.toString().contains("currState")){
@@ -182,7 +184,7 @@ QActor guicontroller context ctxprototipo3{
 					}
 				}
 				Stato.setTTP(intArrayOf(X,Y))
-				
+
 			//}else if(currentMsg.toString().contains("basicrobot")){
 				//println(currentMsg)
 			}else{
@@ -191,7 +193,7 @@ QActor guicontroller context ctxprototipo3{
 		#]
 		println("${Stato}") color yellow
 	}Goto updategui
-	
+
 	State updategui{
 		println("$name |	new update for GUI") color yellow
 		//delay 1000
@@ -233,13 +235,14 @@ QActor coldstorageservice context ctxprototipo3 {
      * 	2b. Altrimenti va in stato rejectRequest
      */
     State requestEvaluation {
-    	        onMsg(storeFood : storeFood(FW)){      
-    	        println("Request evaluation to store ${payloadArg(0)} kg") color blue     
+    	        onMsg(storeFood : storeFood(FW)){
+    	        println("Request evaluation to store ${payloadArg(0)} kg") color blue
            [#
            	RequestWeightToStore = payloadArg(0).toDouble()
-           	
+
            	if(RequestWeightToStore + currentWeightStorage < MAXW ){
            		#]
+           			forward transporttrolley -m mind : mind(_) //indoor
            			forward guicontroller -m updateS : updateS( $RequestWeightToStore )//${requestWeightToStore}
            		[#
            	}
@@ -262,7 +265,6 @@ QActor coldstorageservice context ctxprototipo3 {
     	#]
     	replyTo storeFood with storeAccepted : storeAccepted($TICKETNUMBER)  //TODO:check
     	println("Request accepted | ticket = ${TICKETNUMBER}")
-    	
     }Goto idle
 
 	/*
@@ -398,7 +400,28 @@ QActor transporttrolley context ctxprototipo3{ //TODO  controllare cosa succede 
 		forward basicrobot -m setrobotstate : setpos (0,0,d) // d= down
 		println("$name | waiting for commands.") color green
   	}
- 	Transition t0 whenRequest pickup -> moverobottoindoor
+ 	Transition t0 whenMsg mind -> quickindoor
+
+ 	State afterindoor{
+ 		println("$name | idle staete after indoor")color green
+ 		[#
+ 			tTState.setCurrState(state.CurrStateTrolley.IDLE)
+ 			tTState.setCurrPosition(state.TTPosition.INDOOR)
+ 		#]
+ 		updateResource[#tTState.toJsonString()#]
+ 		println("$name | waiting for commands") color green
+ 	}Transition t0 whenRequest pickup -> movetoport
+
+ 	State quickindoor{
+ 		[#
+			tTState.setCurrState(state.CurrStateTrolley.PICKINGUP)
+			tTState.setCurrPosition(state.TTPosition.INDOOR)
+		#]
+		updateResource[#tTState.toJsonString()#]
+ 		println("$name | moving robot to indoor.") color green
+ 		request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)
+ 	}Transition t0 whenEvent stop -> handlerobotstopped
+ 				  whenReply moverobotdone -> afterindoor
 
  	State moverobottoindoor {
  		//move robot to indoor
@@ -408,12 +431,13 @@ QActor transporttrolley context ctxprototipo3{ //TODO  controllare cosa succede 
 			tTState.setCurrPosition(state.TTPosition.INDOOR)
 			#]
  		}
+
 		updateResource[#tTState.toJsonString()#]
  		println("$name | moving robot to indoor.") color green
  		request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)
  		/*[#
  			Position=arrayOf(INDOORX, INDOORY)
- 		#] 		
+ 		#]
 		forward guicontroller -m robotstate:robotstate( $Position, INDOOR)
 		*/
  	}

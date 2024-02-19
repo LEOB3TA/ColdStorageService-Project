@@ -101,7 +101,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
               curr = update.getCurr;
               max = update.getMaxWeight;
             });
-            ref.read(serviceWeightProvider).currentWeight = update.getCurr;
+            ref.read(serviceWeightProvider).curr = update.getCurr;
             ref.read(serviceWeightProvider).maxWeight = update.maxWeight;
             print(ref.read(serviceWeightProvider).toString());
           }

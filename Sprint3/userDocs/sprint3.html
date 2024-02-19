@@ -23,68 +23,207 @@
         vi &egrave; un robot che ha il compito di trasportare del cibo da un punto di partenza - chiamato INDOOR - alla cella
         frigorifera.
     </div>
-    <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/userDocs/sprint1.html">Sprint1 </a>
+    <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/userDocs/sprint2.html">Sprint2 </a>
 
     <h2>Requirements</h2>
     <div class="remark">
         <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/TemaFinale23.html">Tema Finale </a>
     </div>
+    <h3>Goal</h3>
+    <div class="remark">
+        In questo sprint ci siamo focalizzati sulla creazione delle <kc>Gui</kc> per consentire agli utenti
+        o al manager di osservare lo stato attuale ed interagire col robot.<br>
+        In particolare si vogliono soddisfare i requisiti indicati per la <kc>ServiceAccessGUI</kc>, usata dai
+        clienti, e per la <kc>ServiceStatusGUI</kc>, utilizzata da un <b>Service-manager</b>, come specificati
+        nei <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/TemaFinale23.html">requisiti</a>.<br>
+        Dunque il prodotto finale di questo sprint consiste in due GUI:<br><br>
+        <ul>
+            <li>ServiceAccessGUI</li>
+            <li>ServiceStatusGUI</li>
+        </ul>
 
+    </div>
     <h3>Work plan</h3>
     <div class="remark">
-<!--        <ul>-->
-<!--            <li>A partire dallo sprint0 analizzare il core business dell'applicazione</li>-->
-<!--            <li>Trovare ad analizzare eventuali criticit&agrave; dei requisiti</li>-->
-<!--            <li>Implementare un simulatore del truck, in modo da simulare un interazione del driver con la <b>ServiceAccessGui</b>, che interagisca con il <b>ColdStorageService</b></li>-->
-<!--            <li>Implementare il <b>ColdStorageService</b></li>-->
-<!--            <li>Implementare il <b>TrasportTrolley</b> e interfacciarlo con il <b>BasicRobot</b></li>-->
-<!--            <li>Testing del sistema</li>-->
-<!--            <li>Aggregare le varie componenti in modo da creare un primo prototipo del sistema</li>-->
+        Partendo dal software realizzato per lo <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/userDocs/sprint2.html">Sprint2 </a>
+        realizzare le <kc>GUI</kc>, tenendo conto di:
+        <ul>
+            <li>
+                Come collegare e far comunicare i vari componenti
+            </li>
+            <li>
+                Come e quali dati devono essere inviati a quale GUI
+            </li>
+            <li>
+                Tipo di GUI da realizzare
+            </li>
         </ul>
     </div>
 
     <h2>Problem analysis</h2>
     <div class="remark">
+        <h3>Tipo di GUI da realizzare</h3>
+        <div>
+            Per sviluppare le GUI possiamo usare:
+            <ul>
+                <li>Web App</li>
+                <li>App per dispositivi mobile</li>
+            </ul>
 
+        Siccome nei requisiti non sono presenti preferenze e/o limitazioni a riguardo ed essendo
+        lo sviluppo di applicazioni per dispositivi mobili strettamente legato alla tipologia di dispositivi,
+        si consiglia la realizzazione di una Web App.
+        </div>
     </div>
-        <h2>Architettura Logica</h2>
+    <h3>Dati</h3>
+    <div class="remark">
+        Dai requisiti si ou&ograve; notare che la <kc>ServiceStatusGUI</kc> deve essere in grado di
+        mostrare ad un <kc>Service-manager</kc> una serie di informazioni riguardanti lo stato del
+        sistema e dei suoi componenti. Sempre dai requisiti, si evince che anche la <kc>ServiceAccessGUI</kc>
+        deve fornire una serie di informazioni riguardanti il sistema e lo stato della richiesta presa in carico.
+        Oltre a ci&ograve; quest'ultima GUI deve essere in grado di prendere delle informazioni dall'utente.
+        Per tali motivi bisogna comprendere quali sono le sorgenti di dati che servono per aggiornare le GUI.
+        <h4>Sorgenti di Dati</h4>
+            Le principali fonti da cui le GUI prendono dati sono legate alle informazioni che tali interfacce grafiche
+            devono mostrare:
+            <ul>
+                <li>
+                    Stato del <kc>TransportTrolley</kc> e sua posizione nella stanza (solo ServiceStatusGUI)
+                </li>
+                <li>
+                    Peso presente attualmente nella <kc>ColdRoom</kc>
+                </li>
+                <li>
+                    Numero di richieste di deposito rifiutate (solo ServiceStatusGUI)
+                </li>
+                <li>
+                    Ticket rilasciato dal servizio (solo ServiceAccessGUI)
+                </li>
+            </ul>
+            Inoltre &egrave; importante sottolineare come la ServiceAccessGUI sia anche una sorgente di
+            dati in quanto, consente al cliente di indicare la quantit&agrave; di cibo da depositare e, successivamente,
+            il ticket number per avviare il processo di deposito.
 
+            <h6>Stato TransportTrolley</h6>
+            In seguito all'analisi dei requisiti e all'analisi condotta nello Sprint1 &egrave; stato deciso di rappresentare
+            lo Stato del TransportTrolley come una <em>data class Kotlin</em>, in cui sono presenti le rappresentazioni,
+            mediante l'uso di enumerativi, dello stato attuale e della posizione attuale del TransportTrolley.
+<!--            // TODO:link e code-->
+
+            <h6>Stato ColdStorageService</h6>
+            Analogamente per quanto accade con il TransportTrolley, &egrave; stato creata una data class Kotlin
+            per contenere le informazioni relative alla ColdRoom ed allo stato generale del servizio (Richieste rifiutate,
+            peso attuale/totale, ...). Anche queste scelte sono state commentate precedentemente.
+
+            Per gestire entrambi li stati si utilizzano dei CoapObserver: in tal modo ogni qual volta si presenti
+            una modifica dei dati d'interesse viene emesso un Update che pu&ograve; essere utilizzato per trasmettere
+            i nuovi dati alle GUI.
+            <h4>Pulling vs Push</h4>
+            Compreso come i dati vengono generati per arrivare alle GUI, bisogna comprendere come
+            essi vengano effettivamente recuperati dalle GUI.<br> Sono possibili due modelli:
+            <h6>Polling</h6>
+            In questo modello la GUI richiede all'attore i dati, dunque la GUI deve aprire un canale
+            con tale attore, richiedere i dati e rimanere in ascolto delle risposte.<br>
+            Inoltre per non perdere nessun dato, tale azione dovrebbe essere compiuta ad intervalli regolari,
+            aumentando l'overhead di rete. Per tale motivo questa soluzione &egrave; sconsigliata.
+            <h6>Push</h6>
+            Questa soluzione prevede, invece, che la GUI rimanga in attesa di update e li mostri all'utente.
+            Per implementare tale modello, si necessita di un componente che recepisca gli aggiornamenti dello
+            stato e li invii alle GUI.<br>
+            Tale soluzione &egrave; quella consigliata, in quanto consente di sfruttare le caratteristiche degli
+            attori QAk di essere realizzati come risorse CoAP, ovvero osservabili.<br>
+            Procedendo in tal modo, sar&agrave; possibile inviare gli aggiornamenti mediante la creazione di una
+            connessione CoAP fra server e l'attore che gestisce gli update e che questo si registri come osservatore
+            della risorsa (o delle risorse ) di interesse. In tal modo ogni volta che le risorse saranno modificate
+            da un updateResource, il server CoAP recepisce il messaggio e manda gli update alle GUI notificando il
+            cambiamento dello stato.
         </div>
 
+    <h3>Comunicazione tra i vari componenti in gioco</h3>
+    <div class="remark">
+        Come gi&agrave; accennato dal punto precedente, una parte importante &egrave; della realizzazione &egrave; legata
+        alla gestione delle comunicazioni tra i vari componenti. In generale si vuole ottenere un comportamento che
+        segui tale modello:
+        <ul>
+            <li>
+                <kc>ServiceStatusGUI</kc>: Questa GUI &egrave; <italic>passiva</italic>, rimane in attesa degli update,
+                eccezion fatta per il primo collegamento, nel quale &egrave; la GUI stessa ad inviare un "segnale" per
+                indicare che vuole ricevere i dati pi&ugrave; aggiornati anche se non sono presenti update dello stato.
+            </li>
+            <li>
+                <kc>ServiceAccessGUI</kc>: Questa GUI implementa il modello precedente per quanto riguarda la gestione
+                dei dati relativi allo stato, ma ha anche una componente di dati da inviare, per tale motivo deve essere presente
+                anche una parte relativa all'invio di richieste e gestione di risposte.
+            </li>
+        </ul>
+    </div>
 
-            <h2>Project</h2>
-             <div class="remark">
 
+    <h2>Architettura Logica</h2>
+    <div class="remark">
+        Di seguito si riporta l'architettura logica relativa al <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint3/unibo.prototipo3/src/prototipo3.qak" target="_blank">protipo3.qak</a>. <br>
+        <figure>
+            <img height="100%" width="100%" src="./resources/images/prototipo3arch.png" alt="architettura logica"> <br>
+            <figcaption>
+                Nota: nella figura precedente sono stati rimossi gli attori relativi al sonar per ottenere una figura compatta
+            </figcaption>
+        </figure>
+        Di seguito viene riportata l'architettura contenete informazioni relative a tutti i componenti in gioco.
+        <img height="100%" width="100%" src="./resources/images/iss.png" alt="architettura logica"> <br>
+        Nella precedente figura sono stati appositamente omessi alcuni dettagli, in quanto il focus principale &egrave; relativo al comportamento
+        d'insieme dei vari componenti e di come le varie connessioni interagiscano
+    </div>
+
+
+    <h2>Project</h2>
+    <div class="remark">
+        <h3>guicontroller</h3>
+            <div>
+                Come introdotto nella parte di Analisi del Problema, si necessita di un componente in grado di osservare
+                lo stato delle risorse di interesse ed invii gli update di conseguenza. Tale componente &egrave; il
+                guicontroller. Il guicontroller &egrave; un attore che controlla tutte le interazioni con le gui:
+                dall'invio degli update, alla gestione delle richieste.<br>
+                In particolare questo controller osserva le due risorse di interesse, ovvero lo stato del TransportTrolley e
+                quello del ColdStorageService, ed aggiorna lo stato relativo alla GUI di conseguenza.<br>
+                Lato beck-end sar&agrave; presente un observer che rileva gli update per le gui ed, in base a vari criteri,
+                sceglie a chi mandare cosa.
             </div>
-            <h2>Testing</h2>
-            <div class="remark">
 
-
+        <h3>Realizzazione Back-end</h3>
+            <div>
+                Per la realizzazione del Beck-end si &egrave; deciso di usare Java Spring, in quanto il team possedeva le
+                conoscenze necessarie ad usarlo.<br>
+                Il Back-end &egrave; il componente che si occupa di smistare le richieste alle GUI giuste e ai clienti giusti
+                (nel caso di pi&ugrave; clienti collegati simultaneamente). Per tale motivo questo gestisce le connessioni tra i vari componenti.<br>
+                Lato attori viene creato una connessione CoAP ed una TCP, in tal modo si riesce ad interfacciare con l'attore descritto nel punto precedente.<br>
+                Per quanto riguarda le GUI si &egrave; deciso di usare le <kc>WebSocket</kc>. Il motivo principale di questa scelta &egrave; dovuto alla natura
+                asincrona di questa tecnologia ( ottima per gestire gli update ), ma che garantisce la distinzione dei vari client in base a degli ID univoci.
+<!--                TODO: vedere cosa manca-->
             </div>
+
+        <h3>Realizzazione GUI (front-end)</h3>
+            <div>
+                Per la realizzazione delle GUI in quanto tali, si &egrave; deciso di usare Flutter, in quanto i componenti del team hanno
+                esperienza con tale tecnologia.<br>
+                Nel punto precedente si &egrave; affermato come le <kc>WebSocket</kc> siano state scelte per la natura asincrona, ci sono
+                tuttavia casi in cui si necessita di un comportamento sincrono.<br>
+                Ad esempio quando un cliente invia una richiesta di deposito, questo deve attendere la valutazione della richiesta prima di poter
+                effettuare i successivi passaggi. Per tale motivo si &egrave; deciso di attivare punto successivo della sequenza solo
+                quando si riceve una risposta alla nostra richiesta e questa &egrave; una risposta affermativa (comportamento mostrato in figura).
+<!--                Ora tale appunto &egrave; pi&ugrave; una questione di principio che di attuazione pratica siccome gli update e le request sono immediati, ma immaginando condizioni estreme ci siamo imbattuti in tale problematica-->
+            </div>
+    </div>
+
+<!--    <h2>Testing</h2>-->
+<!--    <div class="remark">-->
+
+
+<!--            </div>-->
 
     <h2>Piano di lavoro</h2>
     <div class="remark">
         Tutti gli sprint sotto intendono delle migliorie e delle eventuali modifiche del lavoro fatto negli sprint precedenti
-<!--        <h3>Sprint 1 (Tempo stimato per lo sviluppo : 1 settimana circa)</h3>-->
-<!--        Core business dell'applicazione:-->
-<!--        <ul>-->
-<!--            <li>Transport trolley e interfacciamento con il basic robot</li>-->
-<!--            <li>Cold storage service</li>-->
-<!--            <li>Simulatore dei driver</li>-->
-<!--        </ul>-->
-<!--        <h3>Sprint 3</h3>-->
-<!--        Aggiunta specifiche di movimento del transport trolley:-->
-<!--        <ul>-->
-<!--            <li>Led</li>-->
-<!--            <li>Controller</li>-->
-<!--            <li>Sonar</li>-->
-<!--        </ul>-->
-        <h3>Sprint 3</h3>
-        Sviluppo inteerfacce grafiche:
-        <ul>
-            <li>ServiceStatusGui</li>
-<!--            <li>ServiceAccessGui</li>-->
-        </ul>
+
         <h3>Sprint 4</h3>
         Deploy sul raspberry:
         <ul>
@@ -95,35 +234,51 @@
 
     </div>
 
-            <h2>Avviare il sistema</h2>
-            <div class="remark">
-<!--                <h5>Avvio automatizzato</h5>-->
+    <h2>Avviare il sistema</h2>
+    <div class="remark">
+        <h5>Avvio automatizzato</h5>
 
-<!--                Scaricare la release da <b>Github</b>, utilizzare lo script adeguato per il proprio sistema:-->
-<!--                <ul>-->
-<!--                    <li>Linux: <b>startPrototype-linux.sh</b></li>-->
-<!--                    <li>MacOS: <b>startPrototype-mac.sh</b></li>-->
-<!--                    <li>Windows: <b>startPrototype-win.bat</b></li>-->
-<!--                </ul>-->
+        Scaricare l'ultima release da <b>Github</b>, utilizzare lo script adeguato per il proprio sistema:
+        <ul>
+            <li>Linux: <b>startPrototype-linux.sh</b></li>
+            <li>MacOS: <b>startPrototype-mac.sh</b></li>
+            <li>Windows: <b>startPrototype-win.bat</b></li>
+        </ul>
 
-<!--                <h5>Avvio manuale</h5>-->
+        <h5>Avvio manuale</h5>
 
-<!--                <ol >-->
-<!--                    <li style="font-size: 25px">-->
-<!--                        <em style="font-size: 25px">Avviare il <bc>WebRobot23</bc></em>-->
-<!--                        <p style="font-size: 16px">In tal modo si avviano il <i>basicrobot23</i> ed il <i>wenv</i></p>-->
-<!--                        <pre style="font-size: 16px">-->
-<!--cd ColdStorageService-Project/Sprint1/unibo.basicrobot23-->
-<!--docker-compose -f webbasicrobot23.yaml up</pre>-->
-<!--                    </li>-->
-<!--                    <li style="font-size: 25px">-->
-<!--                        <em style="font-size: 25px">Avviare il <bc>ColdStorageService</bc>,<bc>MockTruck</bc> e <bc>Trasporttrolley</bc></em>-->
-<!--                        <p style="font-size: 16px">In tal modo si avviano le varie componenti</p>-->
-<!--                        <pre style="font-size: 16px">-->
-<!--cd ColdStorageService-Project/Sprint1/unibo.prototipo0-->
-<!--./gradlew run</pre>-->
-<!--                    </li>-->
-<!--                </ol>-->
+        <ol >
+            <li style="font-size: 25px">
+                <em style="font-size: 25px">Avviare il <bc>WebRobot23</bc></em>
+                <p style="font-size: 16px">In tal modo si avviano il <i>basicrobot23</i> ed il <i>wenv</i></p>
+                <pre style="font-size: 16px">
+cd ColdStorageService-Project/Sprint1/unibo.basicrobot23
+docker-compose -f webbasicrobot23.yaml up</pre>
+            </li>
+            <li style="font-size: 25px">
+                <em style="font-size: 25px">Avviare il <bc>ColdStorageService</bc>,<bc>guicontroller</bc> e <bc>Trasporttrolley</bc></em>
+                <p style="font-size: 16px">In tal modo si avviano le varie componenti</p>
+                <pre style="font-size: 16px">
+cd ColdStorageService-Project/Sprint3/unibo.prototipo3
+./gradlew run</pre>
+            </li>
+            <li style="font-size: 25px">
+                <em style="font-size: 25px">Avviare il <bc>Back end</bc></em>
+                <p style="font-size: 16px">In tal modo si avviano le varie componenti</p>
+                <pre style="font-size: 16px">
+cd ColdStorageService-Project/Sprint3/backend
+./gradlew run</pre>
+            </li>
+            <li style="font-size: 25px">
+                <em style="font-size: 25px">Avviare la <bc>ServiceStatusGUI</bc> o la <bc>ServiceAccessGUI</bc> </em>
+                <p style="font-size: 16px">In tal modo si avviano le varie componenti</p>
+                <pre style="font-size: 16px">
+cd ColdStorageService-Project/Sprint3/ServiceAccessGUI
+                    o
+cd ColdStorageService-Project/Sprint3/ServiceStatusGUI
+./gradlew run</pre>
+            </li>
+        </ol>
             </div>
 
     <!--

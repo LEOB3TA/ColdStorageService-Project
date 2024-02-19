@@ -34,7 +34,6 @@ class Guicontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 					action { //it:State
 						CommUtils.outgreen("$name | 	started")
 						CoapObserverSupport(myself, "localhost","8099","ctxprototipo3","transporttrolley")
-						CoapObserverSupport(myself, "127.0.0.1","8020","ctxbasicrobot","basicrobot")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
