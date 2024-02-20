@@ -31,7 +31,7 @@ class TransportTrolleyWidget extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   style: GoogleFonts.roboto(
                       textStyle: TextStyle(
-                          fontWeight: FontWeight.w800, color: Globals.headerColor, fontSize: 24)),
+                          fontWeight: FontWeight.w800, color: Globals.headerColor, fontSize: 22)),
                 ),
               ),
               Expanded(

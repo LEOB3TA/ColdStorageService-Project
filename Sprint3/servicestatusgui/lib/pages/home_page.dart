@@ -68,19 +68,20 @@ class _HomePageState extends ConsumerState<HomePage> {
     stompClient.subscribe(
       destination: '/topic/status',
       callback: (StompFrame frame){
-        debugPrint("Frame: ${frame.body}");
+        debugPrint(frame.toString());
         if (frame.body == null) {
           return;
         }
-        if (json.decode(frame.body!)['currW'] == null) {
+        if (json.decode(frame.body!)['CurrW'] == null) {
           // Service Config
           ServiceConfigDTO config = ServiceConfigDTO.fromJson(json.decode(frame.body!));
           ref.read(serviceConfigProvider.notifier).state = config;
-          ref.read(serviceStatusProvider.notifier).state.maxWeight = config.getMaxWeight;
+          debugPrint("Service Config: ${ref.read(serviceConfigProvider)}");
         } else {
           // Service Status Update
           ServiceStatusDTO status = ServiceStatusDTO.fromJson(json.decode(frame.body!));
-
+          ref.read(serviceStatusProvider.notifier).state = status;
+          debugPrint("Service Status Update: ${ref.read(serviceStatusProvider)}");
         }
         setState(() {
           isLoading = false;

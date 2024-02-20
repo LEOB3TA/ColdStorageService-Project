@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:servicestatusgui/provider/service_config_provider.dart';
 import 'package:servicestatusgui/provider/service_status_provider.dart';
 
 import '../globals.dart';
@@ -12,10 +13,12 @@ class CurrentWeightWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final configStatus = ref.watch(serviceConfigProvider);
     final serviceStatus = ref.watch(serviceStatusProvider);
-    final progressColor = serviceStatus.percentage < 0.5
+    final percentage = serviceStatus.getCurrentWeight / configStatus.getMaxWeight;
+    final progressColor = percentage < 0.5
         ? Colors.green
-        : serviceStatus.percentage < 0.8
+        : percentage < 0.8
         ? Colors.orange
         : Colors.red;
 
@@ -49,7 +52,7 @@ class CurrentWeightWidget extends ConsumerWidget {
                         radius: 96,
                         animation: true,
                         lineWidth: 16,
-                        percent: serviceStatus.percentage,
+                        percent: percentage,
                         center: RichText(
                           textAlign: TextAlign.center,
                           text: TextSpan(
@@ -65,7 +68,7 @@ class CurrentWeightWidget extends ConsumerWidget {
                                       fontSize: 32,
                                       color: progressColor)),
                               TextSpan(
-                                  text: 'Out of ${serviceStatus.getMaxWeight} kg',
+                                  text: 'Out of ${configStatus.getMaxWeight} kg',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.w400,
                                       fontSize: 16,

@@ -15,7 +15,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:ServiceAccessGUI/model/stepper_model.dart';
 import 'package:ServiceAccessGUI/model/store_food_request_dto.dart';
-import 'package:ServiceAccessGUI/model/ticket_response_dto.dart';
+import 'package:ServiceAccessGUI/model/ticket_dto.dart';
 import 'package:ServiceAccessGUI/model/weight_dto.dart';
 import 'package:ServiceAccessGUI/providers/status_provider.dart';
 import 'package:ServiceAccessGUI/providers/weight_status_provider.dart';
@@ -38,7 +38,6 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
   // Controller
   final TextEditingController storeFoodController = TextEditingController();
   final TextEditingController depositController = TextEditingController();
-  final TextEditingController _depositTicketController = TextEditingController();
   // FormKey
   final formKey = GlobalKey<FormState>();
 
@@ -103,13 +102,25 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
     stompClient.subscribe(
         destination: '/user/queue/store-food/$id',
         callback: (StompFrame frame) {
+          debugPrint('Store Food Response: ${frame.body}');
           if (frame.body != null) {
-            TicketResponseDTO result = TicketResponseDTO.fromJson(json.decode(frame.body!));
-            setState(() {
-              ticketNumber = result.ticketNumber;
-            });
-            ref.read(stepperProvider(false).notifier).setCompleted(StatusEnum.ticketRequest.index);
-            ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketResponse;
+            TicketDTO result = TicketDTO.fromJson(json.decode(frame.body!));
+            if (result.ticketNumber == -1 ) {
+              const snackBar = SnackBar(
+                content: Text("Error - the inserted weight could not be stored!"),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            } else {
+              setState(() {
+                ticketNumber = result.ticketNumber;
+              });
+              ref.read(stepperProvider.notifier).setCompleted(StatusEnum.ticketRequest.index);
+              ref.read(stepperProvider.notifier).setIndex(StatusEnum.ticketResponse.index);
+              ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketResponse;
+            }
+
           }
         });
     stompClient.subscribe(
@@ -136,7 +147,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
   @override
   Widget build(BuildContext context) {
     final status = ref.watch(statusEnumProvider);
-    final model = ref.watch(stepperProvider(false));
+    final model = ref.watch(stepperProvider);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -162,7 +173,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
               child: Stepper(
                 type: StepperType.vertical,
                 currentStep: model.index,
-                onStepTapped: (index) => ref.read(stepperProvider(false).notifier).setIndex(index),
+                // onStepTapped: (index) => ref.read(stepperProvider.notifier).setIndex(index),
                 onStepCancel: () {
                   if (status.index > 0) {
                     ref.read(statusEnumProvider.notifier).state = StatusEnum.values[status.index - 1];
@@ -174,20 +185,23 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                       if (formKey.currentState!.validate()) {
                         storeFoodRequest(double.parse(storeFoodController.text));
                       }
-                      ref.read(stepperProvider(false).notifier).setCompleted(StatusEnum.ticketRequest.index);
                       break;
                     case StatusEnum.ticketResponse:
-                      ref.read(stepperProvider(false).notifier).setCompleted(StatusEnum.ticketResponse.index);
+                      ref.read(stepperProvider.notifier).setCompleted(StatusEnum.ticketResponse.index);
+                      ref.read(stepperProvider.notifier).setIndex(StatusEnum.depositTicket.index);
+                      ref.read(statusEnumProvider.notifier).state = StatusEnum.depositTicket;
                       break;
                     case StatusEnum.depositTicket:
-                      ref.read(stepperProvider(false).notifier).setCompleted(StatusEnum.depositTicket.index);
+                      if (formKey.currentState!.validate()) {
+                        depositRequest(int.parse(depositController.text));
+                      }
+                      ref.read(stepperProvider.notifier).setCompleted(StatusEnum.depositTicket.index);
+                      ref.read(stepperProvider.notifier).setIndex(StatusEnum.result.index);
+                      ref.read(stepperProvider.notifier).setCompleted(StatusEnum.result.index);
                       break;
                     case StatusEnum.result:
-                      ref.read(stepperProvider(false).notifier).setCompleted(StatusEnum.result.index);
-                      break;
+                      // TODO: Handle this case.
                   }
-                  ref.read(stepperProvider(false).notifier).setCompleted(status.index);
-                  ref.read(statusEnumProvider.notifier).state = StatusEnum.values[status.index + 1];
                 },
                 controlsBuilder: (context, details) {
                   StatusEnum status = StatusEnum.values[details.currentStep];
@@ -208,15 +222,9 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                         label: 'Next',
                       );
                     case StatusEnum.result:
-                      return CustomButton(
-                        onPressed: details.onStepContinue,
-                        label: 'Next',
-                      );
+                      return Text('cuiao');
                     default:
-                      return CustomButton(
-                        onPressed: details.onStepContinue,
-                        label: 'Next',
-                      );
+                      return Text('cuiao');
                   }},
                 steps: <Step>[
                   Step(
@@ -224,7 +232,6 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                         style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.bold)),
                     state: _getState(model, StatusEnum.ticketRequest.index),
                     isActive: _getActive(model, StatusEnum.ticketRequest.index),
-
                     content: SpacedColumn(
                         spacing: 8,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,8 +244,8 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                             key: formKey,
                             child: TextFormField(
                               controller: storeFoodController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
+                              inputFormatters: <TextInputFormatter> [
+                                FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
                               ],
                               autovalidateMode: AutovalidateMode.onUserInteraction,
                               validator: (value) {
@@ -261,84 +268,89 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                   Step(
                     title: Text('Rescue Ticket',
                         style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.bold)),
+                    state: _getState(model, StatusEnum.ticketResponse.index),
+                    isActive: _getActive(model, StatusEnum.ticketResponse.index),
                     content: SpacedColumn(
                       spacing: 8,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Save your ticket number to deposit food.',
                             style: TextStyle(color: Colors.blue.shade900)),
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(
-                              height: 200,
-                              width: 300,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.shade200,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 184,
-                              width: 284,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.shade200,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Colors.amber.shade400,
-                                    width: 4,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              SizedBox(
+                                height: 200,
+                                width: 300,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.shade200,
+                                    borderRadius: BorderRadius.circular(4),
                                   ),
                                 ),
                               ),
-                            ),
-                            Positioned(
-                              right: -32,
-                              child: SizedBox.square(
-                                dimension: 64,
+                              SizedBox(
+                                height: 184,
+                                width: 284,
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
-                                      color: Colors.blue.shade100, shape: BoxShape.circle),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              left: -32,
-                              child: SizedBox.square(
-                                dimension: 64,
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                      color: Colors.blue.shade100, shape: BoxShape.circle),
-                                ),
-                              ),
-                            ),
-                            Positioned.fill(
-                              top: 36,
-                              child: Align(
-                                alignment: Alignment.bottomCenter,
-                                child: SpacedColumn(
-                                  spacing: 0,
-                                  children: [
-                                    const Text(
-                                      'Your Ticket is',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w300,
-                                          fontSize: 12,
-                                          color: Colors.black45),
+                                    color: Colors.amber.shade200,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.amber.shade400,
+                                      width: 4,
                                     ),
-                                    Text(ticketNumber.toString(),
-                                        style: TextStyle(
-                                            letterSpacing: -5,
-                                            fontWeight: FontWeight.w900,
-                                            fontSize: 96,
-                                            color: Colors.lime.shade900)),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                              Positioned(
+                                right: -32,
+                                child: SizedBox.square(
+                                  dimension: 64,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                        color: Colors.blue.shade100, shape: BoxShape.circle),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                left: -32,
+                                child: SizedBox.square(
+                                  dimension: 64,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                        color: Colors.blue.shade100, shape: BoxShape.circle),
+                                  ),
+                                ),
+                              ),
+                              Positioned.fill(
+                                top: 36,
+                                child: Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: SpacedColumn(
+                                    spacing: 0,
+                                    children: [
+                                      const Text(
+                                        'Your Ticket is',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w300,
+                                            fontSize: 12,
+                                            color: Colors.black45),
+                                      ),
+                                      Text(ticketNumber.toString(),
+                                          style: TextStyle(
+                                              letterSpacing: -5,
+                                              fontWeight: FontWeight.w900,
+                                              fontSize: 96,
+                                              color: Colors.lime.shade900)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         )
                       ],
                     ),
@@ -346,33 +358,38 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                   Step(
                     title: Text('Deposit Request',
                         style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.bold)),
-                    content: SpacedColumn(
-                      spacing: 8,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Insert your ticket to deposit food.',
-                            style: TextStyle(color: Colors.blue.shade900)),
-                        TextField(
-                          controller: depositController,
-                          decoration: const InputDecoration(
-                              fillColor: Colors.white,
-                              prefixIcon: Icon(Icons.numbers),
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(32))),
-                              //labelText: 'Ticket Request',
-                              hintText: 'Ticket Id'),
-                        ),
-                        CustomButton(
-                            onPressed: () =>
-                                depositRequest(int.parse(depositController.text)),
-                            //ref.read(statusEnumProvider.notifier).state = StatusEnum.result
-                            label: 'Submit')
-                      ],
+                      state: _getState(model, StatusEnum.depositTicket.index),
+                      isActive: _getActive(model, StatusEnum.depositTicket.index),
+                    content: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: SpacedColumn(
+                        spacing: 8,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Insert your ticket to deposit food.',
+                              style: TextStyle(color: Colors.blue.shade900)),
+                          TextField(
+                            controller: depositController,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            decoration: const InputDecoration(
+                                fillColor: Colors.white,
+                                prefixIcon: Icon(Icons.numbers),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(32))),
+                                //labelText: 'Ticket Request',
+                                hintText: 'Ticket Id'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Step(
                     title: Text('Result',
                         style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.bold)),
+                    state: _getState(model, StatusEnum.result.index),
+                    isActive: _getActive(model, StatusEnum.result.index),
                     content: SpacedColumn(
                       spacing: 0,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,7 +413,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
   StepState _getState(StepperModel model, int index) {
     if (model.index == index) {
       return StepState.editing;
-    } else if (model.index > index) {
+    } else if (model.index > index || model.index == 3) {
       return StepState.complete;
     } else {
       return StepState.disabled;
@@ -421,7 +438,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
     }
     stompClient.send(
       destination: '/app/deposit/$id',
-      body: json.encode(TicketResponseDTO(ticketNumber: ticket).toJson()),
+      body: json.encode(TicketDTO(ticketNumber: ticket).toJson()),
     );
   }
 }
