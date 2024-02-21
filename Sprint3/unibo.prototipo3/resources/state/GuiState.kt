@@ -6,8 +6,8 @@ import resources.TicketEvaluationResponse
 data class GuiState(
     private val MAXW :Double = 100.0,
     private var CurrW :Double = 0.0,
-    private val xLength: Int = 7, //contando da 0
-    private val yLength: Int = 5,
+    //private val xLength: Int = 7, //contando da 0
+    //private val yLength: Int = 5,
     private var TicketStatus: TicketEvaluationResponse = TicketEvaluationResponse.VALID,
     private var rejected : Int = 0,
 

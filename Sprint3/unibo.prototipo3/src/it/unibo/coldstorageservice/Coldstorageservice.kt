@@ -59,10 +59,11 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 								
 								           	RequestWeightToStore = payloadArg(0).toDouble()
 								           	
-								           	if(RequestWeightToStore + currentWeightStorage < MAXW ){
+								           	if(RequestWeightToStore + currentWeightStorage <= MAXW ){
 								forward("updateS", "updateS($RequestWeightToStore)" ,"guicontroller" ) 
 								
 								           	}
+								           	currentWeightStorage += RequestWeightToStore
 						}
 						//genTimer( actor, state )
 					}

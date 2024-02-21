@@ -238,11 +238,12 @@ QActor coldstorageservice context ctxprototipo3 {
            [#
            	RequestWeightToStore = payloadArg(0).toDouble()
            	
-           	if(RequestWeightToStore + currentWeightStorage < MAXW ){
+           	if(RequestWeightToStore + currentWeightStorage <= MAXW ){
            		#]
            			forward guicontroller -m updateS : updateS( $RequestWeightToStore )//${requestWeightToStore}
            		[#
            	}
+           	currentWeightStorage += RequestWeightToStore
            	#]
 
        }

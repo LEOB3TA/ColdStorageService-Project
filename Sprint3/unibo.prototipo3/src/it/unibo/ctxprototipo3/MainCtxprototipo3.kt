@@ -10,3 +10,4 @@ fun main() = runBlocking {
 	        "localhost", this, "prototipo3.pl", "sysRules.pl", "ctxprototipo3"
 	)
 }
+

@@ -329,6 +329,9 @@ public class WebSocketController {
         String res = obj.toString();
         System.out.println("Update json "+ res);
         // template.convertAndSend("/topic/updates", res);
+        WeightDTO weightDTO = new WeightDTO((Double) obj.get("CurrW"), (Double) obj.get("MAXW"));
+        template.convertAndSend("/topic/updates",weightDTO);
+        template.convertAndSend("/topic/status", res);
     }
 //    @MessageMapping("/update/{sessionId}")
 //    @SendTo("/user/queue/update/{sessionId}")
@@ -349,17 +352,24 @@ public class WebSocketController {
         }
         if (requestDTO.getQuantity() > serviceConfigDTO.getMaxWeight() || serviceStatusDTO.getCurrentWeight() + requestDTO.getQuantity() > serviceConfigDTO.getMaxWeight()) {
             // return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
+            sendStore(requestDTO.getQuantity());
+            TicketResponseDTO res = new TicketResponseDTO();
+            res.setTicketNumber(-1);
+            return res;
+        }else {
+            // quantity ok sending deposit
+            int Ticket = sendStore(requestDTO.getQuantity());
+            // UPDATE STATUS
+            serviceStatusDTO.setCurrentWeight(serviceStatusDTO.getCurrentWeight() + requestDTO.getQuantity());
+            TicketResponseDTO result = new TicketResponseDTO();
+            result.setTicketNumber(Ticket);
+            serviceStatusDTO.setCurrentTicket(Ticket);
+            WeightDTO weightDTO = new WeightDTO(serviceStatusDTO.getCurrentWeight(), serviceConfigDTO.getMaxWeight());
+            template.convertAndSendToUser(sessionId, "/user/queue/store-food", result);
+            template.convertAndSend("/topic/updates", weightDTO);
+            System.out.println(result);
+            return result;
         }
-        // quantity ok sending deposit
-        int Ticket = sendStore(requestDTO.getQuantity());
-        // UPDATE STATUS
-        serviceConfigDTO.setCurrentWeight(serviceStatusDTO.getCurrentWeight()+requestDTO.getQuantity());
-        TicketResponseDTO result = new TicketResponseDTO();
-        result.setTicketNumber(Ticket);
-        serviceStatusDTO.setCurrentTicket(Ticket);
-        template.convertAndSendToUser(sessionId, "/user/queue/store-food", result);
-        System.out.println(result);
-        return result;
     }
 
     @MessageMapping("/deposit/{sessionId}")
