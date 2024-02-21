@@ -23,9 +23,9 @@ class StepperModel {
   }
 }
 
-class StepperNotifier extends AutoDisposeFamilyNotifier<StepperModel, bool> {
+class StepperNotifier extends AutoDisposeNotifier<StepperModel> {
   @override
-  StepperModel build(bool arg) => StepperModel(completed: List.generate(4, (index) => arg));
+  StepperModel build() => StepperModel(completed: List.generate(4, (index) => false));
 
   void setIndex(int index) => state = state.copyWith(index: index);
 
@@ -36,6 +36,6 @@ class StepperNotifier extends AutoDisposeFamilyNotifier<StepperModel, bool> {
   }
 }
 
-final stepperProvider = NotifierProvider.autoDispose.family<StepperNotifier, StepperModel, bool>(
+final stepperProvider = NotifierProvider.autoDispose<StepperNotifier, StepperModel>(
   () => StepperNotifier(),
 );
