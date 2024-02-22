@@ -13,24 +13,24 @@ class AuthorsWidget extends StatelessWidget {
     return SizedBox(width: double.maxFinite,
         child: DecoratedBox(decoration: BoxDecoration(color: Globals.backgroundWidgetColor, borderRadius: BorderRadius.circular(16)),
           //child: const Center(child: Text('Authors', style: TextStyle(fontSize: 24,),))
-          child: const Expanded(
-            child: Padding(padding: const EdgeInsets.all(16),
-              child: Center(child: SpacedColumn(
+          child: const Padding(padding: const EdgeInsets.all(16),
+            child: Center(child: SpacedColumn(
                 spacing: 8,
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment:CrossAxisAlignment.center,
                 children: [
-                  Text('Authors', style:TextStyle(fontWeight: FontWeight.bold)),
-                  SpacedRow(
-                    spacing: 8,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment:CrossAxisAlignment.center,
-                    children: [
-                      Text('Leonardo Focardi'),
-                      Text('Christian Galeone'),
-                      Text('Gianmiriano Porrazzo')
-                    ],
-                  ),],),),),)
-          ,));
+                Text('Authors', style:TextStyle(fontWeight: FontWeight.bold)),
+              SpacedRow(
+                spacing: 8,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment:CrossAxisAlignment.center,
+                children: [
+                  Text('Leonardo Focardi'),
+                  Text('Christian Galeone'),
+                  Text('Gianmiriano Porrazzo')
+                ],
+              ),],),),)
+
+      ,));
   }
 }
