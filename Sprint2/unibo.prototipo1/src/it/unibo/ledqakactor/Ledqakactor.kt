@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import it.unibo.kactor.sysUtil.createActor   //Sept2023
 	
 class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
@@ -22,7 +23,7 @@ class Ledqakactor ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name
 				val ledState = state.LedState()
 				ledState.setState(state.LState.OFF)
 				var current = ledState.getCurrState()
-		return { //this:ActionBasciFsm
+				return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outblack("${name} STARTS")

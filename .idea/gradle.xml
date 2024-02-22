@@ -4,29 +4,65 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint4/unibo.ctxrasp" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint1/unibo.coldstorageservice" />
         <option name="gradleJvm" value="19" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/Sprint4/unibo.ctxrasp" />
+            <option value="$PROJECT_DIR$/Sprint1/unibo.coldstorageservice" />
           </set>
         </option>
       </GradleProjectSettings>
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint4/unibo.ctxserviceaccessgui" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint1/unibo.mocktruck" />
         <option name="gradleJvm" value="19" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/Sprint4/unibo.ctxserviceaccessgui" />
+            <option value="$PROJECT_DIR$/Sprint1/unibo.mocktruck" />
           </set>
         </option>
       </GradleProjectSettings>
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint4/unibo.ctxstorageservice" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint1/unibo.prototipo0" />
         <option name="gradleJvm" value="19" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/Sprint4/unibo.ctxstorageservice" />
+            <option value="$PROJECT_DIR$/Sprint1/unibo.prototipo0" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint2Reviewed/unibo.prototipo2" />
+        <option name="gradleJvm" value="19" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/Sprint2Reviewed/unibo.prototipo2" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint3/serviceaccessbe" />
+        <option name="gradleJvm" value="19" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/Sprint3/serviceaccessbe" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint3/servicestatusbe" />
+        <option name="gradleJvm" value="19" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/Sprint3/servicestatusbe" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint3/unibo.prototipo3" />
+        <option name="gradleJvm" value="19" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/Sprint3/unibo.prototipo3" />
           </set>
         </option>
       </GradleProjectSettings>

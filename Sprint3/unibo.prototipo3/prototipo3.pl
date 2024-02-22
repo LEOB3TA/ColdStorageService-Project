@@ -36,15 +36,16 @@ dispatch( coapUpdate, coapUpdate(RES,VAL) ).
 dispatch( gotomovetoport, gotomovetoport(_) ).
 dispatch( gotodepositactionended, gotodepositactionended(_) ).
 dispatch( gotorobottohome, gotorobottohome(_) ).
+dispatch( updateS, updateS(W) ).
+dispatch( getData, getData(_) ).
+dispatch( updateR, updateR(_) ).
 %====================================================================================
 context(ctxbasicrobot, "127.0.0.1",  "TCP", "8020").
-context(ctxprototipo2, "localhost",  "TCP", "8099").
+context(ctxprototipo3, "localhost",  "TCP", "8099").
  qactor( basicrobot, ctxbasicrobot, "external").
-  qactor( sonar, ctxprototipo2, "rx.sonarSimulator").
-  qactor( datacleaner, ctxprototipo2, "rx.dataCleaner").
-  qactor( mocktruck, ctxprototipo2, "it.unibo.mocktruck.Mocktruck").
-  qactor( coldstorageservice, ctxprototipo2, "it.unibo.coldstorageservice.Coldstorageservice").
-  qactor( transporttrolley, ctxprototipo2, "it.unibo.transporttrolley.Transporttrolley").
-  qactor( sonar23, ctxprototipo2, "it.unibo.sonar23.Sonar23").
-  qactor( ledqakactor, ctxprototipo2, "it.unibo.ledqakactor.Ledqakactor").
-  qactor( stateobservercontroller, ctxprototipo2, "it.unibo.stateobservercontroller.Stateobservercontroller").
+  qactor( guicontroller, ctxprototipo3, "it.unibo.guicontroller.Guicontroller").
+  qactor( coldstorageservice, ctxprototipo3, "it.unibo.coldstorageservice.Coldstorageservice").
+  qactor( transporttrolley, ctxprototipo3, "it.unibo.transporttrolley.Transporttrolley").
+  qactor( sonar23, ctxprototipo3, "it.unibo.sonar23.Sonar23").
+  qactor( ledqakactor, ctxprototipo3, "it.unibo.ledqakactor.Ledqakactor").
+  qactor( stateobservercontroller, ctxprototipo3, "it.unibo.stateobservercontroller.Stateobservercontroller").

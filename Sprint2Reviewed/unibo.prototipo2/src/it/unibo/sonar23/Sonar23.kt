@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import it.unibo.kactor.sysUtil.createActor   //Sept2023
 	
 class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
@@ -22,7 +23,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 				var D = 0
 				var handled=false
 			var Appl = sysUtil.getActor("transporttrolley") != null  
-		return { //this:ActionBasciFsm
+				return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
 						CommUtils.outblack("sonar | start with appl: $Appl")

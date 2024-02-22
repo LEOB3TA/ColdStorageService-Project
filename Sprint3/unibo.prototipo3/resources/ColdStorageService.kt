@@ -7,10 +7,10 @@ import resources.model.Ticket
 class ColdStorageService {
     private var MAXW : Double = 100.0
     private var DLIMIT : Int =0
-    private val TICKETTIME: Long = 5
+    private val TICKETTIME: Long = 30
     private var currentWeightStorage : Double = 0.0
     private val ticketList : ArrayList<Ticket> = arrayListOf()
-    private var ticketNumber: Int = 0
+    private var ticketNumber: Int = 1
     private var rejectedRequestCounter: Int = 0
 
 
@@ -60,7 +60,7 @@ class ColdStorageService {
         }
 
         private fun resetTicketNumber() {
-            getInstance().ticketNumber = 0
+            getInstance().ticketNumber = 1
         }
 
         private fun resetTicketList() {

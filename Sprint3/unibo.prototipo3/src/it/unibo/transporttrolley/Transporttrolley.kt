@@ -10,15 +10,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
-
+import it.unibo.kactor.sysUtil.createActor   //Sept2023
+	
 class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
 	override fun getInitialState() : String{
 		return "init"
 	}
-	@OptIn(ExperimentalTime::class)
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
 		
@@ -32,11 +30,14 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				var TICKETID = 0
 				val tTState = state.TransportTrolleyState()
 				val MyName = name
-				val ts = kotlin.time.TimeSource.Monotonic
-				var m1 = ts.markNow()
-				val MINT : kotlin.time.Duration= 1.seconds
+				//val ts = kotlin.time.TimeSource.Monotonic
+				//var m1 = ts.markNow()
+				var begin : Long = 0
+				var end : Long = 0
+				val MINT : Long= 1000 //(1 second)
 				var savedState = tTState.getCurrState()
-		return { //this:ActionBasciFsm
+				//var Position = arrayOf(HOMEX, HOMEY)
+				return { //this:ActionBasciFsm
 				state("init") { //this:State
 					action { //it:State
 						discardMessages = false
@@ -47,8 +48,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t014",targetState="idle",cond=whenReply("engagedone"))
-					transition(edgeName="t015",targetState="waitforfree",cond=whenReply("engagerefused"))
+					 transition(edgeName="t09",targetState="idle",cond=whenReply("engagedone"))
+					transition(edgeName="t010",targetState="waitforfree",cond=whenReply("engagerefused"))
 				}	 
 				state("error") { //this:State
 					action { //it:State
@@ -72,7 +73,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				 	 		stateTimer = TimerActor("timer_waitforfree", 
 				 	 					  scope, context!!, "local_tout_transporttrolley_waitforfree", 10000.toLong() )
 					}	 	 
-					 transition(edgeName="t016",targetState="idle",cond=whenTimeout("local_tout_transporttrolley_waitforfree"))   
+					 transition(edgeName="t011",targetState="idle",cond=whenTimeout("local_tout_transporttrolley_waitforfree"))   
 				}	 
 				state("idle") { //this:State
 					action { //it:State
@@ -89,7 +90,7 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t017",targetState="moverobottoindoor",cond=whenRequest("pickup"))
+					 transition(edgeName="t012",targetState="moverobottoindoor",cond=whenRequest("pickup"))
 				}	 
 				state("moverobottoindoor") { //this:State
 					action { //it:State
@@ -108,15 +109,16 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t018",targetState="handlerobotstopped",cond=whenEvent("stop"))
-					transition(edgeName="t019",targetState="movetoport",cond=whenReply("moverobotdone"))
+					 transition(edgeName="t013",targetState="handlerobotstopped",cond=whenEvent("stop"))
+					transition(edgeName="t014",targetState="movetoport",cond=whenReply("moverobotdone"))
 				}	 
 				state("handlerobotstopped") { //this:State
 					action { //it:State
 						CommUtils.outgreen("$name |handle robot stopped")
 						
-						  			if ((m1+MINT).hasPassedNow()){
-						  				m1 = ts.markNow()
+						  			end = System.currentTimeMillis()
+						  			if ((end-begin)>MINT){
+						  				begin = System.currentTimeMillis()
 						  				savedState = tTState.getCurrState()
 						  				tTState.setCurrState(state.CurrStateTrolley.STOPPED)
 						emit("alarm", "alarm(_)" ) 
@@ -144,9 +146,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t020",targetState="goahead",cond=whenReply("moverobotdone"))
-					transition(edgeName="t021",targetState="handlerobotstopped",cond=whenEvent("stop"))
-					transition(edgeName="t022",targetState="resumerobot",cond=whenEvent("resume"))
+					 transition(edgeName="t015",targetState="goahead",cond=whenReply("moverobotdone"))
+					transition(edgeName="t016",targetState="handlerobotstopped",cond=whenEvent("stop"))
+					transition(edgeName="t017",targetState="resumerobot",cond=whenEvent("resume"))
 				}	 
 				state("resumerobot") { //this:State
 					action { //it:State
@@ -172,8 +174,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t023",targetState="handlerobotstopped",cond=whenEvent("stop"))
-					transition(edgeName="t024",targetState="goahead",cond=whenReply("moverobotdone"))
+					 transition(edgeName="t018",targetState="handlerobotstopped",cond=whenEvent("stop"))
+					transition(edgeName="t019",targetState="goahead",cond=whenReply("moverobotdone"))
 				}	 
 				state("goahead") { //this:State
 					action { //it:State
@@ -194,9 +196,9 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t025",targetState="movetoport",cond=whenDispatch("gotomovetoport"))
-					transition(edgeName="t026",targetState="depositactionended",cond=whenDispatch("gotodepositactionended"))
-					transition(edgeName="t027",targetState="corrDir",cond=whenDispatch("gotorobottohome"))
+					 transition(edgeName="t020",targetState="movetoport",cond=whenDispatch("gotomovetoport"))
+					transition(edgeName="t021",targetState="depositactionended",cond=whenDispatch("gotodepositactionended"))
+					transition(edgeName="t022",targetState="corrDir",cond=whenDispatch("gotorobottohome"))
 				}	 
 				state("movetoport") { //this:State
 					action { //it:State
@@ -214,8 +216,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t028",targetState="handlerobotstopped",cond=whenEvent("stop"))
-					transition(edgeName="t029",targetState="depositactionended",cond=whenReply("moverobotdone"))
+					 transition(edgeName="t023",targetState="handlerobotstopped",cond=whenEvent("stop"))
+					transition(edgeName="t024",targetState="depositactionended",cond=whenReply("moverobotdone"))
 				}	 
 				state("depositactionended") { //this:State
 					action { //it:State
@@ -239,8 +241,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 				 	 		stateTimer = TimerActor("timer_depositactionended", 
 				 	 					  scope, context!!, "local_tout_transporttrolley_depositactionended", 3000.toLong() )
 					}	 	 
-					 transition(edgeName="t030",targetState="robottohome",cond=whenTimeout("local_tout_transporttrolley_depositactionended"))   
-					transition(edgeName="t031",targetState="moverobottoindoor",cond=whenRequest("pickup"))
+					 transition(edgeName="t025",targetState="robottohome",cond=whenTimeout("local_tout_transporttrolley_depositactionended"))   
+					transition(edgeName="t026",targetState="moverobottoindoor",cond=whenRequest("pickup"))
 				}	 
 				state("robottohome") { //this:State
 					action { //it:State
@@ -256,8 +258,8 @@ class Transporttrolley ( name: String, scope: CoroutineScope  ) : ActorBasicFsm(
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t032",targetState="corrDir",cond=whenReply("moverobotdone"))
-					transition(edgeName="t033",targetState="handlerobotstopped",cond=whenEvent("stop"))
+					 transition(edgeName="t027",targetState="corrDir",cond=whenReply("moverobotdone"))
+					transition(edgeName="t028",targetState="handlerobotstopped",cond=whenEvent("stop"))
 				}	 
 				state("corrDir") { //this:State
 					action { //it:State

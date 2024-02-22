@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import it.unibo.kactor.sysUtil.createActor   //Sept2023
 	
 class Stateobservercontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
@@ -21,16 +22,16 @@ class Stateobservercontroller ( name: String, scope: CoroutineScope  ) : ActorBa
 		
 			var state = ""
 			var pos= ""
-		return { //this:ActionBasciFsm
+				return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						CoapObserverSupport(myself, "localhost","8099","ctxprototipo2","transporttrolley")
+						CoapObserverSupport(myself, "localhost","8099","ctxprototipo3","transporttrolley")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t037",targetState="upds",cond=whenDispatch("coapUpdate"))
+					 transition(edgeName="t032",targetState="upds",cond=whenDispatch("coapUpdate"))
 				}	 
 				state("upds") { //this:State
 					action { //it:State
@@ -51,7 +52,7 @@ class Stateobservercontroller ( name: String, scope: CoroutineScope  ) : ActorBa
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t038",targetState="upds",cond=whenDispatch("coapUpdate"))
+					 transition(edgeName="t033",targetState="upds",cond=whenDispatch("coapUpdate"))
 				}	 
 			}
 		}

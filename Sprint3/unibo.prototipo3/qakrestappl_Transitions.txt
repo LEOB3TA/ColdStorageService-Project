@@ -1,3 +1,7 @@
+{"actor":"guicontroller", "msgType":"dispatch", "curstate":"idle", "nextstate":"updatestorage", "msgId":"updateS"}
+{"actor":"guicontroller", "msgType":"dispatch", "curstate":"idle", "nextstate":"updaterejected", "msgId":"updateR"}
+{"actor":"guicontroller", "msgType":"dispatch", "curstate":"idle", "nextstate":"updateposition", "msgId":"coapUpdate"}
+{"actor":"guicontroller", "msgType":"dispatch", "curstate":"idle", "nextstate":"updategui", "msgId":"getData"}
 {"actor":"transporttrolley", "msgType":"dispatch", "curstate":"goahead", "nextstate":"movetoport", "msgId":"gotomovetoport"}
 {"actor":"transporttrolley", "msgType":"dispatch", "curstate":"goahead", "nextstate":"depositactionended", "msgId":"gotodepositactionended"}
 {"actor":"transporttrolley", "msgType":"dispatch", "curstate":"goahead", "nextstate":"corrDir", "msgId":"gotorobottohome"}

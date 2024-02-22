@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+    </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="serviceaccessbe" target="11" />
       <module name="Sprint0-unibo.coldstorageservice" target="11" />
       <module name="Sprint0-unibo.coldstorageservice.main" target="11" />
       <module name="Sprint0Reviewed-unibo.coldstorageservice" target="11" />
@@ -14,46 +18,20 @@
       <module name="Sprint1.unibo.coldstorageservice.main" target="11" />
       <module name="Sprint1.unibo.coldstorageservice.test" target="11" />
       <module name="Sprint2Reviewed-unibo.prototipo1" target="11" />
-      <module name="Sprint2Reviewed-unibo.prototipo1.main" target="11" />
-      <module name="Sprint2Reviewed-unibo.prototipo1.test" target="11" />
       <module name="truck.unibo.coldstorageservice" target="11" />
       <module name="truck.unibo.coldstorageservice.main" target="11" />
       <module name="truck.unibo.coldstorageservice.test" target="11" />
-      <module name="unibo.coldstorageservice" target="11" />
-      <module name="unibo.coldstorageservice.main" target="11" />
-      <module name="unibo.coldstorageservice.test" target="11" />
-      <module name="unibo.mocktruck" target="11" />
-      <module name="unibo.mocktruck.main" target="11" />
-      <module name="unibo.mocktruck.test" target="11" />
       <module name="unibo.old_css" target="11" />
       <module name="unibo.old_css.main" target="11" />
       <module name="unibo.old_css.test" target="11" />
-      <module name="unibo.prototipo0" target="11" />
-      <module name="unibo.prototipo0.main" target="11" />
-      <module name="unibo.prototipo0.test" target="11" />
       <module name="unibo.prototipo0.unibo.coldstorageservice" target="11" />
       <module name="unibo.prototipo0.unibo.coldstorageservice.main" target="11" />
       <module name="unibo.prototipo0.unibo.coldstorageservice.test" target="11" />
-      <module name="unibo.prototipo1" target="11" />
-      <module name="unibo.prototipo1.main" target="11" />
-      <module name="unibo.prototipo1.test" target="11" />
-      <module name="unibo.prototipo2" target="11" />
-      <module name="unibo.prototipo2.main" target="11" />
-      <module name="unibo.prototipo2.test" target="11" />
-      <module name="unibo.prototipo3" target="11" />
-      <module name="unibo.prototipo3.main" target="11" />
-      <module name="unibo.prototipo3.test" target="11" />
-      <module name="unibo.prototipo3.unibo.prototipo2" target="11" />
-      <module name="unibo.prototipo3.unibo.prototipo2.main" target="11" />
-      <module name="unibo.prototipo3.unibo.prototipo2.test" target="11" />
-      <module name="unibo.serviceaccessgui" target="11" />
-      <module name="unibo.serviceaccessgui.main" target="11" />
-      <module name="unibo.serviceaccessgui.test" target="11" />
       <module name="unibo.transporttrolley" target="11" />
       <module name="unibo.transporttrolley.main" target="11" />
       <module name="unibo.transportTrolley.main" target="11" />
-      <module name="unibo.transportTrolley.test" target="11" />
       <module name="unibo.transporttrolley.test" target="11" />
+      <module name="unibo.transportTrolley.test" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>
