@@ -70,7 +70,7 @@
                 <li>App per vari devices</li>
             </ul>
 
-        Siccome nei requisiti non sono presenti preferenze e/o limitazioni a riguardo ed essendo
+        Siccome nei requisiti non sono presenti preferenze e/o limitazioni a riguardo, ed essendo
         lo sviluppo di applicazioni per dispositivi mobili strettamente legato alla tipologia di dispositivi,
         si consiglia la realizzazione varie versioni dell'applicazione, per device che usano Linux, Windows o MacOs.
         </div>
@@ -81,7 +81,7 @@
         mostrare ad un <kc>Service-manager</kc> una serie di informazioni riguardanti lo stato del
         sistema e dei suoi componenti. Sempre dai requisiti, si evince che anche la <kc>ServiceAccessGUI</kc>
         deve fornire una serie di informazioni riguardanti il sistema e lo stato della richiesta presa in carico.
-        Oltre a ci&ograve; quest'ultima GUI deve essere in grado di prendere delle informazioni dall'utente.
+        Oltre a ci&ograve;, quest'ultima GUI deve essere in grado di prendere delle informazioni dall'utente.
         Per tali motivi bisogna comprendere quali sono le sorgenti di dati che servono per aggiornare le GUI.
         <h4>Sorgenti di Dati</h4>
             Le principali fonti da cui le GUI prendono dati sono legate alle informazioni che tali interfacce grafiche
@@ -101,7 +101,7 @@
                 </li>
             </ul>
             Inoltre &egrave; importante sottolineare come la ServiceAccessGUI sia anche una sorgente di
-            dati in quanto, consente al cliente di indicare la quantit&agrave; di cibo da depositare e, successivamente,
+            dati, in quanto consente al cliente di indicare la quantit&agrave; di cibo da depositare e, successivamente,
             il ticket number per avviare il processo di deposito.
 
             <h6>Stato TransportTrolley</h6>
@@ -112,10 +112,10 @@
 
             <h6>Stato ColdStorageService</h6>
             Analogamente per quanto accade con il TransportTrolley, &egrave; stato creata una data class Kotlin
-            per contenere le informazioni relative alla ColdRoom ed allo stato generale del servizio (Richieste rifiutate,
-            peso attuale/totale, ...). Anche queste scelte sono state commentate precedentemente.
+            per contenere le informazioni relative alla ColdRoom e allo stato generale del servizio (<i>Richieste rifiutate,
+        peso attuale/totale, ...</i>). Anche queste scelte sono state commentate precedentemente.
 
-            Per gestire entrambi li stati si utilizzano dei CoapObserver: in tal modo ogni qual volta si presenti
+            Per gestire entrambi gli stati si utilizzano dei CoapObserver: in tal modo ogni qual volta si presenti
             una modifica dei dati d'interesse viene emesso un Update che pu&ograve; essere utilizzato per trasmettere
             i nuovi dati alle GUI.
             <h4>Pulling vs Push</h4>
@@ -143,7 +143,7 @@
     <div class="remark">
         Come gi&agrave; accennato dal punto precedente, una parte importante &egrave; della realizzazione &egrave; legata
         alla gestione delle comunicazioni tra i vari componenti. In generale si vuole ottenere un comportamento che
-        segui tale modello:
+        segua tale modello:
         <ul>
             <li>
                 <kc>ServiceStatusGUI</kc>: Questa GUI &egrave; <italic>passiva</italic>, rimane in attesa degli update,
