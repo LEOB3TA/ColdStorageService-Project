@@ -36,9 +36,9 @@ pid2=$!
 sleep 5
 
 # start the guis
-./GUIs/serviceAccLIN/frontend &
+./GUIs/Linux/serviceAccLIN/frontend &
 pid3=$!
-./GUIs/serviceStatLIN/servicestatusgui &
+./GUIs/Linux/serviceStatLIN/servicestatusgui &
 pid4=$!
 
 

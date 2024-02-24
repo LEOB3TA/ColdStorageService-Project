@@ -36,8 +36,8 @@ pid2=$!
 sleep 5
 
 # start the guis
-open -a $(pwd)/GUIs/serviceAccMAC/frontend.app
-open -a $(pwd)/GUIs/serviceStatMAC/servicestatusgui.app
+open -a $(pwd)/GUIs/Mac/serviceAccMAC/frontend.app
+open -a $(pwd)/GUIs/Mac/serviceStatMAC/servicestatusgui.app
 
 # Keep the script running in the background
 while true; do
