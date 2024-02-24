@@ -40,20 +40,11 @@
         </option>
       </GradleProjectSettings>
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint3/serviceaccessbe" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint3/backend" />
         <option name="gradleJvm" value="19" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/Sprint3/serviceaccessbe" />
-          </set>
-        </option>
-      </GradleProjectSettings>
-      <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint3/servicestatusbe" />
-        <option name="gradleJvm" value="19" />
-        <option name="modules">
-          <set>
-            <option value="$PROJECT_DIR$/Sprint3/servicestatusbe" />
+            <option value="$PROJECT_DIR$/Sprint3/backend" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -12,7 +12,10 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="backend" target="11" />
       <module name="serviceaccessbe" target="11" />
+      <module name="serviceaccessbe.main" target="11" />
+      <module name="serviceaccessbe.test" target="11" />
       <module name="Sprint0-unibo.coldstorageservice" target="11" />
       <module name="Sprint0-unibo.coldstorageservice.main" target="11" />
       <module name="Sprint0Reviewed-unibo.coldstorageservice" target="11" />

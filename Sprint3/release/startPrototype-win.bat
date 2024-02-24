@@ -17,7 +17,7 @@ start "servicestatusbe" java -jar servicestatusbe.jar
 timeout /t 5
 
 start "servicestatusgui" .\GUIs\Windows\serviceStatWIN\servicestatusgui.exe
-start "servicaccessgui" .\GUIs\Windows\serviceStatWIN\serviceaccessgui.exe
+start "servicaccessgui" .\GUIs\Windows\serviceAccWIN\serviceaccessgui.exe
 
 REM Wait for the user to press Ctrl+C to stop the container
 pause
