@@ -1,9 +1,9 @@
-import 'package:ServiceAccessGUI/widgets/authors_widget.dart';
-import 'package:ServiceAccessGUI/widgets/current_weight_widget.dart';
-import 'package:ServiceAccessGUI/widgets/layout/spaced_column.dart';
-import 'package:ServiceAccessGUI/widgets/layout/spaced_row.dart';
-import 'package:ServiceAccessGUI/widgets/stepper_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:service_access_gui/widgets/authors_widget.dart';
+import 'package:service_access_gui/widgets/current_weight_widget.dart';
+import 'package:service_access_gui/widgets/layout/spaced_column.dart';
+import 'package:service_access_gui/widgets/layout/spaced_row.dart';
+import 'package:service_access_gui/widgets/stepper_widget.dart';
 
 class DesktopBody extends StatelessWidget {
   final String url;
@@ -15,18 +15,22 @@ class DesktopBody extends StatelessWidget {
       backgroundColor: Colors.blue.shade50,
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: SpacedColumn(spacing: 16, children: [
-          Expanded(
-            flex: 4,
-            child: SpacedRow(spacing: 16, children: [
-              Expanded(flex: 2, child: StepperWidget(url: url)),
-              const Expanded(child: CurrentWeightWidget()),
-            ],),
-          ),
-
-          const Expanded(child: AuthorsWidget()),
-
-        ],),
+        child: SpacedColumn(
+          spacing: 16,
+          children: [
+            Expanded(
+              flex: 4,
+              child: SpacedRow(
+                spacing: 16,
+                children: [
+                  Expanded(flex: 2, child: StepperWidget(url: url)),
+                  const Expanded(child: CurrentWeightWidget()),
+                ],
+              ),
+            ),
+            const Expanded(child: AuthorsWidget()),
+          ],
+        ),
       ),
     );
   }

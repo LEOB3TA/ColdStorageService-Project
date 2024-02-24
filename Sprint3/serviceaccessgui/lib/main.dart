@@ -1,4 +1,4 @@
-import 'package:ServiceAccessGUI/views/home_view.dart';
+import 'package:service_access_gui/views/home_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

@@ -1,25 +1,24 @@
 import 'dart:convert';
 
-import 'package:ServiceAccessGUI/globals.dart';
-import 'package:ServiceAccessGUI/widgets/layout/spaced_column.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
+import 'package:service_access_gui/globals.dart';
+import 'package:service_access_gui/model/stepper_model.dart';
+import 'package:service_access_gui/model/store_food_request_dto.dart';
+import 'package:service_access_gui/model/ticket_dto.dart';
+import 'package:service_access_gui/model/weight_dto.dart';
+import 'package:service_access_gui/providers/status_provider.dart';
+import 'package:service_access_gui/providers/weight_status_provider.dart';
+import 'package:service_access_gui/widgets/custom_button.dart';
+import 'package:service_access_gui/widgets/layout/spaced_column.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:uuid/uuid.dart';
-
-import 'package:ServiceAccessGUI/model/stepper_model.dart';
-import 'package:ServiceAccessGUI/model/store_food_request_dto.dart';
-import 'package:ServiceAccessGUI/model/ticket_dto.dart';
-import 'package:ServiceAccessGUI/model/weight_dto.dart';
-import 'package:ServiceAccessGUI/providers/status_provider.dart';
-import 'package:ServiceAccessGUI/providers/weight_status_provider.dart';
-import 'package:ServiceAccessGUI/widgets/custom_button.dart';
 
 var logger = Logger(printer: PrettyPrinter());
 
@@ -77,14 +76,14 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
   }
 
   void socketConnection(StompFrame frame) {
-    print(frame.headers);
+    debugPrint(frame.headers.toString());
     //comment
     stompClient.subscribe(
         destination: '/topic/message',
         headers: {'id': id},
         callback: (StompFrame frame) {
           if (frame.body != null) {
-            print("RESULT: ${frame.body!}");
+            debugPrint("RESULT: ${frame.body!}");
             Map<String, dynamic> result = json.decode(frame.body!);
             logger.t('WebSocket Connection Result: $result');
           }
@@ -93,7 +92,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
         destination: '/topic/updates',
         callback: (StompFrame frame) {
           if (frame.body != null) {
-            print("Weight Status Update received");
+            debugPrint("Weight Status Update received");
             WeightDTO update = WeightDTO.fromJson(json.decode(frame.body!));
             ref.read(weightStatusProvider.notifier).state = update;
             debugPrint("Weight Status Update: ${ref.read(weightStatusProvider)}");
@@ -105,7 +104,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
           debugPrint('Store Food Response: ${frame.body}');
           if (frame.body != null) {
             TicketDTO result = TicketDTO.fromJson(json.decode(frame.body!));
-            if (result.ticketNumber == -1 ) {
+            if (result.ticketNumber == -1) {
               const snackBar = SnackBar(
                 content: Text("Error - the inserted weight could not be stored!"),
                 backgroundColor: Colors.red,
@@ -120,16 +119,15 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
               ref.read(stepperProvider.notifier).setIndex(StatusEnum.ticketResponse.index);
               ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketResponse;
             }
-
           }
         });
     stompClient.subscribe(
         destination: '/user/queue/deposit/$id',
         callback: (StompFrame frame) {
           if (frame.body != null) {
-            print("RESULT: ${frame.headers}");
+            debugPrint("RESULT: ${frame.headers}");
             //String result = String.fromJson
-            print("SS");
+            debugPrint("SS");
           }
         });
 
@@ -142,7 +140,6 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +162,9 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                 'STEPPER',
                 style: GoogleFonts.inter(
                     textStyle: TextStyle(
-                        fontWeight: FontWeight.w600, color: Colors.blue.shade900, fontSize: Globals.headerWidgetFontSize)),
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blue.shade900,
+                        fontSize: Globals.headerWidgetFontSize)),
               ),
             ),
             Expanded(
@@ -200,7 +199,6 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                       ref.read(stepperProvider.notifier).setCompleted(StatusEnum.result.index);
                       break;
                     case StatusEnum.result:
-                      // TODO: Handle this case.
                   }
                 },
                 controlsBuilder: (context, details) {
@@ -222,48 +220,43 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                         label: 'Next',
                       );
                     case StatusEnum.result:
-                      return Text('cuiao');
-                    default:
-                      return Text('cuiao');
-                  }},
+                      return const SizedBox();
+                  }
+                },
                 steps: <Step>[
                   Step(
                     title: Text('Store Food Request',
                         style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.bold)),
                     state: _getState(model, StatusEnum.ticketRequest.index),
                     isActive: _getActive(model, StatusEnum.ticketRequest.index),
-                    content: SpacedColumn(
-                        spacing: 8,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Insert the amount of kg you want to deposit.',
-                            style: TextStyle(color: Globals.textColor),
-                          ),
-                          Form(
-                            key: formKey,
-                            child: TextFormField(
-                              controller: storeFoodController,
-                              inputFormatters: <TextInputFormatter> [
-                                FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
-                              ],
-                              autovalidateMode: AutovalidateMode.onUserInteraction,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter some digits';
-                                }
-                                return null;
-                              },
-                              decoration: const InputDecoration(
-                                  fillColor: Colors.white,
-                                  prefixIcon: Icon(Icons.scale),
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(32))),
-                                  hintText: 'How many kg?'),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                        ]),
+                    content: SpacedColumn(spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(
+                        'Insert the amount of kg you want to deposit.',
+                        style: TextStyle(color: Globals.textColor),
+                      ),
+                      Form(
+                        key: formKey,
+                        child: TextFormField(
+                          controller: storeFoodController,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
+                          ],
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some digits';
+                            }
+                            return null;
+                          },
+                          decoration: const InputDecoration(
+                              fillColor: Colors.white,
+                              prefixIcon: Icon(Icons.scale),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(32))),
+                              hintText: 'How many kg?'),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ]),
                   ),
                   Step(
                     title: Text('Rescue Ticket',
@@ -274,8 +267,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                       spacing: 8,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Save your ticket number to deposit food.',
-                            style: TextStyle(color: Colors.blue.shade900)),
+                        Text('Save your ticket number to deposit food.', style: TextStyle(color: Colors.blue.shade900)),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Stack(
@@ -310,8 +302,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                                 child: SizedBox.square(
                                   dimension: 64,
                                   child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                        color: Colors.blue.shade100, shape: BoxShape.circle),
+                                    decoration: BoxDecoration(color: Colors.blue.shade100, shape: BoxShape.circle),
                                   ),
                                 ),
                               ),
@@ -320,8 +311,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                                 child: SizedBox.square(
                                   dimension: 64,
                                   child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                        color: Colors.blue.shade100, shape: BoxShape.circle),
+                                    decoration: BoxDecoration(color: Colors.blue.shade100, shape: BoxShape.circle),
                                   ),
                                 ),
                               ),
@@ -334,10 +324,8 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                                     children: [
                                       const Text(
                                         'Your Ticket is',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w300,
-                                            fontSize: 12,
-                                            color: Colors.black45),
+                                        style:
+                                            TextStyle(fontWeight: FontWeight.w300, fontSize: 12, color: Colors.black45),
                                       ),
                                       Text(ticketNumber.toString(),
                                           style: TextStyle(
@@ -358,16 +346,15 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                   Step(
                     title: Text('Deposit Request',
                         style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.bold)),
-                      state: _getState(model, StatusEnum.depositTicket.index),
-                      isActive: _getActive(model, StatusEnum.depositTicket.index),
+                    state: _getState(model, StatusEnum.depositTicket.index),
+                    isActive: _getActive(model, StatusEnum.depositTicket.index),
                     content: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: SpacedColumn(
                         spacing: 8,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Insert your ticket to deposit food.',
-                              style: TextStyle(color: Colors.blue.shade900)),
+                          Text('Insert your ticket to deposit food.', style: TextStyle(color: Colors.blue.shade900)),
                           TextField(
                             controller: depositController,
                             inputFormatters: [
@@ -376,8 +363,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                             decoration: const InputDecoration(
                                 fillColor: Colors.white,
                                 prefixIcon: Icon(Icons.numbers),
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(32))),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(32))),
                                 //labelText: 'Ticket Request',
                                 hintText: 'Ticket Id'),
                           ),
@@ -386,16 +372,14 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                     ),
                   ),
                   Step(
-                    title: Text('Result',
-                        style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.bold)),
+                    title: Text('Result', style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.bold)),
                     state: _getState(model, StatusEnum.result.index),
                     isActive: _getActive(model, StatusEnum.result.index),
                     content: SpacedColumn(
                       spacing: 0,
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children:[
-                        Text('Congratulazioni ce l\'hai fatta !',
-                            style: TextStyle(color: Colors.blue.shade900)),
+                      children: [
+                        Text('Your request has been fulfilled!', style: TextStyle(color: Colors.blue.shade900)),
                       ],
                     ),
                   ),
@@ -424,7 +408,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
 
   void storeFoodRequest(double quantity) {
     if (kDebugMode) {
-      print('Store Food Request: $quantity');
+      debugPrint('Store Food Request: $quantity');
     }
     stompClient.send(
       destination: '/app/store-food/$id',
@@ -434,7 +418,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
 
   void depositRequest(int ticket) {
     if (kDebugMode) {
-      print('Deposit - Ticket id: $ticket');
+      debugPrint('Deposit - Ticket id: $ticket');
     }
     stompClient.send(
       destination: '/app/deposit/$id',

@@ -1,5 +1,5 @@
-import 'package:ServiceAccessGUI/widgets/layout/spaced_column.dart';
 import 'package:flutter/material.dart';
+import 'package:service_access_gui/widgets/layout/spaced_column.dart';
 
 class TicketWidget extends StatelessWidget {
   const TicketWidget({super.key});
@@ -38,8 +38,7 @@ class TicketWidget extends StatelessWidget {
           child: SizedBox.square(
             dimension: 64,
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                  color: Colors.blue.shade100, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: Colors.blue.shade100, shape: BoxShape.circle),
             ),
           ),
         ),
@@ -48,8 +47,7 @@ class TicketWidget extends StatelessWidget {
           child: SizedBox.square(
             dimension: 64,
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                  color: Colors.blue.shade100, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: Colors.blue.shade100, shape: BoxShape.circle),
             ),
           ),
         ),
@@ -62,17 +60,11 @@ class TicketWidget extends StatelessWidget {
               children: [
                 const Text(
                   'Your Ticket is',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w300,
-                      fontSize: 12,
-                      color: Colors.black45),
+                  style: TextStyle(fontWeight: FontWeight.w300, fontSize: 12, color: Colors.black45),
                 ),
                 Text('0',
                     style: TextStyle(
-                        letterSpacing: -5,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 96,
-                        color: Colors.lime.shade900)),
+                        letterSpacing: -5, fontWeight: FontWeight.w900, fontSize: 96, color: Colors.lime.shade900)),
               ],
             ),
           ),
