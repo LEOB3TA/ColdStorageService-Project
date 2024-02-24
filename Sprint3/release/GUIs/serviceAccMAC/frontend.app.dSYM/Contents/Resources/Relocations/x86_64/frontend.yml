@@ -1,0 +1,20 @@
+---
+triple:          'x86_64-apple-darwin'
+binary-path:     '/Users/leo/Documents/Ingegneria_dei_Sistemi_SW/issProject2023/Sprint3/serviceaccessgui/build/macos/Build/Products/Release/frontend.app/Contents/MacOS/frontend'
+relocations:
+  - { offsetInCU: 0x27, offset: 0xC9452, size: 0x8, addend: 0x0, symName: '_$s8frontend17MainFlutterWindowC12awakeFromNibyyF', symObjAddr: 0x0, symBinAddr: 0x100001A70, symSize: 0x140 }
+  - { offsetInCU: 0x78, offset: 0xC94A3, size: 0x8, addend: 0x0, symName: '_$s8frontend17MainFlutterWindowC12awakeFromNibyyF', symObjAddr: 0x0, symBinAddr: 0x100001A70, symSize: 0x140 }
+  - { offsetInCU: 0x120, offset: 0xC954B, size: 0x8, addend: 0x0, symName: '_$s8frontend17MainFlutterWindowC12awakeFromNibyyFTo', symObjAddr: 0x140, symBinAddr: 0x100001BB0, symSize: 0x30 }
+  - { offsetInCU: 0x178, offset: 0xC95A3, size: 0x8, addend: 0x0, symName: '_$s8frontend17MainFlutterWindowC11contentRect9styleMask7backing5deferACSo6CGRectV_So013NSWindowStyleH0VSo18NSBackingStoreTypeVSbtcfcTo', symObjAddr: 0x170, symBinAddr: 0x100001BE0, symSize: 0x80 }
+  - { offsetInCU: 0x1D8, offset: 0xC9603, size: 0x8, addend: 0x0, symName: '_$s8frontend17MainFlutterWindowCfD', symObjAddr: 0x1F0, symBinAddr: 0x100001C60, symSize: 0x30 }
+  - { offsetInCU: 0x206, offset: 0xC9631, size: 0x8, addend: 0x0, symName: '_$s8frontend17MainFlutterWindowCMa', symObjAddr: 0x220, symBinAddr: 0x100001C90, symSize: 0x14 }
+  - { offsetInCU: 0x27, offset: 0xC989E, size: 0x8, addend: 0x0, symName: '_$s8frontend11AppDelegateC47applicationShouldTerminateAfterLastWindowClosedySbSo13NSApplicationCFTo', symObjAddr: 0x0, symBinAddr: 0x100001CB0, symSize: 0x10 }
+  - { offsetInCU: 0x4B, offset: 0xC98C2, size: 0x8, addend: 0x0, symName: '_$s8frontend11AppDelegateC47applicationShouldTerminateAfterLastWindowClosedySbSo13NSApplicationCFTo', symObjAddr: 0x0, symBinAddr: 0x100001CB0, symSize: 0x10 }
+  - { offsetInCU: 0x85, offset: 0xC98FC, size: 0x8, addend: 0x0, symName: '_$s8frontend11AppDelegateCACycfcTo', symObjAddr: 0x10, symBinAddr: 0x100001CC0, symSize: 0x30 }
+  - { offsetInCU: 0xC0, offset: 0xC9937, size: 0x8, addend: 0x0, symName: '_$s8frontend11AppDelegateCfD', symObjAddr: 0x40, symBinAddr: 0x100001CF0, symSize: 0x30 }
+  - { offsetInCU: 0xEE, offset: 0xC9965, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x70, symBinAddr: 0x100001D20, symSize: 0x10 }
+  - { offsetInCU: 0x10C, offset: 0xC9983, size: 0x8, addend: 0x0, symName: '_$s8frontend11AppDelegateCMa', symObjAddr: 0x80, symBinAddr: 0x100001D30, symSize: 0x14 }
+  - { offsetInCU: 0x2B, offset: 0xC9AFB, size: 0x8, addend: 0x0, symName: '_$s8frontend19ResourceBundleClass33_32ADB84F2816073A8FBFD0F4ECA8490FLLCfD', symObjAddr: 0x0, symBinAddr: 0x100001D50, symSize: 0x20 }
+  - { offsetInCU: 0x55, offset: 0xC9B25, size: 0x8, addend: 0x0, symName: '_$s8frontend19ResourceBundleClass33_32ADB84F2816073A8FBFD0F4ECA8490FLLCfD', symObjAddr: 0x0, symBinAddr: 0x100001D50, symSize: 0x20 }
+  - { offsetInCU: 0x84, offset: 0xC9B54, size: 0x8, addend: 0x0, symName: '_$s8frontend19ResourceBundleClass33_32ADB84F2816073A8FBFD0F4ECA8490FLLCMa', symObjAddr: 0x20, symBinAddr: 0x100001D70, symSize: 0x14 }
+...
