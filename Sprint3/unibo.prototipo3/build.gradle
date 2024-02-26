@@ -9,7 +9,8 @@ plugins {
     id 'application'
     id 'java'
     id 'eclipse'
-
+    //Per release
+    id 'com.github.johnrengelman.shadow' version "8.1.1"
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
     id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
 }
@@ -119,7 +120,7 @@ eclipse {
 
 application {
     // Define the main class for the application.
-    mainClass = 'it.unibo.ctxprototipo2.MainCtxprototipo2Kt'
+    mainClass = 'it.unibo.ctxprototipo3.MainCtxprototipo3Kt'
 }
 
  jar {
@@ -127,5 +128,11 @@ application {
     from sourceSets.main.allSource
     manifest {
         attributes 'Main-Class': "$mainClassName"
+    }
+}
+
+shadowJar {
+    manifest {
+        attributes 'Main-Class': 'it.unibo.ctxprototipo3.MainCtxprototipo3Kt'
     }
 }

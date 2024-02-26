@@ -67,21 +67,21 @@
             Per sviluppare le GUI possiamo usare:
             <ul>
                 <li>Web App</li>
-                <li>App per dispositivi mobile</li>
+                <li>App per vari devices</li>
             </ul>
 
-        Siccome nei requisiti non sono presenti preferenze e/o limitazioni a riguardo ed essendo
+        Siccome nei requisiti non sono presenti preferenze e/o limitazioni a riguardo, ed essendo
         lo sviluppo di applicazioni per dispositivi mobili strettamente legato alla tipologia di dispositivi,
-        si consiglia la realizzazione di una Web App.
+        si consiglia la realizzazione varie versioni dell'applicazione, per device che usano Linux, Windows o MacOs.
         </div>
     </div>
     <h3>Dati</h3>
     <div class="remark">
-        Dai requisiti si ou&ograve; notare che la <kc>ServiceStatusGUI</kc> deve essere in grado di
+        Dai requisiti si pu&ograve; notare che la <kc>ServiceStatusGUI</kc> deve essere in grado di
         mostrare ad un <kc>Service-manager</kc> una serie di informazioni riguardanti lo stato del
         sistema e dei suoi componenti. Sempre dai requisiti, si evince che anche la <kc>ServiceAccessGUI</kc>
         deve fornire una serie di informazioni riguardanti il sistema e lo stato della richiesta presa in carico.
-        Oltre a ci&ograve; quest'ultima GUI deve essere in grado di prendere delle informazioni dall'utente.
+        Oltre a ci&ograve;, quest'ultima GUI deve essere in grado di prendere delle informazioni dall'utente.
         Per tali motivi bisogna comprendere quali sono le sorgenti di dati che servono per aggiornare le GUI.
         <h4>Sorgenti di Dati</h4>
             Le principali fonti da cui le GUI prendono dati sono legate alle informazioni che tali interfacce grafiche
@@ -101,7 +101,7 @@
                 </li>
             </ul>
             Inoltre &egrave; importante sottolineare come la ServiceAccessGUI sia anche una sorgente di
-            dati in quanto, consente al cliente di indicare la quantit&agrave; di cibo da depositare e, successivamente,
+            dati, in quanto consente al cliente di indicare la quantit&agrave; di cibo da depositare e, successivamente,
             il ticket number per avviare il processo di deposito.
 
             <h6>Stato TransportTrolley</h6>
@@ -112,10 +112,10 @@
 
             <h6>Stato ColdStorageService</h6>
             Analogamente per quanto accade con il TransportTrolley, &egrave; stato creata una data class Kotlin
-            per contenere le informazioni relative alla ColdRoom ed allo stato generale del servizio (Richieste rifiutate,
-            peso attuale/totale, ...). Anche queste scelte sono state commentate precedentemente.
+            per contenere le informazioni relative alla ColdRoom e allo stato generale del servizio (<i>Richieste rifiutate,
+        peso attuale/totale, ...</i>). Anche queste scelte sono state commentate precedentemente.
 
-            Per gestire entrambi li stati si utilizzano dei CoapObserver: in tal modo ogni qual volta si presenti
+            Per gestire entrambi gli stati si utilizzano dei CoapObserver: in tal modo ogni qual volta si presenti
             una modifica dei dati d'interesse viene emesso un Update che pu&ograve; essere utilizzato per trasmettere
             i nuovi dati alle GUI.
             <h4>Pulling vs Push</h4>
@@ -143,7 +143,7 @@
     <div class="remark">
         Come gi&agrave; accennato dal punto precedente, una parte importante &egrave; della realizzazione &egrave; legata
         alla gestione delle comunicazioni tra i vari componenti. In generale si vuole ottenere un comportamento che
-        segui tale modello:
+        segua tale modello:
         <ul>
             <li>
                 <kc>ServiceStatusGUI</kc>: Questa GUI &egrave; <italic>passiva</italic>, rimane in attesa degli update,
@@ -183,22 +183,114 @@
                 lo stato delle risorse di interesse ed invii gli update di conseguenza. Tale componente &egrave; il
                 guicontroller. Il guicontroller &egrave; un attore che controlla tutte le interazioni con le gui:
                 dall'invio degli update, alla gestione delle richieste.<br>
+                <pre>
+<key2>Dispatch</key2> updateS: updateS(W) // W = peso
+<key2>Disptach</key2> getData:getData(_)
+<key2>Dispatch</key2> updateR:updateR(_)
+                </pre>
                 In particolare questo controller osserva le due risorse di interesse, ovvero lo stato del TransportTrolley e
-                quello del ColdStorageService, ed aggiorna lo stato relativo alla GUI di conseguenza.<br>
-                Lato beck-end sar&agrave; presente un observer che rileva gli update per le gui ed, in base a vari criteri,
+                quello del ColdStorageService, ed aggiorna lo stato relativo alla GUI di conseguenza. Ci&ograve; permette
+                che ogni volta che il <kc>guicontroller</kc> riceve un <pro>updateResource</pro>, possa gestire l'aggiornamento
+                e aggiornare lo
+                <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint3/unibo.prototipo3/resources/state/GuiState.kt" target="_blank">stato della gui</a>.
+                <br>
+                In tal modo, essendo presente nel back-end un observer che rileva gli update per le gui ed, in base a vari criteri,
                 sceglie a chi mandare cosa.
             </div>
 
         <h3>Realizzazione Back-end</h3>
             <div>
-                Per la realizzazione del Beck-end si &egrave; deciso di usare Java Spring, in quanto il team possedeva le
+                Per la realizzazione del Back-end si &egrave; deciso di usare Java Spring, in quanto il team possedeva le
                 conoscenze necessarie ad usarlo.<br>
                 Il Back-end &egrave; il componente che si occupa di smistare le richieste alle GUI giuste e ai clienti giusti
                 (nel caso di pi&ugrave; clienti collegati simultaneamente). Per tale motivo questo gestisce le connessioni tra i vari componenti.<br>
                 Lato attori viene creato una connessione CoAP ed una TCP, in tal modo si riesce ad interfacciare con l'attore descritto nel punto precedente.<br>
+                <pre>
+ <key>private static final String</key> ctxName = "ctxprototipo3";
+ <key>private static final String</key> actorGui = "guicontroller";
+
+ <key>public CoapConnection</key> connectCoap(<key>String</key> ip, <key>int</key> port) {
+        try {
+            <key>String</key> path = ctxName + "/" + actorGui;
+            conn = <key>new</key> CoapConnection(ip + ":" + port, path);
+            ColorsOut.out("[UtilsStatusGUI] connect Tcp conn:" + conn);
+                ...
+         }
+        <key>return</key> (CoapConnection) conn;
+    }
+  <key>public void</key> connectTCP(<key>String</key> ip, <key>int</key> port) {
+        try {
+            CommSystemConfig.tracing = true;
+            connTCP = TcpClientSupport.connect(ip, port, 10);
+            ColorsOut.out("[UtilsStatusGUI] connect Tcp conn:" + conn);
+                ...
+        }
+    }
+                </pre>
+                La connessione CoAP &egrave; utile per gestire gli eventi di modifica dello stato in modo da non caricare troppo la rete, mentre la connessione
+                TCP serve per gestire i messaggi diretti.
+                <br>
+                In paritcolare si riporta di seguito un estratto dell'observer.
+                <pre>
+    <key>public class</key> UtilsCoapObserver <key>implements</key> CoapHandler {
+
+    @Override
+    <key>public void</key> onLoad(<key>CoapResponse</key> response){
+        ColorsOut.outappl("UtilsCoapObserver changed!" + response.getResponseText(), ColorsOut.GREEN);
+        WebSocketController.sendToAll(""+response.getResponseText());
+    }
+    @Override
+    <key>public void</key> onError() {
+
+    }
+}
+                </pre>
+                Il quale viene poi richiamato al momento della creazione della connessione CoAP.<br><br>
                 Per quanto riguarda le GUI si &egrave; deciso di usare le <kc>WebSocket</kc>. Il motivo principale di questa scelta &egrave; dovuto alla natura
                 asincrona di questa tecnologia ( ottima per gestire gli update ), ma che garantisce la distinzione dei vari client in base a degli ID univoci.
-<!--                TODO: vedere cosa manca-->
+                In particolare per la gestione degli update dello stato sono state creati dei topic, per via del fatto che si ha una comunicazione one-to-many, in
+                cui gli interessati si iscrivono al topic:
+                <pre>
+<key>public void</key> handleSubscribeEvent(<key>SessionSubscribeEvent</key> event) {
+        ...
+
+        <key>switch</key> (destination) {
+            <key>case</key> "/topic/updates":
+                sessionList.add(sessionId);
+                System.out.println("Session Id" + sessionId + " subscribed to " + destination);
+                ...
+                template.convertAndSend("/topic/updates", weightDTO);
+                <key>break</key>;
+            <key>case</key> "/topic/status":
+                System.out.println("Session subscribed to " + destination);
+                ...
+                template.convertAndSend("/topic/status", serviceConfigDTO.toJson());
+                <key>break</key>;
+        }
+    }
+                </pre>
+                Come si pu&ograve; osservare dal codice riportato sono presenti <b>due</b> topic invece di <b>uno</b>. Tale scelta &egrave; stata fatta a
+                seguito di un'accurata riflessione sul fatto che non vogliamo che gli update relativi ad una gui raggiungano l'altra gui, o meglio siccome
+                le gui richiedono due update diversi, in base alle richieste commissionate, si &egrave; pensato di distinguere le tipologie di update.
+                Ci&ograve; per garantire la separazione dei dati.<br><br>
+                Per quanto riguarda i canali relativi allo scambio di messaggi, sono stati utilizzati delle queue private in modo che ogni utente riceva il
+                messaggio di risposta che si attende, senza interferire con gli altri clienti.
+                <pre>
+           <key>case</key> "/user/queue/store-food":
+                //sessionList.add(sessionId);
+                System.out.println("Session Id" + sessionId + " subscribed to " + destination);
+                assert sessionId != null;
+                template.convertAndSendToUser(sessionId, "/queue/responses");
+                <key>break</key>;
+           <key>case</key> "/user/queue/deposit":
+                System.out.println("Session Id" + sessionId + " subscribed to " + destination);
+                assert sessionId != null;
+                template.convertAndSendToUser(sessionId, "/queue/responses");
+                <key>break</key>;
+           </pre>
+            Oltre a questa dichiarazione delle queue e dei topic si &egrave; proseguito con l'implementazione della logica.
+            Per una pi&ugrave; dettagliata visione sulla logica rimandiamo al componente che se ne occupa:
+            <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint3/servicestatusbe/src/main/java/com/unibo/servicestatusbe/websocket/WebSocketMessageConfig.java" target="_blank">WebSocketController</a>.
             </div>
 
         <h3>Realizzazione GUI (front-end)</h3>
@@ -209,8 +301,97 @@
                 tuttavia casi in cui si necessita di un comportamento sincrono.<br>
                 Ad esempio quando un cliente invia una richiesta di deposito, questo deve attendere la valutazione della richiesta prima di poter
                 effettuare i successivi passaggi. Per tale motivo si &egrave; deciso di attivare punto successivo della sequenza solo
-                quando si riceve una risposta alla nostra richiesta e questa &egrave; una risposta affermativa (comportamento mostrato in figura).
-<!--                Ora tale appunto &egrave; pi&ugrave; una questione di principio che di attuazione pratica siccome gli update e le request sono immediati, ma immaginando condizioni estreme ci siamo imbattuti in tale problematica-->
+                quando si riceve una risposta alla nostra richiesta e questa &egrave; una risposta affermativa.
+                <img height="100%" width="100%" src="./resources/images/serviceAccess.png" alt="ServiceAccess"> <br>
+                <br>
+                Da come si pu&ograve; osservare nella figura &egrave; presente uno stepper che ha il compito di abilitare all'azione
+                successiva, solo dopo che si &egrave; ricevuta una risposta. Inoltre, una volta effettuata un'azione non si pu&ograve; tornare indietro.
+                <br><br>
+                <img height="100%" width="100%" src="./resources/images/serviceStatus.png" alt="ServiceStatue"> <br>
+                <br>
+                Nella ServiceStautsGUI si possono osservare:
+                <ul>
+                    <li>
+                        Il peso corrente nella <kc>ColdRoom</kc>
+                    </li>
+                    <li>
+                        Lo stato attuale del <kc>TransportTrolley</kc>, con relativa posizione
+                    </li>
+                    <li>
+                        Il numero di ticket emessi, ma rifiutati dal sistema.
+                    </li>
+                </ul>
+                <h6>Gestione comunicazioni</h6>
+                Per quanto riguarda la gestione delle <kc>WebSocket </kc> lato <i>front-end</i>, bisogna distinguere le due gui, in quanto:
+                <ul>
+                    <li>
+                        La ServiceStatusGUI deve iscriversi al <kc>topic status</kc> per ricevere gli update
+                    </li>
+                    <li>
+                        La ServiceAccessGUI si iscrive al <kc>topic updates</kc> e alle <k>queue store-food e deposit</k>
+                     </li>
+                </ul>
+                In entrambi i casi per&ograve; si necessita prima di connettersi alla websocket.
+                <pre>
+
+  void stompClientConfig() {
+    stompClient = StompClient(
+      config: StompConfig(
+        url: widget.url,
+        onConnect: socketConnection,
+       ...
+        },
+        onDisconnect: (dynamic frame) {
+          logger.i('WebSocket Info: Disconnected.');
+        },
+      ),
+    );
+
+    stompClient.activate();
+  }
+                </pre>
+                In seguito ogni GUI si iscrive ai topic/queue di interesse
+                <pre>
+ void socketConnection(StompFrame frame) {
+    print(frame.headers);
+    //comment
+    stompClient.subscribe(
+        destination: '/topic/message',
+        headers: {'id': id},
+        callback: (StompFrame frame) {
+         ...
+        });
+    stompClient.subscribe(
+        destination: '/topic/updates',
+        callback: (StompFrame frame) {
+          ...
+        });
+    stompClient.subscribe(
+        destination: '/user/queue/store-food/$id',
+        ...
+        });
+    stompClient.subscribe(
+        destination: '/user/queue/deposit/$id',
+       ...
+        });
+                </pre>
+                Per la ServiceAccess, e
+                <pre>
+void onConnect(StompFrame frame) {
+    stompClient.subscribe(
+      destination: '/topic/status',
+     ...
+      }
+    );
+    ...
+    setState(() {
+      isLoading = false;
+    });
+  }
+                </pre>
+                per la ServiceStatus.<br><br>
+                A seguito di ci&ograve; sono state implementate delle funzioni di <b>callback</b> per gestire la logica di funzionamento, una volta che si invia/riceve un messaggio/update.
+                <!--                Ora tale appunto &egrave; pi&ugrave; una questione di principio che di attuazione pratica siccome gli update e le request sono immediati, ma immaginando condizioni estreme ci siamo imbattuti in tale problematica-->
             </div>
     </div>
 
@@ -264,19 +445,22 @@ cd ColdStorageService-Project/Sprint3/unibo.prototipo3
             </li>
             <li style="font-size: 25px">
                 <em style="font-size: 25px">Avviare il <bc>Back end</bc></em>
-                <p style="font-size: 16px">In tal modo si avviano le varie componenti</p>
+                <p style="font-size: 16px">In tal modo si avvia il server</p>
                 <pre style="font-size: 16px">
 cd ColdStorageService-Project/Sprint3/backend
-./gradlew run</pre>
+./gradlew bootRun</pre>
             </li>
             <li style="font-size: 25px">
                 <em style="font-size: 25px">Avviare la <bc>ServiceStatusGUI</bc> o la <bc>ServiceAccessGUI</bc> </em>
-                <p style="font-size: 16px">In tal modo si avviano le varie componenti</p>
+                <p style="font-size: 16px">In tal modo si avviano le GUI. Per usare le gui in questo modo si necessita di aver installato una sdk di
+                    <a href="https://docs.flutter.dev/get-started/install">fluttern </a>
+
+                </p>
                 <pre style="font-size: 16px">
 cd ColdStorageService-Project/Sprint3/ServiceAccessGUI
                     o
 cd ColdStorageService-Project/Sprint3/ServiceStatusGUI
-./gradlew run</pre>
+./flutter run</pre>
             </li>
         </ol>
             </div>
