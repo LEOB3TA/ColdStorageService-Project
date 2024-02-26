@@ -1,0 +1,12 @@
+/home/leo/IdeaProjects/ColdStorageService-Project/Sprint3/serviceaccessgui/build/linux/x64/release/bundle/frontend
+/home/leo/IdeaProjects/ColdStorageService-Project/Sprint3/serviceaccessgui/build/linux/x64/release/bundle/data/icudtl.dat
+/home/leo/IdeaProjects/ColdStorageService-Project/Sprint3/serviceaccessgui/build/linux/x64/release/bundle/lib/libflutter_linux_gtk.so
+/home/leo/IdeaProjects/ColdStorageService-Project/Sprint3/serviceaccessgui/build/linux/x64/release/bundle/data/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
+/home/leo/IdeaProjects/ColdStorageService-Project/Sprint3/serviceaccessgui/build/linux/x64/release/bundle/data/flutter_assets/FontManifest.json
+/home/leo/IdeaProjects/ColdStorageService-Project/Sprint3/serviceaccessgui/build/linux/x64/release/bundle/data/flutter_assets/shaders/ink_sparkle.frag
+/home/leo/IdeaProjects/ColdStorageService-Project/Sprint3/serviceaccessgui/build/linux/x64/release/bundle/data/flutter_assets/AssetManifest.bin
+/home/leo/IdeaProjects/ColdStorageService-Project/Sprint3/serviceaccessgui/build/linux/x64/release/bundle/data/flutter_assets/version.json
+/home/leo/IdeaProjects/ColdStorageService-Project/Sprint3/serviceaccessgui/build/linux/x64/release/bundle/data/flutter_assets/AssetManifest.json
+/home/leo/IdeaProjects/ColdStorageService-Project/Sprint3/serviceaccessgui/build/linux/x64/release/bundle/data/flutter_assets/fonts/MaterialIcons-Regular.otf
+/home/leo/IdeaProjects/ColdStorageService-Project/Sprint3/serviceaccessgui/build/linux/x64/release/bundle/data/flutter_assets/NOTICES.Z
+/home/leo/IdeaProjects/ColdStorageService-Project/Sprint3/serviceaccessgui/build/linux/x64/release/bundle/lib/libapp.so

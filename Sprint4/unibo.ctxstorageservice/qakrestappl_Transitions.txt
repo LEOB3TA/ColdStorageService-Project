@@ -1,5 +1,0 @@
-{"actor":"transporttrolley", "msgType":"dispatch", "curstate":"goahead", "nextstate":"movetoport", "msgId":"gotomovetoport"}
-{"actor":"transporttrolley", "msgType":"dispatch", "curstate":"goahead", "nextstate":"depositactionended", "msgId":"gotodepositactionended"}
-{"actor":"transporttrolley", "msgType":"dispatch", "curstate":"goahead", "nextstate":"corrDir", "msgId":"gotorobottohome"}
-{"actor":"stateobservercontroller", "msgType":"dispatch", "curstate":"s0", "nextstate":"upds", "msgId":"coapUpdate"}
-{"actor":"stateobservercontroller", "msgType":"dispatch", "curstate":"upds", "nextstate":"upds", "msgId":"coapUpdate"}
