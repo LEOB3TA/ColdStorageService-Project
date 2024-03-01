@@ -31,7 +31,8 @@ import java.util.Objects;
 public class WebSocketController {
 
     // Observer connection
-    private static final String ctxName = "ctxprototipo3";
+    private static final String ctxName = "ctxcoldstorageservice";
+    //private static final String ctxCSS = "";
     private static final String actorName = "transporttrolley";//"guicontroller"
     private static final String actorGui = "guicontroller";
     private static final String actorService = "coldstorageservice";

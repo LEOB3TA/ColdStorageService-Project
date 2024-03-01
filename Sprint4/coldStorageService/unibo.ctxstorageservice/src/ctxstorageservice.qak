@@ -63,7 +63,7 @@ Dispatch updateR : updateR(_)
 
 Context ctxbasicrobot ip [host="192.168.178.64" port=8020] //TODO indirizzo ip del raspberry ma con porta diversa
 Context ctxrasp ip [host="192.168.178.64" port=8099] //TODO inserire l'indirizzo del raspberry
-Context ctxcoldstorageservice ip [host="localhost" port=8099]//TODO inserire l'indirizzo corretto
+Context ctxcoldstorageservice ip [host="192.168.178.64" port=8099]//TODO inserire l'indirizzo corretto
 
 
 // Attori Esterni
@@ -230,7 +230,6 @@ QActor coldstorageservice context ctxcoldstorageservice {
            			forward guicontroller -m updateS : updateS( $RequestWeightToStore )//${requestWeightToStore}
            		[#
            	}
-           	currentWeightStorage += RequestWeightToStore
            	#]
 
        }
@@ -243,6 +242,7 @@ QActor coldstorageservice context ctxcoldstorageservice {
       */
      State acceptRequest{
     	[#
+    		currentWeightStorage += RequestWeightToStore
     		TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
     		var TICKET : resources.model.Ticket = resources.model.Ticket(TICKETNUMBER, TICKETTIME)
     		resources.ColdStorageService.incrementTicketNumber()
@@ -257,7 +257,14 @@ QActor coldstorageservice context ctxcoldstorageservice {
 	 *  REJECT REQUEST
 	 */
     State rejectRequest{
-        replyTo storeFood with storeRejected : storeRejected(_)
+    	[#
+    		var Remove = - RequestWeightToStore
+    		currentWeightStorage -= RequestWeightToStore
+    	#]
+    	forward guicontroller -m updateS : updateS( $Remove)
+    	replyTo storeFood with storeRejected : storeRejected(_)
+    	
+        
     }Goto idle
 
     /* Non usato
@@ -304,20 +311,26 @@ QActor coldstorageservice context ctxcoldstorageservice {
     	        			 resources.ColdStorageService.incrementRejectedRequestCounter()
     	        			val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
 							resources.ColdStorageService.getTicketList().remove(TICKET)
+							var Remove = -RequestWeightToStore
+							currentWeightStorage -= RequestWeightToStore
     	        		#]
     	        		   println("Ticket of id ${payloadArg(0)} is expired - Reject Request") color blue
     						replyTo sendTicket with ticketExpired : ticketExpired(_)
     						forward guicontroller -m updateR : updateR(_)
+    						forward guicontroller -m updateS : updateS( $Remove)
     	        	}
 
 					if [#TICKETEVALUATION == resources.TicketEvaluationResponse.INVALID #] {
     	        		[#
     	        			val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
 							resources.ColdStorageService.getTicketList().remove(TICKET)
+							var Remove = -RequestWeightToStore
+							currentWeightStorage -= RequestWeightToStore
     	        		#]
     	        			println("Inserted ticket id is not valid") color red
     					replyTo sendTicket with ticketNotValid : ticketNotValid(_)
     					forward guicontroller -m updateR : updateR(_)
+    					forward guicontroller -m updateS : updateS( $Remove)
     	        	}
 
        				}

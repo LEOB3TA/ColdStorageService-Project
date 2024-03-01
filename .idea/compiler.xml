@@ -3,19 +3,9 @@
   <component name="CompilerConfiguration">
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
-      <profile name="Gradle Imported" enabled="true">
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.30/f195ee86e6c896ea47a1d39defbe20eb59cd149d/lombok-1.18.30.jar" />
-        </processorPath>
-        <module name="servicestatusbe.main" />
-      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="backend" target="11" />
-      <module name="backend.servicestatusbe" target="11" />
-      <module name="backend.servicestatusbe.main" target="11" />
-      <module name="backend.servicestatusbe.test" target="11" />
       <module name="serviceaccessbe" target="11" />
       <module name="serviceaccessbe.main" target="11" />
       <module name="serviceaccessbe.test" target="11" />
@@ -34,32 +24,15 @@
       <module name="truck.unibo.coldstorageservice" target="11" />
       <module name="truck.unibo.coldstorageservice.main" target="11" />
       <module name="truck.unibo.coldstorageservice.test" target="11" />
-      <module name="unibo.coldstorageservice" target="11" />
-      <module name="unibo.coldstorageservice.main" target="11" />
-      <module name="unibo.coldstorageservice.test" target="11" />
       <module name="unibo.ctxserviceaccessgui" target="11" />
       <module name="unibo.ctxserviceaccessgui.main" target="11" />
       <module name="unibo.ctxserviceaccessgui.test" target="11" />
-      <module name="unibo.ctxstorageservice.main" target="11" />
-      <module name="unibo.ctxstorageservice.test" target="11" />
-      <module name="unibo.mocktruck" target="11" />
-      <module name="unibo.mocktruck.main" target="11" />
-      <module name="unibo.mocktruck.test" target="11" />
       <module name="unibo.old_css" target="11" />
       <module name="unibo.old_css.main" target="11" />
       <module name="unibo.old_css.test" target="11" />
-      <module name="unibo.prototipo0" target="11" />
-      <module name="unibo.prototipo0.main" target="11" />
-      <module name="unibo.prototipo0.test" target="11" />
       <module name="unibo.prototipo0.unibo.coldstorageservice" target="11" />
       <module name="unibo.prototipo0.unibo.coldstorageservice.main" target="11" />
       <module name="unibo.prototipo0.unibo.coldstorageservice.test" target="11" />
-      <module name="unibo.prototipo1" target="11" />
-      <module name="unibo.prototipo1.main" target="11" />
-      <module name="unibo.prototipo1.test" target="11" />
-      <module name="unibo.prototipo2" target="11" />
-      <module name="unibo.prototipo2.main" target="11" />
-      <module name="unibo.prototipo2.test" target="11" />
       <module name="unibo.transporttrolley" target="11" />
       <module name="unibo.transporttrolley.main" target="11" />
       <module name="unibo.transportTrolley.main" target="11" />
