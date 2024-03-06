@@ -299,20 +299,20 @@
         </ol>
         <b>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</b>
         <h3>ServiceAccessGUI</h3>
-        Dall'analisi dei requisiti si evince che la <kc>ServiceStatusGUI</kc> deve essere eseguita su una computer <b>esterno</b> rispetto all'intero sistema.
+        Dall'analisi dei requisiti si evince che la <kc>ServiceAccessGUI</kc> deve essere eseguita su una computer <b>esterno</b> rispetto all'intero sistema.
         <h4>Problemi</h4>
         <ol>
-            <li>Come <kc>modificare</kc> il software preesistente in modo che esegua su un computer esterno al sistema, senza influenzare il comportamento gi&agrave; sperimentato</li>
+            <li>Come <kc>modificare</kc> la GUI preesistente in modo che esegua su un computer esterno al sistema, senza influenzare il comportamento gi&agrave; sperimentato</li>
         </ol>
         <h4>Possibili soluzioni</h4>
         <ol>
-            <li>Avendo utilizzato il linguaggio <b>Qak</b> per la precedente implementazione &egrave; sufficiente<ul>
-                <li>Creare un progetto <i>Gradle</i> a se stante</li>
-                <li>Specificare i nuovi contesti, in particolare: un nuovo contesto per la <b>ServiceAccessGUI</b> (<i>ctxserviceaccessgui</i>) e un contesto per il <b>ColdStorageService</b> (<i>ctxstorageservice</i>) con la definizione dell'attore <i>external</i> </li>
-                <li>Fare il deploy sul computer attraverso un jar</li>
+            <li>Avendo usato <kc>Flutter</kc> che si connette al server <kc>Spring</kc> (considerando che il server eseguir&agrave; sullo stesso computer del CSS) occorre:<ul>
+                <li>Modificare l'<b>indirizzo</b> del server a cui si connette la GUI</li>
+                <li>Fare la <b>build</b> della GUI</li>
+                <li>Fare eseguire la GUI sul dispositivo</li>
             </ul></li>
         </ol>
-        <h3>ColdStorageService,ServiceStatusGUI,TrasportTrolley</h3>
+        <h3>ColdStorageService,TrasportTrolley</h3>
         Dall'analisi dei requisiti si evince che questi componenti devon essere eseguiti su un computer a se stante.
         <h4>Problemi</h4>
         <ol>
@@ -325,6 +325,94 @@
                 <li>Specificare i nuovi contesti, in particolare: un nuovo contesto per le tre componenti (<i>ctxstorageservice</i>), un contesto per il <b>basicrobot</b> (<i>ctxbasicrobot</i>) e uno per il <b>Raspberry</b> (<i>ctxrasp</i>) con la definizione degli attori <i>external</i></li>
                 <li>Fare il deploy sul computer attraverso un jar</li>
             </ul></li>
+        </ol>
+        <h3>ServiceStatusGUI</h3>
+        Questo componente pu&ograve; essere eseguito sia nello stesso contesto del <b>CSS</b> che in un contesto esterno
+        <h4>Problemi</h4>
+        <ol>
+            <li>Decidere dove far eseguire la GUI</li>
+            <li>Come <kc>modificare</kc> il software preesistente, senza influenzare il comportamento gi&agrave; sperimentato</li>
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+          <li>La <kc>GUI</kc> ha possibilit&agrave;:
+        <ul>
+            <li>Eseguire nello stesso contesto del <b>CSS</b>
+            <table style="width:100%" border="1">
+                <tr>
+                    <td style="width:40%" align="center"><i>PROS</i>
+                    </td>
+                    <td style="width:40%" align="center"><i>CONS</i>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Pi&ugrave; <kc>Economico</kc>
+                        per via del costo dell' hardware
+                    </td>
+                    <td><kc>Maggior carico</kc> su un singolo nodo
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <kc>Deploy</kc>
+                       pi&ugrave; semplice
+                    </td>
+                    <td>
+                        <kc>Minore tolleranza ai guasti</kc>
+                    </td>
+                </tr>
+            </table>
+            </li>
+            <br>
+            <li>Esguire in un contesto diverso
+                <table style="width:100%" border="1">
+                    <tr>
+                        <td style="width:40%" align="center"><i>PROS</i>
+                        </td>
+                        <td style="width:40%" align="center"><i>CONS</i>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <kc>Separazione</kc>
+                            della logica di controllo dalla logica applicativa
+                        </td>
+                        <td>Necessit&agrave; di fare il
+                            <kc>deploy su pi&ugrave; dispositivi</kc>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <kc>Maggiore tolleranza ai guasti</kc>
+                        </td>
+                        <td>
+                            <kc>Maggiore costo</kc>
+                            per via del costo dell' hardware
+                        </td>
+                    </tr>
+                </table>
+            </li>
+            Abbiamo scelto si utilizzare il primo approccio per una questione di comodit&agrave; nel deploy; in futuro se necessario sar&agrave; possibile spostare la GUI su un contesto diverso in modo semplice.
+            <br>
+            <br>
+        </ul>
+          </li>
+            <li>Avendo usato <kc>Flutter</kc> che si connette al server <kc>Spring</kc> (considerando che il server eseguir&agrave; sullo stesso computer del CSS) occorre:<ul>
+                <li>Modificare l'<b>indirizzo</b> del server a cui si connette la GUI</li>
+                <li>Fare la <b>build</b> della GUI</li>
+                <li>Fare eseguire la GUI sul dispositivo</li>
+            </ul></li>
+        </ol>
+        <h3>ServerSpring</h3>
+        Dall'analisi dei requisiti si evince che questo componente deve eseguire sullo stesso contesto del <b>CSS</b>.
+        <h4>Problemi</h4>
+        <ol>
+            <li>Come <kc>modificare</kc> il software preesistente, senza influenzare il comportamento gi&agrave; sperimentato</li>
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+            <li>&egrave; sufficiente fare eseguire il server nel stesso contesto del <b>CSS</b> senza modificare nulla</li>
         </ol>
     </div>
     <h2>Architettura Logica</h2>
@@ -590,41 +678,6 @@ QActor stateobservercontroller context ctxstorageservice{
         <li>Fermare il robot dopo uno Stop ricevuto fino al ricevimento del prossimo Resume</li>
     </ul>
 </div>
-
-<h2>Piano di lavoro</h2>
-<div class="remark">
-    Tutti gli sprint sotto intendono delle migliorie e delle eventuali modifiche del lavoro fatto negli sprint
-    precedenti
-    <!--        <h3>Sprint 1 (Tempo stimato per lo sviluppo : 1 settimana circa)</h3>-->
-    <!--        Core business dell'applicazione:-->
-    <!--        <ul>-->
-    <!--            <li>Transport trolley e interfacciamento con il basic robot</li>-->
-    <!--            <li>Cold storage service</li>-->
-    <!--            <li>Simulatore dei driver</li>-->
-    <!--        </ul>-->
-    <!--        <h3>Sprint 2</h3>-->
-    <!--        Aggiunta specifiche di movimento del transport trolley:-->
-    <!--        <ul>-->
-    <!--            <li>Led</li>-->
-    <!--            <li>Controller</li>-->
-    <!--            <li>Sonar</li>-->
-    <!--        </ul>-->
-    <h3>Sprint 3</h3>
-    Sviluppo inteerfacce grafiche:
-    <ul>
-        <li>ServiceStatusGui</li>
-        <li>ServiceAccessGui</li>
-    </ul>
-    <h3>Sprint 4</h3>
-    Deploy sul raspberry:
-    <ul>
-        <li>Creazione del supporto per led fisico</li>
-        <li>Deploy del sonar</li>
-        <li>Deploy del basic robot</li>
-    </ul>
-
-</div>
-
 <h2>Avviare il sistema</h2>
 <div class="remark">
     <h5>Avvio automatizzato</h5>
