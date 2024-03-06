@@ -1,0 +1,712 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<!--
+<script type="text/javascript" src="../css/issStyle.js"></script>
+-->
+<link rel="stylesheet" type="text/css" href="resources/css/sprint0.css">
+
+<head>
+
+    <title>Sprint4</title></head>
+
+<body>
+<!--
+<div id="top">
+    <h1><b>PROGETTO DI INGEGNERIA DEI SISTEMI SOFTWARE</b> - SPRINT 0 <font size="5"></font></h1>
+    <h3>Gruppo di lavoro: Focardi, Galeone, Porrazzo <font size="3"></font></h3>
+</div>
+-->
+<div class="body">
+    <h2>Introduction</h2>
+    <div class="remark"> Progetto finale di ISS, finalizzato allo sviluppo software di un magazzino refrigerato, nel
+        quale
+        vi &egrave; un robot che ha il compito di trasportare del cibo da un punto di partenza - chiamato INDOOR - alla
+        cella
+        frigorifera.
+    </div>
+    <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint0Reviewed/userDocs/sprint0Reviewed.html">Sprint0 </a><br>
+    <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/userDocs/sprint1.html">Sprint1 </a><br>
+    <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/userDocs/sprint2.html">Sprint2 </a><br>
+    <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint3/userDocs/sprint3.html">Sprint3 </a>
+
+    <h2>Requirements</h2>
+    <div class="remark">
+        <a href="https://htmlpreview.github.io/?https://github.com/anatali/issLab23/blob/main/iss23Material/html/TemaFinale23.html">Tema
+            Finale </a>
+    </div>
+
+    <h3>Goal</h3>
+    <div class="remark">
+        In questo sprint ci occuperemo del
+        <kc>deploy</kc>
+        sul
+        <kc>RaspberryPi</kc>
+        e della distribuzione del software in modo da creare un'
+        <kc>architettura distribuita</kc>
+        . <br>
+        Il fine di questo sprint &egrave; anche quello di riuscire a far funzionare il <b>Sonar</b>, il <b>Led</b> e il
+        <b>Basicrobot</b> all'interno del
+        <kc>RaspberryPi</kc>
+        .<br>
+        Quindi alla fine di questo sprint avremmo la seguente architettura:
+        <ul>
+            <li><b>RaspberryPi</b>, con all'interno
+                <kc>Sonar</kc>
+                ,
+                <kc>Led</kc>
+                e
+                <kc>Basicrobot</kc>
+            </li>
+            <li>Un dispositivo per la
+                <kc>ServiceAccessGUI</kc>
+            </li>
+            <li>Un dispostivo che contenga:
+                <kc>ColdStorageService</kc>
+                ,
+                <kc>ServiceStatusGUI</kc>
+                ,
+                <kc>TransportTrolley</kc>
+            </li>
+        </ul>
+    </div>
+
+    <!--    </div>-->
+    <!--    <h3>Work Plan</h3>-->
+    <!--    <div class="remark" id=wp>-->
+    <!--        <ul>-->
+    <!--            <li></li>-->
+    <!--        </ul>-->
+    <!--    </div>-->
+
+    <h2>Problem analysis</h2>
+    Per ulteriori informazioni riguardanti il software precedentemente implementato fare riferimento fare riferimento ai
+    precedenti Sprint.<br>
+    <div class="remark">
+        <h3>RaspberryPi</h3>
+        <h3>Led</h3>
+        Dall'analisi dei requisiti si evince che il
+        <kc>Led</kc> &egrave; un componente fisico, connesso ad un
+        RaspberryPi, che deve fornire indicazioni sullo stato del
+        <kc>TransportTrolley</kc>
+        .
+        <h4>Obiettivo</h4>
+        Gestire il <b>Led</b> in modo che rispetti i requisiti imposti dal cliente in particolare deve:
+        <ol>
+            <li>Essere <b>Spento</b> quando il TransportTrolley &egrave; in <b>HOME</b></li>
+            <li><b>Lampeggiare</b> quando il TransportTrolley &egrave; <b>in movimento</b></li>
+            <li>Essere <b>Acceso</b> quando il TransportTrolley &egrave; <b>fermo</b></li>
+        </ol>
+        <h4>Problemi</h4>
+        Per un'analisi preliminare fare riferimento allo <a
+            href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/userDocs/sprint2.html">Sprint2 </a>.<br>
+        <br>
+        <b>Problemi attuali:</b>
+        <ol>
+            <li>Come interagire con il <kc>Led fisico</kc></li>
+            <li>Come riutilizzare la precedente implementazione del
+                <kc>Led</kc>
+            </li>
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+            <li>Il <b>Led</b> &egrave; collegato al
+                <kc>RaspberryPi</kc>
+                attraverso i pin
+                <kc>GPio</kc>
+                ; per farlo funzionare &egrave; necessario attivare i suddetti pin. Per farlo sarebbe possibile:
+                <ul>
+                    <li>Modificare i file di sistema attraverso a riga i comando, ad esempio <b>echo 1 >
+                        /sys/class/gpio/gpio25/value</b> ma ci&ograve; risulterebbe
+                        <kc>scomodo</kc>
+                        e molto
+                        <kc>complicato</kc>
+                        per la scrittura del codice
+                    </li>
+                    <li>Utilizzare delle librerie dei linguaggi di programmazione, ad esempio:
+                        <kc>WiringPi</kc>
+                        (per <i>C</i> e <i>Python</i>) oppure
+                        <kc>pi4j</kc>
+                        (per <i>Java</i> e <i>Kotlin</i>)
+                    </li>
+                </ul>
+            </li>
+            <li>Per riutilizzare i componenti gi&agrave; implementati sarebbe possibile:
+                <ul>
+                    <li>
+                        <kc>Creare un programma</kc>
+                        (in C o Python) che agisce come server e risponde ai comandi inviati dall'attore gi&agrave;
+                        implementato. In questo contesto, l'attore dovrebbe essere modificato in modo che <i>rediriga
+                        l'output</i> all'interno del programma implementato.
+                        <table style="width:100%" border="1">
+                            <tr>
+                                <td style="width:40%" align="center"><i>PROS</i>
+                                </td>
+                                <td style="width:40%" align="center"><i>CONS</i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <kc>Separazione</kc>
+                                    della logica di controllo dalla logica applicativa
+                                </td>
+                                <td>Necessit&agrave; di fare il
+                                    <kc>deploy di un ulteriore file</kc>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <kc>Facilit&agrave;</kc>
+                                    di configurazione tra led reale e led simulato
+                                </td>
+                                <td>
+                                    <kc>Frammentazione</kc>
+                                    del codice su pi&ugrave; componenti
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                    <li>Utilizzare la libreria <i>pi4j</i> e
+                        <kc>cablare il codice di accensione del led</kc>
+                        all'interno dell'attore gi&agrave; implementato
+                        <table style="width:100%" border="1">
+                            <tr>
+                                <td style="width:40%" align="center"><i>PROS</i>
+                                </td>
+                                <td style="width:40%" align="center"><i>CONS</i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <kc>Riutilizzo</kc>
+                                    dello stesso codice
+                                </td>
+                                <td>
+                                    <kc>Peggiore</kc>
+                                    manutenzione del codice
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <kc>Facilit&agrave;</kc>
+                                    di deploy
+                                </td>
+                                <td>
+                                    <kc>Difficile</kc>
+                                    cambiamento tra led reale e led simulato
+                                </td>
+                            </tr>
+                        </table>
+                    <li>Creare un
+                        <kc>oggetto</kc>
+                        <i>Kotlin</i>, utilizzando la libreria <i>pi4j</i> che risponda ai comandi inviati dall'attore
+                    </li>
+                    <table style="width:100%" border="1">
+                        <tr>
+                            <td style="width:40%" align="center"><i>PROS</i>
+                            </td>
+                            <td style="width:40%" align="center"><i>CONS</i>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <kc>Facilit&agrave;</kc>
+                                di configurazione tra led reale e led simulato
+                            </td>
+                            <td>
+                                <kc>Necessit&agrave;</kc>
+                                di manutenere pi&ugrave; di un file
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <kc>Integrit&agrave;</kc>
+                                del linguaggio usato
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <kc>Facilit&agrave;</kc>
+                                di deploy
+                            </td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </ul>
+                Analizzando i pro e i contro &egrave; stato deciso di utiilizzare la <b>terza opzione</b></li>
+        </ol>
+        <h3>Sonar</h3>
+        Dall'analisi dei requisiti si evince che il
+        <kc>Sonar</kc> &egrave; un componente fisico, connesso ad un
+        RaspberryPi, il quale genera delle informazioni relative alla distanza da un ostacolo. Per tale motivo
+        si pu&ograve; modellare il sonar come un processo che una volta attivato genera informazioni sugli ostacoli.
+
+        <h4>Obiettivo</h4>
+        Avere un componente che fornisca la <b>distanza</b> del robot da un ostacolo
+        <h4>Problemi</h4>
+        Per un'analisi preliminare fare riferimento allo <a
+            href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/userDocs/sprint2.html">Sprint2</a>.
+        <br><br>
+        <b>Problemi attuali:</b>
+        <ul>
+            <li>Come interagire con il <kc>Sonar fisico</kc></li>
+            <li>Come riutilizzare la precedente implementazione del
+                <kc>Sonar</kc>
+            </li>
+        </ul>
+
+        <h4>Possibili soluzioni</h4>
+        Il cliente ci ha precedentemente fornito il software per il <b>Sonar</b> (<a
+            href="https://github.com/anatali/issLab23/tree/main/unibo.sonarqak23">unibo.sonarqak23</a>) che fornisce un
+        implementazione sia per il sonar simulato sia per il sonar fisico.<br>
+        Il software &egrave; stato precedentemente <b>modificato</b> nello <a
+            href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/userDocs/sprint2.html">Sprint2</a>, quindi &egrave; necessario cambiare solamente l'implmentazione del sonar utilizzando la classe <i>sonarHCSR04Support23</i>.<br>
+        Per i dettagli delle interazioni del sonar fisico con l'attore <i>sonar23</i> consultare lo <a
+            href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/userDocs/sprint2.html">Sprint2</a>.
+        <h3>Basicrobot</h3>
+        Il basicrobot &egrave; un componente precedentemente fornito che si occupa di tutto il movimento del transporttrolley, per i dettagli delle interazioni <b>basicrobot-transporttrolley</b> consultare lo <a href="https://htmlpreview.github.io/?https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint1/userDocs/sprint1.html">Sprint1</a><br>
+        <h4>Obiettivo</h4>
+        Cambiare l'implementazione del <i>basicrobot</i> da robot virtuale a robot fisico
+        <h4>Problemi</h4>
+        <ol>
+            <li>Creare l'<kc>architettura hardware</kc> su cui fare il deploy del basicrobot</li>
+            <li>Conversione dei comandi al <i>wenv</i> in comandi per il robot fisico</li>
+            <li>Come fare il <kc>deploy</kc></li>
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+            <li>Per la creazione dell'architettura &egrave; necessario analizzare la documentazione fornita insieme al <i>basicrobot</i> che specifica quali componenti avere e come collegarli al <b>RaspberryPi</b> per creare un robot denominato <kc>realnano</kc>.<br> Tale robot contiene anche il supporto hardware per il <i>sonar</i> e per il <i>led</i></li>
+            <li>Analizzando la documentazione fornita insieme al <i>basicrobot</i> si evince che il supporto per i movimenti pu&ograve; essere implementato in 3 modi: <b>virtual</b>,<b>realnano</b>,<b>realmbot</b>.<br>
+            L'implementazione che interessa a noi &egrave; <kc>realnano</kc>, quindi &egrave; necessario modificare il file di configurazione (<i>basicrobotconfig.json</i>) nel seguente modo:
+            <pre>
+{"type":"realnano", "port":"8090", "iprobot":"[robotip]", "commtrace": "false"}
+            </pre></li>
+            <li>Dopo il colloquio con il committente, ci &egrave; stato consegnato il codice sorgente, suggerendoci l'utilizzo del target <kc>Gradle</kc> <i>distZip</i>. Il file ZIP generato deve successivamente essere estratto nell'ambiente <kc>RaspberryPi</kc>, e l'esecuzione del programma deve avvenire mediante il file contenuto nella cartella <i>bin</i>. In aggiunta, &egrave; richiesto il trasferimento di tutti i file di configurazione indispensabili.</li>
+        </ol>
+        <h3>Modifica dei contesti</h3>
+        Tutte le componenti presenti all'interno del <kc>RaspberryPi</kc> devono eseguire in un contesto indipendente dagli altri componenti del sistema.
+        <h4>Problemi</h4>
+        <ol>
+            <li>Come <kc>modificare</kc> il software preesistente in modo che esegua su un <b>RaspberryPi</b>, senza influenzare il comportamento gi&agrave; sperimentato</li>
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+            <li>Avendo utilizzato il linguaggio <b>Qak</b> per la precedente implementazione &egrave; sufficiente<ul>
+                <li>Creare un progetto <i>Gradle</i> a se stante</li>
+                <li>Specificare il nuovo contesto su cui eseguir&agrave; il software (<i>ctxrasp</i>) </li>
+                <li>Fare il deploy sul computer attraverso un jar</li>
+            </ul></li>
+        </ol>
+        <b>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</b>
+        <h3>ServiceAccessGUI</h3>
+        Dall'analisi dei requisiti si evince che la <kc>ServiceStatusGUI</kc> deve essere eseguita su una computer <b>esterno</b> rispetto all'intero sistema.
+        <h4>Problemi</h4>
+        <ol>
+            <li>Come <kc>modificare</kc> il software preesistente in modo che esegua su un computer esterno al sistema, senza influenzare il comportamento gi&agrave; sperimentato</li>
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+            <li>Avendo utilizzato il linguaggio <b>Qak</b> per la precedente implementazione &egrave; sufficiente<ul>
+                <li>Creare un progetto <i>Gradle</i> a se stante</li>
+                <li>Specificare i nuovi contesti, in particolare: un nuovo contesto per la <b>ServiceAccessGUI</b> (<i>ctxserviceaccessgui</i>) e un contesto per il <b>ColdStorageService</b> (<i>ctxstorageservice</i>) con la definizione dell'attore <i>external</i> </li>
+                <li>Fare il deploy sul computer attraverso un jar</li>
+            </ul></li>
+        </ol>
+        <h3>ColdStorageService,ServiceStatusGUI,TrasportTrolley</h3>
+        Dall'analisi dei requisiti si evince che questi componenti devon essere eseguiti su un computer a se stante.
+        <h4>Problemi</h4>
+        <ol>
+            <li>Come <kc>modificare</kc> il software preesistente in modo che esegua su un computer esterno al sistema, senza influenzare il comportamento gi&agrave; sperimentato</li>
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+            <li>Avendo utilizzato il linguaggio <b>Qak</b> per la precedente implementazione &egrave; sufficiente<ul>
+                <li>Creare un progetto <i>Gradle</i> a se stante</li>
+                <li>Specificare i nuovi contesti, in particolare: un nuovo contesto per le tre componenti (<i>ctxstorageservice</i>), un contesto per il <b>basicrobot</b> (<i>ctxbasicrobot</i>) e uno per il <b>Raspberry</b> (<i>ctxrasp</i>) con la definizione degli attori <i>external</i></li>
+                <li>Fare il deploy sul computer attraverso un jar</li>
+            </ul></li>
+        </ol>
+    </div>
+    <h2>Architettura Logica</h2>
+    <br>
+   <!-- Modello prototipo: <a style="font-size: larger"
+                          href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2/unibo.prototipo1/src/prototipo1.qak"
+                          target="_blank">protipo2.qak</a>
+    <br>-->
+    <img height="100%" width="100%" src="resources/images/sprint4arch.png" alt="architettura logica"> <br>
+</div>
+
+
+<h2>Project</h2>
+<div class="remark">
+    Tutto si basa sulla gestione dei 2 nuovi componenti e delle modifiche sul
+    <kc>TransportTrolley</kc>
+    .
+    <h4>Sonar</h4>
+    Per prima cosa, per simulare il sonar &egrave; stato creato un simulatore mediante una classe <a
+        href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/unibo.prototipo2/src/rx/sonarSimulator.kt">scritta
+    in kotlin</a>.<br>
+    Nell'ottica di prevedere una futura implementazione di un sonar fisico &egrave; stato creato anche un componente in
+    grado di eseguire un primo filtraggio dei dati
+    raccolti dal sensore in modo da diminuire il carico sulla rete ed eliminare i messaggi inutili. Tale componente
+    &egrave; realizzato in
+    <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/unibo.prototipo2/src/rx/dataCleaner.kt">dataCleaner.kt</a>.<br><br>
+    A monte &egrave; stato sviluppato un attore, con lo scopo di interfacciare il sonar (fisico o simulato) al
+    <kc>TransportTrolley</kc>
+    . Di seguito si riporta il codice:
+    <pre>
+
+<key2>QActor</key2> sonar23 context ctxsonar{
+[#      ...
+       <key>var</key> handled=false
+#]
+	<key2>State</key2> s0 initial{
+		println("sonar | start with appl: $Appl")
+	}<key2>Goto</key2> work
+
+	<key2>State</key2> work{
+		updateResource[# "Sonar waiting"#]
+	}<key2>Transition</key2> t0 <key2>whenEvent</key2> sonardata -> handlesonardata
+
+	<key2>State</key2> handlesonardata{
+		updateResource [# "sonar23 handles $currentMsg" #]
+		onMsg(sonardata : distance(D)){
+			[#D = payloadArg(0).toInt()#]
+			if [#D<DLIMIT && handled==false#]{
+                          [#handled=true#]
+                          println("$name handleobstacle STOP ${payloadArg(0)}") color magenta
+				emit stop : stop(_)
+			}
+			if[#D>=DLIMIT && handled==true#]{
+				[#handled=false#]
+				println("$name sonardata RESUME ${payloadArg(0)}") color magenta
+				emit resume: resume(_)
+			}
+		}
+	}<key2>Goto</key2> work
+}
+                 </pre>
+    <h4>Led</h4>
+    Per quanto riguarda il led si &egrave; reso necessario lo sviluppo di un attore che gestisca lo stato in relazione a
+    quello del
+    <kc>TransportTrolley</kc>
+    , mentre il comportamento viene simulato
+    generando delle <b>print</b> contenenti lo stato attuale. Di seguito si riporta il codice relativo al
+    <b>ledqakactor</b>:
+    <pre>
+<key2>QActor</key2> ledqakactor context ctxsonar {
+	[#
+		<key>val</key> ledState = state.LedState()
+		ledState.setState(state.LState.OFF)
+		<key>var</key> current = ledState.getCurrState()
+	#]
+
+  <key2>State</key2> s0 initial{
+		println("${name} STARTS")
+	}
+	<key2>Transition</key2> t0 <key2>whenMsg</key2> ledCmd -> doCmd
+
+	<key2>State</key2> doCmd{
+		onMsg( ledCmd : ledCmd(CMD) ){
+			[# var Cmd = payloadArg(0) #]
+			if [# Cmd=="ON" #]{
+				[#
+					ledState.setState(state.LState.ON)
+					current = ledState.getCurrState()
+				#]
+				updateResource[#ledState.toJsonString()#]
+				println("${name} - $current") color magenta
+			} if [# Cmd=="OFF" #]{
+				[#
+					ledState.setState(state.LState.OFF)
+					current = ledState.getCurrState()
+				#]
+				updateResource[#ledState.toJsonString()#]
+				println("${name} - $current") color magenta
+			}if [# Cmd=="BLINK" #] {
+				[#
+					ledState.setState(state.LState.BLINKS)
+					current = ledState.getCurrState()
+				#]
+				updateResource[#ledState.toJsonString()#]
+				println("${name} - $current") color magenta
+			}
+		}
+	}
+	<key2>Transition</key2> t0 <key2>whenMsg</key2> ledCmd -> doCmd
+}
+                 </pre>
+    <h4>TransportTrolley</h4>
+    Per quanto riguarda il
+    <kc>TransportTrolley</kc>
+    sono due le modifiche pi&ugrave; importanti apportate:
+    <ol>
+        <li>Modifica relativa alla gestione della stop/resume, in consistenza con i requisiti ed in modo che lo stato
+            rimanga consistente nei passaggi da stop a resume
+        </li>
+        <li>La creazione di un observer in grado di osservare lo stato e comunicare ai componenti interessati (il <b>ledqakactor</b>)
+            quando avviene un cambiamento dello stato del
+            <kc>TransportTrolley</kc>
+            .
+        </li>
+    </ol>
+
+    Mentre nel primo caso &egrave; si &egrave; reso necessario una modifica con l'inserimento di nuovi stati all'interno
+    del
+    <kc>TransportTrolley</kc>
+    , nel secondo caso si &egrave; dovuto creare un nuovo attore
+    con l'unico scopo di fare l'observer.<br>
+    Pertanto di seguito si riporta il codice del nuovo observer
+    <pre>
+QActor stateobservercontroller context ctxstorageservice{
+[#
+	<key>var</key> state = ""
+	<key>var</key> pos= ""
+#]
+	<key2>State</key2> s0 initial{
+		observeResource transporttrolley
+	}
+	<key2>Transition</key2> t0
+	<key2>whenMsg</key2> coapUpdate -> upds
+
+	<key2>State</key2> upds{
+		[#
+			state = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"
+			pos = "${currentMsg.toString().substringAfter("currPosition\":\"").substringBefore("\"")}"
+		#]
+		[#
+			when{
+				pos == "HOME" -> #] forward ledqakactor -m ledCmd : ledCmd(OFF)
+				[#state == "PICKINGUP" || state == "MOVINGTOPORT" || state == "MOVINGTOHOME" ->#] forward ledqakactor -m ledCmd : ledCmd(BLINK)
+				[#state == "STOPPED" ->#] forward ledqakactor -m ledCmd : ledCmd(ON)
+			[#}#]
+	}<key2>Transition</key2> t0
+	<key2>whenMsg</key2> coapUpdate -> upds
+
+}
+                 </pre>
+
+    Per quanto riguarda i cambiamenti relativi al
+    <kc>TransportTrolley</kc>
+    si riportano soltanto le modifiche apportate:
+    <pre>
+<key2>QActor</key2> transporttrolley context ctxstorageservice{
+	[#
+		...
+		<key>val</key> ts = kotlin.time.TimeSource.Monotonic
+		<key>var</key> m1 = ts.markNow()
+		<key>val</key> MINT : kotlin.time.Duration= 1.seconds
+		<key>var</key> savedState = tTState.getCurrState()
+	#]
+	...
+
+ 	<key2>State</key2> moverobottoindoor {
+ 		...
+ 	}
+ 	<key2>Transition</key2> t0 <key2>whenEvent</key2> stop -> handlerobotstopped
+ 				  <key2>whenReply</key2> moverobotdone -> movetoport
+
+  	<key2>State</key2> handlerobotstopped{
+  		println("$name |handle robot stopped") color green
+  		[#
+  			if ((m1+MINT).hasPassedNow()){
+  				m1 = ts.markNow()
+  				savedState = tTState.getCurrState()
+  				tTState.setCurrState(state.CurrStateTrolley.STOPPED)
+  		#]
+  			emit alarm : alarm(_)
+			updateResource[#tTState.toJsonString()#]
+  		[#}#]
+  	}<key2>Transition</key2> t0  <key2>whenReply</key2> moverobotdone -> goahead
+  					<key2>whenEvent</key2> stop -> handlerobotstopped
+  					<key2>whenEvent</key2> resume -> resumerobot
+
+	<key2>State</key2> resumerobot{
+		println("$name | resume robot") color green
+		  		onMsg(resume: resume(_)){
+
+  				[#tTState.setCurrState(savedState)#]
+  				updateResource[#tTState.toJsonString()#]
+  						[# 	when {
+							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)[#
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] request basicrobot -m moverobot:moverobot($CRX,$CRY)[#
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
+
+							[#}}#]
+				}
+	}<key2>Transition</key2> t0  <key2>whenEvent</key2> stop -> handlerobotstopped
+					<key2>whenReply</key2> moverobotdone -> goahead
+
+
+	<key2>State</key2> goahead{
+		println("$name | go ahead with next state") color green
+		[# 	when {
+							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] forward transporttrolley -m gotomovetoport : gotomovetoport(_)[#
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] forward transporttrolley -m gotodepositactionended : gotodepositactionended(_)[#
+							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #]
+							forward transporttrolley -m gotorobottohome : gotorobottohome(_)		delay 6300
+		                    forward basicrobot -m cmd:cmd(l)
+
+		[#
+			}}#]
+	}<key2>Transition</key2> t0 <key2>whenMsg</key2> gotomovetoport -> movetoport
+					<key2>whenMsg</key2> gotodepositactionended -> depositactionended
+					<key2>whenMsg</key2> gotorobottohome -> idle
+	<key2>State</key2> movetoport{
+        ...
+	}
+	<key2>Transition</key2> t0  <key2>whenEvent</key2> stop -> handlerobotstopped
+ 				  <key2>whenReply</key2> moverobotdone -> depositactionended
+
+	...
+	<key2>State</key2> robottohome{
+		...
+	}
+	<key2>Transition</key2> t0  <key2>whenEvent</key2> stop -> handlerobotstopped
+	  			  <key2>whenReply</key2> moverobotdone -> idle
+
+}</pre>
+
+
+</div>
+
+<h2>Testing</h2>
+<div class="remarkTest">
+    Al fine di testare il corretto funzionamento dei nuovi componenti sviluppati per la simulazione del
+    comportamento di sonar e led &egrave; stato sviluppato un file <a
+        href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/unibo.prototipo2/src/test.qak">test.qak</a>,
+    contenente i componenti necessari ed una suite di <a
+        href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/unibo.prototipo2/src/test/it/unibo/TestPrototipo2.kt">test </a>,
+    nella quale si verifica il corretto funzionamento dei nuovi componenti aggiunti.<br>
+    In particolare si verifica che:
+    <ul>
+        <li> All'inizio il Led sia Spento, in quanto il robot &egrave; in HOME</li>
+        <li> Nel momento in cui il robot inizia a muoversi il Led lampeggia</li>
+        <li> Quando il robot riceve una Stop il Led si Accende</li>
+    </ul>
+    per quanto concerne il Led. Per quanto riguarda i dati forniti dal sonar:
+    <ul>
+        <li>Ignorare gli Stop che arrivano in un tempo inferiore a MINT millisecondi rispetto all'ultimo ricevuto</li>
+        <li>Fermare il robot dopo uno Stop ricevuto fino al ricevimento del prossimo Resume</li>
+    </ul>
+</div>
+
+<h2>Piano di lavoro</h2>
+<div class="remark">
+    Tutti gli sprint sotto intendono delle migliorie e delle eventuali modifiche del lavoro fatto negli sprint
+    precedenti
+    <!--        <h3>Sprint 1 (Tempo stimato per lo sviluppo : 1 settimana circa)</h3>-->
+    <!--        Core business dell'applicazione:-->
+    <!--        <ul>-->
+    <!--            <li>Transport trolley e interfacciamento con il basic robot</li>-->
+    <!--            <li>Cold storage service</li>-->
+    <!--            <li>Simulatore dei driver</li>-->
+    <!--        </ul>-->
+    <!--        <h3>Sprint 2</h3>-->
+    <!--        Aggiunta specifiche di movimento del transport trolley:-->
+    <!--        <ul>-->
+    <!--            <li>Led</li>-->
+    <!--            <li>Controller</li>-->
+    <!--            <li>Sonar</li>-->
+    <!--        </ul>-->
+    <h3>Sprint 3</h3>
+    Sviluppo inteerfacce grafiche:
+    <ul>
+        <li>ServiceStatusGui</li>
+        <li>ServiceAccessGui</li>
+    </ul>
+    <h3>Sprint 4</h3>
+    Deploy sul raspberry:
+    <ul>
+        <li>Creazione del supporto per led fisico</li>
+        <li>Deploy del sonar</li>
+        <li>Deploy del basic robot</li>
+    </ul>
+
+</div>
+
+<h2>Avviare il sistema</h2>
+<div class="remark">
+    <h5>Avvio automatizzato</h5>
+
+    Scaricare l'ultima release da <b>Github</b>, utilizzare lo script adeguato per il proprio sistema:
+    <ul>
+        <li>Linux: <b>startPrototype-linux.sh</b></li>
+        <li>MacOS: <b>startPrototype-mac.sh</b></li>
+        <li>Windows: <b>startPrototype-win.bat</b></li>
+    </ul>
+
+    <h5>Avvio manuale</h5>
+
+    <ol>
+        <li style="font-size: 25px">
+            <em style="font-size: 25px">Avviare il
+                <bc>WebRobot23</bc>
+            </em>
+            <p style="font-size: 16px">In tal modo si avviano il <i>basicrobot23</i> ed il <i>wenv</i></p>
+            <pre style="font-size: 16px">
+cd ColdStorageService-Project/Sprint1/unibo.basicrobot23
+docker-compose -f webbasicrobot23.yaml up</pre>
+        </li>
+        <li style="font-size: 25px">
+            <em style="font-size: 25px">Avviare il
+                <bc>ColdStorageService</bc>
+                ,
+                <bc>MockTruck</bc>
+                e
+                <bc>Trasporttrolley</bc>
+            </em>
+            <p style="font-size: 16px">In tal modo si avviano le varie componenti</p>
+            <pre style="font-size: 16px">
+cd ColdStorageService-Project/Sprint2Review/unibo.prototipo2
+./gradlew run</pre>
+        </li>
+    </ol>
+</div>
+
+<!--
+            <h2>Maintenance</h2>
+            -->
+<!-- USEFUL
+<table style="width:100%" border="1">
+<tr>
+<td style="width:40%">
+</td>
+<td></td>
+</tr>
+</table>
+-->
+
+<br/><br/>
+</div>
+
+<div class="stud">
+    By Students: <br/>
+    <div class="studentCardRow">
+        <div class="studentCard">
+            <div class="studentName">Leonardo Focardi</div>
+            <div class="studentEmail"><a
+                    href="mailto:leonardo.focardi@studio.unibo.it">leonardo.focardi@studio.unibo.it</a>
+            </div>
+            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/leo.jpg"></div>
+        </div>
+        <div class="studentCard">
+            <div class="studentName">Christian Galeone</div>
+            <div class="studentEmail"><a href="mailto:christian.galeone@studio.unibo.it">christian.galeone@studio.unibo.it</a>
+            </div>
+            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/christian.jpg"></div>
+        </div>
+        <div class="studentCard">
+            <div class="studentName">Gianmiriano Porrazzo</div>
+            <div class="studentEmail"><a href="mailto:gianmiriano.porrazzo@studio.unibo.it">gianmiriano.porrazzo@studio.unibo.it</a>
+            </div>
+            <div class="studentImg"><img class="studentAvatar" src="./resources/boys/gian.jpg"></div>
+        </div>
+    </div>
+
+    <div class="repo">
+        GIT repo: <a href="https://github.com/LEOB3TA/ColdStorageService-Project">https://github.com/LEOB3TA/ColdStorageService-Project</a>
+    </div>
+</div>
+</body>
+</html>

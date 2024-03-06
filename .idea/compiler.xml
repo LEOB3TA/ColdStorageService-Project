@@ -8,7 +8,7 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.30/f195ee86e6c896ea47a1d39defbe20eb59cd149d/lombok-1.18.30.jar" />
         </processorPath>
-        <module name="servicestatusbe.main" />
+        <module name="backend.servicestatusbe.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -31,6 +31,9 @@
       <module name="truck.unibo.coldstorageservice" target="11" />
       <module name="truck.unibo.coldstorageservice.main" target="11" />
       <module name="truck.unibo.coldstorageservice.test" target="11" />
+      <module name="unibo.ctxserviceaccessgui" target="11" />
+      <module name="unibo.ctxserviceaccessgui.main" target="11" />
+      <module name="unibo.ctxserviceaccessgui.test" target="11" />
       <module name="unibo.old_css" target="11" />
       <module name="unibo.old_css.main" target="11" />
       <module name="unibo.old_css.test" target="11" />

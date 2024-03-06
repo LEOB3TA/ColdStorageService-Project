@@ -1,0 +1,109 @@
+System /*-trace*/ ctxrasp
+
+//Sonar e movimenti robot
+Event sonardata : distance(D) //dataclenaer
+Event alarm		: alarm(X)	
+Event stop : stop(_)
+Event resume:resume(_)
+Dispatch sonaractivate: info(D) //D = DLIMIT
+
+//Led
+Dispatch ledCmd : ledCmd ( CMD )
+
+//Context ctxbasicrobot ip [host="127.0.0.1" port=8020] //TODO indirizzo ip del raspberry ma con porta diversa
+Context ctxrasp ip [host="localhost" port=8099] //TODO inserire l'indirizzo del raspberry
+Context  ctxstorageservice ip [host="192.168.178.21" port=8099] //TODO inserire l'indirizzo del raspberry
+//Context ctxtruck ip[host="127.0.0.1" port=8092] //indirizzo interno alla rete
+//Context ctxrasp ip [host="localhost" port=8099]
+
+// Attori Esterni
+//ExternalQActor basicrobot context ctxbasicrobot
+
+//Sonar
+CodedQActor sonar  context ctxrasp className "rx.sonarHCSR04Support23"   //SU RASP
+//CodedQActor sonar context ctxrasp className "rx.sonarSimulator" //in LOCALE
+CodedQActor datacleaner context ctxrasp className "rx.dataCleaner"
+
+
+
+
+// Implementazione sonar
+//contesto: nello stesso contensto fino a quando non si mette nel rasp
+
+QActor sonar23 context ctxrasp{ //TODO mandare eventi condizionati dallo stato
+	[#var DLIMIT = 5
+		var D = 0
+		var handled=false
+	var Appl = sysUtil.getActor("transporttrolley") != null #]
+	State s0 initial{
+		println("sonar | start with appl: $Appl") color green
+	}Goto work
+
+	State work{
+		updateResource[# "Sonar waiting"#]
+	}Transition t0 whenEvent sonardata -> handlesonardata
+
+	State handlesonardata{
+		updateResource [# "sonar23 handles $currentMsg" #]
+		onMsg(sonardata : distance(D)){
+			[#D = payloadArg(0).toInt()#]
+			if [#D<DLIMIT && handled==false#]{
+				[#handled=true#]
+				println("$name handleobstacle STOP ${payloadArg(0)}") color magenta
+				emit stop : stop(_)
+			}
+			if[#D>DLIMIT+5 && handled==true#]{
+				[#handled=false#]
+				println("$name sonardata RESUME ${payloadArg(0)}") color magenta
+				emit resume: resume(_)
+			}
+		}
+	}Goto work
+}
+
+
+
+QActor ledqakactor context ctxrasp {
+	[#
+		val ledState = state.LedState()
+		ledState.setState(state.LState.OFF)
+		var current = ledState.getCurrState()
+	#]
+
+  State s0 initial{
+		println("${name} STARTS") color green
+		[#resources.ledSupport.create()#]
+	}
+	Transition t0 whenMsg ledCmd -> doCmd
+
+	State doCmd{ //da codificare i comandi del raspberry sprint4
+		onMsg( ledCmd : ledCmd(CMD) ){
+			[# var Cmd = payloadArg(0) #]
+			if [# Cmd=="ON" #]{
+				//[# CommUtils.outyellow( "${name} - on") #]
+				[#
+					ledState.setState(state.LState.ON)
+					resources.ledSupport.on()
+				#]
+				updateResource[#ledState.toJsonString()#]
+			} if [# Cmd=="OFF" #]{
+				//[# CommUtils.outyellow( "${name} - off")#]
+				[#
+					ledState.setState(state.LState.OFF)
+					resources.ledSupport.off()
+				#]
+				updateResource[#ledState.toJsonString()#]
+			}if [# Cmd=="BLINK" #] {
+				//[# CommUtils.outyellow( "${name} - off")#]
+				[#
+					ledState.setState(state.LState.BLINKS)
+					resources.ledSupport.blink()
+				#]
+				updateResource[#ledState.toJsonString()#]
+			}
+		}
+	}
+	Transition t0 whenMsg ledCmd -> doCmd
+	
+
+}
