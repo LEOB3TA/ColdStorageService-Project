@@ -175,7 +175,14 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                 // onStepTapped: (index) => ref.read(stepperProvider.notifier).setIndex(index),
                 onStepCancel: () {
                   if (status.index > 0) {
-                    ref.read(statusEnumProvider.notifier).state = StatusEnum.values[status.index - 1];
+                    //debugPrint("Go back ${status.index}");
+                    //debugPrint("Go back ${StatusEnum.values[0]}");
+                    ref.read(stepperProvider.notifier).setCompleted(StatusEnum.ticketRequest.index);
+                    ref.read(stepperProvider.notifier).setIndex(StatusEnum.ticketRequest.index);
+                    ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketRequest;
+                    storeFoodController.clear();
+                    depositController.clear();
+                    //debugPrint("Go back ${status.index}");
                   }
                 },
                 onStepContinue: () {
@@ -199,6 +206,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                       ref.read(stepperProvider.notifier).setCompleted(StatusEnum.result.index);
                       break;
                     case StatusEnum.result:
+                      //unused case to make dart happy
                   }
                 },
                 controlsBuilder: (context, details) {
@@ -220,7 +228,10 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                         label: 'Next',
                       );
                     case StatusEnum.result:
-                      return const SizedBox();
+                      return CustomButton(
+                        onPressed: details.onStepCancel,
+                        label: 'Insert New',
+                      );//const SizedBox();
                   }
                 },
                 steps: <Step>[
@@ -399,7 +410,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
       return StepState.editing;
     } else if (model.index > index || model.index == 3) {
       return StepState.complete;
-    } else {
+    }else {
       return StepState.disabled;
     }
   }
