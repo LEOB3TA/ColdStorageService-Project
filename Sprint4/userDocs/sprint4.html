@@ -323,7 +323,7 @@
             <li>Avendo utilizzato il linguaggio <b>Qak</b> per la precedente implementazione &egrave; sufficiente<ul>
                 <li>Creare un progetto <i>Gradle</i> a se stante</li>
                 <li>Specificare i nuovi contesti, in particolare: un nuovo contesto per le tre componenti (<i>ctxstorageservice</i>), un contesto per il <b>basicrobot</b> (<i>ctxbasicrobot</i>) e uno per il <b>Raspberry</b> (<i>ctxrasp</i>) con la definizione degli attori <i>external</i></li>
-                <li>Fare il deploy sul computer attraverso un jar</li>
+                <li>Fare il deploy sul computer attraverso un container <b>Docker</b>, rendendo pi&ugrave; compatibile il nostro software e rendendo pi&ugrave; facile il deploy nei vari dispositivi.</li>
             </ul></li>
         </ol>
         <h3>ServiceStatusGUI</h3>
@@ -412,7 +412,7 @@
         </ol>
         <h4>Possibili soluzioni</h4>
         <ol>
-            <li>&egrave; sufficiente fare eseguire il server nel stesso contesto del <b>CSS</b> senza modificare nulla</li>
+            <li>Per garantire la compatibilit&agrave; del software su diversi dispositivi si &egrave; pensato di utilizzare un container <b>Docker</b>, rendendo pi&ugrave; facile il deploy nei vari dispositivi.</li>
         </ol>
     </div>
     <h2>Architettura Logica</h2>
