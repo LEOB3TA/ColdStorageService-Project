@@ -92,10 +92,18 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
         destination: '/topic/updates',
         callback: (StompFrame frame) {
           if (frame.body != null) {
-            debugPrint("Weight Status Update received");
-            WeightDTO update = WeightDTO.fromJson(json.decode(frame.body!));
-            ref.read(weightStatusProvider.notifier).state = update;
-            debugPrint("Weight Status Update: ${ref.read(weightStatusProvider)}");
+            String fl = frame.body.toString();
+            if (fl.contains("ticketNumber")){
+              TicketDTO update = TicketDTO.fromJson(jsonDecode(frame.body!));
+              debugPrint("Ticket Status Response: ${update}");
+              //TODO: check what todo
+            }else if (fl.contains("currentWeight")){
+              debugPrint("Weight Status Update received");
+              debugPrint("${frame.body}");
+              WeightDTO update = WeightDTO.fromJson(json.decode(frame.body!));
+              ref.read(weightStatusProvider.notifier).state = update;
+              debugPrint("Weight Status Update: ${ref.read(weightStatusProvider)}");
+            }
           }
         });
     stompClient.subscribe(
@@ -126,8 +134,8 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
         callback: (StompFrame frame) {
           if (frame.body != null) {
             debugPrint("RESULT: ${frame.headers}");
-            //String result = String.fromJson
-            debugPrint("SS");
+            TicketDTO result = TicketDTO.fromJson(json.decode(frame.body!));
+            debugPrint("SS: ${result}");
           }
         });
 
@@ -175,8 +183,6 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                 // onStepTapped: (index) => ref.read(stepperProvider.notifier).setIndex(index),
                 onStepCancel: () {
                   if (status.index > 0) {
-                    //debugPrint("Go back ${status.index}");
-                    //debugPrint("Go back ${StatusEnum.values[0]}");
                     ref.read(stepperProvider.notifier).setCompleted(StatusEnum.ticketRequest.index);
                     ref.read(stepperProvider.notifier).setIndex(StatusEnum.ticketRequest.index);
                     ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketRequest;

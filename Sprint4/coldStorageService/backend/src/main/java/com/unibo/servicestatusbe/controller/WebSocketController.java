@@ -75,7 +75,7 @@ public class WebSocketController {
     public static void getData() {
         try {
             String res = "";
-            String msg = "msg(getData, dispatch, beckend, " + actorGui + ", getData(_), 1)";
+            String msg = "msg(getData, dispatch, backend, " + actorGui + ", getData(_), 1)";
             ColorsOut.outappl("[UtilsStatusGUI] getData msg:" + msg + " conn=" + conn, ColorsOut.BLUE);
             //String coap = conn.receiveMsg();
             connTCP.forward(msg);
@@ -128,77 +128,10 @@ public class WebSocketController {
         this.serviceConfigDTO = serviceConfigDTO;
         this.sessionList = sessionList;
         this.service = service;
-        connectCoap("192.168.178.21", 8099).observeResource(new UtilsCoapObserver());
-        connectTCP("192.168.178.21", 8099);
-        // define observer
-        //kotlinObs obs = new kotlinObs();
-        //conn.observeResource(obs);
-
+        connectCoap("localhost", 8099).observeResource(new UtilsCoapObserver());
+        connectTCP("localhost", 8099);
         System.out.println("INITIAL SERVICE CONFIG -----------------------\n " + serviceConfigDTO.toJson());
     }
-
-//    @SubscribeMapping("/topic/message")
-//    public TextMessageDTO subscribe() {
-//        connectCoap("localhost", 8099).observeResource(new UtilsCoapObserver());
-//        connectTCP("localhost", 8099);
-//        sendMsg();
-//
-//        System.out.println("Subscribed to /topic/message");
-//
-//        TextMessageDTO message = new TextMessageDTO("Subscribed to /topic/message");
-//        template.convertAndSend("/topic/message", message);
-//        return message;
-//    }
-
-//    @PostMapping(value = "/send", consumes = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<String> sendMessage(@RequestBody ServiceStatusDTO serviceStatusDTO) {
-//        if (serviceStatusDTO.getCurrentWeight() > serviceConfigDTO.getMaxWeight()) {
-//
-//            return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//        if (serviceStatusDTO.getCurrentWeight() < 0) {
-//            return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
-//        }
-//        template.convertAndSend("/topic/message", serviceStatusDTO);
-//        return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
-//    }
-
-//    @PostMapping(value = "/send-private", consumes = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<String> sendMessage(@RequestParam("id") String id, @RequestBody ServiceStatusDTO serviceStatusDTO) {
-//        sendMsg();
-//        if (serviceStatusDTO.getCurrentWeight() > serviceConfigDTO.getMaxWeight()) {
-//            return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//        if (serviceStatusDTO.getCurrentWeight() < 0) {
-//            return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
-//        }
-//        template.convertAndSendToUser(id, "/queue/greetings", "CIAOOOOO");
-//        return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
-//    }
-
-//    @MessageMapping("/sendMessage")
-//    public void receiveMessage(@Payload TextMessageDTO textMessageDTO) {
-//        // receive message from client
-//    }
-//
-//    @SendTo("/topic/message")
-//    public TextMessageDTO broadcastMessage(@Payload TextMessageDTO textMessageDTO) {
-//        return textMessageDTO;
-//    }
-
-//    @PostMapping(value = "/store-food", consumes = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<String> storeFood(@RequestBody StoreFoodRequestDTO storeFoodRequestDTO) {
-//        if (storeFoodRequestDTO.getQuantity() > serviceConfigDTO.getMaxWeight()) {
-//            return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//        if (storeFoodRequestDTO.getQuantity() < 0) {
-//            return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
-//        }
-//        return new ResponseEntity<>("Service Status successfully updated", null, HttpStatus.OK);
-//    }
-
-
-
     @EventListener
     public void handleSubscribeEvent(SessionSubscribeEvent event) {
         String destination = Objects.requireNonNull(event.getMessage().getHeaders().get("simpDestination")).toString();
@@ -245,23 +178,6 @@ public class WebSocketController {
             ColorsOut.outerr("WebSocketController | sendToAll String ERROR:" + e.getMessage());
         }
     }
-
-//    public static void sendToAll(String message) {
-//        upd = message;
-//        Iterator<String> iter = sessionList.iterator();
-//        while( iter.hasNext() ){
-//            try{
-//                String session = iter.next();
-//                ColorsOut.outappl("[WebSocketHandler] sendToAll " +
-//                        message + " for session " + session , ColorsOut.MAGENTA);
-//                //synchronized(session){
-//                handleUpdates();
-//                //}
-//            }catch(Exception e){
-//                ColorsOut.outerr("[WebSocketHandler] TextMessage ERROR:"+e.getMessage());
-//            }
-//        }
-//    }
 
     @MessageMapping("/updates")
     @SendTo("/topic/updates")
@@ -334,16 +250,6 @@ public class WebSocketController {
         template.convertAndSend("/topic/updates",weightDTO);
         template.convertAndSend("/topic/status", res);
     }
-//    @MessageMapping("/update/{sessionId}")
-//    @SendTo("/user/queue/update/{sessionId}")
-//    public ServiceConfigDTO handleUpdate(@PathVariable("sessionId")String sessionId){
-//        getData();
-//        //System.out.println(res);
-//        ServiceConfigDTO result = new ServiceConfigDTO();
-//        // set
-//        template.convertAndSendToUser(sessionId, "/user/queue/update", result);
-//        return result;
-//    }
 
     @MessageMapping("/store-food/{sessionId}")
     @SendTo("/user/queue/store-food/{sessionId}")
@@ -382,10 +288,20 @@ public class WebSocketController {
         String res=sendDeposit(depositDTO.getTicketNumber());
         System.out.print("Risultato deposit "+res); // ritorna ticket valid/invalid
         //TODO: check on valid/invalid ticket
-        //update
+        int v = res.indexOf("(");
+        int l = res.indexOf(",");
+        String val = res.substring(v+1, l);
         TicketResponseDTO result = new TicketResponseDTO();
-        result.setTicketNumber( serviceStatusDTO.getCurrentTicket());
-        return result.toString();
+        if(val.equals("ticketNotValid")){
+            System.out.println(val);
+            result.setTicketNumber( -2);
+        }else if(val.equals("ticketExpired")){
+            System.out.println(val);
+            result.setTicketNumber( -1);
+        }
+        template.convertAndSendToUser(sessionId, "/usr/queue/deposit/", val);
+        template.convertAndSend("/topic/updates", result);
+        return val;
     }
 
     @EventListener
