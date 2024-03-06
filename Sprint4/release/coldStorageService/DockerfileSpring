@@ -1,0 +1,6 @@
+FROM openjdk:11
+
+VOLUME /tmp
+COPY ./servicestatusbe.jar be.jar
+ENTRYPOINT ["java", "-jar", "/be.jar"]
+

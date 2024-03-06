@@ -128,8 +128,8 @@ public class WebSocketController {
         this.serviceConfigDTO = serviceConfigDTO;
         this.sessionList = sessionList;
         this.service = service;
-        connectCoap("localhost", 8099).observeResource(new UtilsCoapObserver());
-        connectTCP("localhost", 8099);
+        connectCoap("192.168.178.21", 8099).observeResource(new UtilsCoapObserver());
+        connectTCP("192.168.178.21", 8099);
         // define observer
         //kotlinObs obs = new kotlinObs();
         //conn.observeResource(obs);

@@ -321,16 +321,10 @@ QActor coldstorageservice context ctxcoldstorageservice {
     	        	}
 
 					if [#TICKETEVALUATION == resources.TicketEvaluationResponse.INVALID #] {
-    	        		[#
-    	        			val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
-							resources.ColdStorageService.getTicketList().remove(TICKET)
-							var Remove = -RequestWeightToStore
-							currentWeightStorage -= RequestWeightToStore
-    	        		#]
     	        			println("Inserted ticket id is not valid") color red
     					replyTo sendTicket with ticketNotValid : ticketNotValid(_)
-    					forward guicontroller -m updateR : updateR(_)
-    					forward guicontroller -m updateS : updateS( $Remove)
+    					//forward guicontroller -m updateR : updateR(_)
+    					//forward guicontroller -m updateS : updateS( $Remove)
     	        	}
 
        				}
