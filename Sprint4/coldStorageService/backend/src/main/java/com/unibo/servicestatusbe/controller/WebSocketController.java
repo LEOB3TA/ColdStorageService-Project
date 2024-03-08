@@ -43,7 +43,8 @@ public class WebSocketController {
     static SimpMessagingTemplate template;
     final Environment env;
     final ServiceConfigDTO serviceConfigDTO;
-    final ServiceStatusDTO serviceStatusDTO = new ServiceStatusDTO();
+    //public static WeightDTO weightDTO;
+    static final ServiceStatusDTO serviceStatusDTO = new ServiceStatusDTO();
     private static List<String> sessionList = Collections.emptyList() ;
     private final WebSocketService service;
 
@@ -87,7 +88,7 @@ public class WebSocketController {
             //return "Error";
         }
     }
-    // TODO: finish modifications
+
     public int sendStore(double w){
         try {
             String res = "";
@@ -143,6 +144,8 @@ public class WebSocketController {
                 sessionList.add(sessionId);
                 System.out.println("Session Id" + sessionId + " subscribed to " + destination);
                 assert sessionId != null;
+                //TODO: modify to avoid peso fantasma
+                // protip use setCurr somewhere
                 WeightDTO weightDTO = new WeightDTO(serviceStatusDTO.getCurrentWeight(), serviceConfigDTO.getMaxWeight());
                 template.convertAndSend("/topic/updates", weightDTO);
                 break;
@@ -203,6 +206,10 @@ public class WebSocketController {
 
             if(key.equals("MAXW") || key.equals("CurrW")){
                 Double val = Double.parseDouble(value);
+                if(key.equals("CurrW")){
+                    serviceStatusDTO.setCurrentWeight(val);
+                }
+                //weightDTO.setCurrentWeight(val);
                 obj.put(key, val);
             }else if (key.startsWith("x")|| key.startsWith("y")||key.equals("rejected") || key.equals("ticketN")){
                 int v = Integer.parseInt(value);

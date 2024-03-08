@@ -86,7 +86,6 @@ QActor guicontroller context ctxcoldstorageservice{
 	State init initial{
 		println("$name | 	started") color green
 		observeResource transporttrolley
-		//observeResource basicrobot
 	}
 	Goto idle
 	State idle{

@@ -2,17 +2,17 @@
 REM TODO : connect the realrobot
 
 REM Open the default browser to localhost:8090
-start "" "http://localhost:8090"
+REM start "" "http://localhost:8090"
 
 REM Start the unibo.prototipo2-1.0-all.jar file in the background
-start "prototipo3" java -jar unibo.ctxstorageservice-1.0-all.jar
+REM start "prototipo3" java -jar unibo.ctxstorageservice-1.0-all.jar
 timeout /t 5
 REM se sei leo e ti stai chiedendo come ho fatto ad usare i nomi, ho buildato prima creando le immagini coi tag
-start "CSS" docker run css:latest
+REM start "CSS" docker run css:latest
 REM start "servicestatusbe" java -jar servicestatusbe.jar
-timeout /t 5
+REM timeout /t 5
 
-start "CSS" docker run spring:latest
+start "server" docker run -p 192.168.1.6:11804:11804 spring:latest
 REM start "servicestatusbe" java -jar servicestatusbe.jar
 timeout /t 5
 
