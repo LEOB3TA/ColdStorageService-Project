@@ -1,5 +1,5 @@
 FROM openjdk:11
-
+EXPOSE 8099 11804
 VOLUME /tmp
 COPY ./servicestatusbe.jar be.jar
 ENTRYPOINT ["java", "-jar", "/be.jar"]
