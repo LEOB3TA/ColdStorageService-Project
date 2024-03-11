@@ -20,7 +20,7 @@
     <h2>Introduction</h2>
     <div class="remark"> Progetto finale di ISS, finalizzato allo sviluppo software di un magazzino refrigerato, nel
         quale
-        vi &egrave; un robot che ha il compito di trasportare del cibo da un punto di partenza - chiamato INDOOR - alla
+        vi &egrave; un robot che ha il compito di Transportare del cibo da un punto di partenza - chiamato INDOOR - alla
         cella
         frigorifera.
     </div>
@@ -312,7 +312,7 @@
                 <li>Fare eseguire la GUI sul dispositivo</li>
             </ul></li>
         </ol>
-        <h3>ColdStorageService,TrasportTrolley</h3>
+        <h3>ColdStorageService,TransportTrolley</h3>
         Dall'analisi dei requisiti si evince che questi componenti devon essere eseguiti su un computer a se stante.
         <h4>Problemi</h4>
         <ol>
@@ -427,238 +427,74 @@
 
 <h2>Project</h2>
 <div class="remark">
-    Tutto si basa sulla gestione dei 2 nuovi componenti e delle modifiche sul
-    <kc>TransportTrolley</kc>
-    .
-    <h4>Sonar</h4>
-    Per prima cosa, per simulare il sonar &egrave; stato creato un simulatore mediante una classe <a
-        href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/unibo.prototipo2/src/rx/sonarSimulator.kt">scritta
-    in kotlin</a>.<br>
-    Nell'ottica di prevedere una futura implementazione di un sonar fisico &egrave; stato creato anche un componente in
-    grado di eseguire un primo filtraggio dei dati
-    raccolti dal sensore in modo da diminuire il carico sulla rete ed eliminare i messaggi inutili. Tale componente
-    &egrave; realizzato in
-    <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/unibo.prototipo2/src/rx/dataCleaner.kt">dataCleaner.kt</a>.<br><br>
-    A monte &egrave; stato sviluppato un attore, con lo scopo di interfacciare il sonar (fisico o simulato) al
-    <kc>TransportTrolley</kc>
-    . Di seguito si riporta il codice:
+    Per prima cosa &egrave; stato necessario analizzare il file <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint3/unibo.prototipo3/src/prototipo3.qak">prototipo3.qak</a> dividendo gli attori gi&agrave; creati nei contesti finali; per farlo sono stati creati i seguenti file qak:
+    <ul>
+        <li><a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint4/unibo.ctxrasp/src/ctxrasp.qak">ctxrasp.qak</a></li>
+        <li><a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint4/coldStorageService/unibo.ctxstorageservice/src/ctxstorageservice.qak">prototipo3.qak</a></li>
+    </ul>
+    Tutte le ulteriori modifiche effettuate nei vari contesti e nei file associati verranno dettagliate in seguito.
+    <h3>RaspberryPi</h3>
+    <h3>Led</h3>
+    Come indicato nell'<b>Analisi del problema</b> &egrave; stato scelto di utilizzare la libreria <kc>pi4j</kc>.<br>
+    Di conseguenza &egrave; stato necessario inserire la dipendenza all'interno del file Gradle.<br>
+    A questo punto per garantire <b>versatilit&agrave;</b> del software abbiamo pensato di creare un <kc>oggetto Kotlin</kc> che funga da supporto per il led e cambi il proprio comportamento secondo un file di configurazione, in particolare, all'interno del file <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint4/unibo.ctxrasp/ledConfig.json">ledConfig.json</a> &egrave; possibile specificare due tipologie di led:
+    <ul>
+        <li><b>simulated</b>: in questo caso il supporto stamper&agrave; a video l'output del led</li>
+        <li><b>real</b>: in questo caso il supporto attraverso la libreria <kc>pi4j</kc> utilizzer&agrave; i pin <b>GPio</b> per manipolare il led</li>
+    </ul>
+    All'interno del file <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint4/unibo.ctxrasp/resources/ledSupport.kt">ledSupport.kt</a> viene specificata la logica del led; in particolare attraverso la funzione <b>create()</b> viene scelta la tipologia del led e nel caso sia <kc>real</kc> viene creato istanziato il supporto fisico attraveso la <kc>GPiofactory</kc> della libreria <kc>pi4j</kc>.
+    Sono disponibili tre funzioni per comandare il led: <b>on()</b>,<b>off()</b>,<b>blink()</b>: ognuna di queste avr&agrave; un comportamento diverso a seconda del tipo di led specificato nel file di configurazione; per completezza viene riportato un esempio: <br>
     <pre>
-
-<key2>QActor</key2> sonar23 context ctxsonar{
-[#      ...
-       <key>var</key> handled=false
-#]
-	<key2>State</key2> s0 initial{
-		println("sonar | start with appl: $Appl")
-	}<key2>Goto</key2> work
-
-	<key2>State</key2> work{
-		updateResource[# "Sonar waiting"#]
-	}<key2>Transition</key2> t0 <key2>whenEvent</key2> sonardata -> handlesonardata
-
-	<key2>State</key2> handlesonardata{
-		updateResource [# "sonar23 handles $currentMsg" #]
-		onMsg(sonardata : distance(D)){
-			[#D = payloadArg(0).toInt()#]
-			if [#D<DLIMIT && handled==false#]{
-                          [#handled=true#]
-                          println("$name handleobstacle STOP ${payloadArg(0)}") color magenta
-				emit stop : stop(_)
-			}
-			if[#D>=DLIMIT && handled==true#]{
-				[#handled=false#]
-				println("$name sonardata RESUME ${payloadArg(0)}") color magenta
-				emit resume: resume(_)
-			}
-		}
-	}<key2>Goto</key2> work
+fun blink(){
+    when(ledType){
+        "simulated" -> CommUtils.outmagenta("LED BLINKS")
+        "real" -> gpioPin.blink(500)
+    }
 }
-                 </pre>
-    <h4>Led</h4>
-    Per quanto riguarda il led si &egrave; reso necessario lo sviluppo di un attore che gestisca lo stato in relazione a
-    quello del
-    <kc>TransportTrolley</kc>
-    , mentre il comportamento viene simulato
-    generando delle <b>print</b> contenenti lo stato attuale. Di seguito si riporta il codice relativo al
-    <b>ledqakactor</b>:
+    </pre>
+    <br>
+    A seguito di queste modifiche &egrave; stato necessario modificare il file <b>Qak</b> in modo da sfruttare il nuovo supporto, di conseguenza &egrave; bastato sostituire le print presenti nel vecchio file <b>Qak</b> con le chiamate al supporto per il led.
+    <h3>Sonar</h3>
+    Considerando il software precedentemente fornito &egrave; bastato modificare leggermente il file <b>ctxrap.qak</b> utilizzando come <i>CodedQActor</i> <kc>rx.sonarHCSR04Support23</kc>.
     <pre>
-<key2>QActor</key2> ledqakactor context ctxsonar {
-	[#
-		<key>val</key> ledState = state.LedState()
-		ledState.setState(state.LState.OFF)
-		<key>var</key> current = ledState.getCurrState()
-	#]
-
-  <key2>State</key2> s0 initial{
-		println("${name} STARTS")
-	}
-	<key2>Transition</key2> t0 <key2>whenMsg</key2> ledCmd -> doCmd
-
-	<key2>State</key2> doCmd{
-		onMsg( ledCmd : ledCmd(CMD) ){
-			[# var Cmd = payloadArg(0) #]
-			if [# Cmd=="ON" #]{
-				[#
-					ledState.setState(state.LState.ON)
-					current = ledState.getCurrState()
-				#]
-				updateResource[#ledState.toJsonString()#]
-				println("${name} - $current") color magenta
-			} if [# Cmd=="OFF" #]{
-				[#
-					ledState.setState(state.LState.OFF)
-					current = ledState.getCurrState()
-				#]
-				updateResource[#ledState.toJsonString()#]
-				println("${name} - $current") color magenta
-			}if [# Cmd=="BLINK" #] {
-				[#
-					ledState.setState(state.LState.BLINKS)
-					current = ledState.getCurrState()
-				#]
-				updateResource[#ledState.toJsonString()#]
-				println("${name} - $current") color magenta
-			}
-		}
-	}
-	<key2>Transition</key2> t0 <key2>whenMsg</key2> ledCmd -> doCmd
+CodedQActor sonar  context ctxrasp className "rx.sonarHCSR04Support23"
+    </pre>
+    <b>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</b>
+    <h3>ServiceAccessGUI</h3>
+    Per modificare l'indirizzo del server &egrave; stato necessario modificare il file <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/8ca7cfc071998b7c769ead0fddfa3dd8d0f7bcb0/Sprint4/serviceaccessgui/lib/service/ws_service.dart">ws_service.dart</a>.
+    <pre>
+class WsService {
+  static const socketUrl = 'ws://'server-ip':11804/ws-message'; // if in another pc
 }
-                 </pre>
-    <h4>TransportTrolley</h4>
-    Per quanto riguarda il
-    <kc>TransportTrolley</kc>
-    sono due le modifiche pi&ugrave; importanti apportate:
-    <ol>
-        <li>Modifica relativa alla gestione della stop/resume, in consistenza con i requisiti ed in modo che lo stato
-            rimanga consistente nei passaggi da stop a resume
-        </li>
-        <li>La creazione di un observer in grado di osservare lo stato e comunicare ai componenti interessati (il <b>ledqakactor</b>)
-            quando avviene un cambiamento dello stato del
-            <kc>TransportTrolley</kc>
-            .
-        </li>
+    </pre>
     </ol>
-
-    Mentre nel primo caso &egrave; si &egrave; reso necessario una modifica con l'inserimento di nuovi stati all'interno
-    del
-    <kc>TransportTrolley</kc>
-    , nel secondo caso si &egrave; dovuto creare un nuovo attore
-    con l'unico scopo di fare l'observer.<br>
-    Pertanto di seguito si riporta il codice del nuovo observer
+    <h3>ColdStorageService,TransportTrolley</h3>
+    Dopo aver creato il file <kc>Qak</kc> a se stante, &egrave; stato necessario creare un jar tramite il target Gradle <i>shadowJar</i>, per poi inserirlo all'interno di un container <kc>Docker</kc> per garantire il massimo della compatibilit&agrave;.<br>
+    Utilizzando l'immagine di base <i>openjdk:11</i> vengono copiato tutti i file di configurazione e il file jar che viene poi eseguito.
+    Di seguito viene riportato il contenuto di <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/81d7136b3de551da11757feb65fed79b14966d3d/Sprint4/release/coldStorageService/DockerfileCSS">DockerfileCSS</a>.
     <pre>
-QActor stateobservercontroller context ctxstorageservice{
-[#
-	<key>var</key> state = ""
-	<key>var</key> pos= ""
-#]
-	<key2>State</key2> s0 initial{
-		observeResource transporttrolley
-	}
-	<key2>Transition</key2> t0
-	<key2>whenMsg</key2> coapUpdate -> upds
+FROM openjdk:11
 
-	<key2>State</key2> upds{
-		[#
-			state = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"
-			pos = "${currentMsg.toString().substringAfter("currPosition\":\"").substringBefore("\"")}"
-		#]
-		[#
-			when{
-				pos == "HOME" -> #] forward ledqakactor -m ledCmd : ledCmd(OFF)
-				[#state == "PICKINGUP" || state == "MOVINGTOPORT" || state == "MOVINGTOHOME" ->#] forward ledqakactor -m ledCmd : ledCmd(BLINK)
-				[#state == "STOPPED" ->#] forward ledqakactor -m ledCmd : ledCmd(ON)
-			[#}#]
-	}<key2>Transition</key2> t0
-	<key2>whenMsg</key2> coapUpdate -> upds
-
-}
-                 </pre>
-
-    Per quanto riguarda i cambiamenti relativi al
-    <kc>TransportTrolley</kc>
-    si riportano soltanto le modifiche apportate:
+VOLUME /tmp
+COPY ./ctxstorageservice.pl ctxstorageservice.pl
+COPY ./sysRules.pl sysRules.pl
+COPY ./Californium3.properties Californium3.properties
+COPY ./unibo.ctxstorageservice-1.0-all.jar css.jar
+ENTRYPOINT ["java", "-jar", "/css.jar"]
+    </pre>
+    <h3>ServerSpring</h3>
+    Dopo aver creato il jar tramite il target Gradle <i>bootJar</i>, &egrave;  stato inserito all'interno di un container <kc>Docker</kc> per garantire il massimo della compatibilit&agrave;.<br>
+    Utilizzando l'immagine di base <i>openjdk:11</i> viene copiato file jar che viene poi eseguito.
+    Di seguito viene riportato il contenuto di <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/81d7136b3de551da11757feb65fed79b14966d3d/Sprint4/release/coldStorageService/DockerfileSpring">DockerfileSpring</a>.
     <pre>
-<key2>QActor</key2> transporttrolley context ctxstorageservice{
-	[#
-		...
-		<key>val</key> ts = kotlin.time.TimeSource.Monotonic
-		<key>var</key> m1 = ts.markNow()
-		<key>val</key> MINT : kotlin.time.Duration= 1.seconds
-		<key>var</key> savedState = tTState.getCurrState()
-	#]
-	...
+FROM openjdk:11
 
- 	<key2>State</key2> moverobottoindoor {
- 		...
- 	}
- 	<key2>Transition</key2> t0 <key2>whenEvent</key2> stop -> handlerobotstopped
- 				  <key2>whenReply</key2> moverobotdone -> movetoport
-
-  	<key2>State</key2> handlerobotstopped{
-  		println("$name |handle robot stopped") color green
-  		[#
-  			if ((m1+MINT).hasPassedNow()){
-  				m1 = ts.markNow()
-  				savedState = tTState.getCurrState()
-  				tTState.setCurrState(state.CurrStateTrolley.STOPPED)
-  		#]
-  			emit alarm : alarm(_)
-			updateResource[#tTState.toJsonString()#]
-  		[#}#]
-  	}<key2>Transition</key2> t0  <key2>whenReply</key2> moverobotdone -> goahead
-  					<key2>whenEvent</key2> stop -> handlerobotstopped
-  					<key2>whenEvent</key2> resume -> resumerobot
-
-	<key2>State</key2> resumerobot{
-		println("$name | resume robot") color green
-		  		onMsg(resume: resume(_)){
-
-  				[#tTState.setCurrState(savedState)#]
-  				updateResource[#tTState.toJsonString()#]
-  						[# 	when {
-							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] request basicrobot -m moverobot:moverobot($INDOORX,$INDOORY)[#
-							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] request basicrobot -m moverobot:moverobot($CRX,$CRY)[#
-							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #] request basicrobot -m moverobot:moverobot($HOMEX,$HOMEY)
-
-							[#}}#]
-				}
-	}<key2>Transition</key2> t0  <key2>whenEvent</key2> stop -> handlerobotstopped
-					<key2>whenReply</key2> moverobotdone -> goahead
-
-
-	<key2>State</key2> goahead{
-		println("$name | go ahead with next state") color green
-		[# 	when {
-							tTState.getCurrState() == state.CurrStateTrolley.PICKINGUP -> #] forward transporttrolley -m gotomovetoport : gotomovetoport(_)[#
-							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOPORT -> #] forward transporttrolley -m gotodepositactionended : gotodepositactionended(_)[#
-							tTState.getCurrState() == state.CurrStateTrolley.MOVINGTOHOME ->{ #]
-							forward transporttrolley -m gotorobottohome : gotorobottohome(_)		delay 6300
-		                    forward basicrobot -m cmd:cmd(l)
-
-		[#
-			}}#]
-	}<key2>Transition</key2> t0 <key2>whenMsg</key2> gotomovetoport -> movetoport
-					<key2>whenMsg</key2> gotodepositactionended -> depositactionended
-					<key2>whenMsg</key2> gotorobottohome -> idle
-	<key2>State</key2> movetoport{
-        ...
-	}
-	<key2>Transition</key2> t0  <key2>whenEvent</key2> stop -> handlerobotstopped
- 				  <key2>whenReply</key2> moverobotdone -> depositactionended
-
-	...
-	<key2>State</key2> robottohome{
-		...
-	}
-	<key2>Transition</key2> t0  <key2>whenEvent</key2> stop -> handlerobotstopped
-	  			  <key2>whenReply</key2> moverobotdone -> idle
-
-}</pre>
-
-
+VOLUME /tmp
+COPY ./servicestatusbe.jar be.jar
+ENTRYPOINT ["java", "-jar", "/be.jar"]
+    </pre>
 </div>
-
-<h2>Testing</h2>
+<h2>Testing TODO</h2>
 <div class="remarkTest">
     Al fine di testare il corretto funzionamento dei nuovi componenti sviluppati per la simulazione del
     comportamento di sonar e led &egrave; stato sviluppato un file <a
@@ -680,7 +516,8 @@ QActor stateobservercontroller context ctxstorageservice{
 </div>
 <h2>Avviare il sistema</h2>
 <div class="remark">
-    <h5>Avvio automatizzato</h5>
+    <h3>Avvio automatizzato</h3>
+    <h5>Robot</h5>
 
     Scaricare l'ultima release da <b>Github</b>, utilizzare lo script adeguato per il proprio sistema:
     <ul>
@@ -707,7 +544,7 @@ docker-compose -f webbasicrobot23.yaml up</pre>
                 ,
                 <bc>MockTruck</bc>
                 e
-                <bc>Trasporttrolley</bc>
+                <bc>Transporttrolley</bc>
             </em>
             <p style="font-size: 16px">In tal modo si avviano le varie componenti</p>
             <pre style="font-size: 16px">
