@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import it.unibo.kactor.sysUtil.createActor   //Sept2023
 	
 class Guicontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
@@ -28,7 +29,7 @@ class Guicontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				var X = 0
 				var Y = 0
 				//var arrPos = intArrayOf(X,Y)
-		return { //this:ActionBasciFsm
+				return { //this:ActionBasciFsm
 				state("init") { //this:State
 					action { //it:State
 						CommUtils.outgreen("$name | 	started")
