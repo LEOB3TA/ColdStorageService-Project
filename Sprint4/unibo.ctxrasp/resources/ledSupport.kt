@@ -20,6 +20,9 @@ object ledSupport {
         val config = File("${configFileName}").readText(Charsets.UTF_8)
         val jsonObject   = jsonParser.parse( config ) as JSONObject
         ledType = jsonObject["type"].toString()
+        if (ledType != "real" && ledType!="simulated"){
+            CommUtils.outred(" -- ledSupport |  ${ledType}: unsupported led type")
+        }
         CommUtils.outred(" -- ledSupport | CREATING support for ${ledType} led")
         //creazione support gpio
         if(ledType == "real"){
@@ -30,7 +33,6 @@ object ledSupport {
             CommUtils.outred("-- ledSupport | CREATED support for real led")
         }
     }
-    //TODO controllare che i gpio low all'inizio vanno bene o no
     fun on(){
         when(ledType){
             "simulated" -> CommUtils.outmagenta("LED ON")
@@ -44,7 +46,6 @@ object ledSupport {
             "real" ->{gpioPin.blink(0); gpioPin.low()}
         }
     }
-    //TODO controllare che esca di qui o perlomeno che si interrompa
     @OptIn(DelicateCoroutinesApi::class)
     fun blink(){
         when(ledType){
