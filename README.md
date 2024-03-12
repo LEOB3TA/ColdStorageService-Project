@@ -23,22 +23,6 @@ Group project for the university course "Ingegneria dei sistemi software" Prof. 
 - **Docker compose**
 
 ## Instructions
-### Mode 1:
-- Download the zip inside release
-- Use the script startPrototype-***.sh/bat to execute the prototype
-### Mode 2:
-You have to install **Gradle** on your computer
+You have to follow the instructions in the sprint documentation
 
-- Download the source code from release
-- Unzip the source code
-- Start the basicrobot
-```bash
-cd ColdStorageService-Project/Sprint1/unibo.basicrobot23
-docker-compose -f webbasicrobot23.yaml up
-```
-- start all the other components of the prototype
-```bash
-cd ColdStorageService-Project/Sprint2/unibo.prototipo1
-./gradlew run
-```
 
