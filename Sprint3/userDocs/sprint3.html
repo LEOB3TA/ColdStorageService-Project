@@ -161,14 +161,15 @@
 
     <h2>Architettura Logica</h2>
     <div class="remark">
-        Di seguito si riporta l'architettura logica relativa al <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint3/unibo.prototipo3/src/prototipo3.qak" target="_blank">protipo3.qak</a>. <br>
-        <figure>
-            <img height="100%" width="100%" src="./resources/images/prototipo3arch.png" alt="architettura logica"> <br>
-            <figcaption>
-                Nota: nella figura precedente sono stati rimossi gli attori relativi al sonar per ottenere una figura compatta
-            </figcaption>
-        </figure>
-        Di seguito viene riportata l'architettura contenete informazioni relative a tutti i componenti in gioco.
+<!--        Di seguito si riporta l'architettura logica relativa al <a style="font-size: larger" href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint3/unibo.prototipo3/src/prototipo3.qak" target="_blank">protipo3.qak</a>. <br>-->
+<!--        <figure>-->
+<!--            <img height="100%" width="100%" src="./resources/images/prototipo3arch.png" alt="architettura logica"> <br>-->
+<!--            <figcaption>-->
+<!--                Nota: nella figura precedente sono stati rimossi gli attori relativi al sonar per ottenere una figura compatta-->
+<!--            </figcaption>-->
+<!--        </figure>-->
+        Siccome l'architettura dell'applicazione &egrave; rimasta inalterata, a meno dell'inserimento del componente <kc>guicontroller</kc>, viene riportata
+        un'architettura che mostra le interazioni tra le varie parti in gioco.
         <img height="100%" width="100%" src="./resources/images/iss.png" alt="architettura logica"> <br>
         Nella precedente figura sono stati appositamente omessi alcuni dettagli, in quanto il focus principale &egrave; relativo al comportamento
         d'insieme dei vari componenti e di come le varie connessioni interagiscano
@@ -176,6 +177,27 @@
 
 
     <h2>Project</h2>
+    <div class="remark">
+        <h4>Perch&egrave; Fluetter e Spring?</h4>
+        <div id="pf">
+             Flutter &egrave; un framework usato per la creazione di interfacce native per vari sistemi operativi: Linux, MacOs e Windows sono alcuni
+            di questi. Sfrutta il linguaggio Dart ed &egrave; vastamente usato per la creazione di interfacce.
+            La scelta &egrave; ricaduta su questo framework per la realizzazione delle nostre interfacce per due motivi:
+            <ol>
+                <li>Facilit&agrave; nella creazione di interfacce per pi&ugrave; ambienti</li>
+                <li>Semplicit&agrave; nella realizzazione di un prodotto pi&ugrave; completo anche a livello estetico </li>
+            </ol>
+            Siccome Flutter si appoggia ad un linguaggio completo come Dart si sarebbe potuto pensare di realizzare la parte in spring usando flutter, difatto
+            realizzando un'applicazione serverless. Il principale dubbio relativo a tale approccio deriva dalla relativa giovinezza del framework. Infatti
+            siccome si necessita di usare connessioni CoAP per far funzionare l'observer, e l'implementazione di meccanismi in grado di gestire tali connessioni in
+            dart sono ancora ad uno stato embrionale, abbiamo preferito avere un approccio pi&ugrave; tradizionale.
+            <br>
+            In sostanza Flutter viene usato solo per la realizzazione della parte grafica, mentre le comunicazioni con l'applicazione (qak), vengono gestite
+            dal server Spring.
+            <br>
+            Tale approccio viene rappresentato nella figura sopra riportata.
+        </div>
+    </div>
     <div class="remark">
         <h3>guicontroller</h3>
             <div>
