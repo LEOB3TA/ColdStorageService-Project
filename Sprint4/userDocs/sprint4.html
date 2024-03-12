@@ -494,64 +494,23 @@ COPY ./servicestatusbe.jar be.jar
 ENTRYPOINT ["java", "-jar", "/be.jar"]
     </pre>
 </div>
-<h2>Testing TODO</h2>
-<div class="remarkTest">
-    Al fine di testare il corretto funzionamento dei nuovi componenti sviluppati per la simulazione del
-    comportamento di sonar e led &egrave; stato sviluppato un file <a
-        href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/unibo.prototipo2/src/test.qak">test.qak</a>,
-    contenente i componenti necessari ed una suite di <a
-        href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint2Reviewed/unibo.prototipo2/src/test/it/unibo/TestPrototipo2.kt">test </a>,
-    nella quale si verifica il corretto funzionamento dei nuovi componenti aggiunti.<br>
-    In particolare si verifica che:
-    <ul>
-        <li> All'inizio il Led sia Spento, in quanto il robot &egrave; in HOME</li>
-        <li> Nel momento in cui il robot inizia a muoversi il Led lampeggia</li>
-        <li> Quando il robot riceve una Stop il Led si Accende</li>
-    </ul>
-    per quanto concerne il Led. Per quanto riguarda i dati forniti dal sonar:
-    <ul>
-        <li>Ignorare gli Stop che arrivano in un tempo inferiore a MINT millisecondi rispetto all'ultimo ricevuto</li>
-        <li>Fermare il robot dopo uno Stop ricevuto fino al ricevimento del prossimo Resume</li>
-    </ul>
-</div>
-<h2>Avviare il sistema</h2>
+<h2>Testing e avvio del sistema</h2>
 <div class="remark">
-    <h3>Avvio automatizzato</h3>
-    <h5>Robot</h5>
-
-    Scaricare l'ultima release da <b>Github</b>, utilizzare lo script adeguato per il proprio sistema:
-    <ul>
-        <li>Linux: <b>startPrototype-linux.sh</b></li>
-        <li>MacOS: <b>startPrototype-mac.sh</b></li>
-        <li>Windows: <b>startPrototype-win.bat</b></li>
-    </ul>
-
-    <h5>Avvio manuale</h5>
-
+    Al fine di testare il corretto funzionamento di tutti i componenti &egrave; necessario eseguire il software in modo distribuito, per farlo occorre:
     <ol>
-        <li style="font-size: 25px">
-            <em style="font-size: 25px">Avviare il
-                <bc>WebRobot23</bc>
-            </em>
-            <p style="font-size: 16px">In tal modo si avviano il <i>basicrobot23</i> ed il <i>wenv</i></p>
-            <pre style="font-size: 16px">
-cd ColdStorageService-Project/Sprint1/unibo.basicrobot23
-docker-compose -f webbasicrobot23.yaml up</pre>
-        </li>
-        <li style="font-size: 25px">
-            <em style="font-size: 25px">Avviare il
-                <bc>ColdStorageService</bc>
-                ,
-                <bc>MockTruck</bc>
-                e
-                <bc>Transporttrolley</bc>
-            </em>
-            <p style="font-size: 16px">In tal modo si avviano le varie componenti</p>
-            <pre style="font-size: 16px">
-cd ColdStorageService-Project/Sprint2Review/unibo.prototipo2
-./gradlew run</pre>
-        </li>
+        <li>Scaricare tutte le componenti nei dispositivi finali</li>
+        <li>Avviare il <b>basicrobot</b> e gli <b>attori</b> all'interno del <kc>RaspberryPi</kc> grazie allo script di avvio <i>startRasp.sh</i></li>
+        <li>Avviare il <b>ColdStorageService</b> e il <b>Server</b> attraverso dei <i>container</i> all'interno del <kc>ColdStorageServiceDevice</kc>(PC del manager)</li>
+        <li>Avviare la <b>ServiceStatusGUI</b> attraverso il file <i>eseguibile</i> all'interno del <kc>ColdStorageServiceDevice</kc>(PC del manager)</li>
+        <li>Avviare la <b>ServiceAccessGUI</b> attraverso il file <i>eseguibile</i> su uno o pi&ugrave; <kc>dispositivi esterni</kc>(PC degli autisti)</li>
     </ol>
+    Per dimostrare il corretto funzionamento del sistema viene riportato un video dell'esecuzione.
+    <br>
+    <video controls autoplay>
+        <source src="./resources/video/Graphic Designer_VS_Programmer.mp4" type="video/mp4">
+        <source src="./resources/video/Graphic Designer_VS_Programmer.mp4" type="video/ogg">
+        Your browser does not support the video tag.
+    </video>
 </div>
 
 <!--
@@ -566,9 +525,6 @@ cd ColdStorageService-Project/Sprint2Review/unibo.prototipo2
 </tr>
 </table>
 -->
-
-<br/><br/>
-</div>
 
 <div class="stud">
     By Students: <br/>
