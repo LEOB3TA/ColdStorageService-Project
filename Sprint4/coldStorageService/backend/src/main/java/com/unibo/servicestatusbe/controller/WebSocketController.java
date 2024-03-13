@@ -31,7 +31,7 @@ import java.util.Objects;
 public class WebSocketController {
 
     // Observer connection
-    private static final String ctxName = "ctxcoldstorageservice";
+    private static final String ctxName = "ctxprototipo3";
     //private static final String ctxCSS = "";
     private static final String actorName = "transporttrolley";//"guicontroller"
     private static final String actorGui = "guicontroller";
@@ -147,6 +147,7 @@ public class WebSocketController {
                 //TODO: modify to avoid peso fantasma
                 // protip use setCurr somewhere
                 WeightDTO weightDTO = new WeightDTO(serviceStatusDTO.getCurrentWeight(), serviceConfigDTO.getMaxWeight());
+                System.out.println(serviceStatusDTO.getCurrentWeight());
                 template.convertAndSend("/topic/updates", weightDTO);
                 break;
             case "/user/queue/store-food":
@@ -264,7 +265,7 @@ public class WebSocketController {
         if (requestDTO.getQuantity() < 0) {
             // return new ResponseEntity<>("Negative weight", null, HttpStatus.BAD_REQUEST);
         }
-        if (requestDTO.getQuantity() > serviceConfigDTO.getMaxWeight() || serviceStatusDTO.getCurrentWeight() + requestDTO.getQuantity() > serviceConfigDTO.getMaxWeight()) {
+        if (serviceStatusDTO.getCurrentWeight() + requestDTO.getQuantity() > serviceConfigDTO.getMaxWeight()) {
             // return new ResponseEntity<>("Too much", null, HttpStatus.INTERNAL_SERVER_ERROR);
             sendStore(requestDTO.getQuantity());
             TicketResponseDTO res = new TicketResponseDTO();

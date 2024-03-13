@@ -1,7 +1,9 @@
 package resources
 
 import com.google.gson.Gson
+import kotlinx.coroutines.*
 import resources.model.Ticket
+import state.GuiState
 
 
 class ColdStorageService {
@@ -16,14 +18,34 @@ class ColdStorageService {
 
     companion object {
 
-        private var instance: ColdStorageService? = null
+         private var instance: ColdStorageService? = null
 
-        private fun getInstance() =
+         private fun getInstance() =
             instance ?: synchronized(this) {
-                instance ?: ColdStorageService().also { instance = it }
+                instance ?: ColdStorageService().also { instance = it;  }
+
             }
 
         val gson = Gson()
+
+
+        @OptIn(DelicateCoroutinesApi::class)
+        fun inizializeControl(){
+            runBlocking {
+                GlobalScope.launch {
+                    while (true) {
+                        delay(10000L)
+                        getInstance().ticketList.forEach {
+                            if(!it.isExpired() && it.controlExpired()){
+                                println(getInstance().currentWeightStorage)
+                                getInstance().currentWeightStorage -= it.getWeight()
+                                println(getInstance().currentWeightStorage)
+                            }
+                        }
+                    }
+                }
+                }
+        }
 
         fun getMAXW(): Double {
             //println(getInstance().json)
@@ -126,6 +148,3 @@ class ColdStorageService {
     }
 }
 
-/*fun main(){
-    println(ColdStorageService.getTICKETTIME())
-}*/
