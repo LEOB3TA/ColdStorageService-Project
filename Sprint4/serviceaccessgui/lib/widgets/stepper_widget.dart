@@ -15,7 +15,6 @@ import 'package:service_access_gui/providers/status_provider.dart';
 import 'package:service_access_gui/providers/weight_status_provider.dart';
 import 'package:service_access_gui/widgets/custom_button.dart';
 import 'package:service_access_gui/widgets/layout/spaced_column.dart';
-import 'package:service_access_gui/widgets/layout/spaced_row.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
@@ -34,8 +33,6 @@ class StepperWidget extends ConsumerStatefulWidget {
 class _StepperWidgetState extends ConsumerState<StepperWidget> {
   late StompClient stompClient;
   int ticketNumber = -1;
-  bool ticketValid = false;
-  bool atLeastOneRequestRejected = false;
   String id = const Uuid().v4();
   // Controller
   final TextEditingController storeFoodController = TextEditingController();
@@ -98,27 +95,8 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
             String fl = frame.body.toString();
             if (fl.contains("ticketNumber")){
               TicketDTO update = TicketDTO.fromJson(jsonDecode(frame.body!));
-              debugPrint("Ticket Status Response: ${update.ticketNumber}");
-              if (update.ticketNumber==-2){
-                setState(() => atLeastOneRequestRejected = true);
-                const snackBar = SnackBar(
-                  content: Text("Ticket number not found - rejected request"),
-                  backgroundColor: Colors.red,
-                  behavior: SnackBarBehavior.floating,
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              }
-              else if (update.ticketNumber==-1){
-                setState(() => atLeastOneRequestRejected = true);
-                const snackBar = SnackBar(
-                  content: Text("Ticket expired -  rejected request"),
-                  backgroundColor: Colors.red,
-                  behavior: SnackBarBehavior.floating,
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              } else{
-                setState(() =>ticketValid= true);
-              }
+              debugPrint("Ticket Status Response: ${update}");
+              //TODO: check what todo
             }else if (fl.contains("currentWeight")){
               debugPrint("Weight Status Update received");
               debugPrint("${frame.body}");
@@ -157,7 +135,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
           if (frame.body != null) {
             debugPrint("RESULT: ${frame.headers}");
             TicketDTO result = TicketDTO.fromJson(json.decode(frame.body!));
-            debugPrint("SS: $result");
+            debugPrint("SS: ${result}");
           }
         });
 
@@ -210,10 +188,6 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                     ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketRequest;
                     storeFoodController.clear();
                     depositController.clear();
-                    setState(() {
-                      ticketValid = false;
-                      atLeastOneRequestRejected = false;
-                    });
                     //debugPrint("Go back ${status.index}");
                   }
                 },
@@ -233,11 +207,9 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                       if (formKey.currentState!.validate()) {
                         depositRequest(int.parse(depositController.text));
                       }
-                      if (ticketValid){
-                        ref.read(stepperProvider.notifier).setCompleted(StatusEnum.depositTicket.index);
-                        ref.read(stepperProvider.notifier).setIndex(StatusEnum.result.index);
-                        ref.read(stepperProvider.notifier).setCompleted(StatusEnum.result.index);
-                      }
+                      ref.read(stepperProvider.notifier).setCompleted(StatusEnum.depositTicket.index);
+                      ref.read(stepperProvider.notifier).setIndex(StatusEnum.result.index);
+                      ref.read(stepperProvider.notifier).setCompleted(StatusEnum.result.index);
                       break;
                     case StatusEnum.result:
                       //unused case to make dart happy
@@ -257,18 +229,10 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                         label: 'Next',
                       );
                     case StatusEnum.depositTicket:
-                      return SpacedRow(spacing: 8, children: [
-                        if (atLeastOneRequestRejected)
-                  OutlinedButton(
-                  onPressed: details.onStepCancel,
-                  style: OutlinedButton.styleFrom(fixedSize: const Size.fromHeight(48), side: BorderSide(color: Colors.blue.shade900), foregroundColor: Colors.blue.shade900),
-                  child: const Text('Send new request'),
-                  ),
-                  CustomButton(
-                  onPressed: details.onStepContinue,
-                  label: 'Next',
-                  ),
-                      ],);
+                      return CustomButton(
+                        onPressed: details.onStepContinue,
+                        label: 'Next',
+                      );
                     case StatusEnum.result:
                       return CustomButton(
                         onPressed: details.onStepCancel,

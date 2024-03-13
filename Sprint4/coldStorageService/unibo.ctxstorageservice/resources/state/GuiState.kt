@@ -19,7 +19,7 @@ data class GuiState(
     private var ttPos : IntArray = intArrayOf(0, 0)
 ){
     fun setCurrW(weight: Double){
-        CurrW = weight
+        CurrW += weight
     }
     fun getCurrW():Double{
         return CurrW
@@ -35,7 +35,7 @@ data class GuiState(
     fun setRejected(){
         rejected+=1
     }
-    fun getRejected():Int{
+    fun getReejected():Int{
         return rejected
     }
 

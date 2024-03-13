@@ -187,12 +187,13 @@ QActor guicontroller context ctxcoldstorageservice{
 
 QActor coldstorageservice context ctxcoldstorageservice {
 
- 	[#
+ [#
         	val MAXW = resources.ColdStorageService.getMAXW()
 			val TICKETTIME = resources.ColdStorageService.getTICKETTIME()
-		   	var currentWeightStorage = resources.ColdStorageService.getCurrentWeightStorage()
+		   	var Update = resources.ColdStorageService.getCurrentWeightStorage()
 		   	var RequestWeightToStore = 0.0
 		   	var TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
+		   	resources.ColdStorageService.inizializeControl()
 		   	#]
 
     State setup initial {
@@ -204,6 +205,8 @@ QActor coldstorageservice context ctxcoldstorageservice {
   Goto idle
 
     State idle {
+    	 [#Update=resources.ColdStorageService.getCurrentWeightStorage()#]
+        forward guicontroller -m updateS : updateS( $Update )
         println("$name |	in idle") color green
     }
     Transition t0 whenRequest storeFood -> requestEvaluation
@@ -218,21 +221,27 @@ QActor coldstorageservice context ctxcoldstorageservice {
      * 	2a. Se esito positivo, va in stato acceptRequest
      * 	2b. Altrimenti va in stato rejectRequest
      */
+     
+     
     State requestEvaluation {
+
+    	 [#Update=resources.ColdStorageService.getCurrentWeightStorage()#]
+        forward guicontroller -m updateS : updateS( $Update )
     	        onMsg(storeFood : storeFood(FW)){      
     	        println("Request evaluation to store ${payloadArg(0)} kg") color blue     
            [#
            	RequestWeightToStore = payloadArg(0).toDouble()
-           	
-           	if(RequestWeightToStore + currentWeightStorage <= MAXW ){
+           	if(RequestWeightToStore + resources.ColdStorageService.getCurrentWeightStorage() <= MAXW ){
            		#]
-           			forward guicontroller -m updateS : updateS( $RequestWeightToStore )//${requestWeightToStore}
+           				[#resources.ColdStorageService.setCurrentWeightStorage(resources.ColdStorageService.getCurrentWeightStorage()+RequestWeightToStore)#]
+           			 [#Update=resources.ColdStorageService.getCurrentWeightStorage()#]
+        				forward guicontroller -m updateS : updateS( $Update )
            		[#
            	}
            	#]
 
        }
-    } Goto acceptRequest if[# resources.ColdStorageService.canStore(RequestWeightToStore) #]
+    } Goto acceptRequest if[# RequestWeightToStore + resources.ColdStorageService.getCurrentWeightStorage() <= MAXW #]
                             else rejectRequest
 
      /*
@@ -241,9 +250,8 @@ QActor coldstorageservice context ctxcoldstorageservice {
       */
      State acceptRequest{
     	[#
-    		currentWeightStorage += RequestWeightToStore
     		TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
-    		var TICKET : resources.model.Ticket = resources.model.Ticket(TICKETNUMBER, TICKETTIME)
+    		var TICKET : resources.model.Ticket = resources.model.Ticket(TICKETNUMBER, TICKETTIME,RequestWeightToStore)
     		resources.ColdStorageService.incrementTicketNumber()
     		resources.ColdStorageService.getTicketList().add(TICKET)
     	#]
@@ -257,10 +265,10 @@ QActor coldstorageservice context ctxcoldstorageservice {
 	 */
     State rejectRequest{
     	[#
-    		var Remove = - RequestWeightToStore
-    		currentWeightStorage -= RequestWeightToStore
+    		resources.ColdStorageService.setCurrentWeightStorage(resources.ColdStorageService.getCurrentWeightStorage()-RequestWeightToStore)
     	#]
-    	forward guicontroller -m updateS : updateS( $Remove)
+    	 [#Update=resources.ColdStorageService.getCurrentWeightStorage()#]
+        forward guicontroller -m updateS : updateS( $Update )
     	replyTo storeFood with storeRejected : storeRejected(_)
     	
         
@@ -307,16 +315,13 @@ QActor coldstorageservice context ctxcoldstorageservice {
     	        	}
 					if [#TICKETEVALUATION == resources.TicketEvaluationResponse.EXPIRED #] {
     	        		[#
-    	        			 resources.ColdStorageService.incrementRejectedRequestCounter()
+    	        			resources.ColdStorageService.incrementRejectedRequestCounter()
     	        			val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
 							resources.ColdStorageService.getTicketList().remove(TICKET)
-							var Remove = -RequestWeightToStore
-							currentWeightStorage -= RequestWeightToStore
     	        		#]
     	        		   println("Ticket of id ${payloadArg(0)} is expired - Reject Request") color blue
     						replyTo sendTicket with ticketExpired : ticketExpired(_)
     						forward guicontroller -m updateR : updateR(_)
-    						forward guicontroller -m updateS : updateS( $Remove)
     	        	}
 
 					if [#TICKETEVALUATION == resources.TicketEvaluationResponse.INVALID #] {
