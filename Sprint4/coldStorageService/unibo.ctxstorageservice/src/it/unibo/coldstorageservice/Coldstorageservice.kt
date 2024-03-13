@@ -10,7 +10,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import it.unibo.kactor.sysUtil.createActor   //Sept2023
 	
 class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scope ){
 
@@ -22,10 +21,11 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 		
 		        	val MAXW = resources.ColdStorageService.getMAXW()
 					val TICKETTIME = resources.ColdStorageService.getTICKETTIME()
-				   	var currentWeightStorage = resources.ColdStorageService.getCurrentWeightStorage()
+				   	var Update = resources.ColdStorageService.getCurrentWeightStorage()
 				   	var RequestWeightToStore = 0.0
 				   	var TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
-				return { //this:ActionBasciFsm
+				   	resources.ColdStorageService.inizializeControl()
+		return { //this:ActionBasciFsm
 				state("setup") { //this:State
 					action { //it:State
 						CommUtils.outblue("$name |	setup")
@@ -39,6 +39,8 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				}	 
 				state("idle") { //this:State
 					action { //it:State
+						Update=resources.ColdStorageService.getCurrentWeightStorage() 
+						forward("updateS", "updateS($Update)" ,"guicontroller" ) 
 						CommUtils.outgreen("$name |	in idle")
 						//genTimer( actor, state )
 					}
@@ -53,14 +55,17 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				}	 
 				state("requestEvaluation") { //this:State
 					action { //it:State
+						Update=resources.ColdStorageService.getCurrentWeightStorage() 
+						forward("updateS", "updateS($Update)" ,"guicontroller" ) 
 						if( checkMsgContent( Term.createTerm("storeFood(FW)"), Term.createTerm("storeFood(FW)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								CommUtils.outblue("Request evaluation to store ${payloadArg(0)} kg")
 								
 								           	RequestWeightToStore = payloadArg(0).toDouble()
-								           	
-								           	if(RequestWeightToStore + currentWeightStorage <= MAXW ){
-								forward("updateS", "updateS($RequestWeightToStore)" ,"guicontroller" ) 
+								           	if(RequestWeightToStore + resources.ColdStorageService.getCurrentWeightStorage() <= MAXW ){
+								resources.ColdStorageService.setCurrentWeightStorage(resources.ColdStorageService.getCurrentWeightStorage()+RequestWeightToStore) 
+								Update=resources.ColdStorageService.getCurrentWeightStorage() 
+								forward("updateS", "updateS($Update)" ,"guicontroller" ) 
 								
 								           	}
 						}
@@ -69,17 +74,16 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="acceptRequest", cond=doswitchGuarded({ resources.ColdStorageService.canStore(RequestWeightToStore)  
+					 transition( edgeName="goto",targetState="acceptRequest", cond=doswitchGuarded({ RequestWeightToStore + resources.ColdStorageService.getCurrentWeightStorage() <= MAXW  
 					}) )
-					transition( edgeName="goto",targetState="rejectRequest", cond=doswitchGuarded({! ( resources.ColdStorageService.canStore(RequestWeightToStore)  
+					transition( edgeName="goto",targetState="rejectRequest", cond=doswitchGuarded({! ( RequestWeightToStore + resources.ColdStorageService.getCurrentWeightStorage() <= MAXW  
 					) }) )
 				}	 
 				state("acceptRequest") { //this:State
 					action { //it:State
 						
-						    		currentWeightStorage += RequestWeightToStore
 						    		TICKETNUMBER = resources.ColdStorageService.getTicketNumber()
-						    		var TICKET : resources.model.Ticket = resources.model.Ticket(TICKETNUMBER, TICKETTIME)
+						    		var TICKET : resources.model.Ticket = resources.model.Ticket(TICKETNUMBER, TICKETTIME,RequestWeightToStore)
 						    		resources.ColdStorageService.incrementTicketNumber()
 						    		resources.ColdStorageService.getTicketList().add(TICKET)
 						answer("storeFood", "storeAccepted", "storeAccepted($TICKETNUMBER)"   )  
@@ -94,9 +98,9 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 				state("rejectRequest") { //this:State
 					action { //it:State
 						
-						    		var Remove = - RequestWeightToStore
-						    		currentWeightStorage -= RequestWeightToStore
-						forward("updateS", "updateS($Remove)" ,"guicontroller" ) 
+						    		resources.ColdStorageService.setCurrentWeightStorage(resources.ColdStorageService.getCurrentWeightStorage()-RequestWeightToStore)
+						Update=resources.ColdStorageService.getCurrentWeightStorage() 
+						forward("updateS", "updateS($Update)" ,"guicontroller" ) 
 						answer("storeFood", "storeRejected", "storeRejected(_)"   )  
 						//genTimer( actor, state )
 					}
@@ -144,15 +148,12 @@ class Coldstorageservice ( name: String, scope: CoroutineScope  ) : ActorBasicFs
 								}
 								if( TICKETEVALUATION == resources.TicketEvaluationResponse.EXPIRED  
 								 ){
-								    	        			 resources.ColdStorageService.incrementRejectedRequestCounter()
+								    	        			resources.ColdStorageService.incrementRejectedRequestCounter()
 								    	        			val TICKET = resources.ColdStorageService.getTicketById(TICKETID)
 															resources.ColdStorageService.getTicketList().remove(TICKET)
-															var Remove = -RequestWeightToStore
-															currentWeightStorage -= RequestWeightToStore
 								CommUtils.outblue("Ticket of id ${payloadArg(0)} is expired - Reject Request")
 								answer("sendTicket", "ticketExpired", "ticketExpired(_)"   )  
 								forward("updateR", "updateR(_)" ,"guicontroller" ) 
-								forward("updateS", "updateS($Remove)" ,"guicontroller" ) 
 								}
 								if( TICKETEVALUATION == resources.TicketEvaluationResponse.INVALID  
 								 ){CommUtils.outred("Inserted ticket id is not valid")

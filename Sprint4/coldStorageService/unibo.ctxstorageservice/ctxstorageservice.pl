@@ -42,7 +42,7 @@ dispatch( updateR, updateR(_) ).
 %====================================================================================
 context(ctxbasicrobot, "192.168.178.64",  "TCP", "8020").
 context(ctxrasp, "192.168.178.64",  "TCP", "8099").
-context(ctxcoldstorageservice, "192.168.178.64",  "TCP", "8099").
+context(ctxcoldstorageservice, "192.168.178.21",  "TCP", "8099").
  qactor( basicrobot, ctxbasicrobot, "external").
   qactor( ledqakactor, ctxrasp, "external").
   qactor( guicontroller, ctxcoldstorageservice, "it.unibo.guicontroller.Guicontroller").
