@@ -287,10 +287,12 @@ public class WebSocketController {
     }
 
     @MessageMapping("/deposit/{sessionId}")
-    @SendTo("/usr/queue/deposit/{sessionId}")
-    public String HandleDeposit(TicketResponseDTO depositDTO, @PathVariable("sessionId") String sessionId){
+    @SendTo("/user/queue/deposit/{sessionId}")
+    public TicketResponseDTO HandleDeposit(TicketResponseDTO depositDTO, @PathVariable("sessionId") String sessionId){
         if (depositDTO.getTicketNumber() <0){
-            return "invalid";
+            //return "invalid";
+            depositDTO.setTicketNumber(-3);
+            return depositDTO;
         }
         String res=sendDeposit(depositDTO.getTicketNumber());
         System.out.print("Risultato deposit "+res); // ritorna ticket valid/invalid
@@ -298,17 +300,17 @@ public class WebSocketController {
         int v = res.indexOf("(");
         int l = res.indexOf(",");
         String val = res.substring(v+1, l);
-        TicketResponseDTO result = new TicketResponseDTO();
+        //TicketResponseDTO result = new TicketResponseDTO();
         if(val.equals("ticketNotValid")){
             System.out.println(val);
-            result.setTicketNumber( -2);
+            depositDTO.setTicketNumber( -2);
         }else if(val.equals("ticketExpired")){
             System.out.println(val);
-            result.setTicketNumber( -1);
+            depositDTO.setTicketNumber( -1);
         }
-        template.convertAndSendToUser(sessionId, "/usr/queue/deposit/", val);
-        template.convertAndSend("/topic/updates", result);
-        return val;
+        template.convertAndSendToUser(sessionId, "/usr/queue/deposit", depositDTO);
+        //template.convertAndSend("/topic/updates", result);
+        return depositDTO;
     }
 
     @EventListener

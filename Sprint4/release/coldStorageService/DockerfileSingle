@@ -1,0 +1,16 @@
+FROM openjdk:11
+
+EXPOSE 8099 11804
+
+VOLUME /tmp
+COPY ./ctxstorageservice.pl ctxstorageservice.pl
+COPY ./sysRules.pl sysRules.pl
+COPY ./Californium3.properties Californium3.properties
+COPY ./unibo.ctxstorageservice-1.0-all.jar css.jar
+
+COPY ./servicestatusbe.jar be.jar
+COPY ./run.sh run.sh
+
+#RUN["/bin/chmod","+x", "/run.sh"]
+RUN chmod +x /run.sh
+ENTRYPOINT ["/bin/sh", "/run.sh"]

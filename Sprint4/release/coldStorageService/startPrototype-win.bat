@@ -5,9 +5,9 @@ REM Open the default browser to localhost:8090
 start "" "http://localhost:8090"
 
 REM Start the unibo.prototipo2-1.0-all.jar file in the background
+REM start "docker" docker run -p localhost:11804:11804 <name:tag>
 start "css" java -jar unibo.ctxstorageservice-1.0-all.jar
 timeout /t 5
-REM se sei leo e ti stai chiedendo come ho fatto ad usare i nomi, ho buildato prima creando le immagini coi tag
 
 REM start "servicestatusbe" java -jar servicestatusbe.jar
 REM timeout /t 5

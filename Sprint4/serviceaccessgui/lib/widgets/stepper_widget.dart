@@ -98,27 +98,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
             String fl = frame.body.toString();
             if (fl.contains("ticketNumber")){
               TicketDTO update = TicketDTO.fromJson(jsonDecode(frame.body!));
-              debugPrint("Ticket Status Response: ${update.ticketNumber}");
-              if (update.ticketNumber==-2){
-                setState(() => atLeastOneRequestRejected = true);
-                const snackBar = SnackBar(
-                  content: Text("Ticket number not found - rejected request"),
-                  backgroundColor: Colors.red,
-                  behavior: SnackBarBehavior.floating,
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              }
-              else if (update.ticketNumber==-1){
-                setState(() => atLeastOneRequestRejected = true);
-                const snackBar = SnackBar(
-                  content: Text("Ticket expired -  rejected request"),
-                  backgroundColor: Colors.red,
-                  behavior: SnackBarBehavior.floating,
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              } else{
-                setState(() =>ticketValid= true);
-              }
+              //debugPrint("Ticket Status Response: ${update.ticketNumber}");
             }else if (fl.contains("currentWeight")){
               debugPrint("Weight Status Update received");
               debugPrint("${frame.body}");
@@ -155,8 +135,28 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
         destination: '/user/queue/deposit/$id',
         callback: (StompFrame frame) {
           if (frame.body != null) {
-            debugPrint("RESULT: ${frame.headers}");
+            debugPrint("RESULT: ${frame.body}");
             TicketDTO result = TicketDTO.fromJson(json.decode(frame.body!));
+            if (result.ticketNumber==-2){
+              setState(() => atLeastOneRequestRejected = true);
+              const snackBar = SnackBar(
+                content: Text("Ticket number not found - rejected request"),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            }
+            else if (result.ticketNumber==-1){
+              setState(() => atLeastOneRequestRejected = true);
+              const snackBar = SnackBar(
+                content: Text("Ticket expired -  rejected request"),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            } else{
+              setState(() =>ticketValid= true);
+            }
             debugPrint("SS: $result");
           }
         });
