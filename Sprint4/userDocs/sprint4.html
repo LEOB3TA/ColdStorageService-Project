@@ -414,6 +414,34 @@
         <ol>
             <li>Per garantire la compatibilit&agrave; del software su diversi dispositivi si &egrave; pensato di utilizzare un container <b>Docker</b>, rendendo pi&ugrave; facile il deploy nei vari dispositivi.</li>
         </ol>
+        <b>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</b>
+        <h3>Revisione dei precedenti sprint</h3>
+        <h4>Problemi</h4>
+        <ol>
+            <li>La <i>Service Access GUI</i> non fornisce un pulsante per <kc>ripetere</kc> la procedura di accesso, inoltre non possiede un meccanismo per <kc>notificare</kc> l'inserimento di un biglietto scaduto/errato.</li>
+            <li>Il <i>CSS</i> non possiede un meccanismo automatico per <kc>gestire la scadenza dei ticket</kc>, in particolare la scadenza viene controllata solo al momento dell'inserimento del ticket scaduto, di conseguenza <kc>il peso presente all'interno della struttura non viene aggiornato in tempo reale</kc>.</li>
+            <li>La classe <i>Ticket</i> non possiede il valore del peso, di conseguenza <kc>l'associazione peso-ticket</kc> viene fatta direttamente dal <i>CSS</i> <kc>senza tenere traccia del</kc> <b>TICKETID</b>, di conseguenza ci potrebbero essere problemi nel caso di pi&ugrave; ticket scaduti.</li>
+            <br>
+            Per rendere pi&ugrave; comprensibile le due problematiche viene riportato un esempio:<br><br>
+            Ipotizziamo che <b>due</b> autisti facciano la richiesta di accesso uno dopo l'altro e il <b>peso massimo</b> immagazinabile sia di <b>100 Kg</b>; le fasi che si affronterebbero sono le seguenti:
+                <br><br>
+            <ol>
+                <li>L'autista <b>A</b> effettua una richiesta <kc>store food</kc> di <b>20 Kg</b> che viene <kc>accettata</kc> con il TICKETID pari a <b>1</b>. (<i>Stato: 20Kg/100Kg, ultima richiesta di peso: 20Kg</i>)</li>
+                <li>L'autista <b>B</b> effettua una richiesta <kc>store food</kc> di <b>10 Kg</b> che viene <kc>accettata</kc> con il TICKETID pari a <b>2</b>. (<i>Stato: 30Kg/100Kg, ultima richiesta di peso: 10Kg</i>)</li>
+                <li><kc>Entrambi</kc> gli autisti fanno <kc>scadere</kc> il loro ticket</li>
+                <li>L'autista <b>A</b> presenta il proprio ticket con TICKETID pari a <b>1</b> con un peso associato di <b>20 Kg</b>.</li>
+                <li>Viene notificato l'invio di un ticket scaduto all'autista <b>A</b> e viene aggiornato il peso sottraendo il valore dell'ultima richiesta di peso che per&oacute; &eacute; di <b>10 Kg</b>. (<i>Stato: 20Kg/100Kg, ultima richiesta di peso: 10Kg</i>)</li>
+                <li>L'autista <b>B</b> presenta il proprio ticket con TICKETID pari a <b>2</b> con un peso associato di <b>10 Kg</b>.</li>
+                <li>Viene notificato l'invio di un ticket scaduto all'autista <b>B</b> e viene aggiornato il peso sottraendo il valore dell'ultima richiesta di peso che &eacute; di <b>10 Kg</b>. (<i>Stato: 10Kg/100Kg, ultima richiesta di peso: 10Kg</i>)</li>
+            </ol></li>
+            Considerando che il peso finale dovrebbe essere 0 Kg &egrave; evidente che questo &egrave; un problema da risolvere
+        </ol>
+        <h4>Possibili soluzioni</h4>
+        <ol>
+            <li><kc>Modificare</kc> il front-end in modo da <kc>aggiungere</kc> i pulsanti richiesti e in modo da <kc>fornire</kc> dei banner per la notifica dei ticket.</li>
+            <li><kc>Modificare</kc> la classe <i>Ticket</i> in modo che mantenga traccia del peso associato al ticket.</li>
+            <li><kc>Creare</kc> un meccanismo di aggiornamento automatico del peso, attraverso una <i>Coroutine Kotlin</i> <kc>modificando</kc> l'oggetto Kotlin <i>ColdStorageService</i>.</li>
+        </ol>
     </div>
     <h2>Architettura Logica</h2>
     <br>
@@ -430,7 +458,7 @@
     Per prima cosa &egrave; stato necessario analizzare il file <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint3/unibo.prototipo3/src/prototipo3.qak">prototipo3.qak</a> dividendo gli attori gi&agrave; creati nei contesti finali; per farlo sono stati creati i seguenti file qak:
     <ul>
         <li><a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint4/unibo.ctxrasp/src/ctxrasp.qak">ctxrasp.qak</a></li>
-        <li><a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint4/coldStorageService/unibo.ctxstorageservice/src/ctxstorageservice.qak">prototipo3.qak</a></li>
+        <li><a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/main/Sprint4/coldStorageService/unibo.ctxstorageservice/src/ctxstorageservice.qak">ctxstorageservice.qak</a></li>
     </ul>
     Tutte le ulteriori modifiche effettuate nei vari contesti e nei file associati verranno dettagliate in seguito.
     <h3>RaspberryPi</h3>
@@ -493,6 +521,50 @@ VOLUME /tmp
 COPY ./servicestatusbe.jar be.jar
 ENTRYPOINT ["java", "-jar", "/be.jar"]
     </pre>
+    <b>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</b>
+    <h3>Revisione dei precedenti sprint</h3>
+    <h4>Modifica del front-end</h4>
+    &Egrave; stato modificato il file <a href="https://github.com/LEOB3TA/issProject2023/blob/bd358d4148ba47dc2e95d706b6e28a00f13b75eb/Sprint4/serviceaccessgui/lib/widgets/stepper_widget.dart">stepper_widget.dart</a> della <i>service access GUI</i> in modo da aggiungere i nuovi <kc>pulsanti</kc> e delle <kc>snackbar</kc> di errore.
+    <h4>Modifica della classe Ticket</h4>
+    Il file <a href="https://github.com/LEOB3TA/issProject2023/blob/ea58444b2c1b5d0120bd7336e332e8991650c848/Sprint4/coldStorageService/unibo.ctxstorageservice/resources/model/Ticket.kt">Ticket.kt</a> &egrave; stato modificato aggiungendo il <kc>valore weight di tipo Double</kc>, inoltre &egrave; stato <kc>modificato</kc> il metodo <b>isExpired()</b> e <kc>aggiunto</kc> un nuovo metodo <b>controlExpired()</b>, in questo modo <b>isExpired()</b> diventa un semplice <i>getter</i> e <b>ControlExpired()</b> serve a controllare l'effettiva scadenza del ticket.
+    <pre>
+...
+private val weight : Double
+...
+fun controlExpired(): Boolean{
+        isExpired = LocalDateTime.now() > ticketTime
+        return isExpired
+}
+fun isExpired(): Boolean {
+    return isExpired
+}
+    </pre>
+La motivazione della modifica dei due metodi verr&agrave; descritta successivamente.
+    <h4>Modifica dell'oggetto ColdStorageService</h4>
+Il file <a href="https://github.com/LEOB3TA/issProject2023/blob/dafbbd0ccc81bebbd9f728c5ef0342ac79c60272/Sprint4/coldStorageService/unibo.ctxstorageservice/resources/ColdStorageService.kt">ColdStorageService.kt</a> &egrave; stato modificato inserendo un nuovo metodo <b>inizializeControl()</b> che una volta chiamato <kc>inizializza una coroutine</kc> che controller&agrave; periodicamente (ogni 10 secondi) quali dei ticket presenti all'interno dell'array <b>ticketList</b> sono scaduti e in caso affermativo sottrarr&agrave; il peso del ticket dal peso complessivo all'interno del sistema.
+    <pre>
+fun inizializeControl(){
+        runBlocking {
+            GlobalScope.launch {
+                while (true) {
+                    delay(10000L)
+                    getInstance().ticketList.forEach {
+                        if(!it.isExpired() && it.controlExpired()){
+                            println(getInstance().currentWeightStorage)
+                            getInstance().currentWeightStorage -= it.getWeight()
+                            println(getInstance().currentWeightStorage)
+                        }
+                    }
+                }
+            }
+        }
+}
+    </pre>
+    &Egrave; necessario notare come il ticket scaduto <kc>non venga rimosso</kc> dal sistema, in questo modo non &egrave; necessario tenere traccia di tutti i ticket scaduti attraverso un altro array, il controllo della scadenza, per l'autista, viene fatto all'inserimento del ticket attraverso la funzione <b>isExpired()</b> e solamente in seguito il ticket <kc>viene rimosso</kc> dal sistema. In questo modo si riesce a garantire l' <kc>aggiornamento in tempo reale</kc> del peso all'interno del sistema.<br>
+    Il doppio controllo sull'if &egrave; necessario per far fronte ai ticket scaduti presenti nel sistema, infatti un ticket che non &egrave; ancora stato controllato avr&agrave; <b>isExpired()=false</b> invece <b>controlExpired()=true</b>.
+    <br>
+    <br>
+    A seguito di queste modifiche &egrave; stato necessario modificare il file <a href="https://github.com/LEOB3TA/issProject2023/blob/dafbbd0ccc81bebbd9f728c5ef0342ac79c60272/Sprint4/coldStorageService/unibo.ctxstorageservice/src/ctxstorageservice.qak">ctxstorageservice.qak</a> in modo da supportarle.
 </div>
 <h2>Testing e avvio del sistema</h2>
 <div class="remark">
