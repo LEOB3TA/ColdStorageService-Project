@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
 import 'package:service_access_gui/globals.dart';
@@ -41,7 +43,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
   final TextEditingController storeFoodController = TextEditingController();
   final TextEditingController depositController = TextEditingController();
   // FormKey
-  final formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormBuilderState>();
 
   @override
   void initState() {
@@ -98,7 +100,6 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
             String fl = frame.body.toString();
             if (fl.contains("ticketNumber")){
               TicketDTO update = TicketDTO.fromJson(jsonDecode(frame.body!));
-              //debugPrint("Ticket Status Response: ${update.ticketNumber}");
             }else if (fl.contains("currentWeight")){
               debugPrint("Weight Status Update received");
               debugPrint("${frame.body}");
@@ -156,6 +157,9 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
               ScaffoldMessenger.of(context).showSnackBar(snackBar);
             } else{
               setState(() =>ticketValid= true);
+              ref.read(stepperProvider.notifier).setCompleted(StatusEnum.ticketResponse.index);
+              ref.read(stepperProvider.notifier).setIndex(StatusEnum.result.index);
+              ref.read(statusEnumProvider.notifier).state = StatusEnum.result;
             }
             debugPrint("SS: $result");
           }
@@ -208,6 +212,8 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                     ref.read(stepperProvider.notifier).setCompleted(StatusEnum.ticketRequest.index);
                     ref.read(stepperProvider.notifier).setIndex(StatusEnum.ticketRequest.index);
                     ref.read(statusEnumProvider.notifier).state = StatusEnum.ticketRequest;
+                    formKey.currentState!.fields['storeFood']!.reset();
+                    FocusScope.of(context).unfocus();
                     storeFoodController.clear();
                     depositController.clear();
                     setState(() {
@@ -266,7 +272,7 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                   ),
                   CustomButton(
                   onPressed: details.onStepContinue,
-                  label: 'Next',
+                  label: 'Deposit',
                   ),
                       ],);
                     case StatusEnum.result:
@@ -287,20 +293,22 @@ class _StepperWidgetState extends ConsumerState<StepperWidget> {
                         'Insert the amount of kg you want to deposit.',
                         style: TextStyle(color: Globals.textColor),
                       ),
-                      Form(
+                      FormBuilder(
                         key: formKey,
-                        child: TextFormField(
+                        initialValue: const {'storeFood': ''},
+                        child: FormBuilderTextField(
+                          name: 'storeFood',
                           controller: storeFoodController,
                           inputFormatters: <TextInputFormatter>[
                             FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
                           ],
                           autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter some digits';
-                            }
-                            return null;
-                          },
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(),
+                            FormBuilderValidators.numeric(),
+                            FormBuilderValidators.min(0.1),
+                          ]),
+
                           decoration: const InputDecoration(
                               fillColor: Colors.white,
                               prefixIcon: Icon(Icons.scale),
