@@ -1,9 +1,0 @@
-FROM openjdk:11
-
-
-VOLUME /tmp
-COPY ./ctxstorageservice.pl ctxstorageservice.pl
-COPY ./sysRules.pl sysRules.pl
-COPY ./Californium3.properties Californium3.properties
-COPY ./unibo.ctxstorageservice-1.0-all.jar css.jar
-ENTRYPOINT ["java", "-jar", "/css.jar"]

@@ -498,29 +498,14 @@ class WsService {
     </ol>
     <h3>ColdStorageService,TransportTrolley</h3>
     Dopo aver creato il file <kc>Qak</kc> a se stante, &egrave; stato necessario creare un jar tramite il target Gradle <i>shadowJar</i>, per poi inserirlo all'interno di un container <kc>Docker</kc> per garantire il massimo della compatibilit&agrave;.<br>
-    Utilizzando l'immagine di base <i>openjdk:11</i> vengono copiato tutti i file di configurazione e il file jar che viene poi eseguito.
-    Di seguito viene riportato il contenuto di <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/81d7136b3de551da11757feb65fed79b14966d3d/Sprint4/release/coldStorageService/DockerfileCSS">DockerfileCSS</a>.
-    <pre>
-FROM openjdk:11
-
-VOLUME /tmp
-COPY ./ctxstorageservice.pl ctxstorageservice.pl
-COPY ./sysRules.pl sysRules.pl
-COPY ./Californium3.properties Californium3.properties
-COPY ./unibo.ctxstorageservice-1.0-all.jar css.jar
-ENTRYPOINT ["java", "-jar", "/css.jar"]
-    </pre>
     <h3>ServerSpring</h3>
     Dopo aver creato il jar tramite il target Gradle <i>bootJar</i>, &egrave;  stato inserito all'interno di un container <kc>Docker</kc> per garantire il massimo della compatibilit&agrave;.<br>
-    Utilizzando l'immagine di base <i>openjdk:11</i> viene copiato file jar che viene poi eseguito.
-    Di seguito viene riportato il contenuto di <a href="https://github.com/LEOB3TA/ColdStorageService-Project/blob/81d7136b3de551da11757feb65fed79b14966d3d/Sprint4/release/coldStorageService/DockerfileSpring">DockerfileSpring</a>.
-    <pre>
-FROM openjdk:11
-
-VOLUME /tmp
-COPY ./servicestatusbe.jar be.jar
-ENTRYPOINT ["java", "-jar", "/be.jar"]
-    </pre>
+    <h3>Problemi con Docker</h3>
+    Purtroppo durante il progetto l'idea di eseguire il deploy attraverso dei container si &egrave; rivelata <b>problematica</b> per via di un <b>errore con gli observer CoAP</b>.<br>
+    In particolare durante l'esecuzione dell'immagine Docker ci siamo accorti che tutti gli observer implementati tramite il linguaggio <i>Qak</i> non funzionavano stampando l'errore <i>OBSERVING FAILED</i>, in particolare gli attori <kc>stateobservercontroller</kc> e  <kc>guicontroller</kc> osservano il <kc>transporttrolley</kc>, di conseguenza <b>non funzionavano</b> <kc>parte della ServiceStatusGUI e il led del robot</kc>.
+    <br>
+    <br> A seguito di una settimana di studio e di tentativi, il team ha deciso all'unanimit&agrave; di <b>abbandonare</b> il deploy attraverso i container e di <b>procedere con il metodo utilizzato nei precedenti sprint</b>.
+    <br>
     <b>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</b>
     <h3>Revisione dei precedenti sprint</h3>
     <h4>Modifica del front-end</h4>
@@ -572,7 +557,7 @@ fun inizializeControl(){
     <ol>
         <li>Scaricare tutte le componenti nei dispositivi finali</li>
         <li>Avviare il <b>basicrobot</b> e gli <b>attori</b> all'interno del <kc>RaspberryPi</kc> grazie allo script di avvio <i>startRasp.sh</i></li>
-        <li>Avviare il <b>ColdStorageService</b> e il <b>Server</b> attraverso dei <i>container</i> all'interno del <kc>ColdStorageServiceDevice</kc>(PC del manager)</li>
+        <li>Avviare il <b>ColdStorageService</b> e il <b>Server</b> attraverso il file <i>startPrototype-XXX.sh/bat</i> all'interno del <kc>ColdStorageServiceDevice</kc>(PC del manager)</li>
         <li>Avviare la <b>ServiceStatusGUI</b> attraverso il file <i>eseguibile</i> all'interno del <kc>ColdStorageServiceDevice</kc>(PC del manager)</li>
         <li>Avviare la <b>ServiceAccessGUI</b> attraverso il file <i>eseguibile</i> su uno o pi&ugrave; <kc>dispositivi esterni</kc>(PC degli autisti)</li>
     </ol>
