@@ -26,3 +26,5 @@ Group project for the university course "Ingegneria dei sistemi software" Prof. 
 You have to follow the instructions in the sprint documentation
 
 
+[![](https://i.ytimg.com/vi/Oz75kJblg-k/hqdefault.jpg?sqp=-oaymwE9CNACELwBSFryq4qpAy8IARUAAAAAGAElAADIQj0AgKJDeAHwAQH4Af4JgALQBYoCDAgAEAEYciBbKDIwDw==&rs=AOn4CLDm-vba15UIem-Qs1oTTpIUFJYutg)](https://www.youtube.com/watch?v=Oz75kJblg-k&t=15s)
+
