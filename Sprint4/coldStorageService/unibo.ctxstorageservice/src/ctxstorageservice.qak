@@ -143,6 +143,7 @@ QActor guicontroller context ctxcoldstorageservice{
 			#]
 			
 		}*/
+		delay 500
 		[#
 			if(currentMsg.toString().contains("currState")){
 				staStr = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"

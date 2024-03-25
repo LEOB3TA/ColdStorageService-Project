@@ -88,6 +88,7 @@ class Guicontroller ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("updateposition") { //this:State
 					action { //it:State
+						delay(500) 
 						
 									if(currentMsg.toString().contains("currState")){
 										staStr = "${currentMsg.toString().substringAfter("currState\":\"").substringBefore("\"")}"
