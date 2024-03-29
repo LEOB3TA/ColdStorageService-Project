@@ -1,0 +1,29 @@
+package state
+
+import com.google.gson.Gson
+
+enum class LState{
+    ON, OFF, BLINKS
+}
+
+data class LedState(
+    private var currLed : LState = LState.OFF
+    ){
+    fun getCurrState(): LState {
+        return currLed
+    }
+    fun setState(state: LState){
+        currLed = state
+    }
+
+    companion object{
+        private val gson = Gson()
+        fun fromJsonString(str : String) : LedState {
+            return gson.fromJson(str, LedState::class.java)
+        }
+    }
+
+    fun toJsonString() : String{
+        return gson.toJson(this)
+    }
+}
