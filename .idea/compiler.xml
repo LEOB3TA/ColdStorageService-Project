@@ -13,6 +13,9 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="backend" target="11" />
+      <module name="backend.servicestatusbe" target="11" />
+      <module name="backend.servicestatusbe.main" target="11" />
+      <module name="backend.servicestatusbe.test" target="11" />
       <module name="serviceaccessbe" target="11" />
       <module name="serviceaccessbe.main" target="11" />
       <module name="serviceaccessbe.test" target="11" />
@@ -31,6 +34,9 @@
       <module name="truck.unibo.coldstorageservice" target="11" />
       <module name="truck.unibo.coldstorageservice.main" target="11" />
       <module name="truck.unibo.coldstorageservice.test" target="11" />
+      <module name="unibo.coldstorageservice" target="11" />
+      <module name="unibo.coldstorageservice.main" target="11" />
+      <module name="unibo.coldstorageservice.test" target="11" />
       <module name="unibo.ctxserviceaccessgui" target="11" />
       <module name="unibo.ctxserviceaccessgui.main" target="11" />
       <module name="unibo.ctxserviceaccessgui.test" target="11" />
@@ -43,8 +49,8 @@
       <module name="unibo.transporttrolley" target="11" />
       <module name="unibo.transporttrolley.main" target="11" />
       <module name="unibo.transportTrolley.main" target="11" />
-      <module name="unibo.transporttrolley.test" target="11" />
       <module name="unibo.transportTrolley.test" target="11" />
+      <module name="unibo.transporttrolley.test" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -13,20 +13,29 @@
         </option>
       </GradleProjectSettings>
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint4/coldStorageService/backend" />
-        <option name="gradleJvm" value="19" />
-        <option name="modules">
-          <set>
-            <option value="$PROJECT_DIR$/Sprint4/coldStorageService/backend" />
-          </set>
-        </option>
-      </GradleProjectSettings>
-      <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint4/coldStorageService/unibo.ctxstorageservice" />
         <option name="gradleJvm" value="19" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/Sprint4/coldStorageService/unibo.ctxstorageservice" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint4Virtual/coldStorageService/backend" />
+        <option name="gradleJvm" value="19" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/Sprint4Virtual/coldStorageService/backend" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Sprint4Virtual/coldStorageService/unibo.prototipo4" />
+        <option name="gradleJvm" value="19" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/Sprint4Virtual/coldStorageService/unibo.prototipo4" />
           </set>
         </option>
       </GradleProjectSettings>
