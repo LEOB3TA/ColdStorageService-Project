@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="FrameworkDetectionExcludesConfiguration">
@@ -15,6 +16,7 @@
     <file type="web" url="file://$PROJECT_DIR$/Sprint3/unibo.prototipo3" />
     <file type="web" url="file://$PROJECT_DIR$/Sprint4/coldStorageService/backend" />
     <file type="web" url="file://$PROJECT_DIR$/Sprint4/coldStorageService/unibo.ctxstorageservice" />
+    <file type="web" url="file://$PROJECT_DIR$/Sprint4Virtual/coldStorageService/unibo.prototipo4" />
   </component>
   <component name="PWA">
     <option name="wasEnabledAtLeastOnce" value="true" />
