@@ -76,7 +76,7 @@ CodedQActor sonar context ctxprototipo4 className "rx.sonarSimulator" //in LOCAL
 CodedQActor datacleaner context ctxprototipo4 className "rx.dataCleaner"
 
 QActor sonar23 context ctxprototipo4{ //TODO mandare eventi condizionati dallo stato
-	[#var DLIMIT = 5
+	[#var DLIMIT = 30
 		var D = 0
 		var handled=false
 	var Appl = sysUtil.getActor("transporttrolley") != null #]

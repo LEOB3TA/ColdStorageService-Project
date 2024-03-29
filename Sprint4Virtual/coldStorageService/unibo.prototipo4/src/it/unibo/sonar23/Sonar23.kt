@@ -18,7 +18,7 @@ class Sonar23 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sc
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		val interruptedStateTransitions = mutableListOf<Transition>()
-		var DLIMIT = 5
+		var DLIMIT = 30
 				var D = 0
 				var handled=false
 			var Appl = sysUtil.getActor("transporttrolley") != null  
