@@ -25,6 +25,8 @@ repositories {
 }
 
 dependencies {
+    //To control LED
+    implementation("com.pi4j:pi4j-core:1.4")
     //GSON
     implementation 'com.google.code.gson:gson:2.8.6'
 
@@ -121,12 +123,12 @@ eclipse {
 
 application {
     // Define the main class for the application.
-    mainClass = 'it.unibo.ctxcoldstorageservice.MainCtxcoldstorageserviceKt'
+    mainClass = 'it.unibo.ctxprototipo4.MainCtxprototipo4Kt'
 }
 
 shadowJar {
     manifest {
-        attributes 'Main-Class': 'it.unibo.ctxcoldstorageservice.MainCtxcoldstorageserviceKt'
+        attributes 'Main-Class': 'it.unibo.ctxprototipo4.MainCtxprototipo4Kt'
     }
 }
 

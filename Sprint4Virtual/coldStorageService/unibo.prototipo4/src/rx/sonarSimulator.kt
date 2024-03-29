@@ -38,6 +38,7 @@ class sonarSimulator ( name : String ) : ActorBasic( name ) {
 				yield( v0 )
 			}
 		}*/
+		delay(20000)
 		var i = 0
 			while( i < 30 ){
  	 			//val m1 = "distance( ${data.elementAt(i)} )"
