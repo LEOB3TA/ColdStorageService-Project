@@ -1,29 +1,51 @@
 package resources
 
 import com.google.gson.Gson
+import kotlinx.coroutines.*
 import resources.model.Ticket
+import state.GuiState
 
 
 class ColdStorageService {
     private var MAXW : Double = 100.0
     private var DLIMIT : Int =0
-    private val TICKETTIME: Long = 5
+    private val TICKETTIME: Long = 30
     private var currentWeightStorage : Double = 0.0
     private val ticketList : ArrayList<Ticket> = arrayListOf()
-    private var ticketNumber: Int = 0
+    private var ticketNumber: Int = 1
     private var rejectedRequestCounter: Int = 0
 
 
     companion object {
 
-        private var instance: ColdStorageService? = null
+         private var instance: ColdStorageService? = null
 
-        private fun getInstance() =
+         private fun getInstance() =
             instance ?: synchronized(this) {
-                instance ?: ColdStorageService().also { instance = it }
+                instance ?: ColdStorageService().also { instance = it;  }
+
             }
 
         val gson = Gson()
+
+
+        @OptIn(DelicateCoroutinesApi::class)
+        fun inizializeControl(){
+            runBlocking {
+                GlobalScope.launch {
+                    while (true) {
+                        delay(10000L)
+                        getInstance().ticketList.forEach {
+                            if(!it.isExpired() && it.controlExpired()){
+                                println(getInstance().currentWeightStorage)
+                                getInstance().currentWeightStorage -= it.getWeight()
+                                println(getInstance().currentWeightStorage)
+                            }
+                        }
+                    }
+                }
+                }
+        }
 
         fun getMAXW(): Double {
             //println(getInstance().json)
@@ -60,7 +82,7 @@ class ColdStorageService {
         }
 
         private fun resetTicketNumber() {
-            getInstance().ticketNumber = 0
+            getInstance().ticketNumber = 1
         }
 
         private fun resetTicketList() {
@@ -126,6 +148,3 @@ class ColdStorageService {
     }
 }
 
-/*fun main(){
-    println(ColdStorageService.getTICKETTIME())
-}*/
