@@ -26,17 +26,16 @@ open http://localhost:8090
 sleep 15
 
 # Start the unibo.prototipo3-1.0-all.jar file (assuming it's in the current directory)
-java -jar unibo.ctxprotipo4-1.0-all.jar &
+java -jar unibo.ctxprototipo4-1.0-all.jar &
 pid1=$!
-sleep 5
+sleep 10
 
 #start the server
 java -jar servicestatusbe.jar &
 pid2=$!
-sleep 5
+sleep 10
 
 # start the guis
-open -a $(pwd)/ServiceAccessGUI/Mac/frontend.app
 open -a $(pwd)/ServiceAccessGUI/Mac/frontend.app
 open -a $(pwd)/ServiceStatusGUI/Mac/servicestatusgui.app
 
